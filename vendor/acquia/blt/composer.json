@@ -1,0 +1,88 @@
+{
+    "name": "acquia/blt",
+    "type": "composer-plugin",
+    "description": "BLT",
+    "keywords": [
+        "drupal",
+        "testing",
+        "deployment",
+        "automation",
+        "template"
+    ],
+    "license": "GPL-2.0-only",
+    "authors": [
+        {
+            "name": "Matthew Grasmick"
+        }
+    ],
+    "require": {
+        "php": ">=7.3",
+        "ext-json": "*",
+        "acquia/drupal-environment-detector": "^1.2.1",
+        "composer-plugin-api": "^1.1.0 || ^2.0",
+        "consolidation/comments": "^1.0",
+        "consolidation/config": "^1.0.0",
+        "consolidation/robo": "^1.4.12 || ^2",
+        "dflydev/dot-access-data": "^1.1.0",
+        "doctrine/annotations": "^1.10.0",
+        "drupal/core": "^9.0.0-alpha1",
+        "drupol/phposinfo": "^1.6",
+        "drush/drush": "^10.2.2",
+        "grasmash/yaml-cli": "^2.0.0",
+        "grasmash/yaml-expander": "^1.2.0",
+        "sensiolabs/security-checker": "^5.0.0",
+        "symfony/config": "^4.4",
+        "symfony/console": "^4.4.6",
+        "symfony/twig-bridge": "^3.3",
+        "symfony/yaml": "^4.4",
+        "zumba/amplitude-php": "^1.0"
+    },
+    "conflict": {
+        "drupal/drupal": "*"
+    },
+    "require-dev": {
+        "knplabs/github-api": "^2.6",
+        "symfony/http-client": "^5.1"
+    },
+    "suggest": {
+        "davereid/drush-acquia-hook-invoke": "dev-master",
+        "hirak/prestissimo": "^0.3",
+        "typhonius/acquia_cli": "^2.0"
+    },
+    "config": {
+        "php": "7",
+        "preferred-install": {
+            "drupal/core": "dist"
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "10.x-dev": "10.0.x-dev"
+        },
+        "class": "Acquia\\Blt\\Composer\\Plugin",
+        "installer-paths": {
+            "vendor/drupal/core": [
+                "type:drupal-core"
+            ]
+        },
+        "phpcodesniffer-search-depth": 4
+    },
+    "autoload": {
+        "psr-4": {
+            "Acquia\\Blt\\": "src/",
+            "Acquia\\Blt\\Tests\\": "tests/phpunit/src/",
+            "Acquia\\Blt\\Tests\\Robo\\": "tests/phpunit/Robo/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "bin": [
+        "bin/blt",
+        "bin/blt.bat"
+    ],
+    "support": {
+        "issues": "https://github.com/acquia/blt/issues",
+        "docs": "https://docs.acquia.com/blt/"
+    }
+}

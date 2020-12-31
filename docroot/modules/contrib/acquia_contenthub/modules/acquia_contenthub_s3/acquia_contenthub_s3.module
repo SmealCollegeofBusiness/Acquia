@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Drupal Module: Acquia Content Hub S3.
+ *
+ * Integrate s3fs module capabilities to Acquia Content Hub.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\file\FileInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function acquia_contenthub_s3_file_delete(EntityInterface $entity) {
+  $file_map = \Drupal::getContainer()->get('acquia_contenthub_s3.file_map');
+  $uuid = $entity->uuid();
+  $tracked_file = $file_map->getFileByUuid($uuid);
+  if ($tracked_file) {
+    $file_map->remove($uuid);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function acquia_contenthub_s3_file_insert(FileInterface $entity) {
+  $scheme = StreamWrapperManager::getScheme($entity->getFileUri());
+  if ($scheme !== 's3') {
+    return;
+  }
+
+  // Map the s3 file to avoid unnecessary requests in the future due to file
+  // location discovery.
+  /** @var \Drupal\acquia_contenthub_s3\S3FileMap $file_map */
+  $file_map = \Drupal::getContainer()->get('acquia_contenthub_s3.file_map');
+  $config_factory = \Drupal::configFactory();
+  $s3fs_config = $config_factory->get('s3fs.settings');
+  /** @var \Acquia\ContentHubClient\ContentHubClient $ch_client */
+  $ch_client = \Drupal::getContainer()->get('acquia_contenthub.client.factory')->getClient();
+  if (!$ch_client) {
+    return;
+  }
+  if (!$file_map->isNew($entity->uuid())) {
+    return;
+  }
+
+  $file_map->record(
+    $entity->uuid(),
+    $s3fs_config->get('bucket'),
+    $s3fs_config->get('root_folder'),
+    $ch_client->getSettings()->getUuid()
+  );
+}

@@ -1,0 +1,46 @@
+parameters:
+  git_dir: .
+  bin_dir: vendor/bin
+grumphp:
+  ascii:
+    failed: grumphp-grumpy.txt
+    succeeded: grumphp-happy.txt
+  process_timeout: 10
+  tasks:
+    git_commit_message:
+      enforce_no_subject_trailing_period: false
+      matchers:
+        'Must begin with a JIRA issue number': '/^ACMS-[0-9]+: /'
+      max_body_width: 0
+      max_subject_width: 0
+    twigcs:
+      path: 'themes'
+      ruleset: 'Allocine\Twigcs\Ruleset\Official'
+    phplint: ~
+    yamllint: ~
+    composer: ~
+    composer_normalize: ~
+    jsonlint: ~
+    phpcpd:
+      directory: ['./src']
+    phpcs:
+      standard: AcquiaDrupalStrict
+      ignore_patterns:
+        - .github
+        - .gitlab
+        - .css
+        - bower_components
+        - node_modules
+        - vendor
+        - css
+      triggered_by:
+        - php
+        - module
+        - inc
+        - install
+        - test
+        - profile
+        - theme
+        - info
+        - txt
+        - md

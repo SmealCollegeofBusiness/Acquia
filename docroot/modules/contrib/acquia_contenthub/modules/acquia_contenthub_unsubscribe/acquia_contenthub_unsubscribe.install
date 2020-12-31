@@ -1,0 +1,50 @@
+<?php
+
+use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
+
+/**
+ * Implements hook_install().
+ *
+ * Sets entities as disconnected from Content Hub.
+ */
+function acquia_contenthub_unsubscribe_install() {
+  // Bail out early if there are not disconnected entities.
+  $state = \Drupal::state();
+  $disconnected_entities = $state->get('acquia_contenthub_update_82001_disconnected_entities', []);
+  if (empty($disconnected_entities)) {
+    return;
+  }
+
+  /** @var \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker */
+  $tracker = \Drupal::service('acquia_contenthub_subscriber.tracker');
+
+  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $client_factory */
+  $client_factory = \Drupal::service('acquia_contenthub.client.factory');
+
+  // Obtaining the Webhook.
+  $webhook = \Drupal::configFactory()->get('acquia_contenthub.admin_settings')->get('webhook');
+  $webhook_uuid = $webhook['uuid'] ?? NULL;
+  if (empty($webhook_uuid)) {
+    \Drupal::logger('acquia_contenthub_unsubscribe')->error('There is no webhook defined for this site. Cannot add entities to interest list.');
+    return;
+  }
+
+  $entities = [];
+  foreach ($disconnected_entities as $key => $entity) {
+      $entities[] = $entity['uuid'];
+    // Disconnecting it from the tracker.
+    $tracker->setStatusByTypeId($entity['type'], $entity['id'], SubscriberTracker::AUTO_UPDATE_DISABLED);
+    print sprintf("Disconnected tracker for entity ID = %s, type = %s\n", $entity['id'], $entity['type']);
+  }
+
+  // Adding imported entities to interest list.
+  if (!empty($entities)) {
+    $client_factory
+      ->getClient()
+      ->addEntitiesToInterestList($webhook_uuid, $entities);
+    print "Added entities to interest list.\n";
+
+    // Deleting state variable.
+    $state->delete('acquia_contenthub_update_82001_disconnected_entities');
+  }
+}

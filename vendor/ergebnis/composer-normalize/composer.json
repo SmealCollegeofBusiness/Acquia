@@ -1,0 +1,73 @@
+{
+  "name": "ergebnis/composer-normalize",
+  "type": "composer-plugin",
+  "description": "Provides a composer plugin for normalizing composer.json.",
+  "keywords": [
+    "composer",
+    "normalizer",
+    "normalize",
+    "plugin"
+  ],
+  "homepage": "https://github.com/ergebnis/composer-normalize",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andreas Möller",
+      "email": "am@localheinz.com"
+    }
+  ],
+  "require": {
+    "php": "^7.2 || ^8.0",
+    "composer-plugin-api": "^1.1.0 || ^2.0.0",
+    "ergebnis/json-normalizer": "^1.0.1",
+    "ergebnis/json-printer": "^3.1.1",
+    "justinrainbow/json-schema": "^5.2.10",
+    "localheinz/diff": "^1.1.1"
+  },
+  "require-dev": {
+    "composer/composer": "^1.10.19 || ^2.0.8",
+    "ergebnis/license": "^1.1.0",
+    "ergebnis/php-cs-fixer-config": "^2.10.0",
+    "ergebnis/phpstan-rules": "~0.15.3",
+    "ergebnis/test-util": "^1.4.0",
+    "phpstan/extension-installer": "^1.1.0",
+    "phpstan/phpstan": "~0.12.64",
+    "phpstan/phpstan-deprecation-rules": "~0.12.6",
+    "phpstan/phpstan-phpunit": "~0.12.17",
+    "phpstan/phpstan-strict-rules": "~0.12.7",
+    "phpunit/phpunit": "^8.5.13",
+    "psalm/plugin-phpunit": "~0.12.2",
+    "symfony/filesystem": "^5.1.8",
+    "vimeo/psalm": "^3.18.2"
+  },
+  "config": {
+    "platform": {
+      "php": "7.2.33"
+    },
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "extra": {
+    "class": "Ergebnis\\Composer\\Normalize\\NormalizePlugin",
+    "composer-normalize": {
+      "indent-size": 2,
+      "indent-style": "space"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Ergebnis\\Composer\\Normalize\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Ergebnis\\Composer\\Normalize\\Test\\": "test/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "support": {
+    "issues": "https://github.com/ergebnis/composer-normalize/issues",
+    "source": "https://github.com/ergebnis/composer-normalize"
+  }
+}

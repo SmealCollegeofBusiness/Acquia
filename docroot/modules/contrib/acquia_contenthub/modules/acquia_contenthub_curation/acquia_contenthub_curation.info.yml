@@ -1,0 +1,12 @@
+name: Acquia ContentHub Curation
+type: module
+description: Provides curation tools & discovery interface for Acquia ContentHub.
+core_version_requirement: ^8.8 || ^9
+package: Acquia ContentHub
+dependencies:
+  - acquia_contenthub
+
+# Information added by Drupal.org packaging script on 2020-12-15
+version: '8.x-2.19'
+project: 'acquia_contenthub'
+datestamp: 1608054200

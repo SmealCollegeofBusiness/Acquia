@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * @file
+ * Drupal Module: Acquia Content Hub - Preview
+ *
+ * Preview restricts an environment to only listen to the preview URL only.
+ */

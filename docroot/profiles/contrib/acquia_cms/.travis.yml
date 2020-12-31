@@ -1,0 +1,89 @@
+---
+language: php
+
+# The lowest version of PHP supported by all of Drupal, Acquia, and ORCA itself.
+# @see https://www.drupal.org/docs/8/system-requirements/php-requirements
+# @see https://docs.acquia.com/acquia-cloud/arch/tech-platform/
+php: "7.3"
+
+services:
+  - mysql
+
+addons:
+  chrome: stable
+
+cache:
+  directories:
+    - "$HOME/.composer/cache"
+    - "$HOME/.drush/cache"
+    - "${TMPDIR:-/tmp}/phpstan/cache"
+
+env:
+  # Change the following values for your implementation.
+  global:
+    - secure: "m+1H1ZD749fNdcwM8P5NrTr1jWIvd5J0EPDM88eNfXHB6tJBfL9C/Xe9OhHQC5gmYJE7fnFJhBOoSBWakVTme2Vn6XqlGluiLfpbPANgxYC3Wsli8QcyZKPSGvpWsdAvm5ai74T2DkwQUiFhPFSCPpt/0h3nWdjSkHCeoPvX6Qsrv5SiGboZKAiVZPks+mwBg+mIw9yx4w/SAIpmJceDuHNWOofD/Poq0W8SC2/pbbv85Xgt5mxDn+IrM1TSvDX9T+BQYc3Pu1M1Qak6BvuT5tbAlGSyxXl7Jt+uFrnqMI+bvhNgsJVUV1q10QwQI/wFHL/dnq3jtlQMyowdhtYBkwrYPsDXofuZPbC1Pi0sJ0c8yN5lpBvh/GxquoI3c/wCfLetqUI4mzxVWt8aYr0T4KzLg0dxI+do5pkaJAsQNVFjmzD7WLYcJJbgbzxnDZ12uzyGZfbSYuxVdO4g/XrDJaBSjfIpTuo0xFedm+P6DxfixklJ+Ufcvu+MhvqCN+bzrIw33b6Uaochv3gScsF1hQt7XyOe2vb7yqu9o5KnN2sfOk7YEMawTGBZwreusZP/9TmEyeqxIMs6JheApsbalnJvTkSxaxD3IXGQXxdfxkuPNppw7A/jirN6l7qkbQ2bZhL3+r9MT2wGdnDrUfxwwakqQvJuBB7HdFFJqzJw04E="
+    # - COHESION_ARTIFACT=$TRAVIS_BUILD_DIR/tests/cohesion.tar.gz
+    # Provide your package's name.
+    - ORCA_SUT_NAME=acquia/acquia_cms
+    # Specify the name of the nearest Git version branch, e.g., 1.x or 8.x-1.x.
+    # This may be the destination branch of a pull request or the nearest
+    # ancestor of a topic branch.
+    - ORCA_SUT_BRANCH=develop
+    # Specify the version of ORCA to use. Use dev-master to track the latest
+    # release, dev-develop to track Dev/HEAD, or any other Composer version
+    # string.
+    # @see https://getcomposer.org/doc/articles/versions.md
+    - ORCA_VERSION=^2
+    # If your package isn't in in ORCA's packages.yml or conflicts with details
+    # that are, you can modify the active packages configuration at runtime by
+    # uncommenting the following line and specifying your own alter file.
+    # @see https://github.com/acquia/orca/blob/master/docs/advanced-usage.md#ORCA_PACKAGES_CONFIG_ALTER
+    - ORCA_PACKAGES_CONFIG_ALTER=../acquia_cms/tests/packages_alter.yml
+    # If your package is a Drupal installation profile, uncomment the following
+    # line and specify its machine name.
+    # @see https://github.com/acquia/orca/blob/master/docs/advanced-usage.md#ORCA_FIXTURE_PROFILE
+    - ORCA_FIXTURE_PROFILE=acquia_cms
+    - ORCA_TELEMETRY_ENABLE=TRUE
+
+# Execution time is drastically reduced by splitting the build into multiple
+# concurrent jobs.
+matrix:
+  # Mark the build as finished once the only remaining jobs are allowed to fail.
+  fast_finish: true
+  include:
+    # The standard ORCA jobs provide broad out-of-the-box coverage.
+    # @see https://github.com/acquia/orca/blob/master/docs/understanding-orca.md#continuous-integration
+    - { name: "Static code analysis", env: ORCA_JOB=STATIC_CODE_ANALYSIS }
+    - { name: "Deprecated code scan", env: ORCA_JOB=DEPRECATED_CODE_SCAN_SUT }
+    - { name: "Isolated test w/ dev package versions", env: ORCA_JOB=CUSTOM ORCA_CUSTOM_FIXTURE_INIT_ARGS="--core=^9 --dev --sut-only --no-sqlite" }
+    - { name: "Starter", env: ORCA_JOB=CUSTOM ORCA_CUSTOM_FIXTURE_INIT_ARGS="--core=^9 --dev --sut-only --no-sqlite"}
+    - { name: "PubSec Demo", env: ORCA_JOB=CUSTOM ORCA_CUSTOM_FIXTURE_INIT_ARGS="--core=^9 --dev --sut-only --no-sqlite"}
+
+# Install ORCA and prepare the environment.
+before_install:
+  - composer self-update 1.10.7
+  - mysql -u root < ./tests/travis/install.sql
+  - composer create-project --no-dev acquia/orca ../orca "$ORCA_VERSION"
+  - composer self-update
+  - ../orca/bin/travis/before_install.sh
+
+# Create the test fixture and place the SUT.
+install: ./tests/travis/install.sh
+
+# Display details about the fixture.
+before_script: ../orca/bin/travis/before_script.sh
+
+# Run the test script.
+script: ./tests/travis/script.sh
+
+# Reserved for future use.
+before_cache: ../orca/bin/travis/before_cache.sh
+
+# Reserved for future use.
+after_success: ../orca/bin/travis/after_success.sh
+
+# Display debugging information in case of failure.
+after_failure: ../orca/bin/travis/after_failure.sh
+
+# Reserved for future use.
+after_script: ../orca/bin/travis/after_script.sh

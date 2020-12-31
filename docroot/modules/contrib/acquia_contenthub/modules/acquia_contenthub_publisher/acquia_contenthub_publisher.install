@@ -1,0 +1,121 @@
+<?php
+
+/**
+ * @file
+ * Acquia Content Hub - Publisher module install file.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function acquia_contenthub_publisher_schema() {
+  $schema = [];
+  $schema['acquia_contenthub_publisher_export_tracking'] = [
+    'description' => 'Table for tracking which entities have been exported to contenthub.',
+    'fields' => [
+      'entity_type' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'entity_id' => [
+        'type' => 'varchar_ascii',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'entity_uuid' => [
+        'type' => 'char',
+        'length' => 36,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'status' => [
+        'description' => 'The status of an exported entity.',
+        'type' => 'varchar',
+        'default' => '',
+        'not null' => TRUE,
+        'length' => 36,
+      ],
+      'created' => [
+        'description' => "The CDF entity's created value.",
+        'type' => 'varchar',
+        'default' => '',
+        'not null' => TRUE,
+        'length' => 36,
+      ],
+      'modified' => [
+        'description' => "The CDF entity's modified value.",
+        'type' => 'varchar',
+        'default' => '',
+        'not null' => TRUE,
+        'length' => 36,
+      ],
+      'hash' => [
+        'type' => 'char',
+        'length' => 40,
+        'default' => '',
+      ],
+      'queue_id' => [
+        'description' => "Queue item to track queue record",
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => FALSE,
+      ],
+    ],
+    'unique keys' => [
+      'entity' => ['entity_type', 'entity_id'],
+      'entity_uuid' => ['entity_uuid'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * Converts 1.x export queues to 2.x export queues.
+ */
+function acquia_contenthub_publisher_update_82001() {
+  $database = \Drupal::database();
+  $queue_items = $database->select('queue', 'q')
+    ->fields('q', ['data', 'item_id'])
+    ->condition('name', 'acquia_contenthub_export_queue')
+    ->execute()
+    ->fetchAll();
+
+  if (!$queue_items) {
+    return;
+  }
+
+  $exp_queue = \Drupal::queue('acquia_contenthub_publish_export');
+  foreach ($queue_items as $item) {
+    $data = unserialize($item->data);
+
+    foreach ($data->data as $entity_data) {
+      $new = new \stdClass();
+      $new->type = $entity_data['entity_type'];
+      $new->uuid = $entity_data['entity_uuid'];
+      $exp_queue->createItem($new);
+    }
+  }
+
+  $database
+    ->delete('queue')
+    ->condition('name', 'acquia_contenthub_export_queue')
+    ->execute();
+
+}
+
+/**
+ * Add the new database column.
+ */
+function acquia_contenthub_publisher_update_82002() {
+  $queue_id_column = [
+    'type' => 'varchar',
+    'description' => "Queue item to track queue record",
+    'length' => 32,
+    'not null' => FALSE,
+  ];
+  $schema = \Drupal::database()->schema();
+  $schema->addField('acquia_contenthub_publisher_export_tracking', 'queue_id', $queue_id_column);
+}

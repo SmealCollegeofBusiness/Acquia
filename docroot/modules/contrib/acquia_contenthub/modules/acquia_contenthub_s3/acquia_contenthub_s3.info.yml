@@ -1,0 +1,17 @@
+name: Acquia ContentHub S3
+description: ContentHub Integration of s3 modules.
+package: Acquia ContentHub (Experimental)
+
+type: module
+core_version_requirement: ^8.8 || ^9
+
+dependencies:
+  - s3fs:s3fs (= 3.0-alpha16)
+  - drupal:file
+  - drupal:system (>= 8.8)
+  - acquia_contenthub:acquia_contenthub
+
+# Information added by Drupal.org packaging script on 2020-12-15
+version: '8.x-2.19'
+project: 'acquia_contenthub'
+datestamp: 1608054200

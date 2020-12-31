@@ -1,0 +1,10 @@
+/.coveralls.yml
+/.lando
+/.lando.yml
+/.local_gitignore
+docroot/profiles/contrib/acquia_cms/.coveralls.yml
+docroot/profiles/contrib/acquia_cms/.editorconfig
+docroot/profiles/contrib/acquia_cms/.gitignore
+docroot/profiles/contrib/acquia_cms/.travis.yml
+docroot/profiles/contrib/acquia_cms/acquia-pipelines.yml
+docroot/profiles/contrib/acquia_cms/grumphp.yml

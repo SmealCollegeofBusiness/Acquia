@@ -1,0 +1,37 @@
+acquia_contenthub.admin_settings:
+  type: config_object
+  label: 'Acquia ContentHub Administrative Settings'
+  mapping:
+    hostname:
+      type: string
+      label: 'ContentHub hostname'
+    api_key:
+      type: string
+      label: 'ContentHub API Key'
+    secret_key:
+      type: string
+      label: 'ContentHub Secret Key'
+    origin:
+      type: string
+      label: 'ContentHub Origin UUID'
+    client_name:
+      type: string
+      label: 'ContentHub client name'
+    shared_secret:
+      type: string
+      label: 'ContentHub Secret Key'
+    webhook:
+      type: mapping
+      label: 'ContentHub Webhook details'
+      uuid:
+        type: string
+        label: 'Webhook uuid'
+      url:
+        type: string
+        label: 'Webhook url'
+      settings_url:
+        type: string
+        label: 'Webhook settings url'
+    is_suppressed:
+      type: boolean
+      label: 'Webhook supression status'

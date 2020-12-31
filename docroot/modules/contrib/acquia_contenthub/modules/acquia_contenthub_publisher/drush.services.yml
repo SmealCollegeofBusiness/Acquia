@@ -1,0 +1,6 @@
+services:
+  acquia_contenthub_publisher.commands:
+    class: Drupal\acquia_contenthub_publisher\Commands\AcquiaContentHubPublisherCommands
+    arguments: ['@database', '@config.factory', '@acquia_contenthub.client.factory', '@logger.factory', '@state', '@module_handler']
+    tags:
+      - { name: drush.command }

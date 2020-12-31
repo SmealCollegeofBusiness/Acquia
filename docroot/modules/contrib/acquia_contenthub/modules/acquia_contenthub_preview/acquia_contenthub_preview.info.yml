@@ -1,0 +1,13 @@
+name: Acquia ContentHub Preview
+type: module
+description: Locks down the environment to only show previews of contenthub content
+core_version_requirement: ^8.8 || ^9
+package: Acquia ContentHub
+dependencies:
+  - acquia_contenthub
+hidden: true
+
+# Information added by Drupal.org packaging script on 2020-12-15
+version: '8.x-2.19'
+project: 'acquia_contenthub'
+datestamp: 1608054200

@@ -1,0 +1,119 @@
+{
+    "name": "acquia/sf_acms",
+    "type": "project",
+    "description": "An implementation of Acquia CMS for running in Acquia Cloud Site Factory.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "acquia/acquia_cms": "dev-develop#1.0.0-beta6",
+        "acquia/blt": "^12.4",
+        "drupal/core": "^9.0",
+        "drupal/core-composer-scaffold": "^9.0.0",
+        "drupal/samlauth": "3.x-dev",
+        "drush/drush": "^10",
+        "oomphinc/composer-installers-extender": "^1.1 || ^2",
+        "swichers/acsf-client": "dev-develop"
+    },
+    "require-dev": {},
+    "extra": {
+        "drupal-scaffold": {
+          "allowed-packages": [
+            "drupal/core",
+            "acquia/acquia_cms"
+          ],
+          "locations": {
+            "web-root": "./docroot",
+            "profile-root": "./docroot/profiles/contrib/acquia_cms"
+          },
+          "file-mapping": {
+            "[web-root]/.htaccess": false,
+            "[profile-root]/.editorconfig": false,
+            "[profile-root]/.gitattributes": false,
+            "[profile-root]/hooks": false,
+            "[profile-root]/drush/sites/acms.site.yml": false,
+            "[profile-root]/.coveralls.yml": false,
+            "[profile-root]/.travis.yml": false,
+            "[profile-root]/.gitignore": false,
+            "[profile-root]/acquia-pipelines.yml": false,
+            "[profile-root]/grumphp.yml": false
+          },
+          "gitignore": true
+        },
+        "enable-patching": true,
+        "installer-paths": {
+            "docroot/core": [
+                "type:drupal-core"
+            ],
+            "docroot/libraries/{$name}": [
+                "type:drupal-library",
+                "type:bower-asset",
+                "type:npm-asset"
+            ],
+            "docroot/modules/contrib/{$name}": [
+                "type:drupal-module"
+            ],
+            "docroot/profiles/contrib/{$name}": [
+                "type:drupal-profile"
+            ],
+            "docroot/themes/contrib/{$name}": [
+                "type:drupal-theme"
+            ]
+        },
+        "installer-types": [
+            "bower-asset",
+            "npm-asset"
+        ],
+        "patchLevel": {
+            "drupal/core": "-p2"
+        },
+        "patches": {}
+    },
+    "autoload": {},
+    "repositories": {
+        "drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        },
+        "assets": {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        },
+        "acquia_cms": {
+            "type": "vcs",
+            "url": "https://github.com/acquia/acquia_cms",
+            "no-api": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "post-install-cmd": [
+            "@putenv PROFILE_DIR=./docroot/profiles/contrib/acquia_cms",
+            "find ./docroot/profiles -type d -name .git -prune -exec rm -r -f '{}' ';'",
+            "find ./docroot/modules -type d -name .git -prune -exec rm -r -f '{}' ';'",
+            "composer install:frontend"
+        ],
+        "pre-update-cmd": [
+            "@putenv COMPOSER_MEMORY_LIMIT=2G"
+        ],
+        "post-update-cmd": [
+            "composer run-script post-install-cmd"
+        ],
+        "build:frontend": [
+            "Composer\\Config::disableProcessTimeout",
+            "cd $PROFILE_DIR/themes/acquia_claro && npm run build",
+            "mkdir -p $PROFILE_DIR/modules/acquia_cms_toolbar/css",
+            "cp $PROFILE_DIR/themes/acquia_claro/css/acquia_cms_toolbar.css $PROFILE_DIR/modules/acquia_cms_toolbar/css"
+        ],
+        "install:frontend": [
+            "Composer\\Config::disableProcessTimeout",
+            "@putenv PROFILE_DIR=./docroot/profiles/contrib/acquia_cms",
+            "cd docroot/profiles/contrib/acquia_cms/themes/acquia_claro && npm install",
+            "composer build:frontend"
+        ],
+        "nuke": [
+            "rm -rf composer.lock deploy docroot vendor",
+            "@composer clearcache --ansi",
+            "@composer install --ansi"
+        ]
+    }
+}

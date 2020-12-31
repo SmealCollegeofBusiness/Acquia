@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * @file
+ * Contains hook implementations for the acquia_cms_tour module.
+ */
+
+/**
+ * Implements hook_menu_links_discovered_alter().
+ */
+function acquia_cms_tour_menu_links_discovered_alter(array &$links) {
+  // Direct the Help link to our tour, leaving the help available to people who
+  // know where it is.
+  if (array_key_exists('help.main', $links)) {
+    $links['help.main']['route_name'] = $links['acquia_cms_tour.tour']['route_name'];
+    $links['help.main']['title'] = $links['acquia_cms_tour.tour']['title'];
+    // Don't show our Tour link twice.
+    unset($links['acquia_cms_tour.tour']);
+  }
+}
+
+/**
+ * Register tour twig file.
+ *
+ * Implements hook_theme().
+ */
+function acquia_cms_tour_theme() {
+  return [
+    'acquia_cms_tour' => [
+      'variables' => [],
+    ],
+    'acquia_cms_tour_dashboard_disabled' => [
+      'variables' => [
+        'section' => [],
+      ],
+    ],
+    'acquia_cms_tour_checklist_form' => [
+      'render element' => 'form',
+    ],
+  ];
+}
+
+/**
+ * Remove checklist form state when module is uninstalled.
+ *
+ * Implements hook_modules_uninstalled().
+ */
+function acquia_cms_tour_modules_uninstalled(array $modules) {
+  $checklist_forms = [
+    'acquia_csm_tool_checklist_form',
+    'google_api_checklist_form',
+  ];
+
+  // When a checklist-form has a module entry checked, it stores its checked
+  // state and when that particular module is unistalled- state data should
+  // remove its entry. Installing the module again shall have unchecked entry
+  // in concerned checklist form.
+  foreach ($checklist_forms as $form_id) {
+    $config_state = \Drupal::state()->get('acquia_cms_tour.' . $form_id);
+
+    // Ignore checklist-forms with empty state data.
+    if (!isset($config_state) || !is_array($config_state)) {
+      continue;
+    }
+
+    // Unset module being uninstalled entry from the checklist-form.
+    $config_state = array_diff_key($config_state, array_flip($modules));
+    \Drupal::state()->set('acquia_cms_tour.' . $form_id, $config_state);
+  }
+
+}

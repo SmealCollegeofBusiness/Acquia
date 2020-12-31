@@ -1,0 +1,16 @@
+<?php
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function acquia_contenthub_site_health_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.acquia_contenthub_site_health':
+      return t('
+        <h2>Acquia Content Hub Site Health</h2>
+        <h3>For Publishers:</h3>
+        <p>This module provides a Drush command to fix the UUIDs of local configuration entities in the publisher that have NULL values by assigning them randomly generated UUIDs.</p>
+      ');
+  }
+}

@@ -1,0 +1,9 @@
+{
+    "name": "drupal/acquia_contenthub_site_health",
+    "type": "drupal-module",
+    "description": "Provides audits for known incompatibilities between Drupal and ContentHub. Experimental. Use with caution.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": "^8.8 || ^9"
+    }
+}

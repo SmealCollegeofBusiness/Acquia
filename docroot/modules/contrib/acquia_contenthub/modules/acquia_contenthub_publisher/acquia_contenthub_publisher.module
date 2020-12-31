@@ -1,0 +1,213 @@
+<?php
+
+/**
+ * @file
+ * Drupal Module: Acquia Content Hub - Publisher.
+ *
+ * Publisher exports content from your Drupal site to Content Hub services.
+ */
+
+use Drupal\acquia_contenthub_publisher\ContentHubPublisherEvents;
+use Drupal\acquia_contenthub_publisher\Event\ContentHubEntityEligibilityEvent;
+use Drupal\acquia_contenthub_publisher\Event\NotConfirmedEntitiesFoundEvent;
+use Drupal\acquia_contenthub_publisher\PublisherTracker;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_entity_insert().
+ *
+ * @throws \Exception
+ */
+function acquia_contenthub_publisher_entity_insert(EntityInterface $entity) {
+  _acquia_contenthub_publisher_enqueue_entity($entity, 'insert');
+}
+
+/**
+ * Implements hook_entity_update().
+ *
+ * @throws \Exception
+ */
+function acquia_contenthub_publisher_entity_update(EntityInterface $entity) {
+  _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+}
+
+/**
+ * Implements hook_entity_delete().
+ *
+ * @throws \Exception
+ */
+function acquia_contenthub_publisher_entity_delete(EntityInterface $entity) {
+  $uuid = $entity->uuid();
+  if (!$uuid) {
+    return;
+  }
+  /** @var \Drupal\acquia_contenthub\ContentHubCommonActions $common */
+  $common = \Drupal::service('acquia_contenthub_common_actions');
+  try {
+    $common->deleteRemoteEntity($uuid);
+  }
+  catch (\Exception $e) {
+    \Drupal::logger('acquia_contenthub')->error('@error_message', ['@error_message' => $e->getMessage()]);
+  }
+}
+
+/**
+ * Enqueues candidate entities for publishing.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity to enqueue to ContentHub.
+ * @param string $op
+ *   Operation.
+ *
+ * @throws \Exception
+ */
+function _acquia_contenthub_publisher_enqueue_entity(EntityInterface $entity, $op) {
+  $event = new ContentHubEntityEligibilityEvent($entity, $op);
+  /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
+  $dispatcher = \Drupal::service('event_dispatcher');
+  $dispatcher->dispatch(ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY, $event);
+  if ($event->getEligibility()) {
+    /** @var \Drupal\Core\Queue\QueueFactory $queue_factory */
+    $queue_factory = \Drupal::service('queue');
+    $queue = $queue_factory->get('acquia_contenthub_publish_export');
+    $item = new \stdClass();
+    $item->type = $entity->getEntityTypeId();
+    $item->uuid = $entity->uuid();
+    $queue_id = $queue->createItem($item);
+    /** @var \Drupal\acquia_contenthub_publisher\PublisherTracker $tracker */
+    $tracker = \Drupal::service('acquia_contenthub_publisher.tracker');
+    $tracker->queue($entity);
+    $tracker->setQueueItemByUuid($item->uuid, $queue_id);
+    /* @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
+    $factory = \Drupal::service('acquia_contenthub.client.factory');
+    // Reinitialize client cdf metrics data.
+    $factory->getClient();
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function acquia_contenthub_publisher_form_acquia_contenthub_admin_settings_alter(array &$form, FormStateInterface $form_state) {
+  $config = \Drupal::config('acquia_contenthub_publisher.settings');
+
+  $form['publisher_settings'] = [
+    '#type' => 'details',
+    '#title' => t('Publisher settings'),
+    '#open' => FALSE,
+  ];
+  $form['publisher_settings']['threshold_stale_entities'] = [
+    '#type' => 'select',
+    '#title' => t('Period threshold for stale items'),
+    '#description' => t('A "stale item" is an exported entity that is not confirmed by the service at least for the specified period of time.'),
+    '#options' => _acquia_contenthub_publisher_get_threshold_stale_items_options(),
+    '#default_value' => $config->get('threshold_stale_entities'),
+  ];
+  $form['publisher_settings']['submit'] = [
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#name' => 'save_publisher_settings',
+    '#submit' => ['_acquia_contenthub_publisher_save_publisher_settings_submit'],
+  ];
+}
+
+/**
+ * Submit handler for publisher settings form fieldset.
+ *
+ * @param array $form
+ *   The form.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ */
+function _acquia_contenthub_publisher_save_publisher_settings_submit(array &$form, FormStateInterface $form_state) {
+  /** @var \Drupal\Core\Config\Config $config */
+  $config = \Drupal::configFactory()->getEditable('acquia_contenthub_publisher.settings');
+  $config
+    ->set('threshold_stale_entities', $form_state->getValue('threshold_stale_entities', ''))
+    ->save();
+  \Drupal::messenger()->addMessage(t('The Publisher settings have been saved.'));
+}
+
+/**
+ * Implements hook_cron().
+ */
+function acquia_contenthub_publisher_cron() {
+  _acquia_contenthub_dispatch_not_confirmed_entities_event();
+}
+
+/**
+ * Returns the list of options for "Period threshold for stale items" input.
+ *
+ * @return array
+ *   The list of options.
+ */
+function _acquia_contenthub_publisher_get_threshold_stale_items_options() {
+  $periods = [
+    // 30 minutes.
+    1800,
+    // 1 hour.
+    3600,
+    // 2 hours.
+    7200,
+    // 3 hours.
+    10800,
+    // 6 hours.
+    21600,
+    // 12 hours.
+    43200,
+    // 1 day.
+    86400,
+    // 2 days.
+    172800,
+  ];
+
+  $options = ['' => t('Disabled')];
+  $options += array_map(
+    [\Drupal::service('date.formatter'), 'formatInterval'],
+    array_combine($periods, $periods));
+
+  return $options;
+}
+
+/**
+ * Dispatches "NOT_CONFIRMED_ENTITIES_FOUND" event.
+ */
+function _acquia_contenthub_dispatch_not_confirmed_entities_event() {
+  /** @var \Drupal\Core\Config\Config $config */
+  $config = \Drupal::service('config.factory')->get('acquia_contenthub_publisher.settings');
+  $threshold_stale_entities = $config->get('threshold_stale_entities');
+  if (!$threshold_stale_entities) {
+    return;
+  }
+
+  $request_time = \Drupal::service('datetime.time')->getRequestTime();
+  $threshold_timestamp = $request_time - $threshold_stale_entities;
+
+  $query = \Drupal::database()->select('acquia_contenthub_publisher_export_tracking', 'tracking');
+  $query->fields('tracking',
+    [
+      'entity_type',
+      'entity_id',
+      'entity_uuid',
+      'created',
+      'modified',
+    ]);
+  $query->addExpression(
+    ":threshold_timestamp - UNIX_TIMESTAMP(CONVERT_TZ(DATE_FORMAT(modified, '%Y-%m-%dT%H:%i:%s'), '+00:00', @@SESSION.time_zone))",
+    'overdue',
+    [':threshold_timestamp' => $threshold_timestamp]);
+  $query->condition('status', PublisherTracker::EXPORTED);
+  $query->orderBy('modified');
+
+  $items = $query->execute()->fetchAllAssoc('entity_uuid');
+  $items = array_filter($items, function($item) { return $item->overdue >= 0; });
+  if (!$items) {
+    return;
+  }
+
+  $event = new NotConfirmedEntitiesFoundEvent($items);
+  /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
+  $dispatcher = \Drupal::service('event_dispatcher');
+  $dispatcher->dispatch(ContentHubPublisherEvents::NOT_CONFIRMED_ENTITIES_FOUND, $event);
+}

@@ -1,0 +1,9 @@
+{
+    "name": "drupal/acquia_contenthub_curation",
+    "type": "drupal-module",
+    "description": "Provides curation tools & discovery interface for Acquia ContentHub.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": "^8.8 || ^9"
+    }
+}

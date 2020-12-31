@@ -1,0 +1,12 @@
+name: Acquia ContentHub Site Health
+type: module
+description: Provides audits for known incompatibilities between Drupal and ContentHub. Experimental. Use with caution.
+core_version_requirement: ^8.8 || ^9
+package: Acquia ContentHub (Experimental)
+dependencies:
+  - acquia_contenthub
+
+# Information added by Drupal.org packaging script on 2020-12-15
+version: '8.x-2.19'
+project: 'acquia_contenthub'
+datestamp: 1608054200

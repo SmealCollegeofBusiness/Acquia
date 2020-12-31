@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * @defgroup updates-8.6.x-contenthub-configuration
+ * @{
+ * Update functions to Configuration Entities.
+ */
+
+/**
+ * Updates Content Hub legacy settings to 2.x version.
+ *
+ * @see acquia_contenthub_post_update_update_config_entities()
+ */
+function acquia_contenthub_update_82001() {
+  $database = \Drupal::database();
+  $config_factory = \Drupal::configFactory();
+  if (!$database->schema()->tableExists('acquia_contenthub_entities_tracking')) {
+    return;
+  }
+  $admin_settings = $config_factory->getEditable('acquia_contenthub.admin_settings');
+
+  // Updates Configuration Entity "acquia_contenthub.admin_settings".
+  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $client_factory */
+  $client_factory = \Drupal::service('acquia_contenthub.client.factory');
+  $settings = $client_factory->getSettings();
+  $client = $client_factory->getClient($settings);
+  $remote = $client->getRemoteSettings();
+  $admin_settings->set('shared_secret', $remote['shared_secret']);
+
+  $state = \Drupal::state();
+
+  // We will store Webhook URL and Webhook UUID in a state variable to be able
+  // to delete the legacy config and make space for the new way of storing this
+  // information.
+  $state->set('acquia_contenthub_update_82001_webhook_uuid', $admin_settings->get('webhook_uuid'));
+  $state->set('acquia_contenthub_update_82001_webhook_url', $admin_settings->get('webhook_url'));
+  $admin_settings->clear('webhook_uuid');
+  $admin_settings->clear('webhook_url');
+  $admin_settings->save();
+
+  // Delete Configuration Entity "acquia_contenthub.entity_config".
+  // We store these settings in a state variable to be used later by the
+  // acquia_lift_publisher module to obtain information about what are the
+  // legacy configured view displays to export as rendered entities.
+  $entity_type_configuration = [];
+  foreach ($config_factory->listAll('acquia_contenthub.entity') as $contenthub_entity_type_config_name) {
+    $contenthub_entity_type_config = $config_factory->getEditable($contenthub_entity_type_config_name);
+    $entity_type_configuration[$contenthub_entity_type_config_name] = $contenthub_entity_type_config->getRawData();
+    $contenthub_entity_type_config->delete();
+  }
+  $state->set('acquia_contenthub_update_82001_entity_type_config', $entity_type_configuration);
+  $entity_config = $config_factory->getEditable('acquia_contenthub.entity_config');
+  $state->set('acquia_contenthub_update_82001_entity_config', $entity_config->getRawData());
+  $entity_config->delete();
+
+  // Delete legacy state variables.
+  $state->delete('acquia_contenthub.shared_secret');
+  $state->delete('acquia_contenthub.reindexing_state');
+}
+
+/**
+ * @} End of "addtogroup updates-8.6.x-contenthub-configuration".
+ */

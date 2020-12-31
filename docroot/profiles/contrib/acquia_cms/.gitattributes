@@ -1,0 +1,16 @@
+/acquia-pipelines.yml export-ignore
+/config/optional/views.view.acquia_search_solr.yml export-ignore
+/.coveralls.yml export-ignore
+/DEVELOPING.md export-ignore
+/drush/sites export-ignore
+/.editorconfig export-ignore
+/grumphp.yml export-ignore
+/hooks export-ignore
+/modules/acquia_cms_development export-ignore
+/package.json export-ignore
+package-lock.json export-ignore
+/phpcs.xml.dist export-ignore
+/phpunit.xml export-ignore
+*.sh export-ignore
+/tests export-ignore
+/.travis.yml export-ignore

@@ -1,0 +1,14 @@
+name: Acquia ContentHub S3 Testing
+description: Support module for acquia_contenthub_s3 module testing.
+package: Acquia ContentHub
+
+type: module
+core_version_requirement: ^8.8 || ^9
+
+dependencies:
+  - acquia_contenthub:acquia_contenthub
+
+# Information added by Drupal.org packaging script on 2020-12-15
+version: '8.x-2.19'
+project: 'acquia_contenthub'
+datestamp: 1608054200

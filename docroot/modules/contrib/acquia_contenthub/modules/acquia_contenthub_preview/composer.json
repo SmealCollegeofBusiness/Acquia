@@ -1,0 +1,14 @@
+{
+    "name": "drupal/acquia_contenthub_preview",
+    "type": "drupal-module",
+    "description": "Locks down the environment to only show previews of contenthub content.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": "^8.8 || ^9"
+    },
+    "extra": {
+        "orca": {
+            "enable": false
+        }
+    }
+}

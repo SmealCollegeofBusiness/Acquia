@@ -1,0 +1,13 @@
+name: ACSF Scheduled Jobs
+type: module
+description: Integrates with Site Factory's Scheduled Jobs functionality.
+core: 8.x
+core_version_requirement: ^8 || ^9
+package: Acquia Cloud Site Factory
+dependencies:
+  - drupal:system (>=8.5.0)
+
+# Information added by Drupal.org packaging script on 2020-10-21
+version: '8.x-2.68'
+project: 'acsf'
+datestamp: 1603275068

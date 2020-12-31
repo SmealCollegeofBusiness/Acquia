@@ -1,0 +1,12 @@
+name: Depcalc Testing
+description: Support module for depcalc module testing.
+package: Testing
+# version: VERSION
+type: module
+core_version_requirement: ^8.7.7 || ^9
+hidden: true
+
+# Information added by Drupal.org packaging script on 2020-05-21
+version: '8.x-1.1'
+project: 'depcalc'
+datestamp: 1590104433

@@ -1,0 +1,127 @@
+{
+    "entities": [
+        {
+            "uuid": "b1dd007c-6720-4497-b54c-879ea2eb6898",
+            "type": "drupal8_content_entity",
+            "created": "2020-03-28T18:18:18+00:00",
+            "modified": "2020-03-28T18:18:18+00:00",
+            "origin": false,
+            "attributes": {
+                "label": {
+                    "type": "array<string>",
+                    "value": {
+                        "en": "External Link",
+                        "und": "External Link"
+                    }
+                },
+                "entity_type": {
+                    "type": "keyword",
+                    "value": {
+                        "und": "menu_link_content"
+                    }
+                },
+                "entity_type_label": {
+                    "type": "string",
+                    "value": {
+                        "und": "Custom menu link"
+                    }
+                },
+                "bundle": {
+                    "type": "keyword",
+                    "value": {
+                        "und": "menu_link_content"
+                    }
+                },
+                "channels": {
+                    "type": "array<reference>",
+                    "value": {
+                        "und": []
+                    }
+                },
+                "hash": {
+                    "type": "string",
+                    "value": {
+                        "und": "832b834ab00d36a10ed5ceea43b089745ca49146"
+                    }
+                },
+                "base_url": {
+                    "type": "string",
+                    "value": {
+                        "und": "http:\\\/\\\/publisher.dd:8083\\\/"
+                    }
+                }
+            },
+            "metadata": {
+                "default_language": "en",
+                "field": {
+                    "uuid": {
+                        "type": "uuid"
+                    },
+                    "langcode": {
+                        "type": "language"
+                    },
+                    "bundle": {
+                        "type": "string"
+                    },
+                    "revision_created": {
+                        "type": "created"
+                    },
+                    "revision_user": {
+                        "type": "entity_reference",
+                        "target": "user"
+                    },
+                    "revision_log_message": {
+                        "type": "string_long"
+                    },
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "menu_name": {
+                        "type": "string"
+                    },
+                    "link": {
+                        "type": "link"
+                    },
+                    "external": {
+                        "type": "boolean"
+                    },
+                    "rediscover": {
+                        "type": "boolean"
+                    },
+                    "weight": {
+                        "type": "integer"
+                    },
+                    "expanded": {
+                        "type": "boolean"
+                    },
+                    "parent": {
+                        "type": "string"
+                    },
+                    "changed": {
+                        "type": "changed"
+                    },
+                    "default_langcode": {
+                        "type": "boolean"
+                    },
+                    "revision_default": {
+                        "type": "boolean"
+                    },
+                    "revision_translation_affected": {
+                        "type": "boolean"
+                    }
+                },
+                "data": "eyJ1dWlkIjp7InZhbHVlIjp7ImVuIjp7InZhbHVlIjoiYjFkZDAwN2MtNjcyMC00NDk3LWI1NGMtODc5ZWEyZWI2ODk4In19fSwiYnVuZGxlIjp7InZhbHVlIjp7ImVuIjoibWVudV9saW5rX2NvbnRlbnQifX0sInJldmlzaW9uX2NyZWF0ZWQiOnsidmFsdWUiOnsiZW4iOnsidmFsdWUiOiIxNTg1NDE5MzY2In19fSwicmV2aXNpb25fdXNlciI6eyJ2YWx1ZSI6eyJlbiI6W119fSwicmV2aXNpb25fbG9nX21lc3NhZ2UiOltdLCJlbmFibGVkIjp7InZhbHVlIjp7ImVuIjoiMSJ9fSwidGl0bGUiOnsidmFsdWUiOnsiZW4iOiJFeHRlcm5hbCBMaW5rIn19LCJkZXNjcmlwdGlvbiI6eyJ2YWx1ZSI6eyJlbiI6IkFuIEV4dGVybmFsIExpbmsifX0sIm1lbnVfbmFtZSI6eyJ2YWx1ZSI6eyJlbiI6InRlc3QtbWVudSJ9fSwibGluayI6eyJ2YWx1ZSI6eyJlbiI6W3sidXJpIjoiaHR0cDpcL1wvZ29vZ2xlLmNvbSIsInRpdGxlIjpudWxsLCJvcHRpb25zIjpbXSwidXJpX3R5cGUiOiJleHRlcm5hbCJ9XX19LCJleHRlcm5hbCI6eyJ2YWx1ZSI6eyJlbiI6IjAifX0sInJlZGlzY292ZXIiOnsidmFsdWUiOnsiZW4iOiIwIn19LCJ3ZWlnaHQiOnsidmFsdWUiOnsiZW4iOiItNTAifX0sImV4cGFuZGVkIjp7InZhbHVlIjp7ImVuIjoiMSJ9fSwicGFyZW50IjpbXSwiY2hhbmdlZCI6eyJ2YWx1ZSI6eyJlbiI6eyJ2YWx1ZSI6IjE1NDY1ODczNDMifX19LCJkZWZhdWx0X2xhbmdjb2RlIjp7InZhbHVlIjp7ImVuIjoiMSJ9fSwicmV2aXNpb25fZGVmYXVsdCI6eyJ2YWx1ZSI6eyJlbiI6IjEifX0sInJldmlzaW9uX3RyYW5zbGF0aW9uX2FmZmVjdGVkIjp7InZhbHVlIjp7ImVuIjoiMSJ9fX0=",
+                "languages": [
+                    "en"
+                ],
+                "version": 2
+            }
+        }
+    ]
+}

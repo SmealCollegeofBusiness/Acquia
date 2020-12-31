@@ -1,0 +1,9 @@
+{
+    "name": "drupal/acquia_contenthub_unsubscribe",
+    "type": "drupal-module",
+    "description": "Allows for individual entities to be disconnected from pushed updates.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": "^8.8 || ^9"
+    }
+}

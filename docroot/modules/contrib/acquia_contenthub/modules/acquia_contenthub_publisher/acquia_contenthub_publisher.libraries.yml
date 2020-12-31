@@ -1,0 +1,19 @@
+acquia_contenthub_publisher:
+  css:
+    theme:
+      css/acquia_contenthub_publisher.css: {}
+
+acquia_contenthub_publisher_details:
+  js:
+    js/acquia_contenthub_publisher.js: {}
+  css:
+    theme:
+      css/acquia_contenthub_publisher.css: {}
+  dependencies:
+    - core/drupalSettings
+    - acquia_contenthub_publisher/google_charts
+
+google_charts:
+  header: true
+  js:
+    https://www.gstatic.com/charts/loader.js: { type: external }
