@@ -4,7 +4,7 @@
     "description": "An implementation of Acquia CMS for running in Acquia Cloud Site Factory.",
     "license": "GPL-2.0-or-later",
     "require": {
-        "acquia/acquia_cms": "dev-develop#1.0.0-beta6",
+        "acquia/acquia_cms": "dev-develop#1.0.0-beta7",
         "acquia/blt": "^12.4",
         "drupal/core": "^9.0",
         "drupal/core-composer-scaffold": "^9.0.0",

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f
+class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
 {
     public static $files = array (
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
@@ -973,7 +973,6 @@ class ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f
         'Acquia\\Blt\\Robo\\Tasks\\PhpUnitTask' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Tasks/PhpUnitTask.php',
         'Acquia\\Blt\\Robo\\Tasks\\RunTestsTask' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Tasks/RunTestsTask.php',
         'Acquia\\Blt\\Robo\\Wizards\\SetupWizard' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Wizards/SetupWizard.php',
-        'Acquia\\Blt\\Robo\\Wizards\\TestsWizard' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Wizards/TestsWizard.php',
         'Acquia\\Blt\\Robo\\Wizards\\Wizard' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Wizards/Wizard.php',
         'Acquia\\Blt\\Update\\DoPackagistConverter' => __DIR__ . '/..' . '/acquia/blt/src/Update/DoPackagistConverter.php',
         'Acquia\\Blt\\Update\\Updater' => __DIR__ . '/..' . '/acquia/blt/src/Update/Updater.php',
@@ -1042,7 +1041,7 @@ class ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f
         'Caxy\\HtmlDiff\\ListDiffLines' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/ListDiffLines.php',
         'Caxy\\HtmlDiff\\ListDiff\\DiffList' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/ListDiff/DiffList.php',
         'Caxy\\HtmlDiff\\ListDiff\\DiffListItem' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/ListDiff/DiffListItem.php',
-        'Caxy\\HtmlDiff\\Match' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/Match.php',
+        'Caxy\\HtmlDiff\\MatchingBlock' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/MatchingBlock.php',
         'Caxy\\HtmlDiff\\Operation' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/Operation.php',
         'Caxy\\HtmlDiff\\Preprocessor' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/Preprocessor.php',
         'Caxy\\HtmlDiff\\Strategy\\EqualMatchStrategy' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/Strategy/EqualMatchStrategy.php',
@@ -8272,11 +8271,11 @@ class ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInite742d8a81e9f5f7fd5c3ed96729f9c8f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$classMap;
 
         }, null, ClassLoader::class);
     }
