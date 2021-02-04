@@ -17367,6 +17367,5 @@
             "install-path": "../zumba/amplitude-php"
         }
     ],
-    "dev": false,
-    "dev-package-names": []
+    "dev": false
 }

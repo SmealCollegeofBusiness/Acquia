@@ -1,0 +1,15 @@
+dev:
+    root: /var/www/html/profserv2.01dev/docroot
+    uri: profserv201dev.enterprise-g1.acquia-sites.com
+    host: web-1675.enterprise-g1.hosting.acquia.com
+    user: profserv2.01dev
+prod:
+    root: /var/www/html/profserv2.01_live/docroot
+    uri: profserv2_01_live.enterprise-g1.acquia-sites.com
+    host: web-1673.enterprise-g1.hosting.acquia.com
+    user: profserv2.01_live
+test:
+    root: /var/www/html/profserv2.01_test/docroot
+    uri: profserv2_01_test.enterprise-g1.acquia-sites.com
+    host: web-1675.enterprise-g1.hosting.acquia.com
+    user: profserv2.01_test
