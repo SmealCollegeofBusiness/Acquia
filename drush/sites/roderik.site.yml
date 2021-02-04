@@ -1,0 +1,12 @@
+dev:
+    root: /var/www/html/roderik201dev/docroot
+    host: roderik201dev.ssh.sprint209.sites.ahdev.co
+    user: roderik2.01live
+prod:
+    root: /var/www/html/roderik201live/docroot
+    host: roderik201live.ssh.sprint209.sites.ahdev.co
+    user: roderik2.01live
+test:
+    root: /var/www/html/roderik201test/docroot
+    host: roderik201test.ssh.sprint209.sites.ahdev.co
+    user: roderik2.01live

@@ -178,7 +178,7 @@
                     }
                 }
             },
-            "installation-source": "source",
+            "installation-source": "dist",
             "scripts": {
                 "pre-update-cmd": [
                     "@putenv COMPOSER_MEMORY_LIMIT=2G"
@@ -17367,6 +17367,5 @@
             "install-path": "../zumba/amplitude-php"
         }
     ],
-    "dev": false,
-    "dev-package-names": []
+    "dev": false
 }
