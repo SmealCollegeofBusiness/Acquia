@@ -83,7 +83,8 @@ class ContentHubWebhookController extends ControllerBase {
           $this->dispatcher->dispatch(AcquiaContentHubEvents::HANDLE_WEBHOOK, $event);
           return $event->getResponse();
         }
-      } else {
+      }
+      else {
         $ip_address = $request->getClientIp();
         $message = new FormattableMarkup('Webhook [from IP = @IP] rejected (Signatures do not match): @whook', [
           '@IP' => $ip_address,

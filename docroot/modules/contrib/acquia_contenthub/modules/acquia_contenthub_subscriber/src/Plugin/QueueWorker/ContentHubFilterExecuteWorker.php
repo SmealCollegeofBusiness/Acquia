@@ -14,7 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class ContentHubFilterExecuteWorker.
+ * Queue worker for entities from Content Hub filters.
  *
  * @QueueWorker(
  *   id = "acquia_contenthub_import_from_filters",

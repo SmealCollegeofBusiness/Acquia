@@ -3,7 +3,7 @@
 namespace Drupal\acquia_contenthub;
 
 /**
- * Trait AcquiaContentHubStatusMetricsTrait.
+ * Trait to set status metrics for Content Hub client cdf entities.
  *
  * @package Drupal\acquia_contenthub
  */

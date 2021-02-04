@@ -26,7 +26,7 @@ class TaxonomyTermMatch implements EventSubscriberInterface {
   public static function getSubscribedEvents() {
     return [
       AcquiaContentHubEvents::LOAD_LOCAL_ENTITY => [
-        ['onLoadLocalEntity', 100],
+        ['onLoadLocalEntity', 7],
       ],
     ];
   }

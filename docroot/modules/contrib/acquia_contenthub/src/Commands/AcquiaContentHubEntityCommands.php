@@ -13,7 +13,7 @@ use Drupal\depcalc\DependentEntityWrapper;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class AcquiaContentHubEntityCommands.
+ * Drush commands for interacting with Acquia Content Hub entities.
  *
  * @package Drupal\acquia_contenthub\Commands
  */
@@ -78,7 +78,7 @@ class AcquiaContentHubEntityCommands extends DrushCommands {
    *
    * @throws \Exception
    */
-  public function contenthubEntity($op, $uuid, $entity_type = NULL,  array $options = ['decode' => NULL]) {
+  public function contenthubEntity($op, $uuid, $entity_type = NULL, array $options = ['decode' => NULL]) {
     $client = $this->clientFactory->getClient();
 
     if (empty($uuid)) {
@@ -256,7 +256,12 @@ class AcquiaContentHubEntityCommands extends DrushCommands {
    *   The CDF entity array before it is written to the output.
    */
   protected function decodeEntityArrayMetadata(array &$cdf_entity) {
-    if (in_array($cdf_entity['type'], ['drupal8_content_entity', 'drupal8_config_entity', 'rendered_entity'])) {
+    $types = [
+      'drupal8_content_entity',
+      'drupal8_config_entity',
+      'rendered_entity',
+    ];
+    if (in_array($cdf_entity['type'], $types)) {
       $cdf_entity['metadata']['data'] = base64_decode($cdf_entity['metadata']['data']);
     }
   }

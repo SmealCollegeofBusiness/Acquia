@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 /**
- * Class PreExistingTermImportExportTest.
+ * Tests preexisting entity export and imports.
  *
  * @group acquia_contenthub
  *

@@ -9,7 +9,7 @@ use Drupal\taxonomy\TermInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class TermParentCdfAttribute.
+ * Creates the term parent cdf attribute.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\CdfAttributes
  */

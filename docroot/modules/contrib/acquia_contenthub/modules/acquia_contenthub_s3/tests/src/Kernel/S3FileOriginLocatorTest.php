@@ -12,7 +12,7 @@ use Drupal\image\ImageStyleInterface;
 use Prophecy\Argument;
 
 /**
- * Class S3FileOriginLocatorTest.
+ * Tests the S3FileOriginLocator.
  *
  * @group acquia_contenthub_s3
  * @coversDefaultClass \Drupal\acquia_contenthub_s3\S3FileOriginLocator

@@ -9,6 +9,7 @@ use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\acquia_contenthub_subscriber\Plugin\QueueWorker\ContentHubImportQueueWorker;
+use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\Entity\EntityViewMode;
 use Drupal\Core\Logger\LoggerChannelInterface;
@@ -19,7 +20,7 @@ use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
 
 /**
- * Class UnserializationTest.
+ * Tests that entities are properly unserialized.
  *
  * @group acquia_contenthub
  *
@@ -100,6 +101,8 @@ class UnserializationTest extends EntityKernelTestBase {
     $client_factory_mock->getClient()->willReturn($this->contentHubClient);
     $client_factory_mock->getSettings()->willReturn($this->settings->reveal());
     $this->container->set('acquia_contenthub.client.factory', $client_factory_mock->reveal());
+    $subscriber_tracker_mock = $this->prophesize(SubscriberTracker::class);
+    $this->container->set('acquia_contenthub_subscriber.tracker', $subscriber_tracker_mock->reveal());
     $logger_channel_mock = $this
       ->prophesize(LoggerChannelInterface::class);
     $this->container->set('acquia_contenthub.logger_channel', $logger_channel_mock->reveal());
@@ -119,6 +122,7 @@ class UnserializationTest extends EntityKernelTestBase {
         $this->container->get('event_dispatcher'),
         $this->container->get('acquia_contenthub_common_actions'),
         $this->container->get('acquia_contenthub.client.factory'),
+        $this->container->get('acquia_contenthub_subscriber.tracker'),
         $this->container->get('acquia_contenthub.logger_channel'),
         [],
         NULL,

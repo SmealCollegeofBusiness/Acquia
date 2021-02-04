@@ -1,17 +1,2 @@
 project:
-  machine_name: sf-acms
-
-git:
-  default_branch: develop
-  remotes:
-    - 'acmsbeta@svn-2398.enterprise-g1.hosting.acquia.com:acmsbeta.git'
-
-deploy:
-  tag_source: true
-  dir: 'deploy'
-  docroot: 'deploy/docroot'
-post-deploy-build:
-  dir: '${deploy.dir}/drush'
-  command: 'find ''Commands'' -type d -name ''.git'' -exec rm -fr {} +'
-validate:
-  acsf: true
+  machine_name: deploy

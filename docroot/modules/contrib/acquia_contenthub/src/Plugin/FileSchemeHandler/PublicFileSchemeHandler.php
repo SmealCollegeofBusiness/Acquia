@@ -17,7 +17,7 @@ use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class PublicFileSchemeHandler.
+ * The handler for files with a public file scheme.
  *
  * @FileSchemeHandler(
  *   id = "public",

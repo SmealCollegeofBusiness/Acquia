@@ -68,9 +68,11 @@ class ExistingUser implements EventSubscriberInterface {
    *   The arguments to use with the pattern.
    *
    * @return bool|string
+   *   Username or false if not generated.
+   *
    * @throws \Exception
    */
-  public function generateUsername(string $pattern, string ...$pattern_arguments) {
+  public function generateUsername(string $pattern, string ...$pattern_arguments) { // @codingStandardsIgnoreLine
     if (empty($pattern)) {
       throw new \Exception("No pattern could be found for the generated username.");
     }

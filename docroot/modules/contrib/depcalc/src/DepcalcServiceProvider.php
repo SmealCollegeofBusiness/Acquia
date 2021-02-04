@@ -25,8 +25,9 @@ class DepcalcServiceProvider extends ServiceProviderBase {
     if ($container->hasDefinition('plugin.manager.core.layout')) {
       $container->getDefinition('layout_builder.dependency_calculator')
         ->addArgument(new Reference('plugin.manager.core.layout'));
+      $container->getDefinition('layout_builder.entity_view_display.dependency_calculator')
+        ->addArgument(new Reference('plugin.manager.core.layout'));
     }
   }
 
 }
-

@@ -12,7 +12,7 @@ use Drupal\user\UserInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Class UserDataCdfAttributeTest.
+ * Tests the user data cdf attribute.
  *
  * @group acquia_contenthub
  *

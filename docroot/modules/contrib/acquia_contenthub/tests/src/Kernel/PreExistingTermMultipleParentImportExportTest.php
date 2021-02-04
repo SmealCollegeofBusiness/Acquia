@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 /**
- * Class PreExistingTermMultipleParentImportExportTest.
+ * Tests terms with multiple parents during export and import.
  *
  * @group acquia_contenthub
  *

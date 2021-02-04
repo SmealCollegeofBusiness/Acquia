@@ -33,8 +33,10 @@ class TrackEntity implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::ENTITY_IMPORT_NEW][] = ['trackEntity', 100];
-    $events[AcquiaContentHubEvents::ENTITY_IMPORT_UPDATE][] = ['trackEntity', 100];
+    $events[AcquiaContentHubEvents::ENTITY_IMPORT_NEW][] =
+      ['trackEntity', 100];
+    $events[AcquiaContentHubEvents::ENTITY_IMPORT_UPDATE][] =
+      ['trackEntity', 100];
     return $events;
   }
 

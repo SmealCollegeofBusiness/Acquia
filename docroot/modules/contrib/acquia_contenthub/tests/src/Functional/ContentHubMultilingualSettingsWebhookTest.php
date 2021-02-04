@@ -7,7 +7,7 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests that the Content Hub Webhook URL is unchanged with multi-lingual settings.
+ * Tests that the Webhook Url is unchanged with multilingual settings.
  *
  * @group acquia_contenthub
  */
@@ -72,10 +72,11 @@ class ContentHubMultilingualSettingsWebhookTest extends BrowserTestBase {
   }
 
   /**
-   * Tests the webhook path is not changed when multilingual site settings are enabled.
+   * Tests the webhook path is not changed if multilingual settings are enabled.
    */
   public function testContentHubWebhookPath() {
     $webhook_path = Url::fromRoute('acquia_contenthub.webhook')->toString();
     $this->assertEqual($webhook_path, '/acquia-contenthub/webhook');
   }
+
 }

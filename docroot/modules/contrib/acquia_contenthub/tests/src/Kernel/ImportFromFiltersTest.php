@@ -11,7 +11,7 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use GuzzleHttp\Psr7\Response;
 
 /**
- * Class ImportFromFiltersTest.
+ * Tests that imports from filters work properly.
  *
  * @group acquia_contenthub
  *

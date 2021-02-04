@@ -19,7 +19,8 @@ class LoadUserByNameOrMail implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::LOAD_LOCAL_ENTITY][] = ['onLoadLocalEntity', 5];
+    $events[AcquiaContentHubEvents::LOAD_LOCAL_ENTITY][] =
+      ['onLoadLocalEntity', 5];
     return $events;
   }
 

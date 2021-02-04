@@ -6,7 +6,7 @@ use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\file\FileInterface;
 
 /**
- * Interface FileSchemeHandlerManagerInterface.
+ * Interface for file scheme handler managers.
  *
  * @package Drupal\acquia_contenthub\Plugin\FileSchemeHandler
  */
@@ -26,7 +26,7 @@ interface FileSchemeHandlerManagerInterface extends PluginManagerInterface {
   /**
    * Checks whether the current file has a supported scheme handler.
    *
-   * @param FileInterface $file
+   * @param \Drupal\file\FileInterface $file
    *   The file.
    *
    * @return bool

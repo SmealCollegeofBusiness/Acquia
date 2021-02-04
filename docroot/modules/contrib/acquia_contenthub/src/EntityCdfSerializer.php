@@ -146,11 +146,12 @@ class EntityCdfSerializer {
     $event = new PruneCdfEntitiesEvent($cdf);
     $this->dispatcher->dispatch(AcquiaContentHubEvents::PRUNE_CDF, $event);
     $cdf = $event->getCdf();
-    $this->handleModules($cdf, $stack);
     // Allows entity data to be manipulated before unserialization.
     $event = new EntityDataTamperEvent($cdf, $stack);
     $this->dispatcher->dispatch(AcquiaContentHubEvents::ENTITY_DATA_TAMPER, $event);
     $cdf = $event->getCdf();
+    // Install required modules.
+    $this->handleModules($cdf, $stack);
     // Organize the entities into a dependency chain.
     // Use a while loop to prevent memory expansion due to recursion.
     while (!$stack->hasDependencies(array_keys($cdf->getEntities()))) {

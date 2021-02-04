@@ -16,7 +16,8 @@ class RevisionIsPublished implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] = ['onEnqueueCandidateEntity', 100];
+    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] =
+      ['onEnqueueCandidateEntity', 100];
     return $events;
   }
 

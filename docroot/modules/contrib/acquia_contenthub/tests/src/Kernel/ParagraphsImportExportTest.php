@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 /**
- * Class ParagraphsImportExportTest.
+ * Tests that paragraphs are properly exported and imported.
  *
  * @group acquia_contenthub
  *

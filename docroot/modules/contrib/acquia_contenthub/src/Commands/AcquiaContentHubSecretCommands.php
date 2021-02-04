@@ -7,7 +7,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class AcquiaContentHubSecretCommands.
+ * Drush commands for the Content Hub Service secret key.
  *
  * @package Drupal\acquia_contenthub\Commands
  */

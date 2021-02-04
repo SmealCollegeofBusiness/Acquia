@@ -6,7 +6,7 @@ use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\CreateCdfEntityEvent;
 
 /**
- * Class S3FileSchemeHandlerTest.
+ * Tests the S3FileSchemeHandler.
  *
  * @group acquia_contenthub_s3
  * @coversDefaultClass \Drupal\acquia_contenthub_s3\Plugin\FileSchemeHandler\S3FileSchemeHandler

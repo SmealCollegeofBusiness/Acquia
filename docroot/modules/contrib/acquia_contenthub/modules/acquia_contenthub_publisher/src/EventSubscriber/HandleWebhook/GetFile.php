@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook;
 
 use Acquia\Hmac\ResponseSigner;
@@ -15,12 +14,11 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 /**
-   * Class PreviewEntity.
-   *
-   * @package Drupal\acquia_contenthub_preview\EventSubscriber\HandleWebhook
-   */
-class GetFile implements EventSubscriberInterface
-{
+ * Gets files during preview in content as a service.
+ *
+ * @package Drupal\acquia_contenthub_preview\EventSubscriber\HandleWebhook
+ */
+class GetFile implements EventSubscriberInterface {
 
   /**
    * The common actions object.
@@ -53,7 +51,8 @@ class GetFile implements EventSubscriberInterface
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::HANDLE_WEBHOOK][] = ['onHandleWebhook', 1000];
+    $events[AcquiaContentHubEvents::HANDLE_WEBHOOK][] =
+      ['onHandleWebhook', 1000];
     return $events;
   }
 
@@ -79,10 +78,10 @@ class GetFile implements EventSubscriberInterface
     $file_scheme = $payload['cdf']['scheme'];
 
     if ($this->streamWrapperManager->isValidScheme($file_scheme) && is_file($file_uri)) {
-        $binary = new BinaryFileResponse($file_uri, 200, [], ($file_scheme === 'private' ? FALSE : TRUE), 'inline');
-        $response = $this->getResponse($event, '', $binary);
-        $event->setResponse($response);
-        $event->stopPropagation();
+      $binary = new BinaryFileResponse($file_uri, 200, [], ($file_scheme === 'private' ? FALSE : TRUE), 'inline');
+      $response = $this->getResponse($event, '', $binary);
+      $event->setResponse($response);
+      $event->stopPropagation();
     }
   }
 
@@ -93,7 +92,7 @@ class GetFile implements EventSubscriberInterface
    *   Handle webhook event.
    * @param string $body
    *   Body of request.
-   * @param SymfonyResponse|null $response
+   * @param \Symfony\Component\HttpFoundation\Response|null $response
    *   SymfonyResponse.
    *
    * @return \Psr\Http\Message\ResponseInterface

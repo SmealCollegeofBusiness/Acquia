@@ -13,7 +13,7 @@ use Drush\Commands\DrushCommands;
 use Drush\Log\LogLevel;
 
 /**
- * Class AcquiaContentHubPublisherCommands.
+ * Drush commands for Acquia Content Hub Publishers.
  *
  * @package Drupal\acquia_contenthub_publisher\Commands
  */

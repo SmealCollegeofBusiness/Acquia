@@ -7,7 +7,7 @@ use Drupal\Core\Plugin\PluginBase;
 use Drupal\file\FileInterface;
 
 /**
- * Class HttpsFileSchemeHandler.
+ * File scheme handler for https schemes.
  *
  * @FileSchemeHandler(
  *   id = "https",

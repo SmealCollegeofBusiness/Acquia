@@ -10,7 +10,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 
 /**
- * Class AcquiaContentHubFiltersCommands.
+ * Drush command to interact with Acquia Content Hub filters.
  *
  * @package Drupal\acquia_contenthub\Commands
  */

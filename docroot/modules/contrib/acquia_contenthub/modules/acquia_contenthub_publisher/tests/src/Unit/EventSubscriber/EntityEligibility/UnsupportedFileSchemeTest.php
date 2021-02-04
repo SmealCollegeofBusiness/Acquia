@@ -9,7 +9,7 @@ use Drupal\file\FileInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Class UnsupportedFileSchemeTest
+ * Tests unsupported file schemes.
  *
  * @group acquia_contenthub
  *

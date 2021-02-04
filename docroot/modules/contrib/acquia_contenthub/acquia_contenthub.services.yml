@@ -54,7 +54,25 @@ services:
 
   config_entity.cdf.handler:
     class: Drupal\acquia_contenthub\EventSubscriber\Cdf\ConfigEntityHandler
-    arguments: ['@entity.dependency.calculator', '@config.factory', '@acquia_contenthub.client.factory', '@language_manager']
+    arguments: ['@entity.dependency.calculator', '@acquia_contenthub.client.factory', '@language_manager']
+    tags:
+      - { name: event_subscriber }
+
+  config_entity.data.serializer:
+    class: Drupal\acquia_contenthub\EventSubscriber\SerializeConfig\DefaultConfigSerializer
+    arguments: ['@config.factory', '@language_manager']
+    tags:
+      - { name: event_subscriber }
+
+  entity_view_display.data.serializer:
+    class: Drupal\acquia_contenthub\EventSubscriber\SerializeConfig\EntityViewDisplaySerializer
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: event_subscriber }
+
+  config_entity.layout_builder.cdf.handler:
+    class: Drupal\acquia_contenthub\EventSubscriber\Cdf\ConfigEntityLayoutBuilderHandler
+    arguments: ['@entity_type.manager']
     tags:
       - { name: event_subscriber }
 

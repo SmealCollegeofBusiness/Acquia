@@ -10,7 +10,7 @@ use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\file\FileInterface;
 
 /**
- * Class FileSchemeHandlerManager.
+ * The file scheme handler manager.
  *
  * @package Drupal\acquia_contenthub\Plugin\FileSchemeHandler
  */
@@ -64,7 +64,7 @@ class FileSchemeHandlerManager extends DefaultPluginManager implements FileSchem
   /**
    * Gets the File Scheme.
    *
-   * @param FileInterface $file
+   * @param \Drupal\file\FileInterface $file
    *   The file.
    *
    * @return bool|mixed|string
@@ -80,4 +80,5 @@ class FileSchemeHandlerManager extends DefaultPluginManager implements FileSchem
     }
     return $scheme;
   }
+
 }

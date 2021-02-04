@@ -8,7 +8,7 @@ use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class DeleteAssets.
+ * Deletes assets based on a webhook.
  *
  * @package Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook
  */

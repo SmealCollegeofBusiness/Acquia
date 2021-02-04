@@ -5,7 +5,7 @@ namespace Drupal\Tests\acquia_contenthub\Kernel;
 use Drupal\language\Entity\ConfigurableLanguage;
 
 /**
- * Class ConfigEntityTranslationTest.
+ * Tests that config entities are properly translated.
  *
  * @group acquia_contenthub
  * @group orca_ignore

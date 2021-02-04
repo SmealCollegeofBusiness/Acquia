@@ -34,7 +34,8 @@ class PublisherSubscriberStatusCdfAttribute implements EventSubscriberInterface 
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::BUILD_CLIENT_CDF][] = ['onBuildClientCdf', 100];
+    $events[AcquiaContentHubEvents::BUILD_CLIENT_CDF][] =
+      ['onBuildClientCdf', 100];
     return $events;
   }
 

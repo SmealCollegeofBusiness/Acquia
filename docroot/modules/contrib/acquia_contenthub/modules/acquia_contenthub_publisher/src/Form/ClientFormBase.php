@@ -7,7 +7,7 @@ use Drupal\Core\Form\FormBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class ClientFormBase.
+ * The base class for the client form.
  *
  * @package Drupal\acquia_contenthub_publisher\Form
  */

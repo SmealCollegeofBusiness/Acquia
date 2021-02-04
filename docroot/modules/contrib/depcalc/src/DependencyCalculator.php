@@ -49,11 +49,11 @@ class DependencyCalculator {
     if (empty($dependencies['module'])) {
       $dependencies['module'] = [];
     }
-    // Prevent handling the same entity more than once..
+    // Prevent handling the same entity more than once.
     if (!empty($dependencies[$wrapper->getUuid()])) {
       return $dependencies;
     }
-    // Prevent handling the same entity more than once..
+    // Prevent handling the same entity more than once.
     if ($stack->hasDependency($wrapper->getUuid())) {
       $dependencies[$wrapper->getUuid()] = $stack->getDependency($wrapper->getUuid());
       return $dependencies;
@@ -62,6 +62,8 @@ class DependencyCalculator {
     $stack->addDependency($wrapper);
     $event = new CalculateEntityDependenciesEvent($wrapper, $stack);
     $this->dispatcher->dispatch(DependencyCalculatorEvents::CALCULATE_DEPENDENCIES, $event);
+    // Update the stack with the newest $wrapper.
+    $stack->addDependency($wrapper);
 
     $modules = $event->getModuleDependencies();
     if ($modules) {
@@ -70,7 +72,10 @@ class DependencyCalculator {
     $dependencies = $stack->getDependenciesByUuid(array_keys($event->getDependencies()));
     $wrapper->addDependencies($stack, ...array_values($dependencies));
     $dependencies[$wrapper->getUuid()] = $wrapper;
-    $dependencies['module'] = $event->getModuleDependencies();
+    // Extract the name of the module providing this entity type.
+    $entity_module = $wrapper->getEntity()->getEntityType()->getProvider();
+    $entity_module = \Drupal::moduleHandler()->moduleExists($entity_module) ? [$entity_module] : [];
+    $dependencies['module'] = $event->getModuleDependencies() + $entity_module;
     return $dependencies;
   }
 

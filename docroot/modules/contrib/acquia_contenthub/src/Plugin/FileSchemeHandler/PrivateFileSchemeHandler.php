@@ -11,14 +11,12 @@ use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\StreamWrapper\StreamWrapperManager;
-use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 use Drupal\Core\Url;
 use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class PrivateFileSchemeHandler.
+ * File scheme handler for private files.
  *
  * @FileSchemeHandler(
  *   id = "private",
@@ -35,7 +33,9 @@ class PrivateFileSchemeHandler extends PluginBase implements FileSchemeHandlerIn
   protected $fileSystem;
 
   /**
-   * @var ContentHubCommonActions
+   * Common actions for Content Hub.
+   *
+   * @var \Drupal\acquia_contenthub\ContentHubCommonActions
    */
   private $contentHubCommonActions;
 
@@ -51,7 +51,7 @@ class PrivateFileSchemeHandler extends PluginBase implements FileSchemeHandlerIn
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    *   The file system.
    * @param \Drupal\acquia_contenthub\ContentHubCommonActions $common_actions
-   *   Content Hub Common Actions
+   *   Content Hub Common Actions.
    */
   public function __construct(array $configuration, string $plugin_id, $plugin_definition, FileSystemInterface $file_system, ContentHubCommonActions $common_actions) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);

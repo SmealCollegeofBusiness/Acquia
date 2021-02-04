@@ -13,7 +13,7 @@ use PHPUnit\Framework\Assert;
 use function GuzzleHttp\Psr7\mimetype_from_extension;
 
 /**
- * Class PrivateFileSchemeHandlerTest.
+ * Tests the Private File Scheme Handler.
  *
  * @group acquia_contenthub
  * @coversDefaultClass \Drupal\acquia_contenthub\Plugin\FileSchemeHandler\PrivateFileSchemeHandler

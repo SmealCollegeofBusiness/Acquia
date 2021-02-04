@@ -107,6 +107,7 @@ class S3FileOriginLocator {
    *
    * @return object|null
    *   An object with the following fields:
+   *
    * @see \Drupal\acquia_contenthub_s3\S3FileMap::getFileByUuid()
    *
    * @throws \Exception

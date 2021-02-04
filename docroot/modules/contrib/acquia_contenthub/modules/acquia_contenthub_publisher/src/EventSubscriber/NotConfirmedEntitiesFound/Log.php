@@ -8,7 +8,7 @@ use Drupal\Core\Logger\LoggerChannelInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class Log.
+ * Log for not yet confirmed entities found.
  *
  * @package Drupal\acquia_contenthub_publisher\EventSubscriber\NotConfirmedEntitiesFound
  */

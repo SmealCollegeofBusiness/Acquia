@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 /**
- * Class NodeImportUpdateExportTest.
+ * Tests importing and exporting nodes.
  *
  * @group acquia_contenthub
  * @group orca_ignore

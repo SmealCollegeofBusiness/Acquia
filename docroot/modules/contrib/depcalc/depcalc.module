@@ -1,0 +1,26 @@
+<?php
+
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_entity_presave().
+ */
+function depcalc_entity_presave(EntityInterface $entity) {
+  if ($uuid = $entity->uuid()) {
+    $backend = \Drupal::cache('depcalc');
+    $backend->invalidate($uuid);
+    Cache::invalidateTags([$uuid]);
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function depcalc_entity_delete(EntityInterface $entity) {
+  if ($uuid = $entity->uuid()) {
+    $backend = \Drupal::cache('depcalc');
+    $backend->delete($uuid);
+    Cache::invalidateTags([$uuid]);
+  }
+}

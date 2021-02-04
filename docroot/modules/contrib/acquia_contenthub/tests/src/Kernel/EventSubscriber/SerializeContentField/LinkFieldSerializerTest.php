@@ -2,10 +2,9 @@
 
 namespace Drupal\Tests\acquia_contenthub\Kernel\EventSubscriber\SerializeContentField;
 
-use ArrayAccess;
+use DMS\PHPUnitExtensions\ArraySubset\Assert as DMSAssert;
 use Drupal\acquia_contenthub\Event\SerializeCdfEntityFieldEvent;
 use Drupal\acquia_contenthub\EventSubscriber\SerializeContentField\LinkFieldSerializer;
-use DMS\PHPUnitExtensions\ArraySubset\Assert as DMSAssert;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
@@ -16,7 +15,7 @@ use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 
 /**
- * Class LinkFieldSerializerTest.
+ * Tests Link Field Serialization.
  *
  * @group acquia_contenthub
  * @coversDefaultClass \Drupal\acquia_contenthub\EventSubscriber\SerializeContentField\LinkFieldSerializer
@@ -112,21 +111,23 @@ class LinkFieldSerializerTest extends EntityKernelTestBase {
   /**
    * Wrapper class that asserts that an array has a specified subset.
    *
-   * TODO: When Drupal 9/PHPUnit 9 is standard, this method can be removed and
+   * @todo When Drupal 9/PHPUnit 9 is standard, this method can be removed and
    * the tests need to be refactored to use the DMSAssertArraySubset library.
    *
    * @param array|ArrayAccess $subset
+   *   Subset for assertion.
    * @param array|ArrayAccess $array
-   *
+   *   Array for assertion.
    * @param bool $checkForObjectIdentity
+   *   Boolean to check for object identity.
    * @param string $message
+   *   Message used for assertion.
    *
    * @codeCoverageIgnore
    *
    * @throws \Exception
    */
-  protected function assertArraySubsetWrapper($subset, $array, bool $checkForObjectIdentity = false, string $message = ''): void
-  {
+  protected function assertArraySubsetWrapper($subset, $array, bool $checkForObjectIdentity = FALSE, string $message = ''): void {
     if (class_exists(DMSAssert::class)) {
       DMSAssert::assertArraySubset($subset, $array, $checkForObjectIdentity, $message);
     }

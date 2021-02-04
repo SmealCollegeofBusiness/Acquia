@@ -9,7 +9,7 @@ use Drupal\Core\File\Exception\FileWriteException;
 use Drupal\Core\File\FileSystemInterface;
 
 /**
- * Class PublicFileSchemeHandler.
+ * Handler for public files.
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel\Stubs
  */

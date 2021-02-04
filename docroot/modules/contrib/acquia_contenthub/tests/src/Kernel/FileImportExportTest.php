@@ -5,7 +5,7 @@ namespace Drupal\Tests\acquia_contenthub\Kernel;
 use Drupal\Tests\acquia_contenthub\Kernel\Core\FileSystemTrait;
 
 /**
- * Class FileImportExportTest.
+ * Tests that files are properly exported and imported.
  *
  * @group acquia_contenthub
  *

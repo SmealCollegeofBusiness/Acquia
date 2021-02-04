@@ -35,7 +35,7 @@ abstract class S3FileKernelTestBase extends KernelTestBase {
     $this->installSchema('acquia_contenthub_s3', S3FileMap::TABLE_NAME);
     $this->installSchema('s3fs', 's3fs_file');
 
-    // @todo: Can be removed after resolving https://www.drupal.org/project/s3fs/issues/3053014
+    // @todo Can be removed after resolving https://www.drupal.org/project/s3fs/issues/3053014
     $this->container->get('config.factory')->getEditable('s3fs.settings')
       ->set('region', 'us-east-1')->save();
   }

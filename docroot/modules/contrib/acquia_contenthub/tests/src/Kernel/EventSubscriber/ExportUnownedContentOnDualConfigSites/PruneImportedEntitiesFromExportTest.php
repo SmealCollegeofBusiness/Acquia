@@ -13,7 +13,7 @@ use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
- * Class PruneImportedEntitiesFromExportTest.
+ * Tests that imported entities are properly pruned from export.
  *
  * @group acquia_contenthub_subscriber
  *

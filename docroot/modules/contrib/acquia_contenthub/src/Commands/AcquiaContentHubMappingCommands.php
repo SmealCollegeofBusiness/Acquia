@@ -6,7 +6,7 @@ use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class AcquiaContentHubMappingCommands.
+ * Drush commands for printing Acquia Content Hub mappings.
  *
  * @package Drupal\acquia_contenthub\Commands
  */

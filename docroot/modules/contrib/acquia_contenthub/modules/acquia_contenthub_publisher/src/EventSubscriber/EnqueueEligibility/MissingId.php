@@ -17,13 +17,14 @@ class MissingId implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] = ['onEnqueueCandidateEntity', 999];
+    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] =
+      ['onEnqueueCandidateEntity', 999];
 
     return $events;
   }
 
   /**
-   * Skips entities that are missing ids
+   * Skips entities that are missing ids.
    *
    * @param \Drupal\acquia_contenthub_publisher\Event\ContentHubEntityEligibilityEvent $event
    *   The event to determine entity eligibility.

@@ -10,7 +10,7 @@ use Drupal\acquia_contenthub\Event\PruneCdfEntitiesEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class HandleChannelLanguages.
+ * Handles channel languages during pruning.
  */
 class HandleChannelLanguages implements EventSubscriberInterface {
 

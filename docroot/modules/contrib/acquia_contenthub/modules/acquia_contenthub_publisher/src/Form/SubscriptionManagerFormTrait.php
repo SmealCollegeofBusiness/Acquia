@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 
 /**
- * Trait SubscriptionManagerFormTrait.
+ * Trait for consistency in subscription manager form.
  */
 trait SubscriptionManagerFormTrait {
 

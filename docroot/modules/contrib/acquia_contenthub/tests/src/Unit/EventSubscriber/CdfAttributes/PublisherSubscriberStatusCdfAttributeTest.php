@@ -13,7 +13,7 @@ use Drupal\Tests\UnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Class PublisherSubscriberStatusCdfAttributeTest.
+ * Tests the PublisherSubscriberStatusCdfAttribute.
  *
  * @group acquia_contenthub
  *

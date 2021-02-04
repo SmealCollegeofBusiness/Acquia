@@ -52,8 +52,9 @@ class UpdatePublished implements EventSubscriberInterface {
     if ($payload['status'] == 'successful' && $payload['crud'] == 'update' && $payload['initiator'] == $client->getSettings()->getUuid()) {
       $uuids = [];
       if (isset($payload['assets']) && count($payload['assets'])) {
+        $types = ['drupal8_content_entity', 'drupal8_config_entity'];
         foreach ($payload['assets'] as $asset) {
-          if (!in_array($asset['type'], ['drupal8_content_entity', 'drupal8_config_entity'])) {
+          if (!in_array($asset['type'], $types)) {
             continue;
           }
           $uuids[] = $asset['uuid'];

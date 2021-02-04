@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class ImportUpdateAssets.
+ * Imports and updates assets.
  *
  * @package Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook
  */
@@ -78,8 +78,9 @@ class ImportUpdateAssets implements EventSubscriberInterface {
     // @todo The same regarding $payload['crud'] and supported types ($asset['type']).
     if ($payload['status'] == 'successful' && $payload['crud'] == 'update' && isset($payload['assets']) && count($payload['assets']) && $payload['initiator'] != $client->getSettings()->getUuid()) {
       $uuids = [];
+      $types = ['drupal8_content_entity', 'drupal8_config_entity'];
       foreach ($payload['assets'] as $asset) {
-        if (in_array($asset['type'], ['drupal8_content_entity', 'drupal8_config_entity'])) {
+        if (in_array($asset['type'], $types)) {
           if ($this->tracker->isTracked($asset['uuid'])) {
             $status = $this->tracker->getStatusByUuid($asset['uuid']);
             if ($status === SubscriberTracker::AUTO_UPDATE_DISABLED) {

@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel\Core;
 
 /**
- * Trait FileSystemTrait.
+ * A trait for file system components.
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel\Core
  */

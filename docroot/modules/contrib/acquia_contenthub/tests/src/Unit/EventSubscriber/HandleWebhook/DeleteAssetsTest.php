@@ -15,7 +15,7 @@ use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class DeleteAssetsTest.
+ * Tests the DeleteAssets webhook event subscriber.
  *
  * @group acquia_contenthub
  *

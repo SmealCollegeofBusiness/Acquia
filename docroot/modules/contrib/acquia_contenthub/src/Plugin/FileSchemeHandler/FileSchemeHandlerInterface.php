@@ -7,7 +7,7 @@ use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\file\FileInterface;
 
 /**
- * Interface FileSchemeHandlerInterface.
+ * The interface for file scheme handlers.
  *
  * @package Drupal\acquia_contenthub\Plugin\FileSchemeHandler
  */

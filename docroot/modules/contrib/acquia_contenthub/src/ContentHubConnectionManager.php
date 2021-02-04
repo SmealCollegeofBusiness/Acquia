@@ -520,4 +520,5 @@ class ContentHubConnectionManager {
       }
     }
   }
+
 }

@@ -13,7 +13,7 @@ use Prophecy\Argument;
 use Prophecy\Prophecy\MethodProphecy;
 
 /**
- * Class S3FileEntityHandlerTest.
+ * Tests the S3FileEntityHandler.
  *
  * @group acquia_contenthub_s3
  * @coversDefaultClass \Drupal\acquia_contenthub_s3\EventSubscriber\Cdf\S3FileEntityHandler

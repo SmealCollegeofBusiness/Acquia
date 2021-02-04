@@ -7,7 +7,7 @@ use Drupal\acquia_contenthub\Event\FailedImportEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class DefaultException.
+ * Default exceptions for import failures.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\ImportFailure
  */

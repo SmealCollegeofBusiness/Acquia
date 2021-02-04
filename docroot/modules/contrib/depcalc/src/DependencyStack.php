@@ -3,6 +3,8 @@
 namespace Drupal\depcalc;
 
 use Acquia\ContentHubClient\CDFDocument;
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Cache\Cache;
 
 /**
  * The dependencies stack.
@@ -24,6 +26,13 @@ class DependencyStack {
   protected $additional_processing = [];
 
   /**
+   * An indicator whether this stack instances should not load cached values.
+   *
+   * @var bool
+   */
+  protected $ignoreCache = FALSE;
+
+  /**
    * DependencyStack constructor.
    *
    * @param \Drupal\depcalc\DependentEntityWrapperInterface ...$dependencies
@@ -36,12 +45,22 @@ class DependencyStack {
   }
 
   /**
+   * Set whether this stack should be able to load cached values.
+   *
+   * @param bool $value
+   */
+  public function ignoreCache(bool $value = TRUE) {
+    $this->ignoreCache = $value;
+  }
+
+  /**
    * Add a dependency to the stack.
    *
    * @param \Drupal\depcalc\DependentEntityWrapperInterface $dependency
    *   The dependency to add to the stack.
    */
   public function addDependency(DependentEntityWrapperInterface $dependency) {
+    \Drupal::cache('depcalc')->set($dependency->getUuid(), $dependency, Cache::PERMANENT, array_keys($dependency->getDependencies()));
     $this->dependencies[$dependency->getRemoteUuid()] = $dependency;
     if ($dependency->needsAdditionalProcessing()) {
       $this->additional_processing[$dependency->getRemoteUuid()] = '';
@@ -59,11 +78,22 @@ class DependencyStack {
    *
    * @return \Drupal\depcalc\DependentEntityWrapperInterface
    *   The dependent entity wrapper.
+   *
+   * @throws \Exception
    */
   public function getDependency($uuid) {
     if (!empty($this->dependencies[$uuid])) {
       return $this->dependencies[$uuid];
     }
+    if (!$this->ignoreCache) {
+      // Check cached dependencies.
+      $cache = \Drupal::cache('depcalc')->get($uuid);
+      if ($cache && $cache->expire === -1 && $cache->data instanceof DependentEntityWrapperInterface) {
+        $this->dependencies[$uuid] = $cache->data;
+        return $this->dependencies[$uuid];
+      }
+    }
+    throw new \Exception(sprintf("Missing Dependency requested: %s.", $uuid));
   }
 
   /**
@@ -112,7 +142,7 @@ class DependencyStack {
   public function getDependenciesByUuid(array $dependencies) {
     $results = [];
     foreach ($dependencies as $uuid) {
-       $results[$uuid] = $this->getDependency($uuid);
+      $results[$uuid] = $this->getDependency($uuid);
     }
     return $results;
   }

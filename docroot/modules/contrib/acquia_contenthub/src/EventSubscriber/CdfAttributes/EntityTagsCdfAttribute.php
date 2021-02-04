@@ -17,7 +17,8 @@ class EntityTagsCdfAttribute implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES][] = ['onPopulateAttributes', 100];
+    $events[AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES][] =
+      ['onPopulateAttributes', 100];
     return $events;
   }
 
@@ -38,8 +39,8 @@ class EntityTagsCdfAttribute implements EventSubscriberInterface {
     if ($entity instanceof ContentEntityInterface) {
       $cdf = $event->getCdf();
       $tags = [];
-      // @var string $field_name
-      // @var \Drupal\Core\Field\FieldItemListInterface $field
+      /** @var string $field_name */
+      /** @var \Drupal\Core\Field\FieldItemListInterface $field */
       foreach ($entity as $field_name => $field) {
         if ($field->getFieldDefinition()->getType() == 'entity_reference' && $field->getFieldDefinition()->getSettings()['target_type'] == 'taxonomy_term') {
           foreach ($field as $item) {

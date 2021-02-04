@@ -8,7 +8,7 @@ use Drupal\Core\Database\Connection;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class TermParentSerializer.
+ * Serializes taxonomy term field parents.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\SerializeContentField
  */
@@ -35,7 +35,8 @@ class TermParentSerializer implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD][] = ['onSerializeContentField', 102];
+    $events[AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD][] =
+      ['onSerializeContentField', 102];
     return $events;
   }
 

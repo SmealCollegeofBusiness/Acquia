@@ -4,11 +4,11 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
+class ComposerStaticInit1675c344657a2673366828fe72d90396
 {
     public static $files = array (
-        'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
@@ -258,6 +258,7 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
             'Acquia\\Blt\\Tests\\Robo\\' => 22,
             'Acquia\\Blt\\Tests\\' => 17,
             'Acquia\\Blt\\' => 11,
+            'Acquia\\BltAcsf\\' => 15,
         ),
     );
 
@@ -810,6 +811,10 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
         array (
             0 => __DIR__ . '/..' . '/acquia/blt/src',
         ),
+        'Acquia\\BltAcsf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/acquia/blt-acsf/src',
+        ),
     );
 
     public static $prefixesPsr0 = array (
@@ -829,13 +834,6 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
             'Stack' => 
             array (
                 0 => __DIR__ . '/..' . '/stack/builder/src',
-            ),
-        ),
-        'K' => 
-        array (
-            'KubAT\\PhpSimple\\HtmlDomParser' => 
-            array (
-                0 => __DIR__ . '/..' . '/kub-at/php-simple-html-dom-parser/src',
             ),
         ),
         'H' => 
@@ -877,6 +875,9 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
     );
 
     public static $classMap = array (
+        'Acquia\\BltAcsf\\Blt\\Plugin\\Commands\\AcsfHooksCommand' => __DIR__ . '/..' . '/acquia/blt-acsf/src/Blt/Plugin/Commands/AcsfHooksCommand.php',
+        'Acquia\\BltAcsf\\Blt\\Plugin\\Commands\\AcsfRecipesCommand' => __DIR__ . '/..' . '/acquia/blt-acsf/src/Blt/Plugin/Commands/AcsfRecipesCommand.php',
+        'Acquia\\BltAcsf\\Blt\\Plugin\\Commands\\AcsfTestsCommand' => __DIR__ . '/..' . '/acquia/blt-acsf/src/Blt/Plugin/Commands/AcsfTestsCommand.php',
         'Acquia\\Blt\\Annotations\\Fileset' => __DIR__ . '/..' . '/acquia/blt/src/Annotations/Fileset.php',
         'Acquia\\Blt\\Annotations\\Update' => __DIR__ . '/..' . '/acquia/blt/src/Annotations/Update.php',
         'Acquia\\Blt\\Composer\\Plugin' => __DIR__ . '/..' . '/acquia/blt/src/Composer/Plugin.php',
@@ -1037,10 +1038,7 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
         'Caxy\\HtmlDiff\\HtmlDiff' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/HtmlDiff.php',
         'Caxy\\HtmlDiff\\HtmlDiffConfig' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/HtmlDiffConfig.php',
         'Caxy\\HtmlDiff\\LcsService' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/LcsService.php',
-        'Caxy\\HtmlDiff\\ListDiff' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/ListDiff.php',
         'Caxy\\HtmlDiff\\ListDiffLines' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/ListDiffLines.php',
-        'Caxy\\HtmlDiff\\ListDiff\\DiffList' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/ListDiff/DiffList.php',
-        'Caxy\\HtmlDiff\\ListDiff\\DiffListItem' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/ListDiff/DiffListItem.php',
         'Caxy\\HtmlDiff\\MatchingBlock' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/MatchingBlock.php',
         'Caxy\\HtmlDiff\\Operation' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/Operation.php',
         'Caxy\\HtmlDiff\\Preprocessor' => __DIR__ . '/..' . '/caxy/php-htmldiff/lib/Caxy/HtmlDiff/Preprocessor.php',
@@ -1168,6 +1166,7 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
         'Composer\\Installers\\Plugin' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Plugin.php',
         'Composer\\Installers\\PortoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PortoInstaller.php',
         'Composer\\Installers\\PrestashopInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PrestashopInstaller.php',
+        'Composer\\Installers\\ProcessWireInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ProcessWireInstaller.php',
         'Composer\\Installers\\PuppetInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PuppetInstaller.php',
         'Composer\\Installers\\PxcmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PxcmsInstaller.php',
         'Composer\\Installers\\RadPHPInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/RadPHPInstaller.php',
@@ -1179,6 +1178,7 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
         'Composer\\Installers\\ShopwareInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ShopwareInstaller.php',
         'Composer\\Installers\\SilverStripeInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SilverStripeInstaller.php',
         'Composer\\Installers\\SiteDirectInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SiteDirectInstaller.php',
+        'Composer\\Installers\\StarbugInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/StarbugInstaller.php',
         'Composer\\Installers\\SyDESInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SyDESInstaller.php',
         'Composer\\Installers\\SyliusInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SyliusInstaller.php',
         'Composer\\Installers\\Symfony1Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Symfony1Installer.php',
@@ -4257,7 +4257,6 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
         'JsonSchema\\Uri\\UriResolver' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Uri/UriResolver.php',
         'JsonSchema\\Uri\\UriRetriever' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Uri/UriRetriever.php',
         'JsonSchema\\Validator' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Validator.php',
-        'KubAT\\PhpSimple\\HtmlDomParser' => __DIR__ . '/..' . '/kub-at/php-simple-html-dom-parser/src/KubAT/PhpSimple/HtmlDomParser.php',
         'Laminas\\Diactoros\\AbstractSerializer' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/AbstractSerializer.php',
         'Laminas\\Diactoros\\CallbackStream' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/CallbackStream.php',
         'Laminas\\Diactoros\\ConfigProvider' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/ConfigProvider.php',
@@ -8120,6 +8119,7 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
         'lsolesen\\pel\\PelFormat' => __DIR__ . '/..' . '/lsolesen/pel/src/PelFormat.php',
         'lsolesen\\pel\\PelIfd' => __DIR__ . '/..' . '/lsolesen/pel/src/PelIfd.php',
         'lsolesen\\pel\\PelIfdException' => __DIR__ . '/..' . '/lsolesen/pel/src/PelIfdException.php',
+        'lsolesen\\pel\\PelIllegalFormatException' => __DIR__ . '/..' . '/lsolesen/pel/src/PelIllegalFormatException.php',
         'lsolesen\\pel\\PelInvalidArgumentException' => __DIR__ . '/..' . '/lsolesen/pel/src/PelInvalidArgumentException.php',
         'lsolesen\\pel\\PelInvalidDataException' => __DIR__ . '/..' . '/lsolesen/pel/src/PelInvalidDataException.php',
         'lsolesen\\pel\\PelJpeg' => __DIR__ . '/..' . '/lsolesen/pel/src/PelJpeg.php',
@@ -8271,11 +8271,11 @@ class ComposerStaticInitcb405f3b260fb3f96298b05fc55df647
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitcb405f3b260fb3f96298b05fc55df647::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit1675c344657a2673366828fe72d90396::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit1675c344657a2673366828fe72d90396::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit1675c344657a2673366828fe72d90396::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit1675c344657a2673366828fe72d90396::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit1675c344657a2673366828fe72d90396::$classMap;
 
         }, null, ClassLoader::class);
     }

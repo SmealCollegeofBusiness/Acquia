@@ -5,15 +5,16 @@ namespace Drupal\acquia_contenthub\EventSubscriber\Cdf;
 use Acquia\ContentHubClient\CDF\CDFObject;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Client\ClientFactory;
+use Drupal\acquia_contenthub\Event\ConfigDataEvent;
 use Drupal\acquia_contenthub\Event\CreateCdfEntityEvent;
 use Drupal\acquia_contenthub\Event\ParseCdfEntityEvent;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\depcalc\DependencyCalculator;
 use Drupal\language\ConfigurableLanguageManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -29,13 +30,6 @@ class ConfigEntityHandler implements EventSubscriberInterface {
    * @var \Drupal\depcalc\DependencyCalculator
    */
   protected $calculator;
-
-  /**
-   * The configuration factory.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
 
   /**
    * The client factory.
@@ -56,16 +50,13 @@ class ConfigEntityHandler implements EventSubscriberInterface {
    *
    * @param \Drupal\depcalc\DependencyCalculator $calculator
    *   The dependency calculator.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The configuration factory.
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $factory
    *   The client factory.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager.
    */
-  public function __construct(DependencyCalculator $calculator, ConfigFactoryInterface $config_factory, ClientFactory $factory, LanguageManagerInterface $language_manager) {
+  public function __construct(DependencyCalculator $calculator, ClientFactory $factory, LanguageManagerInterface $language_manager) {
     $this->calculator = $calculator;
-    $this->configFactory = $config_factory;
     $this->clientFactory = $factory;
     $this->languageManager = $language_manager;
   }
@@ -82,7 +73,7 @@ class ConfigEntityHandler implements EventSubscriberInterface {
   /**
    * Creates a new CDF representation of Configuration Entities.
    */
-  public function onCreateCdf(CreateCdfEntityEvent $event) {
+  public function onCreateCdf(CreateCdfEntityEvent $event, string $event_name, EventDispatcherInterface $dispatcher) {
     $entity = $event->getEntity();
     if (!$entity instanceof ConfigEntityInterface) {
       // Bail early if this isn't a config entity.
@@ -110,30 +101,10 @@ class ConfigEntityHandler implements EventSubscriberInterface {
       }
     }
 
-    /** @var \Drupal\Core\Config\Entity\ConfigEntityType $entity_type */
-    $entity_type = $entity->getEntityType();
-    $config_name = $entity_type->getConfigPrefix() . '.' . $entity->get($entity_type->getKey('id'));
-    $config = $this->configFactory->get($config_name);
+    $config_data_event = new ConfigDataEvent($entity);
+    $dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_CONFIG_ENTITY, $config_data_event);
 
-    $data = [
-      $entity->language()->getId() => $config->getRawData(),
-    ];
-    if ($this->languageManager instanceof ConfigurableLanguageManagerInterface) {
-      foreach ($this->languageManager->getLanguages() as $langcode => $language) {
-        if ($langcode === $entity->language()->getId()) {
-          continue;
-        }
-
-        /** @var \Drupal\language\Config\LanguageConfigOverride $language_config_override */
-        $language_config_override = $this->languageManager->getLanguageConfigOverride($langcode, $config_name);
-        $overridden_config = $language_config_override->get();
-        if ($overridden_config) {
-          $data[$langcode] = $overridden_config;
-        }
-      }
-    }
-
-    $metadata['data'] = base64_encode(Yaml::encode($data));
+    $metadata['data'] = base64_encode(Yaml::encode($config_data_event->getData()));
     $cdf->setMetadata($metadata);
     $event->addCdf($cdf);
   }

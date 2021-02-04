@@ -2,28 +2,28 @@
 
 namespace Drupal\acquia_contenthub_publisher\EventSubscriber\EnqueueEligibility;
 
+use Drupal\acquia_contenthub\Plugin\FileSchemeHandler\FileSchemeHandlerManagerInterface;
 use Drupal\acquia_contenthub_publisher\ContentHubPublisherEvents;
 use Drupal\acquia_contenthub_publisher\Event\ContentHubEntityEligibilityEvent;
 use Drupal\file\FileInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Drupal\acquia_contenthub\Plugin\FileSchemeHandler\FileSchemeHandlerManagerInterface;
 
 /**
- * Subscribes to entity eligibility to prevent enqueueing files whose scheme is not supported.
+ * Prevents enqueueing files whose scheme is not supported.
  */
 class FileSchemeIsSupported implements EventSubscriberInterface {
 
   /**
-   * The File Scheme Handler Manager Interfaxce.
+   * The File Scheme Handler Manager Interface.
    *
-   * @var FileSchemeHandlerManagerInterface
+   * @var \Drupal\acquia_contenthub\Plugin\FileSchemeHandler\FileSchemeHandlerManagerInterface
    */
   protected $fileSchemeHandler;
 
   /**
    * ImportedEntity constructor.
    *
-   * @param \Drupal\acquia_contenthub\Plugin\FileSchemeHandler\FileSchemeHandlerManagerInterface $module_handler
+   * @param \Drupal\acquia_contenthub\Plugin\FileSchemeHandler\FileSchemeHandlerManagerInterface $file_scheme_handler
    *   The File Scheme Handler Manager Interface.
    */
   public function __construct(FileSchemeHandlerManagerInterface $file_scheme_handler) {
@@ -34,7 +34,8 @@ class FileSchemeIsSupported implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] = ['onEnqueueCandidateEntity', 60];
+    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] =
+      ['onEnqueueCandidateEntity', 60];
     return $events;
   }
 
@@ -54,4 +55,5 @@ class FileSchemeIsSupported implements EventSubscriberInterface {
       $event->stopPropagation();
     }
   }
+
 }

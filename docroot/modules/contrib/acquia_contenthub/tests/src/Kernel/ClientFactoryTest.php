@@ -8,7 +8,7 @@ use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
- * Class ClientFactoryTest.
+ * Tests the client factory.
  *
  * @group acquia_contenthub
  *

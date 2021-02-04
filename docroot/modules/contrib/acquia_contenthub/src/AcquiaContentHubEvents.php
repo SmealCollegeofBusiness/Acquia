@@ -283,4 +283,12 @@ final class AcquiaContentHubEvents {
    */
   const CLEANUP_STUBS = 'acquia_contenthub_cleanup_stubs';
 
+  /**
+   * Event triggered when a config entity is about to be serialized.
+   *
+   * This event allows you to manipulate the data array that will be serialized
+   * for export to the ContentHub service.
+   */
+  const SERIALIZE_CONFIG_ENTITY = 'acquia_contenthub_serialize_config_entity';
+
 }

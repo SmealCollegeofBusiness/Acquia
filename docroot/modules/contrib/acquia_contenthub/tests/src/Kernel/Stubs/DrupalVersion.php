@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel\Stubs;
 
 /**
- * Trait DrupalVersion.
+ * Drupal version trait for consistency.
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel\Stubs
  */

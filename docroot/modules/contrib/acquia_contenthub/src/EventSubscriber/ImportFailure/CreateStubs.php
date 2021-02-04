@@ -137,7 +137,7 @@ class CreateStubs implements EventSubscriberInterface {
           $field_definitions = !empty($keys['bundle']) ? $this->entityFieldManager->getFieldDefinitions($entity_type, $keys['bundle']) : NULL;
           $field_settings = isset($field_definitions) ? $field_definitions[$keys['label']]->getItemDefinition()->getSettings() : [];
           $size = $field_settings['max_length'] ?? 255;
-          $values[$keys['label']] = substr($cdf->getAttribute('label')->getValue()['und'], 0, $size);
+          $values[$keys['label']] = mb_substr($cdf->getAttribute('label')->getValue()['und'], 0, $size);
         }
         /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
         $entity = $storage->create($values);

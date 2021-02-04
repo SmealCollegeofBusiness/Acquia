@@ -9,7 +9,7 @@ use Drupal\Core\Url;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class PathFieldSerializer.
+ * Serializes path fields.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\SerializeContentField
  */
@@ -36,7 +36,8 @@ class PathFieldSerializer extends FallbackFieldSerializer implements EventSubscr
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD][] = ['onSerializeContentField', 11];
+    $events[AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD][] =
+      ['onSerializeContentField', 11];
     return $events;
   }
 

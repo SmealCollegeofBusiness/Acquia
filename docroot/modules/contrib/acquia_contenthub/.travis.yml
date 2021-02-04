@@ -73,10 +73,6 @@ jobs:
     - env: ORCA_JOB=ISOLATED_TEST_ON_NEXT_MAJOR_LATEST_MINOR_DEV
     - env: ORCA_JOB=INTEGRATED_TEST_ON_NEXT_MAJOR_LATEST_MINOR_DEV
     - env: ORCA_JOB=ISOLATED_UPGRADE_TEST_TO_NEXT_MAJOR_DEV
-    # Temporary allowances.
-    # The Static Code Analysis is allowed to fail because we have encoded Ember javascript files in the codebase.
-    # Please keep this job here until Ember files are not used anymore as part of the module codebase.
-    - env: ORCA_JOB=STATIC_CODE_ANALYSIS
 
 before_install:
   - composer self-update 1.10.16

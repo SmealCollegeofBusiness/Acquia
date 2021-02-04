@@ -8,7 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class StatusReportDetailsController.
+ * Controller for status report details.
  *
  * @package Drupal\acquia_contenthub_publisher\Controller
  */

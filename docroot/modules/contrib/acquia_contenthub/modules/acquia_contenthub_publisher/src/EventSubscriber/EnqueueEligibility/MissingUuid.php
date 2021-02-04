@@ -18,7 +18,8 @@ class MissingUuid implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] = ['onEnqueueCandidateEntity', 1000];
+    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] =
+      ['onEnqueueCandidateEntity', 1000];
 
     return $events;
   }

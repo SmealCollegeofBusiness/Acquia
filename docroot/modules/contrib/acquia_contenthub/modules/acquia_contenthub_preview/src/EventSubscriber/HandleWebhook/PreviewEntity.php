@@ -19,7 +19,7 @@ use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class PreviewEntity.
+ * Previews entities across content as a service sites.
  *
  * @package Drupal\acquia_contenthub_preview\EventSubscriber\HandleWebhook
  */
@@ -46,7 +46,8 @@ class PreviewEntity implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::HANDLE_WEBHOOK][] = ['onHandleWebhook', 1000];
+    $events[AcquiaContentHubEvents::HANDLE_WEBHOOK][] =
+      ['onHandleWebhook', 1000];
     return $events;
   }
 
@@ -74,7 +75,13 @@ class PreviewEntity implements EventSubscriberInterface {
       $document->addCdfEntity($cdfObject);
     }
     $this->common->importEntityCdfDocument($document);
-    $url = Url::fromRoute('acquia_contenthub_preview.preview', ['uuid' => $payload['preview']], ['absolute' => TRUE, 'base_url' => $event->getRequest()->getSchemeAndHttpHost()]);
+    $url = Url::fromRoute('acquia_contenthub_preview.preview',
+      ['uuid' => $payload['preview']],
+      [
+        'absolute' => TRUE,
+        'base_url' => $event->getRequest()->getSchemeAndHttpHost(),
+      ]
+    );
     $response = $this->getResponse($event, '<iframe src="' . $url->toString() . '" width="1165" height="500"></iframe>');
     $event->setResponse($response);
     $event->stopPropagation();

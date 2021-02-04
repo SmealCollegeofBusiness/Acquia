@@ -147,7 +147,7 @@ class DiscoveryInterfaceController extends ControllerBase {
    * This also includes the 'bundle' key field. If the bundle key is empty this
    * means that this entity does not have any bundle information.
    *
-   * TODO: This needs to be changed in the discovery interface to see all types.
+   * @todo This needs to be changed in the discovery interface to see all types.
    *
    * @return array
    *   An array of entity_types and bundles keyed by entity_type.

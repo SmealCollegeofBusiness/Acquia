@@ -4,39 +4,43 @@
     "description": "An implementation of Acquia CMS for running in Acquia Cloud Site Factory.",
     "license": "GPL-2.0-or-later",
     "require": {
-        "acquia/acquia_cms": "dev-develop#1.0.0-beta7",
+        "acquia/acquia_cms": "dev-develop#1.0.0-beta8",
         "acquia/blt": "^12.4",
         "drupal/core": "^9.0",
         "drupal/core-composer-scaffold": "^9.0.0",
         "drupal/samlauth": "3.x-dev",
         "drush/drush": "^10",
         "oomphinc/composer-installers-extender": "^1.1 || ^2",
-        "swichers/acsf-client": "dev-develop"
+        "swichers/acsf-client": "dev-develop",
+        "acquia/blt-acsf": "^1.0"
     },
     "require-dev": {},
     "extra": {
         "drupal-scaffold": {
-          "allowed-packages": [
-            "drupal/core",
-            "acquia/acquia_cms"
-          ],
-          "locations": {
-            "web-root": "./docroot",
-            "profile-root": "./docroot/profiles/contrib/acquia_cms"
-          },
-          "file-mapping": {
-            "[web-root]/.htaccess": false,
-            "[profile-root]/.editorconfig": false,
-            "[profile-root]/.gitattributes": false,
-            "[profile-root]/hooks": false,
-            "[profile-root]/drush/sites/acms.site.yml": false,
-            "[profile-root]/.coveralls.yml": false,
-            "[profile-root]/.travis.yml": false,
-            "[profile-root]/.gitignore": false,
-            "[profile-root]/acquia-pipelines.yml": false,
-            "[profile-root]/grumphp.yml": false
-          },
-          "gitignore": true
+            "allowed-packages": [
+                "drupal/core",
+                "acquia/acquia_cms"
+            ],
+            "locations": {
+                "web-root": "./docroot",
+                "profile-root": "./docroot/profiles/contrib/acquia_cms"
+            },
+            "file-mapping": {
+                "[web-root]/.htaccess": false,
+                "[profile-root]/.editorconfig": false,
+                "[profile-root]/.gitattributes": false,
+                "[profile-root]/hooks": false,
+                "[profile-root]/drush/sites/acms.site.yml": false,
+                "[profile-root]/.coveralls.yml": false,
+                "[profile-root]/.travis.yml": false,
+                "[profile-root]/.gitignore": false,
+                "[profile-root]/acquia-pipelines.yml": false,
+                "[profile-root]/grumphp.yml": false
+            },
+            "gitignore": true,
+            "excludes": [
+                ".htaccess"
+            ]
         },
         "enable-patching": true,
         "installer-paths": {
@@ -88,8 +92,6 @@
     "scripts": {
         "post-install-cmd": [
             "@putenv PROFILE_DIR=./docroot/profiles/contrib/acquia_cms",
-            "find ./docroot/profiles -type d -name .git -prune -exec rm -r -f '{}' ';'",
-            "find ./docroot/modules -type d -name .git -prune -exec rm -r -f '{}' ';'",
             "composer install:frontend"
         ],
         "pre-update-cmd": [
@@ -115,5 +117,8 @@
             "@composer clearcache --ansi",
             "@composer install --ansi"
         ]
+    },
+    "config": {
+        "discard-changes": false
     }
 }

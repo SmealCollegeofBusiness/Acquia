@@ -7,7 +7,7 @@ use Drupal\acquia_contenthub\Event\CreateCdfEntityEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class ConfigurableLanguageHandler.
+ * Handler for configurable languages.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\Cdf
  */

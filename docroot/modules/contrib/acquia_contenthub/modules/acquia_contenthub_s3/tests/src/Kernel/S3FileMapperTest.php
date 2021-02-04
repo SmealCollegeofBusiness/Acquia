@@ -9,7 +9,7 @@ use Drupal\acquia_contenthub_s3\S3FileMapper;
 use Prophecy\Argument;
 
 /**
- * Class S3FileMapperTest.
+ * Tests the S3FileMapper.
  *
  * @group acquia_contenthub_s3
  * @coversDefaultClass \Drupal\acquia_contenthub_s3\S3FileMapper

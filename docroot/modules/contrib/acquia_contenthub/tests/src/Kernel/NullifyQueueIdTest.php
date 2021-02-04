@@ -9,7 +9,7 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 
 /**
- * Class NullifyQueueIdTest
+ * Tests the NullifyQueueId class.
  *
  * @group acquia_contenthub
  *
@@ -183,7 +183,7 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
 
     // First check whether "queue_id" exists.
     $queue_id = $this->getQueueId($node->id(), 'queued');
-    $this->assertNotEmpty($queue_id[0],'Queue ID should not be empty');
+    $this->assertNotEmpty($queue_id[0], 'Queue ID should not be empty');
 
     while ($item = $this->queue->claimItem()) {
       $this->queueWorker->processItem($item->data);
@@ -205,6 +205,7 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
    *   Status of the entity.
    *
    * @return mixed
+   *   The queue id.
    */
   protected function getQueueId($entity_id, $status) {
     $query = \Drupal::database()->select(self::TABLE_NAME, 't');
@@ -229,7 +230,7 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
     // Create the node bundle required for testing.
     $type = NodeType::create([
       'type' => $type,
-      'name' => $name
+      'name' => $name,
     ]);
     $type->save();
   }
@@ -274,4 +275,5 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
       return TRUE;
     });
   }
+
 }

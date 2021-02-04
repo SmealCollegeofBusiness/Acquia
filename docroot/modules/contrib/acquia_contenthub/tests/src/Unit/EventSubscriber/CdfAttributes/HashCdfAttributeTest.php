@@ -12,7 +12,7 @@ use Drupal\Tests\UnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Class HashCdfAttributeTest.
+ * Tests hashing of cdf attributes.
  *
  * @group acquia_contenthub
  *

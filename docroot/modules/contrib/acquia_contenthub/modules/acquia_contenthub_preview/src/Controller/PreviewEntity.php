@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class PreviewEntity.
+ * Controller for previewing entities in content as a service.
  *
  * @package Drupal\acquia_contenthub_preview\Controller
  */

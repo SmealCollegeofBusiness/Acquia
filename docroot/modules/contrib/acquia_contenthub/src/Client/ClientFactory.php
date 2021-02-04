@@ -125,7 +125,7 @@ class ClientFactory {
 
     // If any of these variables is empty, then we do NOT have a valid
     // connection.
-    // @todo: add validation for the Hostname.
+    // @todo add validation for the Hostname.
     if (!$settings
       || !Uuid::isValid($settings->getUuid())
       || empty($settings->getName())

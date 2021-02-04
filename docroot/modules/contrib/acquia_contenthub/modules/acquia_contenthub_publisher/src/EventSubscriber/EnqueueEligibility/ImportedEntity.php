@@ -8,7 +8,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Any entity that has been previously imported shouldn't be enqueued for export.
+ * Any entity that has been previously imported shouldn't be enqueued.
  *
  * @package Drupal\acquia_contenthub_publisher\EventSubscriber\EnqueueEligibility
  */
@@ -37,7 +37,8 @@ class ImportedEntity implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] = ['onEnqueueCandidateEntity', 500];
+    $events[ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY][] =
+      ['onEnqueueCandidateEntity', 500];
     return $events;
   }
 

@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 /**
- * Class UserImportUpdateExportTest.
+ * Tests user export, update, and import.
  *
  * @group acquia_contenthub
  *

@@ -8,7 +8,7 @@ use Drupal\acquia_contenthub\Event\LoadLocalEntityEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class LoadEntityByUuid.
+ * Loads local entities by UUID.
  *
  * Loads a Local Entity by UUID.
  *
@@ -20,7 +20,8 @@ class LoadEntityByUuid implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::LOAD_LOCAL_ENTITY][] = ['onLoadLocalEntity', 10];
+    $events[AcquiaContentHubEvents::LOAD_LOCAL_ENTITY][] =
+      ['onLoadLocalEntity', 10];
     return $events;
   }
 

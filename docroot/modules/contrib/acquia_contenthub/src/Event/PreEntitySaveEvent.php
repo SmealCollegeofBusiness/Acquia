@@ -8,7 +8,7 @@ use Drupal\depcalc\DependencyStack;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class PreEntitySaveEvent.
+ * Event that fires prior to an entity save.
  *
  * @package Drupal\acquia_contenthub\Event
  */

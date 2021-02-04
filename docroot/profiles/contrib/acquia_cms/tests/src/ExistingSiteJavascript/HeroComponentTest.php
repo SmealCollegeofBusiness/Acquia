@@ -43,7 +43,7 @@ class HeroComponentTest extends CohesionComponentTestBase {
       }
     };
 
-    $edit_form->clickLink('Layout');
+    $edit_form->clickLink('Layout and style');
     // Check if all the height styles are there in the select list.
     $assert_styles('Height', [
       'Large',
@@ -96,8 +96,6 @@ class HeroComponentTest extends CohesionComponentTestBase {
       'Right',
       'Center',
     ]);
-
-    $edit_form->clickLink('Style');
 
     // Check if all the button styles are there in the select list.
     $assert_styles('Button style', [

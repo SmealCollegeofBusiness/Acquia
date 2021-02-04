@@ -10,7 +10,7 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class PruneImportedEntitiesFromExport.
+ * Prunes imported entities so they are not exported.
  *
  * @package Drupal\acquia_contenthub_subscriber\EventSubscriber\PrunePublishEntities
  */

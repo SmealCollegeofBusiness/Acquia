@@ -2,12 +2,12 @@
 
 namespace Drupal\Tests\acquia_contenthub\Unit\EventSubscriber\Cdf;
 
-use Drupal\acquia_contenthub\EventSubscriber\Cdf;
-use Drupal\Tests\UnitTestCase;
+use Drupal\acquia_contenthub\EventSubscriber\Cdf\ExistingUser;
 use Drupal\Component\Uuid\Php;
+use Drupal\Tests\UnitTestCase;
 
 /**
- * Class GenerateUserNameTest.
+ * Tests username generation.
  *
  * @group acquia_contenthub
  *
@@ -21,7 +21,7 @@ class GenerateUserNameTest extends UnitTestCase {
    * Tests username generation to make sure character limit truncation occurs.
    */
   public function testUsernameGeneration() {
-    $existingUser = new Cdf\ExistingUser();
+    $existingUser = new ExistingUser();
     $uuidGenerator = new Php();
     $uuid = $uuidGenerator->generate();
     $valid_user = $existingUser->generateUsername($existingUser::GENERATED_USER_PATTERN, $uuid, 'asimplename');

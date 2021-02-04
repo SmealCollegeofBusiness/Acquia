@@ -13,7 +13,7 @@ use Drupal\path\Plugin\Field\FieldType\PathFieldItemList;
 use Drupal\Tests\acquia_contenthub\Kernel\Stubs\DrupalVersion;
 
 /**
- * Class PathFieldSerializerTest.
+ * Tests Path Field Serialiation.
  *
  * @group acquia_contenthub
  *

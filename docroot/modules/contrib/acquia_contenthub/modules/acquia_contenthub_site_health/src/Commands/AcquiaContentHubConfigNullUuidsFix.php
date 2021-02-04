@@ -10,7 +10,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class AcquiaContentHubConfigNullUuidsFix.
+ * Drush command to fix config entities with null uuids.
  *
  * @package Drupal\acquia_contenthub_config_null_uuids_fix\Commands
  */

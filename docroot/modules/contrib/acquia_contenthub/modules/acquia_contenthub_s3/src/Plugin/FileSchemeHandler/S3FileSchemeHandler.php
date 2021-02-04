@@ -14,7 +14,7 @@ use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class S3FileSchemeHandler.
+ * S3 file scheme handler.
  *
  * @FileSchemeHandler(
  *   id = "s3",

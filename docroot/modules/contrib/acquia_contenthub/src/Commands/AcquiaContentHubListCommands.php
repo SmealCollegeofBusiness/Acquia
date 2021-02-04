@@ -7,7 +7,7 @@ use Drupal\Component\Uuid\Uuid;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class AcquiaContentHubListCommands.
+ * Drush commands for listing entities from Acquia Content Hub.
  *
  * @package Drupal\acquia_contenthub\Commands
  */
@@ -106,7 +106,7 @@ class AcquiaContentHubListCommands extends DrushCommands {
     }
 
     // Filtering by language.
-    // TODO: Add a query to validate languages in plexus.
+    // @todo Add a query to validate languages in plexus.
     $language = $options['language'];
     if (isset($language)) {
       $list_options['language'] = $language;
@@ -155,7 +155,13 @@ class AcquiaContentHubListCommands extends DrushCommands {
    *   The CDF entity array before it is written to the output.
    */
   protected function decodeEntityArrayMetadata(array &$cdf_entity) {
-    if (in_array($cdf_entity['type'], ['drupal8_content_entity', 'drupal8_config_entity', 'rendered_entity'])) {
+    $types = [
+      'drupal8_content_entity',
+      'drupal8_config_entity',
+      'rendered_entity',
+    ];
+
+    if (in_array($cdf_entity['type'], $types)) {
       $cdf_entity['metadata']['data'] = base64_decode($cdf_entity['metadata']['data']);
     }
   }

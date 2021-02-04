@@ -2,14 +2,14 @@
 
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
+use Drupal\acquia_contenthub_publisher\Event\ContentHubEntityEligibilityEvent;
+use Drupal\acquia_contenthub_publisher\EventSubscriber\EnqueueEligibility\MissingId;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\webform\Entity\Webform;
 use Drupal\webform\Entity\WebformSubmission;
-use Drupal\acquia_contenthub_publisher\Event\ContentHubEntityEligibilityEvent;
-use Drupal\acquia_contenthub_publisher\EventSubscriber\EnqueueEligibility\MissingId;
 
 /**
- * Class MissingIdTest
+ * Tests that entities without ids are not eligible for export.
  *
  * @group acquia_contenthub
  *
@@ -28,7 +28,7 @@ class MissingIdTest extends KernelTestBase {
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_publisher',
-    'webform'
+    'webform',
   ];
 
   /**
@@ -64,7 +64,7 @@ class MissingIdTest extends KernelTestBase {
       'name' => [
         '#type' => 'textfield',
         '#title' => 'name',
-      ]
+      ],
     ];
     $webform->setElements($elements);
     // Disable saving of results.
@@ -75,7 +75,7 @@ class MissingIdTest extends KernelTestBase {
     $webform_submission = WebformSubmission::create([
       'id' => $this->randomMachineName(),
       'webform_id' => $webform->id(),
-      'data' => ['name' => $this->randomMachineName()]
+      'data' => ['name' => $this->randomMachineName()],
     ]);
     $webform_submission->save();
 

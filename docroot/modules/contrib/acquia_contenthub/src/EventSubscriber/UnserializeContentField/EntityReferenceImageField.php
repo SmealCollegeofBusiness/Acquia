@@ -24,7 +24,8 @@ class EntityReferenceImageField implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::UNSERIALIZE_CONTENT_ENTITY_FIELD] = ['onUnserializeContentField', 8];
+    $events[AcquiaContentHubEvents::UNSERIALIZE_CONTENT_ENTITY_FIELD] =
+      ['onUnserializeContentField', 8];
     return $events;
   }
 

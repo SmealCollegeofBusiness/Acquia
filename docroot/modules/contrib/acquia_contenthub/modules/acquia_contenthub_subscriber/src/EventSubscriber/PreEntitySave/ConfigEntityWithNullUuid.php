@@ -8,7 +8,7 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class ConfigEntityWithNullUuid.
+ * Handles config entities with null uuids.
  *
  * @package Drupal\acquia_contenthub_subscriber\EventSubscriber\PreEntitySave
  */

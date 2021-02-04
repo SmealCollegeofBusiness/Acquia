@@ -4,9 +4,8 @@ namespace Drupal\acquia_contenthub\EventSubscriber\SerializeContentField;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\SerializeCdfEntityFieldEvent;
+use Drupal\acquia_contenthub\LayoutBuilder\LayoutBuilderDataHandlerTrait;
 use Drupal\Core\Entity\EntityTypeManager;
-use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\layout_builder\Plugin\Block\InlineBlock;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -15,6 +14,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class LayoutBuilderFieldSerializer implements EventSubscriberInterface {
 
   use ContentFieldMetadataTrait;
+  use LayoutBuilderDataHandlerTrait;
 
   const FIELD_TYPE = 'layout_section';
 
@@ -48,6 +48,9 @@ class LayoutBuilderFieldSerializer implements EventSubscriberInterface {
    *
    * @param \Drupal\acquia_contenthub\Event\SerializeCdfEntityFieldEvent $event
    *   The content entity field serialization event.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function onSerializeContentField(SerializeCdfEntityFieldEvent $event) {
     $event_field_type = $event->getField()->getFieldDefinition()->getType();
@@ -67,47 +70,17 @@ class LayoutBuilderFieldSerializer implements EventSubscriberInterface {
         continue;
       }
 
-      $data['value'][$langcode] = $this->handleSections($field);
+      $sections = [];
+      foreach ($field as $item) {
+        $sections[] = $item->getValue()['section'];
+      }
+      $sections = $this->serializeSections(... $sections);
+      foreach ($sections as $section) {
+        $data['value'][$langcode][] = ['section' => $section];
+      }
     }
     $event->setFieldData($data);
     $event->stopPropagation();
-  }
-
-  /**
-   * Prepares Layout Builder sections to be serialized.
-   *
-   * @param \Drupal\Core\Field\FieldItemListInterface $field
-   *   The field with the sections.
-   *
-   * @return array
-   *   The prepared Layout Builder sections.
-   */
-  protected function handleSections(FieldItemListInterface $field) {
-    $sections = [];
-    foreach ($field as $item) {
-      $section = $item->getValue()['section'];
-      $this->handleComponents($section->getComponents());
-      $sections[] = ['section' => $section->toArray()];
-    }
-    return $sections;
-  }
-
-  /**
-   * Prepares component to be serialized.
-   *
-   * @param \Drupal\layout_builder\SectionComponent[] $components
-   *   The component to add.
-   */
-  protected function handleComponents(array $components) {
-    foreach ($components as $component) {
-      $plugin = $component->getPlugin();
-      // @todo Decide if it's worth to handle this as an event.
-      if ($plugin instanceof InlineBlock) {
-        $revision_id = $plugin->getConfiguration()['block_revision_id'];
-        $entity = $this->entityTypeManager->getStorage('block_content')->loadRevision($revision_id);
-        $component->set('block_uuid', $entity->uuid());
-      }
-    }
   }
 
 }

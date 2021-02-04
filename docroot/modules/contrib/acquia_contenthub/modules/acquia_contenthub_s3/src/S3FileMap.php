@@ -217,6 +217,7 @@ class S3FileMap {
    *   The file uuid.
    * @param array $values
    *   The values to update the fields with. The following format should apply:
+   *
    * @code
    *   $values = [
    *     'bucket' => 'some-bucket-name',

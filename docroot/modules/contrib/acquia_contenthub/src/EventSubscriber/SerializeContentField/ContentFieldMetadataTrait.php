@@ -5,7 +5,7 @@ namespace Drupal\acquia_contenthub\EventSubscriber\SerializeContentField;
 use Drupal\acquia_contenthub\Event\SerializeCdfEntityFieldEvent;
 
 /**
- * Trait ContentFieldMetadataTrait.
+ * Trait to set content field metadata.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\SerializeContentField
  */

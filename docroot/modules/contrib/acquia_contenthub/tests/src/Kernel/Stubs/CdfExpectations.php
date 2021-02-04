@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel\Stubs;
 
 /**
- * Class CdfExpectations.
+ * Expectations for cdf fixtures.
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel\Stubs
  */

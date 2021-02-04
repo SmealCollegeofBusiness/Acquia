@@ -37,6 +37,7 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
     'filter',
     'image',
     'language',
+    'path_alias',
     'node',
     'responsive_image',
     'system',
@@ -79,7 +80,6 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
     $dependencies = $this->calculator->calculateDependencies($wrapper, new DependencyStack());
 
     $this->assertNotEmpty($dependencies);
-    $this->assertEmpty($dependencies['module']);
     $this->assertEqual(2, count($dependencies));
     $this->assertArrayHasKey($style1->uuid(), $dependencies);
 
@@ -109,9 +109,7 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
     $this->assertArrayHasKey($style1->uuid(), $wrapper->getDependencies());
     $this->assertArrayHasKey($style2->uuid(), $wrapper->getDependencies());
 
-    $wrapper->addModuleDependencies(['image']);
-    $dependencies = $this->calculator->calculateDependencies($wrapper, new DependencyStack());
-    $this->assertEqual($dependencies['module'], ['image']);
+    $this->assertEqual($dependencies['module'], [$wrapper->getEntity()->getEntityType()->getProvider()]);
   }
 
   /**

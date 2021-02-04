@@ -9,7 +9,7 @@ use Drupal\Core\Database\Connection;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class RemoveUnmodifiedEntities.
+ * Removes unmodified entities from export.
  *
  * @package Drupal\acquia_contenthub_publisher\EventSubscriber\PublishEntities
  */
@@ -36,7 +36,8 @@ class RemoveUnmodifiedEntities implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::PUBLISH_ENTITIES][] = ['onPublishEntities', 1000];
+    $events[AcquiaContentHubEvents::PUBLISH_ENTITIES][] =
+      ['onPublishEntities', 1000];
     return $events;
   }
 
@@ -52,7 +53,10 @@ class RemoveUnmodifiedEntities implements EventSubscriberInterface {
     $query = $this->database->select('acquia_contenthub_publisher_export_tracking', 't')
       ->fields('t', ['entity_uuid', 'hash']);
     $query->condition('t.entity_uuid', $uuids, 'IN');
-    $query->condition('t.status', [PublisherTracker::CONFIRMED, PublisherTracker::EXPORTED], 'IN');
+    $query->condition('t.status',
+      [PublisherTracker::CONFIRMED, PublisherTracker::EXPORTED],
+      'IN'
+    );
     $results = $query->execute();
     foreach ($results as $result) {
       // Can't check it if it doesn't have a hash.

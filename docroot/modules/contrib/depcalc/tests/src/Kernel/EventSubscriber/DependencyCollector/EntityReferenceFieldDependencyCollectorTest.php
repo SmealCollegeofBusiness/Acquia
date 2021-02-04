@@ -40,6 +40,7 @@ class EntityReferenceFieldDependencyCollectorTest extends KernelTestBase {
     'taxonomy',
     'text',
     'user',
+    'path_alias',
   ];
 
   /**

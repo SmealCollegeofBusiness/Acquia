@@ -58,7 +58,8 @@ class Report implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::HANDLE_WEBHOOK][] = ['onHandleWebhook', 1000];
+    $events[AcquiaContentHubEvents::HANDLE_WEBHOOK][] =
+      ['onHandleWebhook', 1000];
     return $events;
   }
 
@@ -90,7 +91,7 @@ class Report implements EventSubscriberInterface {
    * @param string $body
    *   Body of response.
    *
-   * @TODO Copied from preview. Move it a more generic class.
+   * @todo Copied from preview. Move it a more generic class.
    *
    * @return \Psr\Http\Message\ResponseInterface
    *   Signed response.

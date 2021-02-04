@@ -3,7 +3,6 @@
 namespace Drupal\Tests\acquia_contenthub_s3\Kernel;
 
 use Drupal\acquia_contenthub_s3\S3FileMap;
-use PDO;
 
 /**
  * Provides helper methods for s3 file map table interactions.
@@ -34,7 +33,7 @@ trait S3FileMapTestTrait {
       ->select(S3FileMap::TABLE_NAME, 'acs3')
       ->fields('acs3')
       ->execute()
-      ->fetchAllAssoc('file_uuid', PDO::FETCH_ASSOC);
+      ->fetchAllAssoc('file_uuid', \PDO::FETCH_ASSOC);
   }
 
 }

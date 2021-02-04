@@ -8,7 +8,7 @@ use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class SubscriptionManagerController.
+ * Controller for managing the subscription.
  *
  * @package Drupal\acquia_contenthub_publisher\Controller
  */

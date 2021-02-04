@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class ContentHubImportQueueForm.
+ * The form for content hub import queues.
  *
  * @package Drupal\acquia_contenthub\Form
  */

@@ -35,6 +35,7 @@ class EmbeddedImagesCollectorTest extends KernelTestBase {
     'file',
     'editor',
     'depcalc',
+    'path_alias',
   ];
 
   /**

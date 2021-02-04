@@ -7,7 +7,7 @@ use Drupal\acquia_contenthub\Event\CleanUpStubsEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class ContentModerationStateStubCleanup.
+ * Cleans up Content moderation state stubs after import.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\CleanupStubs
  */

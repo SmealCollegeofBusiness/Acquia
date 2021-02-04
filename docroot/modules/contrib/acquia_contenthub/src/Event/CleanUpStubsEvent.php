@@ -7,7 +7,7 @@ use Drupal\depcalc\DependencyStack;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class CleanUpStubsEvent.
+ * Event to clean up stubs after import.
  *
  * @package Drupal\acquia_contenthub\Event
  */

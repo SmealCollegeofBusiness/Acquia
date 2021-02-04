@@ -4,6 +4,8 @@ namespace Drupal\acquia_contenthub_subscriber\Plugin\QueueWorker;
 
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
+use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
+use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
@@ -11,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Class ContentHubImportQueueWorker.
+ * Queue worker for importing entities.
  *
  * @QueueWorker(
  *   id = "acquia_contenthub_subscriber_import",
@@ -42,6 +44,13 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
   protected $factory;
 
   /**
+   * The Subscriber Tracker.
+   *
+   * @var \Drupal\acquia_contenthub_subscriber\SubscriberTracker
+   */
+  protected $tracker;
+
+  /**
    * The logger channel.
    *
    * @var \Drupal\Core\Logger\LoggerChannelInterface
@@ -57,6 +66,8 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    *   The common actions object.
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $factory
    *   The client factory.
+   * @param \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker
+   *   The Subscriber Tracker.
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
    *   The logger factory.
    * @param array $configuration
@@ -68,7 +79,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    *
    * @throws \Exception
    */
-  public function __construct(EventDispatcherInterface $dispatcher, ContentHubCommonActions $common, ClientFactory $factory, LoggerChannelInterface $logger_channel, array $configuration, $plugin_id, $plugin_definition) {
+  public function __construct(EventDispatcherInterface $dispatcher, ContentHubCommonActions $common, ClientFactory $factory, SubscriberTracker $tracker, LoggerChannelInterface $logger_channel, array $configuration, $plugin_id, $plugin_definition) {
 
     $this->common = $common;
     if (!empty($this->common->getUpdateDbStatus())) {
@@ -76,6 +87,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
     }
     $this->dispatcher = $dispatcher;
     $this->factory = $factory;
+    $this->tracker = $tracker;
     $this->loggerChannel = $logger_channel;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -88,6 +100,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
       $container->get('event_dispatcher'),
       $container->get('acquia_contenthub_common_actions'),
       $container->get('acquia_contenthub.client.factory'),
+      $container->get('acquia_contenthub_subscriber.tracker'),
       $container->get('acquia_contenthub.logger_channel'),
       $configuration,
       $plugin_id,
@@ -129,11 +142,37 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
       $stack = $this->common->importEntities(...$uuids);
       $this->factory->getClient();
     }
-    catch (\Exception $e) {
-      $this
-        ->loggerChannel
-        ->error(sprintf('Import failed: %s.', $e->getMessage()));
-      throw $e;
+    catch (ContentHubImportException $e) {
+      // Get UUIDs.
+      $e_uuids = $e->getUuids();
+      if (array_diff($uuids, $e_uuids) == array_diff($e_uuids, $uuids) && $e->isEntitiesMissing()) {
+        // The UUIDs can't be imported since they aren't in the Service.
+        // The missing UUIDs are the same as the ones that were sent for import.
+        if ($webhook) {
+          foreach ($uuids as $uuid) {
+            try {
+              if (!$this->tracker->getEntityByRemoteIdAndHash($uuid)) {
+                // If we cannot load, delete interest and tracking record.
+                $contentHubClient->deleteInterest($uuid, $webhook);
+                $this->tracker->delete($uuid);
+              }
+            }
+            catch (\Exception $ex) {
+              $this
+                ->loggerChannel
+                ->error(sprintf('Message: %s.', $ex->getMessage()));
+            }
+            return;
+          }
+        }
+      }
+      else {
+        // There are import problems but probably on dependent entities.
+        $this
+          ->loggerChannel
+          ->error(sprintf('Import failed: %s.', $e->getMessage()));
+        throw $e;
+      }
     }
 
     if ($webhook) {

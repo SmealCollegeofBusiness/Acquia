@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class StatusReportController.
+ * Controller for Status Reports.
  *
  * @package Drupal\acquia_contenthub_publisher\Controller
  */

@@ -3,6 +3,17 @@ services:
     class: Drupal\depcalc\DependencyCalculator
     arguments: ['@event_dispatcher']
 
+  cache.depcalc:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory: ['@cache.factory.depcalc', 'get']
+    arguments: [depcalc]
+
+  cache.factory.depcalc:
+    class: Drupal\depcalc\Cache\DepcalcCacheFactory
+    arguments: ['@cache_factory', '@event_dispatcher']
+
   entity.config_entity.dependency_calculator:
     class: Drupal\depcalc\EventSubscriber\DependencyCollector\ConfigEntityDependencyCollector
     arguments: ['@config.manager']
@@ -19,6 +30,12 @@ services:
     arguments: ['@event_dispatcher']
     tags:
     - { name: event_subscriber }
+
+  layout_builder.entity_view_display.dependency_calculator:
+    class: Drupal\depcalc\EventSubscriber\DependencyCollector\LayoutBuilderEntityViewDisplayDependencyCollector
+    arguments: ['@event_dispatcher']
+    tags:
+      - { name: event_subscriber }
 
   text_item.dependency_calculator:
     class: Drupal\depcalc\EventSubscriber\DependencyCollector\TextItemFieldDependencyCollector
@@ -102,5 +119,10 @@ services:
       - { name: event_subscriber }
   entity.path_alias.dependency.calculator:
     class: Drupal\depcalc\EventSubscriber\DependencyCollector\EntityPathAliasCollector
+    tags:
+      - { name: event_subscriber }
+
+  menu_item_content.parent.calculator:
+    class: Drupal\depcalc\EventSubscriber\DependencyCollector\MenuItemContentDependencyCollector
     tags:
       - { name: event_subscriber }

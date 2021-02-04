@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 /**
- * Class BlockTest.
+ * Tests exporting and import blocks.
  *
  * @group acquia_contenthub
  *

@@ -5,7 +5,7 @@ namespace Drupal\Tests\acquia_contenthub\Kernel;
 use Drupal\Tests\acquia_contenthub\Kernel\Core\FileSystemTrait;
 
 /**
- * Class MediaImportExportTest.
+ * Tests media export and import.
  *
  * @group acquia_contenthub
  *

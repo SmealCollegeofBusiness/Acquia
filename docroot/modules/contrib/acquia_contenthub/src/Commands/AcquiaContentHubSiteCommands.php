@@ -10,7 +10,7 @@ use Drush\Commands\DrushCommands;
 use Drush\Log\LogLevel;
 
 /**
- * Class AcquiaContentHubSiteCommands.
+ * Drush commands for interacting with Acquia Content Hub client site.
  *
  * @package Drupal\acquia_contenthub\Commands
  */
@@ -66,7 +66,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
   public function contenthubConnectSite() {
     $options = $this->input()->getOptions();
 
-    // TODO: Revisit initial connection logic with our event subscibers.
+    // @todo Revisit initial connection logic with our event subscibers.
     $settings = $this->clientFactory->getSettings();
     $config_origin = $settings->getUuid();
 
@@ -109,7 +109,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
       'op' => t('Save configuration'),
     ]);
 
-    // @TODO Errors handling can be improved after relocation of registration
+    // @todo Errors handling can be improved after relocation of registration
     // logic into separate service.
     $form = \Drupal::formBuilder()->buildForm(ContentHubSettingsForm::class, new FormState());
     $form_state->setTriggeringElement($form['actions']['submit']);
@@ -154,7 +154,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
     $client_name = $config->get('client_name');
     $config->delete();
 
-    // TODO: We should disconnect the webhook, but first we need to know its
+    // @todo We should disconnect the webhook, but first we need to know its
     // ours.
     $message = dt(
       'Successfully disconnected site %site from contenthub',

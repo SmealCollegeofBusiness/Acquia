@@ -9,7 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class DisablePathauto.
+ * Disables path auto during pre-entity save.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\PreEntitySave
  */

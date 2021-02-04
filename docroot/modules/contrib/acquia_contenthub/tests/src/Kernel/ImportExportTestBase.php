@@ -17,7 +17,7 @@ use Drupal\Tests\acquia_contenthub\Kernel\Stubs\CdfExpectations;
 use Drupal\Tests\acquia_contenthub\Kernel\Stubs\DrupalVersion;
 
 /**
- * Class ImportExportTestBase.
+ * Base for testing exports and imports.
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */

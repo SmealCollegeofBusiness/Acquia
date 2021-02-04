@@ -94,7 +94,7 @@ class ContentLanguageSettings implements EventSubscriberInterface {
     $installed_storage_definitions = $schema_repository->getLastInstalledFieldStorageDefinitions($entity_type_id);
 
     foreach (array_diff_key($storage_definitions, $installed_storage_definitions) as $storage_definition) {
-      // @var $storage_definition \Drupal\Core\Field\FieldStorageDefinitionInterface
+      /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $storage_definition */
       if ($storage_definition->getProvider() == 'content_translation') {
         $definition_update_manager->installFieldStorageDefinition($storage_definition->getName(), $entity_type_id, 'content_translation', $storage_definition);
       }

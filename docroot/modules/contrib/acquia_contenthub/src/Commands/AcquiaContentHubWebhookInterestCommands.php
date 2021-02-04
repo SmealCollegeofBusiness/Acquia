@@ -2,14 +2,13 @@
 
 namespace Drupal\acquia_contenthub\Commands;
 
-use Acquia\ContentHubClient\ContentHubClient;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubConnectionManager;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Console\Helper\Table;
 
 /**
- * Class AcquiaContentHubWebhookInterestCommands.
+ * Tests commands that interact with webhook interests.
  *
  * @package Drupal\acquia_contenthub\Commands
  */
@@ -18,14 +17,14 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
   /**
    * The client factory.
    *
-   * @var ClientFactory
+   * @var \Drupal\acquia_contenthub\Client\ClientFactory
    */
   protected $clientFactory;
 
   /**
    * The Content Hub client.
    *
-   * @var ContentHubClient
+   * @var \Acquia\ContentHubClient\ContentHubClient
    */
   protected $client;
 
@@ -41,35 +40,34 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
    *
    * @var string
    */
-  protected $webhook_url;
+  protected $webhookUrl;
 
   /**
    * The webhook uuid.
    *
    * @var string
    */
-  protected $webhook_uuid;
+  protected $webhookUuid;
 
   /**
    * The Content Hub Connection Manager.
    *
-   * @var ContentHubConnectionManager
+   * @var \Drupal\acquia_contenthub\ContentHubConnectionManager
    */
   protected $connectionManager;
 
   /**
    * AcquiaContentHubWebhookInterestCommands constructor.
    *
-   * @param ClientFactory $client_factory
+   * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The client factory.
-   * @param ContentHubConnectionManager $connection_manager
+   * @param \Drupal\acquia_contenthub\ContentHubConnectionManager $connection_manager
    *   The Content Hub Connection Manager.
    */
   public function __construct(ClientFactory $client_factory, ContentHubConnectionManager $connection_manager) {
     $this->clientFactory = $client_factory;
     $this->connectionManager = $connection_manager;
   }
-
 
   /**
    * Find webhook information.
@@ -82,14 +80,14 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
       throw new \Exception(dt('The Content Hub client is not connected so the webhook operations could not be performed.'));
     }
 
-    $this->webhook_url = $this->formatWebhookUrl($this->input()->getOptions()['webhook_url'] ?? $this->client->getSettings()->getWebhook('url'));
-    $this->webhook = $this->client->getWebHook($this->webhook_url);
+    $this->webhookUrl = $this->formatWebhookUrl($this->input()->getOptions()['webhook_url'] ?? $this->client->getSettings()->getWebhook('url'));
+    $this->webhook = $this->client->getWebHook($this->webhookUrl);
     if (!$this->webhook) {
       throw new \Exception(dt('The webhook is not available so the operation could not complete.'));
     }
 
-    $this->webhook_uuid = $this->webhook->getUuid();
-    if (!$this->webhook_uuid) {
+    $this->webhookUuid = $this->webhook->getUuid();
+    if (!$this->webhookUuid) {
       throw new \Exception(dt('The webhook uuid is not available so the operation could not complete.'));
     }
   }
@@ -112,17 +110,17 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
   public function contenthubWebhookInterestsList() {
     $this->findWebhook();
 
-    $message = sprintf('Listing Interests for webhook %s', $this->webhook_url);
-    $interests = $this->client->getInterestsByWebhook($this->webhook_uuid);
+    $message = sprintf('Listing Interests for webhook %s', $this->webhookUrl);
+    $interests = $this->client->getInterestsByWebhook($this->webhookUuid);
 
     if (empty($interests)) {
-      $this->output()->writeln(dt('<fg=white;bg=red;options=bold;>No interests found for webhook @url</>', ['@url' => $this->webhook_url]));
+      $this->output()->writeln(dt('<fg=white;bg=red;options=bold;>No interests found for webhook @url</>', ['@url' => $this->webhookUrl]));
       return;
     }
 
     $interests = ['Index' => 'Interest'] + $interests;
 
-    $webhooks = array_merge(['Webhook'], array_fill(0, count($interests) - 1, $this->webhook_url));
+    $webhooks = array_merge(['Webhook'], array_fill(0, count($interests) - 1, $this->webhookUrl));
     $this->renderTable($message, TRUE, array_keys($interests), $interests, $webhooks);
   }
 
@@ -151,7 +149,7 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
       return;
     }
     $uuids = explode(',', $this->input()->getOptions()['uuids']);
-    $response = $this->client->addEntitiesToInterestList($this->webhook_uuid,$uuids);
+    $response = $this->client->addEntitiesToInterestList($this->webhookUuid, $uuids);
 
     if (empty($response)) {
       return;
@@ -192,19 +190,28 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
     }
     $uuids = explode(',', $this->input()->getOptions()['uuids']);
     $this->output()->writeln("\n");
-    foreach($uuids as $uuid) {
-      $response = $this->client->deleteInterest($uuid,$this->webhook_uuid);
+    foreach ($uuids as $uuid) {
+      $response = $this->client->deleteInterest($uuid, $this->webhookUuid);
 
       if (empty($response)) {
         continue;
       }
 
       if (200 !== $response->getStatusCode()) {
-        $this->output()->writeln(dt('An error occurred and the interest @uuid was not removed.',['@uuid' => $uuid]));
+        $this->output()->writeln(
+          dt('An error occurred and the interest @uuid was not removed.',
+            ['@uuid' => $uuid]
+          )
+        );
         continue;
       }
 
-      $this->output()->writeln(dt('Interest @uuid removed from webhook @webhook.', ['@uuid' => $uuid,'@webhook' => $this->webhook_url]));
+      $this->output()->writeln(
+        dt('Interest @uuid removed from webhook @webhook.', [
+          '@uuid' => $uuid,
+          '@webhook' => $this->webhookUrl,
+        ])
+      );
     }
 
     $this->output()->writeln("\n");
@@ -224,11 +231,11 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
   /**
    * Render a message and table with headers.
    *
-   * @param $message
+   * @param string $message
    *   String to display above the table. Pass empty string to display nothing.
-   * @param $use_headers
+   * @param bool $use_headers
    *   Show Individual column headers?
-   * @param mixed ...$cols
+   * @param mixed ... $cols // @codingStandardsIgnoreLine
    *   Columns of data to render into rows. Variable length.
    */
   private function renderTable(string $message, bool $use_headers = FALSE, array ...$cols) {
@@ -254,17 +261,19 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
 
     $rows = array_map($rows_mapper, ...$cols);
 
-
     $table->setRows($rows)
-    ->render();
+      ->render();
 
   }
 
   /**
-   * Format webhook url in case of missing acquia-contenthub/webhook
+   * Format webhook url in case of missing acquia-contenthub/webhook.
    *
    * @param string $webhook_url
+   *   Webhook url to format.
+   *
    * @return string
+   *   Webhook url in proper format.
    */
   private function formatWebhookUrl(string $webhook_url) {
     if (!strpos($webhook_url, 'acquia-contenthub/webhook')) {
@@ -272,4 +281,5 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
     }
     return $webhook_url;
   }
+
 }

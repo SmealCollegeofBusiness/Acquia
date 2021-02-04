@@ -20,7 +20,8 @@ class LinkFieldSerializer implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD][] = ['onSerializeContentField', 15];
+    $events[AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD][] =
+      ['onSerializeContentField', 15];
     return $events;
   }
 
@@ -119,9 +120,9 @@ class LinkFieldSerializer implements EventSubscriberInterface {
    * Extracts all translations of field.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
-   * Entity.
+   *   Entity.
    * @param \Drupal\acquia_contenthub\Event\SerializeCdfEntityFieldEvent $event
-   * The content entity field serialization event.
+   *   The content entity field serialization event.
    *
    * @return \Drupal\Core\Field\FieldItemListInterface[]
    *   List of fields.

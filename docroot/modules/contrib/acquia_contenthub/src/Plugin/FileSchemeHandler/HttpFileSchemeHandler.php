@@ -7,7 +7,7 @@ use Drupal\Core\Plugin\PluginBase;
 use Drupal\file\FileInterface;
 
 /**
- * Class HttpFileSchemeHandler.
+ * The file scheme handler for http schemes.
  *
  * @FileSchemeHandler(
  *   id = "http",

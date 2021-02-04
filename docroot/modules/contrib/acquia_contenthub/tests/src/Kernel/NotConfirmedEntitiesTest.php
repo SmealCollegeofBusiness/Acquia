@@ -12,7 +12,7 @@ use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Prophecy\Argument;
 
 /**
- * Class NotConfirmedEntitiesTest.
+ * Tests entities that are not confirmed.
  *
  * @group orca_ignore
  *

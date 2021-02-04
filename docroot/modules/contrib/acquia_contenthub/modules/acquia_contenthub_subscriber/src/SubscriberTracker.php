@@ -7,7 +7,7 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class SubscriberTracker.
+ * Subscriber Tracker database table methods.
  */
 class SubscriberTracker {
 
@@ -289,8 +289,8 @@ class SubscriberTracker {
   /**
    * Set the queue item of a particular record by its uuid.
    *
-   * @param array $uuid
-   *   The uuid of an entity.
+   * @param array $uuids
+   *   The uuids of entities.
    * @param string $queue_id
    *   The status to set.
    *

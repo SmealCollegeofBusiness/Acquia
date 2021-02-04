@@ -9,7 +9,7 @@ use Drush\Log\LogLevel;
 use Symfony\Component\Console\Helper\Table;
 
 /**
- * Class AcquiaContentHubWebhookCommands.
+ * Drush commands for interacting with Acquia Content Hub webhooks.
  *
  * @package Drupal\acquia_contenthub\Commands
  */
@@ -97,11 +97,14 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
           return;
         }
 
-        $this->logger->log(LogLevel::SUCCESS, dt('Registered Content Hub Webhook: @url | @uuid', ['@url' => $webhook_url, '@uuid' => $response['uuid']]));
+        $this->logger->log(LogLevel::SUCCESS,
+          dt('Registered Content Hub Webhook: @url | @uuid',
+            ['@url' => $webhook_url, '@uuid' => $response['uuid']]
+          ));
         break;
 
       case 'unregister':
-        // @TODO: Complete Webhook Unregistration.
+        // @todo Complete Webhook Unregistration.
         $webhooks = $client->getWebHooks();
         if (empty($webhooks)) {
           $this->logger->log(LogLevel::CANCEL, dt('You have no webhooks.'));

@@ -11,7 +11,7 @@ use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 use Drupal\file\FileInterface;
 
 /**
- * Class S3FileMapper.
+ * S3FileMapper for tracking S3 files.
  *
  * @package Drupal\acquia_contenthub_s3
  */
@@ -98,8 +98,8 @@ class S3FileMapper {
    * @param \Drupal\file\FileInterface $file
    *   The file entity in question.
    *
-   * @todo: Activate the feature when auto update disabling has been resolved.
-   * @todo: acquia_contenthub_unsubscribe module
+   * @todo Activate the feature when auto update disabling has been resolved.
+   * @todo acquia_contenthub_unsubscribe module
    *
    * @throws \Exception
    */

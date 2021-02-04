@@ -9,7 +9,7 @@ use Drupal\user\UserData;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class ExportUserData.
+ * Exports user data.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\ExtraCdfFields
  */

@@ -5,7 +5,7 @@ namespace Drupal\acquia_contenthub\Plugin\Field;
 use Drupal\Core\Field\FieldItemList;
 
 /**
- * Class AcquiaContentHubGenerateNullFieldItemList.
+ * Generates null field item for sample data.
  *
  * @package Drupal\acquia_contenthub\Plugin\Field
  */

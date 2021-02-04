@@ -12,7 +12,7 @@ use Prophecy\Argument;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Class DeleteEntityTest.
+ * Tests deletion of entities.
  *
  * @group acquia_contenthub
  *

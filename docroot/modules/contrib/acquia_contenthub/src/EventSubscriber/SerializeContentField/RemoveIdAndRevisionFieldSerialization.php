@@ -15,7 +15,8 @@ class RemoveIdAndRevisionFieldSerialization implements EventSubscriberInterface 
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD][] = ['onSerializeContentField', 110];
+    $events[AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD][] =
+      ['onSerializeContentField', 110];
     return $events;
   }
 
@@ -28,7 +29,12 @@ class RemoveIdAndRevisionFieldSerialization implements EventSubscriberInterface 
   public function onSerializeContentField(SerializeCdfEntityFieldEvent $event) {
     $entity = $event->getEntity();
     $entityType = $entity->getEntityType();
-    if (in_array($event->getFieldName(), [$entityType->getKey('id'), $entityType->getKey('revision')])) {
+    $entityTypes = [
+      $entityType->getKey('id'),
+      $entityType->getKey('revision'),
+    ];
+
+    if (in_array($event->getFieldName(), $entityTypes)) {
       $event->setExcluded();
       $event->stopPropagation();
     }

@@ -9,7 +9,7 @@ use Drupal\Core\Extension\ModuleExtensionList;
 use Drush\Commands\DrushCommands;
 
 /**
- * Class AcquiaContentHubPurgeCommands.
+ * Drush commands for purging Acquia Content Hub.
  *
  * @package Drupal\acquia_contenthub\Commands
  */

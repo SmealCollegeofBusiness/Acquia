@@ -4,16 +4,16 @@ namespace Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent;
+use Drupal\acquia_contenthub\LayoutBuilder\LayoutBuilderDataHandlerTrait;
 use Drupal\Core\Entity\EntityTypeManager;
-use Drupal\layout_builder\Plugin\Block\InlineBlock;
-use Drupal\layout_builder\Section;
-use Drupal\layout_builder\SectionComponent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Layout builder field unserializer fallback subscriber.
  */
 class LayoutBuilderFieldUnserializer implements EventSubscriberInterface {
+
+  use LayoutBuilderDataHandlerTrait;
 
   /**
    * Layout section field type definition.
@@ -52,6 +52,9 @@ class LayoutBuilderFieldUnserializer implements EventSubscriberInterface {
    *
    * @param \Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent $event
    *   The unserialize event.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function onUnserializeContentField(UnserializeCdfEntityFieldEvent $event) {
     $event_field_type = $event->getFieldMetadata()['type'];
@@ -63,70 +66,14 @@ class LayoutBuilderFieldUnserializer implements EventSubscriberInterface {
     $values = [];
     if (!empty($field['value'])) {
       foreach ($field['value'] as $langcode => $sections) {
-        $values[$langcode][$event->getFieldName()] = $this->handleSections($sections);
+        foreach ($this->unserializeSections($sections) as $section) {
+          $values[$langcode][$event->getFieldName()][] = ['section' => $section];
+        }
+
       }
       $event->setValue($values);
     }
     $event->stopPropagation();
-  }
-
-  /**
-   * Prepares Layout Builder sections to be unserialized.
-   *
-   * @param array $sections
-   *   The Layout Builder sections to unserialize.
-   *
-   * @return array
-   *   The prepared sections.
-   */
-  protected function handleSections(array $sections) {
-    $values = [];
-    foreach ($sections as $sectionArray) {
-      $section = Section::fromArray($sectionArray['section']);
-      $this->handleComponents($section->getComponents());
-      $values[] = ['section' => $section];
-    }
-    return $values;
-  }
-
-  /**
-   * Prepares Layout Builder components to be unserialized.
-   *
-   * @param \Drupal\layout_builder\SectionComponent[] $components
-   *   The components to unserialize.
-   */
-  protected function handleComponents(array $components) {
-    foreach ($components as $component) {
-      $plugin = $component->getPlugin();
-      // @todo Decide if it's worth to handle this as an event.
-      if ($plugin instanceof InlineBlock) {
-        $block_uuid = $component->get('block_uuid');
-        $entity = array_shift($this->entityTypeManager->getStorage('block_content')->loadByProperties(['uuid' => $block_uuid]));
-        $componentConfiguration = $this->getComponentConfiguration($component);
-        $componentConfiguration['block_revision_id'] = $entity->getRevisionId();
-        $component->setConfiguration($componentConfiguration);
-      }
-    }
-  }
-
-  /**
-   * Gets configuration for a Layout Builder component.
-   *
-   * @param \Drupal\layout_builder\SectionComponent $component
-   *   The Layout Builder component.
-   *
-   * @return array
-   *   The component configuration.
-   *
-   * @throws \ReflectionException
-   *
-   * @todo Check pending patch to make SectionComponent::getConfiguration() public: https://www.drupal.org/project/drupal/issues/3046814
-   */
-  protected function getComponentConfiguration(SectionComponent $component) {
-    $method = new \ReflectionMethod('\Drupal\layout_builder\SectionComponent', 'getConfiguration');
-    $method->setAccessible(TRUE);
-
-    return $method->invoke($component);
   }
 
 }

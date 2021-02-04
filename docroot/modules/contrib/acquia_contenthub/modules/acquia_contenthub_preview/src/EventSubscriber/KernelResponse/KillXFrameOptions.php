@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Class KillXFrameOptions.
+ * Removes the x-frame-options header from previews.
  *
  * @package Drupal\acquia_contenthub_preview\EventSubscriber\KernelResponse
  */

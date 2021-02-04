@@ -9,7 +9,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\node\NodeInterface;
 
 /**
- * Class PublisherTracker.
+ * The publisher tracker table class.
  */
 class PublisherTracker {
 
@@ -152,7 +152,6 @@ class PublisherTracker {
       ->execute();
   }
 
-
   /**
    * Set the queue item of a particular record by its uuid.
    *
@@ -195,8 +194,6 @@ class PublisherTracker {
    *
    * @param string $uuid
    *   The uuid of an entity.
-   *
-   * @return bool
    */
   public function nullifyQueueId($uuid) {
     $query = $this->database->update(self::EXPORT_TRACKING_TABLE);
@@ -204,4 +201,5 @@ class PublisherTracker {
     $query->condition('entity_uuid', $uuid);
     $query->execute();
   }
+
 }

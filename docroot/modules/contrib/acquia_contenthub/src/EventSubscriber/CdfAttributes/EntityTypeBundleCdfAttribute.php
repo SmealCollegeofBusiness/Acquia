@@ -24,7 +24,8 @@ class EntityTypeBundleCdfAttribute implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES][] = ['onPopulateAttributes', 100];
+    $events[AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES][] =
+      ['onPopulateAttributes', 100];
     return $events;
   }
 

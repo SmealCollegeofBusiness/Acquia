@@ -44,6 +44,7 @@ class EntityEmbedCollectorTest extends EntityEmbedFilterTestBase {
     'depcalc',
     'embed',
     'entity_embed',
+    'path_alias',
   ];
 
   /**

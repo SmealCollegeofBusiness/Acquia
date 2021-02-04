@@ -3,7 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 /**
- * Class TermImportExportTest.
+ * Taxonomy term export and import test.
  *
  * @group acquia_contenthub
  * @group orca_ignore

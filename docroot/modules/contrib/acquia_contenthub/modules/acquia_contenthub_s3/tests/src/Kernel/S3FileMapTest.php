@@ -5,7 +5,7 @@ namespace Drupal\Tests\acquia_contenthub_s3\Kernel;
 use Drupal\acquia_contenthub_s3\S3FileMap;
 
 /**
- * Class S3FileMapTest.
+ * Tests the S3FileMap.
  *
  * @group acquia_contenthub_s3
  * @coversDefaultClass \Drupal\acquia_contenthub_s3\S3FileMap

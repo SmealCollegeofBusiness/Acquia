@@ -5,7 +5,7 @@ namespace Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField;
 use Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent;
 
 /**
- * Trait FieldEntityDependencyTrait.
+ * Trait for consistency of field entity dependencies.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField
  */

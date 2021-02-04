@@ -8,7 +8,7 @@ use Drupal\acquia_contenthub\Event\BuildClientCdfEvent;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
 /**
- * Class ClientCDFTest.
+ * Tests the client cdf.
  *
  * @group acquia_contenthub
  *

@@ -8,6 +8,7 @@ use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\ContentHubPublishEntitiesEvent;
 use Drupal\acquia_contenthub\Event\DeleteRemoteEntityEvent;
+use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Entity\EntityInterface;
@@ -17,7 +18,7 @@ use Drupal\depcalc\DependentEntityWrapper;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Class ContentHubCommonActions.
+ * Common actions across the entirety of Content Hub.
  *
  * @package Drupal\acquia_contenthub
  */
@@ -175,13 +176,15 @@ class ContentHubCommonActions {
    * @return \Acquia\ContentHubClient\CDFDocument
    *   The CDFDocument object.
    *
-   * @throws \Exception
+   * @throws \Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException
    */
   public function getCdfDocument(string ...$uuids) { //@codingStandardsIgnoreLine
     $uuid_list = [];
     foreach ($uuids as $uuid) {
       if (!Uuid::isValid($uuid)) {
-        throw new \Exception(sprintf("Invalid uuid %s.", $uuid));
+        $exception = new ContentHubImportException(sprintf("Invalid uuid %s.", $uuid), 101);
+        $exception->setUuids([$uuid]);
+        throw $exception;
       }
       $uuid_list[$uuid] = $uuid;
     }
@@ -206,13 +209,16 @@ class ContentHubCommonActions {
    * @param array $uuids
    *   The list of expected uuids.
    *
-   * @throws \Exception
+   * @throws \Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException
    */
   protected function validateDocument(CDFDocument $document, array $uuids) {
     $uuids_count = count($uuids);
     $document_count = count($document->getEntities());
     if ($uuids_count > $document_count) {
-      throw new \Exception(sprintf("Did not retrieve all requested entities. %d of %d retrieved. Missing entities: %s", $document_count, $uuids_count, implode(", ", array_diff($uuids, array_keys($document->getEntities())))));
+      $diff_uuids = array_diff($uuids, array_keys($document->getEntities()));
+      $exception = new ContentHubImportException(sprintf("Did not retrieve all requested entities. %d of %d retrieved. Missing entities: %s", $document_count, $uuids_count, implode(", ", $diff_uuids)), 100);
+      $exception->setUuids($diff_uuids);
+      throw $exception;
     }
   }
 

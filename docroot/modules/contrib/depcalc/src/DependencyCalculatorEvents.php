@@ -66,4 +66,16 @@ final class DependencyCalculatorEvents {
    */
   const SECTION_COMPONENT_DEPENDENCIES_EVENT = "section_component_dependencies_event";
 
+  /**
+   * Name of the event fired with a dependency is invalidated from the cache.
+   *
+   * The event listener method recieves a
+   * \Drupal\depcalc\Event\InvalidateDependenciesEvent instance.
+   *
+   * @Event
+   *
+   * @see \Drupal\depcalc\Cache\DepcalcCacheBackend
+   */
+  const INVALIDATE_DEPENDENCIES = "depcalc_invalidate_dependencies";
+
 }

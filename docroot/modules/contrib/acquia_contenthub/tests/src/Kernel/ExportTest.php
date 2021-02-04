@@ -22,7 +22,7 @@ use Drupal\Tests\acquia_contenthub\Kernel\Stubs\DrupalVersion;
 use Drupal\user\Entity\User;
 
 /**
- * Class ExportTest.
+ * Tests entity exports.
  *
  * @group orca_ignore
  *
@@ -1611,7 +1611,7 @@ class ExportTest extends EntityKernelTestBase {
       'pass' => [
         'value' => [
           'en' => [
-            'pre_hashed' => true,
+            'pre_hashed' => TRUE,
           ],
         ],
       ],

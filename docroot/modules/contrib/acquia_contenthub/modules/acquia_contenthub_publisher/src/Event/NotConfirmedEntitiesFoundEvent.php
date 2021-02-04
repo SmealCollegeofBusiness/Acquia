@@ -5,7 +5,7 @@ namespace Drupal\acquia_contenthub_publisher\Event;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class NotConfirmedEntitiesFoundEvent.
+ * Event for not entities not yet in a confirmed state.
  *
  * @package Drupal\acquia_contenthub_publisher\Event
  */

@@ -7,7 +7,7 @@ use Drupal\acquia_contenthub\Event\AcquiaContentHubSettingsEvent;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Class GetSettingsFromEnvVarTest.
+ * Tests that environment variables can be used for settings.
  *
  * @group acquia_contenthub
  * @coversDefaultClass \Drupal\acquia_contenthub\EventSubscriber\GetSettings\GetSettingsFromEnvVar
@@ -56,6 +56,7 @@ class GetSettingsFromEnvVarTest extends KernelTestBase {
    *   Expected setting values.
    *
    * @dataProvider credentialsDataProvider
+   *
    * @throws \Exception
    */
   public function testGetSettingsFromEnvVar(array $credentials, string $settings_provider, array $expected_settings) {

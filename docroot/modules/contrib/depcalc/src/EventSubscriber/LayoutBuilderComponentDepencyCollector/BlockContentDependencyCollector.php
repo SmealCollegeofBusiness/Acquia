@@ -57,7 +57,8 @@ class BlockContentDependencyCollector implements EventSubscriberInterface {
     }
 
     $block_uuid = $plugin->getDerivativeId();
-    $entity = array_shift($this->entityTypeManager->getStorage('block_content')->loadByProperties(['uuid' => $block_uuid]));
+    $entities = $this->entityTypeManager->getStorage('block_content')->loadByProperties(['uuid' => $block_uuid]);
+    $entity = array_shift($entities);
     $event->addEntityDependency($entity);
   }
 
