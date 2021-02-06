@@ -26,7 +26,16 @@
                 "profile-root": "./docroot/profiles/contrib/acquia_cms"
             },
             "file-mapping": {
-                "[web-root]/.htaccess": false
+                "[web-root]/.htaccess": false,
+                "[profile-root]/.editorconfig": false,
+                "[profile-root]/.gitattributes": false,
+                "[profile-root]/hooks": false,
+                "[profile-root]/drush/sites/acms.site.yml": false,
+                "[profile-root]/.coveralls.yml": false,
+                "[profile-root]/.travis.yml": false,
+                "[profile-root]/.gitignore": false,
+                "[profile-root]/acquia-pipelines.yml": false,
+                "[profile-root]/grumphp.yml": false
             },
             "gitignore": true,
             "excludes": [
@@ -82,8 +91,7 @@
     "prefer-stable": true,
     "scripts": {
         "post-install-cmd": [
-            "@putenv PROFILE_DIR=./docroot/profiles/contrib/acquia_cms",
-            "composer install:frontend"
+            "@putenv PROFILE_DIR=./docroot/profiles/contrib/acquia_cms"
         ],
         "pre-update-cmd": [
             "@putenv COMPOSER_MEMORY_LIMIT=2G"
@@ -110,9 +118,6 @@
         ]
     },
     "config": {
-        "discard-changes": false,
-        "preferred-install": {
-            "acquia/acquia_cms": "dist"
-        }
+        "discard-changes": false
     }
 }

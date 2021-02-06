@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# set -ev
-set +e
-set -v
+set -e
 
 # Allow MySQL to finish starting.
 sleep 3
@@ -22,4 +20,4 @@ echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/t
 git config --global user.name "Travis-CI"
 git config --global user.email "noreply@travis-ci.com"
 
-# set +ev
+set +e

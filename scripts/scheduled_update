@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ev
+set -e
 
 # Pull in any upstream updates. ACMS theme builds will create Git changes that
 # need to be discarded, but the files can't be gitignored. BLT will correctly
@@ -22,4 +22,4 @@ else
   echo "Scheduled update complete."
 fi
 
-set +ev
+set +e

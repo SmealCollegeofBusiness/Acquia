@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'ffa933b567724076b0fc4b2493be2b6d0b2782e5',
+    'reference' => '7ab843b726da305e9c50cfb5558368f292bcaa52',
     'name' => 'acquia/sf_acms',
   ),
   'versions' => 
@@ -19,7 +19,7 @@
       array (
         0 => '9999999-dev',
       ),
-      'reference' => 'd6a097d15a7b4afca7388efb6e187126492d7612',
+      'reference' => '3fd574e8bdf5bb9c8c658975ffffea7bf9bf6d24',
     ),
     'acquia/blt' => 
     array (
@@ -107,7 +107,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'ffa933b567724076b0fc4b2493be2b6d0b2782e5',
+      'reference' => '7ab843b726da305e9c50cfb5558368f292bcaa52',
     ),
     'asm89/stack-cors' => 
     array (
@@ -1577,12 +1577,12 @@
     ),
     'drupal/search_api_solr' => 
     array (
-      'pretty_version' => '4.1.10',
-      'version' => '4.1.10.0',
+      'pretty_version' => '4.1.11',
+      'version' => '4.1.11.0',
       'aliases' => 
       array (
       ),
-      'reference' => '4.1.10',
+      'reference' => '4.1.11',
     ),
     'drupal/seckit' => 
     array (
@@ -1791,12 +1791,12 @@
     ),
     'drupal/webform' => 
     array (
-      'pretty_version' => '6.0.0',
-      'version' => '6.0.0.0',
+      'pretty_version' => '6.0.1',
+      'version' => '6.0.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => '6.0.0',
+      'reference' => '6.0.1',
     ),
     'drupal/workbench_email' => 
     array (
@@ -2712,12 +2712,12 @@
     ),
     'solarium/solarium' => 
     array (
-      'pretty_version' => '6.0.4',
-      'version' => '6.0.4.0',
+      'pretty_version' => '6.1.1',
+      'version' => '6.1.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'efdbb4c3cad33fbb8ac971f45405f5c1856b506b',
+      'reference' => 'a161014dea4799c46adeb542d0a25ec334dcccc2',
     ),
     'stack/builder' => 
     array (

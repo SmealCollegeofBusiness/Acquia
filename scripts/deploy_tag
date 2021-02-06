@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-set -ev
+set -e
 
 blt artifact:deploy --commit-msg "Automated commit by Travis CI for Build ${TRAVIS_TAG}" --tag "${TRAVIS_TAG}-build" --no-interaction --verbose
 
-set +v
+set +e

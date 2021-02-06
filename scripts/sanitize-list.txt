@@ -1,0 +1,14 @@
+docroot/profiles/contrib/acquia_cms/acquia-pipelines.yml
+docroot/profiles/contrib/acquia_cms/config/optional/views.view.acquia_search_solr.yml
+docroot/profiles/contrib/acquia_cms/.coveralls.yml
+docroot/profiles/contrib/acquia_cms/DEVELOPING.md
+-rf docroot/profiles/contrib/acquia_cms/drush/sites
+docroot/profiles/contrib/acquia_cms/.editorconfig
+docroot/profiles/contrib/acquia_cms/grumphp.yml
+-rf docroot/profiles/contrib/acquia_cms/hooks
+-rf docroot/profiles/contrib/acquia_cms/modules/acquia_cms_development
+docroot/profiles/contrib/acquia_cms/phpcs.xml.dist
+docroot/profiles/contrib/acquia_cms/phpunit.xml
+-rf docroot/profiles/contrib/acquia_cms/tests
+docroot/profiles/contrib/acquia_cms/.travis.yml
+docroot/profiles/contrib/acquia_cms/acquia_cms.png
