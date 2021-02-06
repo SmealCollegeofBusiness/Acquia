@@ -6,20 +6,19 @@
     'aliases' => 
     array (
     ),
-    'reference' => '7ab843b726da305e9c50cfb5558368f292bcaa52',
+    'reference' => '8a8a22c2e840cd8bb674993be6ceb604c8de522f',
     'name' => 'acquia/sf_acms',
   ),
   'versions' => 
   array (
     'acquia/acquia_cms' => 
     array (
-      'pretty_version' => 'dev-develop',
-      'version' => 'dev-develop',
+      'pretty_version' => '1.0.0-beta9',
+      'version' => '1.0.0.0-beta9',
       'aliases' => 
       array (
-        0 => '9999999-dev',
       ),
-      'reference' => '3fd574e8bdf5bb9c8c658975ffffea7bf9bf6d24',
+      'reference' => 'd6a097d15a7b4afca7388efb6e187126492d7612',
     ),
     'acquia/blt' => 
     array (
@@ -107,7 +106,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '7ab843b726da305e9c50cfb5558368f292bcaa52',
+      'reference' => '8a8a22c2e840cd8bb674993be6ceb604c8de522f',
     ),
     'asm89/stack-cors' => 
     array (

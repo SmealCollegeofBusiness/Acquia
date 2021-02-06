@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "04498f0e8d4cd5f81ab509759b369ab6",
+    "content-hash": "3d618b2ba3657c806a2c7f480e395b15",
     "packages": [
         {
             "name": "acquia/acquia_cms",
-            "version": "dev-develop",
+            "version": "1.0.0-beta9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/acquia/acquia_cms",
-                "reference": "3fd574e8bdf5bb9c8c658975ffffea7bf9bf6d24"
+                "reference": "d6a097d15a7b4afca7388efb6e187126492d7612"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acquia/acquia_cms/zipball/3fd574e8bdf5bb9c8c658975ffffea7bf9bf6d24",
-                "reference": "3fd574e8bdf5bb9c8c658975ffffea7bf9bf6d24",
+                "url": "https://api.github.com/repos/acquia/acquia_cms/zipball/d6a097d15a7b4afca7388efb6e187126492d7612",
+                "reference": "d6a097d15a7b4afca7388efb6e187126492d7612",
                 "shasum": ""
             },
             "require": {
@@ -93,7 +93,6 @@
                 "phpunit/phpunit": "~9.4.0",
                 "weitzman/drupal-test-traits": "^1.5"
             },
-            "default-branch": true,
             "type": "drupal-profile",
             "extra": {
                 "drupal-scaffold": {
@@ -231,7 +230,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "An implementation of Drupal 9 for running custom, low code websites on the Acquia platform.",
-            "time": "2021-02-05T03:04:30+00:00"
+            "time": "2021-02-03T14:18:20+00:00"
         },
         {
             "name": "acquia/blt",
@@ -16615,7 +16614,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "acquia/acquia_cms": 20,
         "drupal/samlauth": 20,
         "swichers/acsf-client": 20
     },
