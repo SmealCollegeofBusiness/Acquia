@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => 'bbea57d4eeb9453196e69d5132abaa65d358ba83',
+    'reference' => '7f8536144046754b96a3093a77b7b9b8d02c715e',
     'name' => 'acquia/sf_acms',
   ),
   'versions' => 
@@ -106,7 +106,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'bbea57d4eeb9453196e69d5132abaa65d358ba83',
+      'reference' => '7f8536144046754b96a3093a77b7b9b8d02c715e',
     ),
     'asm89/stack-cors' => 
     array (
