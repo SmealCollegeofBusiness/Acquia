@@ -2,24 +2,20 @@
 
 set -e
 
-# Pull in any upstream updates. ACMS theme builds will create Git changes that
-# need to be discarded, but the files can't be gitignored. BLT will correctly
-# commit compiled stylesheets to the deployed repo artifact. Also note that
 # Travis checks out the branch in a detached state, so we have to explicitly
 # checkout the branch.
 git checkout ${TRAVIS_BRANCH}
-composer config discard-changes true
 yes | composer update --prefer-dist
-composer config discard-changes false
 
-if git diff-index --quiet HEAD --; then
-  echo "No changes detected."
-else
-  # This should only ever run on the develop branch.
+if [[ `git status --porcelain` ]]; then
+  # Git status has returned results, meaning there are changes present and
+  # we need to commit them.
   git add -A
   git commit -m "Scheduled ACMS update commit by Travis CI for Build ${TRAVIS_BUILD_ID}" .
   git push origin ${TRAVIS_BRANCH}
   echo "Scheduled update complete."
+else
+  echo "No changes detected."
 fi
 
 set +e

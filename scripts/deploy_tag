@@ -2,6 +2,16 @@
 
 set -e
 
-blt artifact:deploy --commit-msg "Automated commit by Travis CI for Build ${TRAVIS_TAG}" --tag "${TRAVIS_TAG}-build" --no-interaction --verbose
+# Helper script to make sure we push both the tag and the branch commit
+# at the same time.
+
+if ! [[ `git status --porcelain` ]]; then
+  CURRENT_BRANCH=$(git symbolic-ref --short HEAD)
+  read -p "Enter a version tag (ex: 1.0.0): " TAG
+  git push --atomic origin ${CURRENT_BRANCH} ${TAG}
+else
+  echo "Working dir has uncommitted changes, commit them first before tagging."
+  exit;
+fi
 
 set +e

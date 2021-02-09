@@ -2,6 +2,15 @@
 
 set -e
 
+# Check to see if this is a tagged commit.
+COMMIT_TAG=$(git tag --points-at HEAD)
+
 blt artifact:deploy --commit-msg "Automated commit by Travis CI for Build ${TRAVIS_BUILD_ID}" --branch "${TRAVIS_BRANCH}-build" --no-interaction --verbose
+
+if [[ $COMMIT_TAG ]]; then
+  cd deploy
+  git tag ${COMMIT_TAG}
+  git remote | xargs -L1 -I R git push R ${COMMIT_TAG}
+fi
 
 set +e
