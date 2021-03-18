@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '48f4c6327947a24cbd64d1e96d25f19077bb6614',
+    'reference' => '9e09996dea42b463167deb391be8b6a04568ba56',
     'name' => 'acquia/sf_acms',
   ),
   'versions' => 
@@ -130,7 +130,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '48f4c6327947a24cbd64d1e96d25f19077bb6614',
+      'reference' => '9e09996dea42b463167deb391be8b6a04568ba56',
     ),
     'asm89/stack-cors' => 
     array (
