@@ -27,7 +27,7 @@ echo "Generated temporary Drush cache directory: $cache_dir."
 echo "Install additional ACSF modules on $DOMAIN domain in $ENVIRONMENT environment on the $SITEGROUP subscription."
 
 # Rebuild site studio.
-DRUSH_PATHS_CACHE_DIRECTORY="$cache_dir" $drush -l $DOMAIN en acsf_sso acsf_duplication
+DRUSH_PATHS_CACHE_DIRECTORY="$cache_dir" $drush -l $DOMAIN pm:enable acsf_sso acsf_duplication
 result=$?
 
 # Check and report back if the content is present on the homepage.

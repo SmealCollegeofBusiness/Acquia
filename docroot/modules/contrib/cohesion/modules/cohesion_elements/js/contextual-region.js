@@ -164,7 +164,7 @@
             maxRight = this.getMaxOfArray(rights);
             maxBottom = this.getMaxOfArray(bottoms);
 
-            if(maxRight > this.els.$window.width()) {
+            if(Math.floor(maxRight) > this.els.$window.width()) {
                 this.els.$mask.css({display: 'none'});
                 this.els.$region.css({display: 'none'});
             } else {

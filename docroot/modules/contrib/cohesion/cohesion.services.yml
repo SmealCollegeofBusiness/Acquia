@@ -50,7 +50,7 @@ services:
 
   cohesion.utils:
     class: Drupal\cohesion\Services\CohesionUtils
-    arguments: ['@theme_handler', '@theme.manager', '@entity_type.manager']
+    arguments: ['@theme_handler', '@theme.manager', '@entity_type.manager', '@language_manager']
 
   cohesion.xss:
     class: Drupal\cohesion\Services\JsonXss
@@ -80,7 +80,7 @@ services:
 
   cohesion.autocomplete_matcher:
     class: Drupal\cohesion\Entity\CohesionEntityAutocompleteMatcher
-    arguments: ['@plugin.manager.entity_reference_selection']
+    arguments: ['@plugin.manager.entity_reference_selection', '@entity_type.manager']
 
   # Usage
   plugin.manager.usage.processor:

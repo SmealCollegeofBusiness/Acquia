@@ -59,6 +59,13 @@ class ComponentContentController extends ControllerBase {
       if($component_content->id() === $exclude_component_content) {
         continue;
       }
+
+      $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+
+      if ($component_content->hasTranslation($language)) {
+        $component_content = $component_content->getTranslation($language);
+      }
+
       /** @var \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem $component_field */
       $component_field = $component_content->get('component')->first();
       if ($component_field) {

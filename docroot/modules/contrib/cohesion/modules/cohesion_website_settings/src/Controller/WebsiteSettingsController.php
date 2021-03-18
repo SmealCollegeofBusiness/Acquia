@@ -465,7 +465,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public static function batch($cron = FALSE, $verbose = FALSE) {
+  public static function batch($cron = FALSE, $verbose = FALSE, $no_cache_clear = FALSE) {
     // Reset temporary template list.
     \Drupal::keyValue('cohesion.temporary_template')->set('temporary_templates', []);
 
@@ -592,11 +592,13 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
       ]
     ];
 
-    $batch['operations'][] = [
-      'batch_drupal_flush_all_caches', [
-        'verbose' => $verbose
-      ]
-    ];
+    if(!$no_cache_clear) {
+      $batch['operations'][] = [
+        'batch_drupal_flush_all_caches', [
+          'verbose' => $verbose
+        ]
+      ];
+    }
 
     // Carry on!
     if ($cron) {

@@ -3,14 +3,13 @@
 namespace Drupal\cohesion_sync\Drush;
 
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\cohesion_sync\PackagerManager;
-use Drupal\Core\Entity\EntityRepository;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Site\Settings;
-use Drupal\Core\State\State;
-use Drupal\Core\File\FileSystem;
+use Drupal\Core\State\StateInterface;
 
 /**
  * Class CommandHelpers.
@@ -30,7 +29,7 @@ final class CommandHelpers {
   protected $entityTypeManager;
 
   /**
-   * @var \Drupal\Core\Config\ConfigFactory
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $configFactory;
 
@@ -40,7 +39,7 @@ final class CommandHelpers {
   protected $packagerManager;
 
   /**
-   * @var \Drupal\Core\Entity\EntityRepository
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
    */
   protected $entityRepository;
 
@@ -49,16 +48,15 @@ final class CommandHelpers {
    */
   protected $config;
 
-    /**
-     * The file system.
-     *
-    * @var \Drupal\Core\File\FileSystem
-     */
-    protected $fileSystem;
-
+  /**
+   * The file system.
+   *
+  * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
 
   /**
-   * @var \Drupal\Core\State\State
+   * @var \Drupal\Core\State\StateInterface
    */
   protected $state;
 
@@ -68,11 +66,11 @@ final class CommandHelpers {
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    * @param \Drupal\cohesion_sync\PackagerManager $packagerManager
-   * @param \Drupal\Core\Entity\EntityRepository $entityRepository
-   * @param \Drupal\Core\State\State $state
-   * @param \Drupal\Core\File\FileSystem $fileSystem
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository
+   * @param \Drupal\Core\State\StateInterface $state
+   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, PackagerManager $packagerManager, EntityRepository $entityRepository, State $state, FileSystem $fileSystem) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, PackagerManager $packagerManager, EntityRepositoryInterface $entityRepository, StateInterface $state, FileSystemInterface $fileSystem) {
     $this->entityTypeManager = $entityTypeManager;
     $this->configFactory = $configFactory;
     $this->packagerManager = $packagerManager;
@@ -194,18 +192,24 @@ final class CommandHelpers {
   }
 
   /**
-   * @param $overwrite
-   * @param $keep
-   * @param $path
-   * @param $force
    *
-   * @return string
+   * Import a package from a path or the Site Studio sync directory
+   *
+   * @param bool $overwrite
+   * @param bool $keep
+   * @param string|NULL $path
+   * @param bool $force
+   * @param bool $no_rebuild
+   *   True if no entity rebuilds are required.
+   * @param bool $no_maintenance
+   *
    * @throws \Exception
+   *
+   * @return array The batch operations
    */
-  public function import($overwrite, $keep, $path, $force = FALSE) {
+  public function import($overwrite, $keep, $path, $force = FALSE, $no_rebuild = FALSE, $no_maintenance = FALSE) {
 
     $paths = [];
-    $messages = [];
 
     // Path was specified by the user.
     if ($path !== NULL) {
@@ -214,10 +218,10 @@ final class CommandHelpers {
     // Full import (no paths specified, so look up from settings.php)
     else {
       // For a full import, set the site to maintenance mode.
-      $this->state->set('system.maintenance_mode', TRUE);
+      $no_maintenance ?: $this->state->set('system.maintenance_mode', TRUE);
 
       // Make sure the config sync directory has been set.
-     $dir = $this->getSyncDirectory();
+      $dir = $this->getSyncDirectory();
 
       try {
         $this->fileSystem->scanDirectory($dir, '/.package.yml_$/', [
@@ -231,16 +235,19 @@ final class CommandHelpers {
       }
 
       if (empty($paths)) {
-        $messages[] = 'No *.package.yml_ files found in ' . $dir;
+        throw new \Exception('No *.package.yml_ files found in ' . $dir);
       }
     }
 
+    $batch_operations = [];
+
     // Import each file in the paths list.
     foreach ($paths as $path) {
+
       try {
         $action_data = $this->packagerManager->validateYamlPackageStream($path);
-        // Prevent from importing if some content will be broken/lost and it is set to overwrite all entities
-        if($overwrite && !$force) {
+        // Prevent from importing if some content will be broken/lost and it is set to overwrite all entities.
+        if ($overwrite && !$force) {
           $broken_entities = $this->packagerManager->validateYamlPackageContentIntegrity($path);
           $error_messages = [];
           $drupal_translate = \Drupal::translation();
@@ -255,14 +262,14 @@ final class CommandHelpers {
             }
           }
 
-          if(!empty($error_messages)) {
+          if (!empty($error_messages)) {
             $error_messages[] = "\n" . $drupal_translate->translate('You can choose to ignore and proceed with the import by adding `--force` to your command');
             throw new \Exception(implode("\n", $error_messages));
           }
         }
       }
       catch (\Exception $e) {
-        $this->state->set('system.maintenance_mode', FALSE);
+        $no_maintenance ?: $this->state->set('system.maintenance_mode', FALSE);
         throw new \Exception('Error in ' . $path . ' ' . $e->getMessage());
       }
 
@@ -279,13 +286,15 @@ final class CommandHelpers {
       }
 
       // Process the action items.
-      $applied_count = $this->packagerManager->applyYamlPackageStream($path, $action_data);
-
-      $messages[] = 'Imported ' . $applied_count . ' items from package: ' . $path;
+      $batch_operations = array_merge($batch_operations, $this->packagerManager->applyBatchYamlPackageStream($path, $action_data, $no_rebuild));
+      $batch_operations[] = [
+        '\Drupal\cohesion_sync\Controller\BatchImportController::batchReportCallback',
+        [$path]
+      ];
     }
 
-    $this->state->set('system.maintenance_mode', FALSE);
-    return implode("\n", $messages);
+    $no_maintenance ?: $this->state->set('system.maintenance_mode', FALSE);
+    return $batch_operations;
   }
 
 }

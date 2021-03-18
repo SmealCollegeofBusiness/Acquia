@@ -61,9 +61,9 @@ final class DX8CommandHelpers {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public static function rebuild(array $options = []) {
+  public static function rebuild(array $options = ['no-cache-clear' => FALSE]) {
     // Reset temporary template list.
-    $batch = WebsiteSettingsController::batch(TRUE, $options['verbose']);
+    $batch = WebsiteSettingsController::batch(TRUE, $options['verbose'], $options['no-cache-clear']);
     batch_set($batch);
     $batch['progressive'] = FALSE;
     return drush_backend_batch_process();

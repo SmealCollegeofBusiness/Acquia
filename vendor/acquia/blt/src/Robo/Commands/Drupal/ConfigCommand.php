@@ -100,6 +100,16 @@ class ConfigCommand extends BltTasks {
         break;
 
       case 'config-split':
+        // Drush task explicitly to turn on config_split and check if it was
+        // successfully enabled. Otherwise default to core-only.
+        $check_task = $this->taskDrush();
+        $check_task->drush("pm-enable")->arg('config_split');
+        $result = $check_task->run();
+        if (!$result->wasSuccessful()) {
+          $this->logger->warning('Import strategy is config-split, but the config_split module does not exist. Falling back to core-only.');
+          $this->importCoreOnly($task, $cm_core_key);
+          break;
+        }
         $this->importConfigSplit($task, $cm_core_key);
         break;
     }
@@ -138,7 +148,6 @@ class ConfigCommand extends BltTasks {
    *   Cm core key.
    */
   protected function importConfigSplit($task, $cm_core_key) {
-    $task->drush("pm-enable")->arg('config_split');
     $task->drush("config-import")->arg($cm_core_key);
     // Runs a second import to ensure splits are
     // both defined and imported.

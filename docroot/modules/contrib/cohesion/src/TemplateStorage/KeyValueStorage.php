@@ -97,7 +97,7 @@ final class KeyValueStorage extends TemplateStorageBase {
 
     foreach ($this->keyValue->getAll() as $key => $template) {
       if (strpos($key, 'temporary::') === FALSE) {
-        $templates[] = $template[0];
+        $templates[] = reset($template);
       }
     }
     return $templates;

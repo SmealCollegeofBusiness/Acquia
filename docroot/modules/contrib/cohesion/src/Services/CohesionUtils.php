@@ -10,6 +10,7 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
@@ -37,16 +38,25 @@ class CohesionUtils {
   protected $entityTypeManager;
 
   /**
+  * The language manager service.
+  *
+  * @var \Drupal\Core\Language\LanguageManagerInterface
+  */
+  protected $languageManager;
+
+  /**
    * CohesionUtils constructor.
    *
    * @param \Drupal\Core\Extension\ThemeHandlerInterface $theme_handler
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    */
-  public function __construct(ThemeHandlerInterface $theme_handler, ThemeManagerInterface $theme_manager, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(ThemeHandlerInterface $theme_handler, ThemeManagerInterface $theme_manager, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager) {
     $this->themeHandler = $theme_handler;
     $this->themeManager = $theme_manager;
     $this->entityTypeManager = $entity_type_manager;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -410,7 +420,7 @@ class CohesionUtils {
             if ($entity_type = \Drupal::service('entity_type.manager')
               ->getStorage($entity_type_id)) {
               if ($entity = $entity_type->load($entity_id)) {
-                $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+                $language = $this->languageManager->getCurrentLanguage()->getId();
                 if($entity->hasTranslation($language)){
                   $entity = $entity->getTranslation($language);
                 }
@@ -470,6 +480,11 @@ class CohesionUtils {
     $components_content = ComponentContent::loadMultiple($component_content_ids);
     foreach ($components_content as $component_content) {
       $category_entity = $component_content->getComponent()->getCategoryEntity();
+
+      $language = $this->languageManager->getCurrentLanguage()->getId();
+      if ($component_content->hasTranslation($language)) {
+        $component_content = $component_content->getTranslation($language);
+      }
 
       $components_content_data[$component_content->id()] = array_merge([
         'title' => $component_content->label(),

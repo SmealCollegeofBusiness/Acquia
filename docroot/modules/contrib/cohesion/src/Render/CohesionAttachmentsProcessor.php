@@ -11,6 +11,7 @@ use Drupal\Core\Render\AttachmentsInterface;
 use Drupal\Core\Render\AttachmentsResponseProcessorInterface;
 use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\HtmlResponseAttachmentsProcessor;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Render\RendererInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -75,13 +76,7 @@ class CohesionAttachmentsProcessor extends HtmlResponseAttachmentsProcessor {
         if (!is_string($cohesion_attachment)) {
           throw new \LogicException(sprintf('Site Studio attachment must be of string, %s given', gettype($cohesion_attachment)));
         }
-
-        $template = [
-          '#type' => 'inline_template',
-          '#template' => $cohesion_attachment,
-        ];
-
-        $processed_cohesion_attachments[] = $this->renderer->renderRoot($template);
+        $processed_cohesion_attachments[] = Markup::create($cohesion_attachment);
       }
     }
 

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit86199d906ceb95511289297d56a5140c
+class ComposerStaticInita541406ac3a85118ab1fa36d0edb76a3
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -40,10 +40,10 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
         '2f69d3914119f042cca9e44442d5ce95' => __DIR__ . '/../..' . '/docroot/core/includes/bootstrap.inc',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
-        '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
-        '952683d815ff0a7bf322b93c0be7e4e4' => __DIR__ . '/..' . '/chi-teck/drupal-code-generator/src/bootstrap.php',
         '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
         '8cff32064859f4559445b89279f3199c' => __DIR__ . '/..' . '/php-http/message/src/filters.php',
+        '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
+        '952683d815ff0a7bf322b93c0be7e4e4' => __DIR__ . '/..' . '/chi-teck/drupal-code-generator/src/bootstrap.php',
         '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
         'fbeead2280a8f3911a1fe6dd034f7d5e' => __DIR__ . '/..' . '/mkalkbrenner/php-htmldiff-advanced/src/HtmlDiffAdvancedInterface.php',
         '96f8d8288528d52059397cad6ec61f17' => __DIR__ . '/..' . '/mkalkbrenner/php-htmldiff-advanced/src/HtmlDiffAdvanced.php',
@@ -131,7 +131,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
             'Solarium\\' => 9,
             'Shaper\\Tests\\' => 13,
             'Shaper\\' => 7,
-            'SensioLabs\\Security\\' => 20,
             'SelfUpdate\\' => 11,
         ),
         'R' => 
@@ -210,6 +209,7 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
             'Ergebnis\\Json\\Printer\\' => 22,
             'Ergebnis\\Json\\Normalizer\\' => 25,
             'Ergebnis\\Composer\\Normalize\\' => 28,
+            'Enlightn\\SecurityChecker\\' => 25,
             'Egulias\\EmailValidator\\' => 23,
         ),
         'D' => 
@@ -244,7 +244,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
             'Consolidation\\AnnotatedCommand\\' => 31,
             'Composer\\Semver\\' => 16,
             'Composer\\Installers\\' => 20,
-            'Composer\\CaBundle\\' => 18,
             'CommerceGuys\\Addressing\\' => 24,
             'Clue\\StreamFilter\\' => 18,
         ),
@@ -469,10 +468,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         array (
             0 => __DIR__ . '/..' . '/e0ipso/shaper/src',
         ),
-        'SensioLabs\\Security\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/sensiolabs/security-checker/SensioLabs/Security',
-        ),
         'SelfUpdate\\' => 
         array (
             0 => __DIR__ . '/..' . '/consolidation/self-update/src',
@@ -655,6 +650,10 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         array (
             0 => __DIR__ . '/..' . '/ergebnis/composer-normalize/src',
         ),
+        'Enlightn\\SecurityChecker\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/enlightn/security-checker/src',
+        ),
         'Egulias\\EmailValidator\\' => 
         array (
             0 => __DIR__ . '/..' . '/egulias/email-validator/src',
@@ -766,10 +765,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
-        ),
-        'Composer\\CaBundle\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
         ),
         'CommerceGuys\\Addressing\\' => 
         array (
@@ -883,7 +878,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Acquia\\Blt\\Composer\\Plugin' => __DIR__ . '/..' . '/acquia/blt/src/Composer/Plugin.php',
         'Acquia\\Blt\\Robo\\Application' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Application.php',
         'Acquia\\Blt\\Robo\\Blt' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Blt.php',
-        'Acquia\\Blt\\Robo\\BltCommandInfoAlterer' => __DIR__ . '/..' . '/acquia/blt/src/Robo/BltCommandInfoAlterer.php',
         'Acquia\\Blt\\Robo\\BltTasks' => __DIR__ . '/..' . '/acquia/blt/src/Robo/BltTasks.php',
         'Acquia\\Blt\\Robo\\Commands\\Artifact\\AcHooksCommand' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Commands/Artifact/AcHooksCommand.php',
         'Acquia\\Blt\\Robo\\Commands\\Artifact\\DeployCommand' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Commands/Artifact/DeployCommand.php',
@@ -975,7 +969,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Acquia\\Blt\\Robo\\Tasks\\RunTestsTask' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Tasks/RunTestsTask.php',
         'Acquia\\Blt\\Robo\\Wizards\\SetupWizard' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Wizards/SetupWizard.php',
         'Acquia\\Blt\\Robo\\Wizards\\Wizard' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Wizards/Wizard.php',
-        'Acquia\\Blt\\Update\\DoPackagistConverter' => __DIR__ . '/..' . '/acquia/blt/src/Update/DoPackagistConverter.php',
         'Acquia\\Blt\\Update\\Updater' => __DIR__ . '/..' . '/acquia/blt/src/Update/Updater.php',
         'Acquia\\Blt\\Update\\Updates' => __DIR__ . '/..' . '/acquia/blt/src/Update/Updates.php',
         'Acquia\\ContentHubClient\\Asset' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Asset.php',
@@ -997,6 +990,8 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Acquia\\ContentHubClient\\Settings' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Settings.php',
         'Acquia\\ContentHubClient\\Webhook' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Webhook.php',
         'Acquia\\DrupalEnvironmentDetector\\AcquiaDrupalEnvironmentDetector' => __DIR__ . '/..' . '/acquia/drupal-environment-detector/src/AcquiaDrupalEnvironmentDetector.php',
+        'Acquia\\DrupalEnvironmentDetector\\EnvironmentNames' => __DIR__ . '/..' . '/acquia/drupal-environment-detector/src/EnvironmentNames.php',
+        'Acquia\\DrupalEnvironmentDetector\\FilePaths' => __DIR__ . '/..' . '/acquia/drupal-environment-detector/src/FilePaths.php',
         'Acquia\\Hmac\\AuthorizationHeader' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/AuthorizationHeader.php',
         'Acquia\\Hmac\\AuthorizationHeaderBuilder' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/AuthorizationHeaderBuilder.php',
         'Acquia\\Hmac\\AuthorizationHeaderInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/AuthorizationHeaderInterface.php',
@@ -1096,7 +1091,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'CommerceGuys\\Addressing\\Validator\\Constraints\\CountryConstraintValidator' => __DIR__ . '/..' . '/commerceguys/addressing/src/Validator/Constraints/CountryConstraintValidator.php',
         'CommerceGuys\\Addressing\\Zone\\Zone' => __DIR__ . '/..' . '/commerceguys/addressing/src/Zone/Zone.php',
         'CommerceGuys\\Addressing\\Zone\\ZoneTerritory' => __DIR__ . '/..' . '/commerceguys/addressing/src/Zone/ZoneTerritory.php',
-        'Composer\\CaBundle\\CaBundle' => __DIR__ . '/..' . '/composer/ca-bundle/src/CaBundle.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Composer\\Installers\\AglInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AglInstaller.php',
         'Composer\\Installers\\AimeosInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AimeosInstaller.php',
@@ -1393,7 +1387,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Consolidation\\OutputFormatters\\Validate\\ValidDataTypesInterface' => __DIR__ . '/..' . '/consolidation/output-formatters/src/Validate/ValidDataTypesInterface.php',
         'Consolidation\\OutputFormatters\\Validate\\ValidDataTypesTrait' => __DIR__ . '/..' . '/consolidation/output-formatters/src/Validate/ValidDataTypesTrait.php',
         'Consolidation\\OutputFormatters\\Validate\\ValidationInterface' => __DIR__ . '/..' . '/consolidation/output-formatters/src/Validate/ValidationInterface.php',
-        'Consolidation\\SiteAlias\\Cli\\SiteAliasCommands' => __DIR__ . '/..' . '/consolidation/site-alias/src/Cli/SiteAliasCommands.php',
         'Consolidation\\SiteAlias\\DataFileLoaderInterface' => __DIR__ . '/..' . '/consolidation/site-alias/src/DataFileLoaderInterface.php',
         'Consolidation\\SiteAlias\\HostPath' => __DIR__ . '/..' . '/consolidation/site-alias/src/HostPath.php',
         'Consolidation\\SiteAlias\\SiteAlias' => __DIR__ . '/..' . '/consolidation/site-alias/src/SiteAlias.php',
@@ -1419,7 +1412,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Consolidation\\SiteProcess\\ProcessManager' => __DIR__ . '/..' . '/consolidation/site-process/src/ProcessManager.php',
         'Consolidation\\SiteProcess\\ProcessManagerAwareInterface' => __DIR__ . '/..' . '/consolidation/site-process/src/ProcessManagerAwareInterface.php',
         'Consolidation\\SiteProcess\\ProcessManagerAwareTrait' => __DIR__ . '/..' . '/consolidation/site-process/src/ProcessManagerAwareTrait.php',
-        'Consolidation\\SiteProcess\\Remo\\RemoCommands' => __DIR__ . '/..' . '/consolidation/site-process/src/Remo/RemoCommands.php',
         'Consolidation\\SiteProcess\\SiteProcess' => __DIR__ . '/..' . '/consolidation/site-process/src/SiteProcess.php',
         'Consolidation\\SiteProcess\\Transport\\DockerComposeTransport' => __DIR__ . '/..' . '/consolidation/site-process/src/Transport/DockerComposeTransport.php',
         'Consolidation\\SiteProcess\\Transport\\LocalTransport' => __DIR__ . '/..' . '/consolidation/site-process/src/Transport/LocalTransport.php',
@@ -1467,6 +1459,7 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Doctrine\\Common\\Annotations\\Annotation\\Attributes' => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations/Annotation/Attributes.php',
         'Doctrine\\Common\\Annotations\\Annotation\\Enum' => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations/Annotation/Enum.php',
         'Doctrine\\Common\\Annotations\\Annotation\\IgnoreAnnotation' => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations/Annotation/IgnoreAnnotation.php',
+        'Doctrine\\Common\\Annotations\\Annotation\\NamedArgumentConstructor' => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations/Annotation/NamedArgumentConstructor.php',
         'Doctrine\\Common\\Annotations\\Annotation\\Required' => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations/Annotation/Required.php',
         'Doctrine\\Common\\Annotations\\Annotation\\Target' => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations/Annotation/Target.php',
         'Doctrine\\Common\\Annotations\\CachedReader' => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations/CachedReader.php',
@@ -3361,6 +3354,7 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Drupal\\Driver\\Database\\mysql\\Install\\Tasks' => __DIR__ . '/..' . '/drupal/mysql56/Install/Tasks.php',
         'Drupal\\Driver\\Database\\mysql\\Schema' => __DIR__ . '/..' . '/drupal/mysql56/Schema.php',
         'Drupal\\Driver\\Database\\mysql\\Upsert' => __DIR__ . '/..' . '/drupal/mysql56/Upsert.php',
+        'Drupal\\acquia_cms\\Composer\\ConfigureProject' => __DIR__ . '/../..' . '/docroot/profiles/contrib/acquia_cms/src/Composer/ConfigureProject.php',
         'Drupal\\acsf\\AcsfConfig' => __DIR__ . '/../..' . '/docroot/modules/contrib/acsf/src/AcsfConfig.php',
         'Drupal\\acsf\\AcsfConfigDefault' => __DIR__ . '/../..' . '/docroot/modules/contrib/acsf/src/AcsfConfigDefault.php',
         'Drupal\\acsf\\AcsfConfigIncompleteException' => __DIR__ . '/../..' . '/docroot/modules/contrib/acsf/src/AcsfConfigIncompleteException.php',
@@ -3499,6 +3493,7 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Drush\\Drupal\\Commands\\core\\LanguageCommands' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Commands/core/LanguageCommands.php',
         'Drush\\Drupal\\Commands\\core\\LocaleCommands' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Commands/core/LocaleCommands.php',
         'Drush\\Drupal\\Commands\\core\\MessengerCommands' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Commands/core/MessengerCommands.php',
+        'Drush\\Drupal\\Commands\\core\\MigrateRunnerCommands' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Commands/core/MigrateRunnerCommands.php',
         'Drush\\Drupal\\Commands\\core\\QueueCommands' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Commands/core/QueueCommands.php',
         'Drush\\Drupal\\Commands\\core\\RoleCommands' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Commands/core/RoleCommands.php',
         'Drush\\Drupal\\Commands\\core\\StateCommands' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Commands/core/StateCommands.php',
@@ -3522,6 +3517,13 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Drush\\Drupal\\ExtensionDiscovery' => __DIR__ . '/..' . '/drush/drush/src/Drupal/ExtensionDiscovery.php',
         'Drush\\Drupal\\FindCommandsCompilerPass' => __DIR__ . '/..' . '/drush/drush/src/Drupal/FindCommandsCompilerPass.php',
         'Drush\\Drupal\\InstallerKernel' => __DIR__ . '/..' . '/drush/drush/src/Drupal/InstallerKernel.php',
+        'Drush\\Drupal\\Migrate\\MigrateEvents' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Migrate/MigrateEvents.php',
+        'Drush\\Drupal\\Migrate\\MigrateExecutable' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Migrate/MigrateExecutable.php',
+        'Drush\\Drupal\\Migrate\\MigrateIdMapFilter' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Migrate/MigrateIdMapFilter.php',
+        'Drush\\Drupal\\Migrate\\MigrateMessage' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Migrate/MigrateMessage.php',
+        'Drush\\Drupal\\Migrate\\MigrateMissingSourceRowsEvent' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Migrate/MigrateMissingSourceRowsEvent.php',
+        'Drush\\Drupal\\Migrate\\MigratePrepareRowEvent' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Migrate/MigratePrepareRowEvent.php',
+        'Drush\\Drupal\\Migrate\\MigrateUtils' => __DIR__ . '/..' . '/drush/drush/src/Drupal/Migrate/MigrateUtils.php',
         'Drush\\Drupal\\UpdateKernel' => __DIR__ . '/..' . '/drush/drush/src/Drupal/UpdateKernel.php',
         'Drush\\Drush' => __DIR__ . '/..' . '/drush/drush/src/Drush.php',
         'Drush\\Exceptions\\CommandFailedException' => __DIR__ . '/..' . '/drush/drush/src/Exceptions/CommandFailedException.php',
@@ -3653,6 +3655,16 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Egulias\\EmailValidator\\Warning\\QuotedString' => __DIR__ . '/..' . '/egulias/email-validator/src/Warning/QuotedString.php',
         'Egulias\\EmailValidator\\Warning\\TLD' => __DIR__ . '/..' . '/egulias/email-validator/src/Warning/TLD.php',
         'Egulias\\EmailValidator\\Warning\\Warning' => __DIR__ . '/..' . '/egulias/email-validator/src/Warning/Warning.php',
+        'Enlightn\\SecurityChecker\\AdvisoryAnalyzer' => __DIR__ . '/..' . '/enlightn/security-checker/src/AdvisoryAnalyzer.php',
+        'Enlightn\\SecurityChecker\\AdvisoryFetcher' => __DIR__ . '/..' . '/enlightn/security-checker/src/AdvisoryFetcher.php',
+        'Enlightn\\SecurityChecker\\AdvisoryParser' => __DIR__ . '/..' . '/enlightn/security-checker/src/AdvisoryParser.php',
+        'Enlightn\\SecurityChecker\\AnsiFormatter' => __DIR__ . '/..' . '/enlightn/security-checker/src/AnsiFormatter.php',
+        'Enlightn\\SecurityChecker\\Composer' => __DIR__ . '/..' . '/enlightn/security-checker/src/Composer.php',
+        'Enlightn\\SecurityChecker\\Filesystem' => __DIR__ . '/..' . '/enlightn/security-checker/src/Filesystem.php',
+        'Enlightn\\SecurityChecker\\FormatterInterface' => __DIR__ . '/..' . '/enlightn/security-checker/src/FormatterInterface.php',
+        'Enlightn\\SecurityChecker\\JsonFormatter' => __DIR__ . '/..' . '/enlightn/security-checker/src/JsonFormatter.php',
+        'Enlightn\\SecurityChecker\\SecurityChecker' => __DIR__ . '/..' . '/enlightn/security-checker/src/SecurityChecker.php',
+        'Enlightn\\SecurityChecker\\SecurityCheckerCommand' => __DIR__ . '/..' . '/enlightn/security-checker/src/SecurityCheckerCommand.php',
         'Ergebnis\\Composer\\Normalize\\Command\\NormalizeCommand' => __DIR__ . '/..' . '/ergebnis/composer-normalize/src/Command/NormalizeCommand.php',
         'Ergebnis\\Composer\\Normalize\\Exception\\Exception' => __DIR__ . '/..' . '/ergebnis/composer-normalize/src/Exception/Exception.php',
         'Ergebnis\\Composer\\Normalize\\Exception\\ShouldNotHappen' => __DIR__ . '/..' . '/ergebnis/composer-normalize/src/Exception/ShouldNotHappen.php',
@@ -4355,6 +4367,8 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Laminas\\Feed\\Reader\\Extension\\DublinCore\\Feed' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Reader/Extension/DublinCore/Feed.php',
         'Laminas\\Feed\\Reader\\Extension\\GooglePlayPodcast\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Reader/Extension/GooglePlayPodcast/Entry.php',
         'Laminas\\Feed\\Reader\\Extension\\GooglePlayPodcast\\Feed' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Reader/Extension/GooglePlayPodcast/Feed.php',
+        'Laminas\\Feed\\Reader\\Extension\\PodcastIndex\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Reader/Extension/PodcastIndex/Entry.php',
+        'Laminas\\Feed\\Reader\\Extension\\PodcastIndex\\Feed' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Reader/Extension/PodcastIndex/Feed.php',
         'Laminas\\Feed\\Reader\\Extension\\Podcast\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Reader/Extension/Podcast/Entry.php',
         'Laminas\\Feed\\Reader\\Extension\\Podcast\\Feed' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Reader/Extension/Podcast/Feed.php',
         'Laminas\\Feed\\Reader\\Extension\\Slash\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Reader/Extension/Slash/Entry.php',
@@ -4401,6 +4415,10 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Laminas\\Feed\\Writer\\Extension\\ITunes\\Feed' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/ITunes/Feed.php',
         'Laminas\\Feed\\Writer\\Extension\\ITunes\\Renderer\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/ITunes/Renderer/Entry.php',
         'Laminas\\Feed\\Writer\\Extension\\ITunes\\Renderer\\Feed' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/ITunes/Renderer/Feed.php',
+        'Laminas\\Feed\\Writer\\Extension\\PodcastIndex\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/PodcastIndex/Entry.php',
+        'Laminas\\Feed\\Writer\\Extension\\PodcastIndex\\Feed' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/PodcastIndex/Feed.php',
+        'Laminas\\Feed\\Writer\\Extension\\PodcastIndex\\Renderer\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/PodcastIndex/Renderer/Entry.php',
+        'Laminas\\Feed\\Writer\\Extension\\PodcastIndex\\Renderer\\Feed' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/PodcastIndex/Renderer/Feed.php',
         'Laminas\\Feed\\Writer\\Extension\\RendererInterface' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/RendererInterface.php',
         'Laminas\\Feed\\Writer\\Extension\\Slash\\Renderer\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/Slash/Renderer/Entry.php',
         'Laminas\\Feed\\Writer\\Extension\\Threading\\Renderer\\Entry' => __DIR__ . '/..' . '/laminas/laminas-feed/src/Writer/Extension/Threading/Renderer/Entry.php',
@@ -4968,6 +4986,7 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'PharIo\\Version\\GreaterThanOrEqualToVersionConstraint' => __DIR__ . '/..' . '/phar-io/version/src/constraints/GreaterThanOrEqualToVersionConstraint.php',
         'PharIo\\Version\\InvalidPreReleaseSuffixException' => __DIR__ . '/..' . '/phar-io/version/src/exceptions/InvalidPreReleaseSuffixException.php',
         'PharIo\\Version\\InvalidVersionException' => __DIR__ . '/..' . '/phar-io/version/src/exceptions/InvalidVersionException.php',
+        'PharIo\\Version\\NoPreReleaseSuffixException' => __DIR__ . '/..' . '/phar-io/version/src/exceptions/NoPreReleaseSuffixException.php',
         'PharIo\\Version\\OrVersionConstraintGroup' => __DIR__ . '/..' . '/phar-io/version/src/constraints/OrVersionConstraintGroup.php',
         'PharIo\\Version\\PreReleaseSuffix' => __DIR__ . '/..' . '/phar-io/version/src/PreReleaseSuffix.php',
         'PharIo\\Version\\SpecificMajorAndMinorVersionConstraint' => __DIR__ . '/..' . '/phar-io/version/src/constraints/SpecificMajorAndMinorVersionConstraint.php',
@@ -5877,13 +5896,6 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'SebastianBergmann\\Type\\VoidType' => __DIR__ . '/..' . '/sebastian/type/src/VoidType.php',
         'SebastianBergmann\\Version' => __DIR__ . '/..' . '/sebastian/version/src/Version.php',
         'SelfUpdate\\SelfUpdateCommand' => __DIR__ . '/..' . '/consolidation/self-update/src/SelfUpdateCommand.php',
-        'SensioLabs\\Security\\Command\\SecurityCheckerCommand' => __DIR__ . '/..' . '/sensiolabs/security-checker/SensioLabs/Security/Command/SecurityCheckerCommand.php',
-        'SensioLabs\\Security\\Crawler' => __DIR__ . '/..' . '/sensiolabs/security-checker/SensioLabs/Security/Crawler.php',
-        'SensioLabs\\Security\\Exception\\ExceptionInterface' => __DIR__ . '/..' . '/sensiolabs/security-checker/SensioLabs/Security/Exception/ExceptionInterface.php',
-        'SensioLabs\\Security\\Exception\\HttpException' => __DIR__ . '/..' . '/sensiolabs/security-checker/SensioLabs/Security/Exception/HttpException.php',
-        'SensioLabs\\Security\\Exception\\RuntimeException' => __DIR__ . '/..' . '/sensiolabs/security-checker/SensioLabs/Security/Exception/RuntimeException.php',
-        'SensioLabs\\Security\\Result' => __DIR__ . '/..' . '/sensiolabs/security-checker/SensioLabs/Security/Result.php',
-        'SensioLabs\\Security\\SecurityChecker' => __DIR__ . '/..' . '/sensiolabs/security-checker/SensioLabs/Security/SecurityChecker.php',
         'Shaper\\DataAdaptor\\DataAdaptorBase' => __DIR__ . '/..' . '/e0ipso/shaper/src/DataAdaptor/DataAdaptorBase.php',
         'Shaper\\DataAdaptor\\DataAdaptorTransformerTrait' => __DIR__ . '/..' . '/e0ipso/shaper/src/DataAdaptor/DataAdaptorTransformerTrait.php',
         'Shaper\\DataAdaptor\\DataAdaptorValidatorTrait' => __DIR__ . '/..' . '/e0ipso/shaper/src/DataAdaptor/DataAdaptorValidatorTrait.php',
@@ -6310,6 +6322,8 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Stiphle\\Throttle\\ThrottleInterface' => __DIR__ . '/..' . '/davedevelopment/stiphle/src/Stiphle/Throttle/ThrottleInterface.php',
         'Stiphle\\Throttle\\TimeWindow' => __DIR__ . '/..' . '/davedevelopment/stiphle/src/Stiphle/Throttle/TimeWindow.php',
         'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'Symfony\\Bridge\\PsrHttpMessage\\ArgumentValueResolver\\PsrServerRequestResolver' => __DIR__ . '/..' . '/symfony/psr-http-message-bridge/ArgumentValueResolver/PsrServerRequestResolver.php',
+        'Symfony\\Bridge\\PsrHttpMessage\\EventListener\\PsrResponseListener' => __DIR__ . '/..' . '/symfony/psr-http-message-bridge/EventListener/PsrResponseListener.php',
         'Symfony\\Bridge\\PsrHttpMessage\\Factory\\HttpFoundationFactory' => __DIR__ . '/..' . '/symfony/psr-http-message-bridge/Factory/HttpFoundationFactory.php',
         'Symfony\\Bridge\\PsrHttpMessage\\Factory\\PsrHttpFactory' => __DIR__ . '/..' . '/symfony/psr-http-message-bridge/Factory/PsrHttpFactory.php',
         'Symfony\\Bridge\\PsrHttpMessage\\Factory\\UploadedFile' => __DIR__ . '/..' . '/symfony/psr-http-message-bridge/Factory/UploadedFile.php',
@@ -6786,6 +6800,7 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'Symfony\\Component\\Finder\\Iterator\\FileTypeFilterIterator' => __DIR__ . '/..' . '/symfony/finder/Iterator/FileTypeFilterIterator.php',
         'Symfony\\Component\\Finder\\Iterator\\FilecontentFilterIterator' => __DIR__ . '/..' . '/symfony/finder/Iterator/FilecontentFilterIterator.php',
         'Symfony\\Component\\Finder\\Iterator\\FilenameFilterIterator' => __DIR__ . '/..' . '/symfony/finder/Iterator/FilenameFilterIterator.php',
+        'Symfony\\Component\\Finder\\Iterator\\LazyIterator' => __DIR__ . '/..' . '/symfony/finder/Iterator/LazyIterator.php',
         'Symfony\\Component\\Finder\\Iterator\\MultiplePcreFilterIterator' => __DIR__ . '/..' . '/symfony/finder/Iterator/MultiplePcreFilterIterator.php',
         'Symfony\\Component\\Finder\\Iterator\\PathFilterIterator' => __DIR__ . '/..' . '/symfony/finder/Iterator/PathFilterIterator.php',
         'Symfony\\Component\\Finder\\Iterator\\RecursiveDirectoryIterator' => __DIR__ . '/..' . '/symfony/finder/Iterator/RecursiveDirectoryIterator.php',
@@ -8053,6 +8068,7 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
         'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'Webmozart\\Assert\\Assert' => __DIR__ . '/..' . '/webmozart/assert/src/Assert.php',
+        'Webmozart\\Assert\\InvalidArgumentException' => __DIR__ . '/..' . '/webmozart/assert/src/InvalidArgumentException.php',
         'Webmozart\\Assert\\Mixin' => __DIR__ . '/..' . '/webmozart/assert/src/Mixin.php',
         'Webmozart\\PathUtil\\Path' => __DIR__ . '/..' . '/webmozart/path-util/src/Path.php',
         'Webmozart\\PathUtil\\Url' => __DIR__ . '/..' . '/webmozart/path-util/src/Url.php',
@@ -8271,11 +8287,11 @@ class ComposerStaticInit86199d906ceb95511289297d56a5140c
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit86199d906ceb95511289297d56a5140c::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit86199d906ceb95511289297d56a5140c::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit86199d906ceb95511289297d56a5140c::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit86199d906ceb95511289297d56a5140c::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit86199d906ceb95511289297d56a5140c::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInita541406ac3a85118ab1fa36d0edb76a3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInita541406ac3a85118ab1fa36d0edb76a3::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInita541406ac3a85118ab1fa36d0edb76a3::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInita541406ac3a85118ab1fa36d0edb76a3::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInita541406ac3a85118ab1fa36d0edb76a3::$classMap;
 
         }, null, ClassLoader::class);
     }

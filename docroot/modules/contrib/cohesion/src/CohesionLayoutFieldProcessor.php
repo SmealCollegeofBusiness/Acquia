@@ -117,9 +117,13 @@ class CohesionLayoutFieldProcessor extends DefaultFieldProcessor {
           }
         }
       }
+
+      $field->offsetGet(0)->set('value', json_encode($layout_canvas));
+    }
+    else {
+      parent::setTranslations($field_data, $field);
     }
 
-    $field->offsetGet(0)->set('value', json_encode($layout_canvas));
   }
 
   private function valuesWithModelKey($values, $keys = []) {

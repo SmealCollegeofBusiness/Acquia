@@ -7,15 +7,11 @@
 
 use Acquia\Blt\Robo\Common\EnvironmentDetector;
 use Acquia\Blt\Robo\Exceptions\BltException;
+use Acquia\DrupalEnvironmentDetector\FilePaths;
 
 /**
  * Detect environments, sites, and hostnames.
  */
-
-$http_host = getenv('HTTP_HOST');
-$request_method = getenv('REQUEST_METHOD');
-$request_uri = getenv('REQUEST_URI');
-$http_x_request_id = getenv('HTTP_X_REQUEST_ID');
 
 // If trusted_reverse_proxy_ips is not defined, fail gracefully.
 // phpcs:ignore
@@ -83,24 +79,16 @@ $settings_files = [];
 /**
  * Site path.
  *
- * @var $site_path
+ * @var string $site_path
  * This is always set and exposed by the Drupal Kernel.
  */
 // phpcs:ignore
 $site_name = EnvironmentDetector::getSiteName($site_path);
 // Acquia Cloud settings.
 if (EnvironmentDetector::isAhEnv()) {
-  $ah_group = EnvironmentDetector::getAhGroup();
   try {
     if (!EnvironmentDetector::isAcsfEnv()) {
-      if ($site_name == 'default') {
-        $settings_files[] = "/var/www/site-php/$ah_group/$ah_group-settings.inc";
-      }
-      else {
-        // Acquia Cloud does not support periods in db names.
-        $safe_site_name = str_replace('.', '_', $site_name);
-        $settings_files[] = "/var/www/site-php/$ah_group/$safe_site_name-settings.inc";
-      }
+      $settings_files[] = FilePaths::ahSettingsFile(EnvironmentDetector::getAhGroup(), $site_name);
     }
   }
   catch (BltException $e) {

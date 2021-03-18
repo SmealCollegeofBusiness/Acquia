@@ -65,10 +65,16 @@ function cohesion_sync_modules_installed($modules) {
 
           // Attempt to deploy the package.
           try {
-            $messages = \Drupal::service('cohesion_sync.drush_helpers')->import(TRUE, FALSE, $path);
+            $operations = \Drupal::service('cohesion_sync.drush_helpers')->import(TRUE, FALSE, $path);
 
-            // Tell dblog what happened.
-            Drupal::logger('cohesion')->notice($messages);
+            $batch = [
+              'title' => t('Importing configuration.'),
+              'operations' => $operations,
+              'progressive' => FALSE,
+            ];
+
+            batch_set($batch);
+
           }
           catch (\Exception $e) {
             // Tell dblog what happened.

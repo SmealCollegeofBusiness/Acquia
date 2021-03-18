@@ -27,6 +27,7 @@ class SamlauthMappingEditForm extends FormBase {
     'list_integer',
     'list_string',
     'string',
+    'string_long',
     'telephone',
     'timestamp',
   ];
@@ -156,7 +157,7 @@ class SamlauthMappingEditForm extends FormBase {
 
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Submit'),
+      '#value' => $this->t('Submit'),
     ];
 
     return $form;

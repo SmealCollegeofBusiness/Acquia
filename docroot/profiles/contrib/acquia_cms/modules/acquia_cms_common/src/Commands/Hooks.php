@@ -5,6 +5,7 @@ namespace Drupal\acquia_cms_common\Commands;
 use Consolidation\AnnotatedCommand\CommandData;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drush\Commands\DrushCommands;
+use Drush\Drush;
 
 /**
  * Implements Drush command hooks.
@@ -80,6 +81,11 @@ final class Hooks extends DrushCommands {
           }
         }
         throw new \Exception(implode("\n", $reasons));
+      }
+    }
+    if (is_array($requirements) && drupal_requirements_severity($requirements) == REQUIREMENT_WARNING) {
+      foreach ($requirements as $id => $requirement) {
+        Drush::logger()->warning(dt($requirement['description']));
       }
     }
   }

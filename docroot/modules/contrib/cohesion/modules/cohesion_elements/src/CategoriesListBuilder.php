@@ -43,7 +43,6 @@ class CategoriesListBuilder extends CohesionListBuilder {
   public function buildRow(EntityInterface $entity) {
     $row = parent::buildRow($entity);
     unset($row['type']);
-    $row['label'] = '<span>' . $row['label'] . '</span>';
 
     $row['class']['#markup'] = '<div class="coh-category-color-item ' . $row['class']['#markup'] . '"></div>';
 

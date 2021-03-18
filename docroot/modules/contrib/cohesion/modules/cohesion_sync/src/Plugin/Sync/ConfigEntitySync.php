@@ -349,31 +349,6 @@ class ConfigEntitySync extends SyncPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function applyPackageEntry($entry) {
-    parent::applyPackageEntry($entry);
-    // A custom style with this classname already exists.
-    if ($this->entityTypeStorage->getEntityTypeId() === 'cohesion_custom_style') {
-      try {
-        $ids = \Drupal::entityQuery('cohesion_custom_style')
-          ->condition('class_name', $entry['class_name'])
-          ->execute();
-
-        /** @var \Drupal\cohesion_custom_styles\Entity\CustomStyle $existing_entity */
-        // Key must be an array of string or integer otherwise loadMultiple() throws a warning.
-        if ($key = key($ids)) {
-          if ($existing_entity = $this->entityTypeStorage->load($key)) {
-            $existing_entity->delete();
-          }
-        }
-      } catch (\Throwable $e) {
-        return;
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getActionData($entry, $action_state) {
     $action_data = [
       'entity_type_label' => $this->entityTypeDefinition->getLabel()

@@ -6,6 +6,7 @@
 
 use Drupal\cohesion_elements\Plugin\Field\FieldType\CohesionEntityReferenceRevisionsItem;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\media_library\MediaLibraryState;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\JobInterface;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
@@ -864,4 +865,33 @@ function cohesion_config_schema_info_alter(&$definitions) {
       'label' => 'Build site studio assets'
     ];
   }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param $form_id
+ */
+function cohesion_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $request = \Drupal::request();
+
+  // This resolves an issue where after selecting media library filters you can't insert media.
+  // Restrict this to views exposed form and media library inside Site Studio.
+  if($form_id == 'views_exposed_form' && !empty($request->get('media_library_opener_id') == 'media_library.opener.cohesion')) {
+    // Get the selected by from the request.
+    $selected_type = $request->get('media_library_selected_type');
+    // Get the selected type from the view args.
+    if (!empty($view_arg = $form_state->getStorage()['view']->args[0])) {
+      // If the request selected by and view args are not the same then set the request select type to be the views arg type.
+      if ($selected_type !== $view_arg) {
+        $request->query->set('media_library_selected_type', $view_arg);
+        // Re-create the media state based on the new selected type to get the hash and update the hash in the request.
+        $media_state = MediaLibraryState::create('media_library.opener.cohesion', $request->get('media_library_allowed_types'), $request->get('media_library_selected_type'), 1);
+        $request->query->set('hash', $media_state->getHash());
+      }
+    }
+  }
+
 }

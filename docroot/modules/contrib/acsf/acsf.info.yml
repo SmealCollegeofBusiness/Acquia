@@ -4,14 +4,14 @@ description: 'Connects a site with Acquia Cloud Site Factory.'
 package: Acquia Cloud Site Factory
 core: 8.x
 core_version_requirement: ^8 || ^9
-acsf_version: 2.68.0
+acsf_version: 2.69.0
 dependencies:
  - drupal:system (>=8.5.0)
  - acsf_duplication
  - acsf_theme
  - acsf_variables
 
-# Information added by Drupal.org packaging script on 2020-10-21
-version: '8.x-2.68'
+# Information added by Drupal.org packaging script on 2021-02-10
+version: '8.x-2.69'
 project: 'acsf'
-datestamp: 1603275068
+datestamp: 1612957030

@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion;
 
+use Composer\Semver\Semver;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -159,7 +160,7 @@ class SettingsEndpointUtils {
   public function getCohFormOnInit($group, $type) {
     $assetLibrary = \Drupal::keyValue('cohesion.assets.' . $group);
 
-    list($error, $data, $message) = $this->getAssets($assetLibrary, $type, $group, FALSE);
+    [$error, $data, $message] = $this->getAssets($assetLibrary, $type, $group, FALSE);
 
     // Return the (optionally) patched results.
     return $data;
@@ -567,26 +568,28 @@ class SettingsEndpointUtils {
   private function importLibraries($assets, $element_group) {
     $elements_asset_libraries = \Drupal::keyValue('cohesion.elements.asset.libraries');
     foreach ($assets as $k_asset => $asset) {
-      // Import any available js assets.
-      if (isset($asset['js'])) {
-        $this->_saveAssets('js', $asset);
-      }
+      if(!isset($asset['core_compatibility']) || Semver::satisfies(\Drupal::VERSION, $asset['core_compatibility'])){
+        // Import any available js assets.
+        if (isset($asset['js'])) {
+          $this->_saveAssets('js', $asset);
+        }
 
-      // Import any available css assets.
-      if (isset($asset['css'])) {
-        $this->_saveAssets('css', $asset);
-      }
+        // Import any available css assets.
+        if (isset($asset['css'])) {
+          $this->_saveAssets('css', $asset);
+        }
 
-      // Import any available generic assets.
-      if (isset($asset['assets'])) {
-        $this->_saveAssets('assets', $asset);
-      }
+        // Import any available generic assets.
+        if (isset($asset['assets'])) {
+          $this->_saveAssets('assets', $asset);
+        }
 
-      // Import available default json assets.
-      if (isset($asset['json'])) {
-        $this->_saveAssets('json', $asset);
+        // Import available default json assets.
+        if (isset($asset['json'])) {
+          $this->_saveAssets('json', $asset);
+        }
+        $elements_asset_libraries->set($element_group . '.' . $asset['id'], $asset);
       }
-      $elements_asset_libraries->set($element_group . '.' . $asset['id'], $asset);
     }
   }
 

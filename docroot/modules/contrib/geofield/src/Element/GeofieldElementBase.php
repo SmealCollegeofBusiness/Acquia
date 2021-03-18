@@ -71,7 +71,7 @@ abstract class GeofieldElementBase extends FormElement {
       if (!empty($element[$key]['#value']) && !is_numeric($element[$key]['#value'])) {
         $form_state->setError($element[$key], t('@title: @component_title is not valid.', ['@title' => $error_label, '@component_title' => $component['title']]));
       }
-      elseif (abs($element[$key]['#value']) > $component['range']) {
+      elseif (is_numeric($element[$key]['#value']) && abs($element[$key]['#value']) > $component['range']) {
         $form_state->setError($element[$key], t('@title: @component_title is out of bounds (@bounds).', [
           '@title' => $error_label,
           '@component_title' => $component['title'],

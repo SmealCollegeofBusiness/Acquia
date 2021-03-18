@@ -6,6 +6,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\cohesion_sync\PackagerManager;
 
@@ -260,7 +261,25 @@ class ImportFileForm extends FormBase {
 
     // Apply all the items from the import.
     try {
-      $this->packagerManager->applyBatchYamlPackageStream($this->file_uri, $this->action_data);
+      // Clear the sync report.
+      \Drupal::service('tempstore.private')
+        ->get('sync_report')
+        ->delete('report');
+
+      // Get the batch operations for the sync import.
+      $operations = $this->packagerManager->applyBatchYamlPackageStream($this->file_uri, $this->action_data);
+
+      $batch = [
+        'title' => t('Importing configuration.'),
+        'finished' => '\Drupal\cohesion_sync\Controller\BatchImportController::batchFinishedCallback',
+        'operations' => $operations,
+      ];
+
+      // Set the sync report.
+      \Drupal::service('tempstore.private')->get('sync_report')->set('report', $this->action_data);
+
+      batch_set($batch);
+
     } catch (\Exception $e) {
       \Drupal::messenger()->addError($this->t('The import failed with the following message: %message', ['%message' => $e->getMessage()]));
       return FALSE;

@@ -1449,16 +1449,46 @@ class TwigExtension extends \Twig_Extension {
 
   public function getComponentFieldValue($context, $key, $sub_key_path = NULL) {
     $keys = [];
+    // If we need to find the find further down the array
+    if(is_string($sub_key_path) && !empty($sub_key_path)) {
+      $keys = array_merge($keys, explode(',', $sub_key_path));
+    }
+
+    // If within the context of a field repeater check if the key exists
+    // otherwise check in the component field values
     if(isset($context['coh_repeater_val']['#' . $key])) {
       $value = $context['coh_repeater_val']['#' . $key];
     } elseif(isset($context['componentFieldsValues'][$key])) {
       $value = $context['componentFieldsValues'][$key];
     } else {
-      return FALSE;
-    }
+      // Try to find the key in all componentFieldsValues
+      // If this is a field inside a field repeater but used outside a pattern repeater
+      // use case: Hide if no data
 
-    if(is_string($sub_key_path) && !empty($sub_key_path)) {
-      $keys = array_merge($keys, explode(',', $sub_key_path));
+      foreach ($context['componentFieldsValues'] as $cpt_key => $cpt_value) {
+        if(is_array($cpt_value)) {
+          foreach ($cpt_value as $repeater_value) {
+            if(is_array($repeater_value) && isset($repeater_value['#' . $key])) {
+
+              $value = $repeater_value['#' . $key];
+              foreach ($keys as $key) {
+                if(is_array($value) && isset($value[$key])) {
+                  $value = $value[$key];
+                } else {
+                  $value = '';
+                }
+              }
+
+              if(trim($value) !== '') {
+                return $value;
+              }
+
+            }
+          }
+        }
+      }
+
+      return FALSE;
     }
 
     foreach ($keys as $key) {

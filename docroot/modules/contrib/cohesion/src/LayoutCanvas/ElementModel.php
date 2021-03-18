@@ -266,7 +266,7 @@ class ElementModel implements \JsonSerializable {
                       foreach ($this->model as $uuid_key => $multifield) {
                         if(is_array($multifield)) {
                           foreach ($multifield as $key => $val) {
-                            if(property_exists($val, $uuid)) {
+                            if(is_object($val) && property_exists($val, $uuid)) {
                               $this->processValue($this->model->{$uuid_key}[$key]->{$uuid}, $element, $component_model_value, $inner_component_model_values);
                             }
                           }

@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion_elements\Form;
 
+use Drupal\cohesion_elements\Entity\Component;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityRepositoryInterface;
@@ -66,13 +67,36 @@ class ComponentContentForm extends ContentEntityForm {
       ]);
     }
 
+    $component_id = NULL;
     if ($this->operation == 'add') {
       // If component content add form attach the component ID from the request for angular.
       $request = \Drupal::request();
       $component_id = $request->attributes->get('cohesion_component');
 
+      // Attach the component id to add if comming from the add page
       $form['#attached']['drupalSettings']['cohesion']['component_content_add'] = $component_id;
+
     }
+
+    // Case for translation (operation add but not component id request
+    if($component_id == NULL && $component_content->getComponent() instanceof Component) {
+      $component_id = $component_content->getComponent()->id();
+    }
+
+    $form['component_id'] = [
+      '#type' => 'hidden',
+      '#default_value' => $component_id,
+    ];
+
+    $form['changed'] = [
+      '#type' => 'hidden',
+      '#default_value' => $component_content->getChangedTime(),
+    ];
+
+    $form['changed'] = [
+      '#type' => 'hidden',
+      '#default_value' => $component_content->getChangedTime(),
+    ];
 
     // Changed must be sent to the client, for later overwrite error checking.
     $form['changed'] = [
@@ -173,12 +197,8 @@ class ComponentContentForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-
-    if($this->operation == 'add') {
-      $component_id = $form['#attached']['drupalSettings']['cohesion']['component_content_add'];
-      $this->entity->set('component', $component_id);
-    }
-
+    $lsls = $form_state->getValue('component_id');
+    $this->entity->set('component', $form_state->getValue('component_id'));
     parent::save($form, $form_state);
     if ($this->entity->id() && $this->entity->access('view')) {
       $form_state->setRedirect(

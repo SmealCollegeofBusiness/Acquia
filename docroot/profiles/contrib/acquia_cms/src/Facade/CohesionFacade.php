@@ -61,11 +61,15 @@ final class CohesionFacade implements ContainerInjectionInterface {
    *
    * @param string $package
    *   The path to the sync package, relative to the Drupal root.
-   * @param bool $batch
-   *   If TRUE, the package is imported as a batch operation; otherwise, the
-   *   package is imported immediately.
+   * @param bool $no_rebuild
+   *   Whether rebuild operation should execute or not.
+   *
+   * @return array
+   *   The batch operations.
+   *
+   * @throws \Exception
    */
-  public function importPackage(string $package, bool $batch) : void {
+  public function importPackage(string $package, $no_rebuild = FALSE): array {
     // Prepare to import the package. This code is delicate because it was
     // basically written by rooting around in Cohesion's internals. So be
     // extremely careful when changing it.
@@ -80,19 +84,20 @@ final class CohesionFacade implements ContainerInjectionInterface {
       $action['entry_action_state'] = ENTRY_EXISTING_OVERWRITTEN;
     }
 
-    if ($batch) {
-      $this->packager->applyBatchYamlPackageStream($package, $action_data);
-    }
-    else {
-      $this->packager->applyYamlPackageStream($package, $action_data);
-    }
+    $batch_operations = [];
+
+    $batch_operations[] = [
+      '_display_package_import_operation',
+      [$package],
+    ];
+    $operations = $this->packager->applyBatchYamlPackageStream($package, $action_data, $no_rebuild);
+    $batch_operations = \array_merge($batch_operations, $operations);
+
+    return $batch_operations;
   }
 
   /**
    * Returns a list of all available sync packages.
-   *
-   * This will also include the big UI kit shipped during development of Acquia
-   * CMS (misc/ui-kit.package.yml), at the end of the list.
    *
    * @return string[]
    *   An array of sync package paths, relative to the Drupal root.
@@ -102,10 +107,6 @@ final class CohesionFacade implements ContainerInjectionInterface {
     foreach ($this->getSortedModules() as $module) {
       $packages = array_merge($packages, $this->getPackagesFromExtension($module));
     }
-    // @todo This line should be deleted when we are no longer shipping the big
-    // UI kit package.
-    $packages[] = $this->moduleHandler->getModule('acquia_cms')->getPath() . '/misc/ui-kit.package.yml';
-
     return $packages;
   }
 
@@ -137,17 +138,65 @@ final class CohesionFacade implements ContainerInjectionInterface {
    * Returns a list of all installed modules.
    *
    * @return \Drupal\Core\Extension\Extension[]
-   *   A list of all installed modules. The acquia_cms profile will be the last
-   *   item in the list.
+   *   A list of all installed modules. The acquia_cms profile and its modules
+   *   will be the last items in the list.
    */
   private function getSortedModules() : array {
-    $modules = $this->moduleHandler->getModuleList();
+    $module_list = $this->moduleHandler->getModuleList();
+    $acms_module_list = [];
 
-    $profile = $modules['acquia_cms'];
-    unset($modules['acquia_cms']);
-    $modules['acquia_cms'] = $profile;
+    foreach ($module_list as $name => $extension) {
+      if ('acquia_cms' === $name) {
+        // Ensure the Acquia CMS Profile is the first ACMS extension.
+        $acms_module_list = [$name => $extension] + $acms_module_list;
+        unset($module_list[$name]);
+      }
+      elseif (stripos($name, 'acquia_cms') === 0) {
+        // Add any other ACMS modules to the array.
+        $acms_module_list[$name] = $extension;
+        unset($module_list[$name]);
+      }
+    }
 
-    return $modules;
+    return $module_list + $acms_module_list;
+  }
+
+  /**
+   * Batch finished callback.
+   *
+   * @param bool $success
+   *   Status of batch process.
+   * @param array $results
+   *   Result of the operations performed.
+   * @param array $operations
+   *   Operations performed in the batch process.
+   */
+  public static function batchFinishedCallback($success, array $results, array $operations) {
+    // The 'success' parameter means no fatal PHP errors were detected. All
+    // other error management should be handled using 'results'.
+    if ($success) {
+      \Drupal::messenger()->addMessage(t('The import succeeded. @count tasks completed.', ['@count' => count($results)]));
+    }
+    else {
+      \Drupal::messenger()->addMessage(t('Finished with an error.'));
+    }
+  }
+
+  /**
+   * Get all required operations to import site studio packages of Acquia CMS.
+   *
+   * @param bool $no_rebuild
+   *   Whether rebuild operation should execute or not.
+   *
+   * @return array
+   *   All the operations.
+   */
+  public function getAllOperations(bool $no_rebuild = FALSE) : array {
+    $operations = [];
+    foreach ($this->getAllPackages() as $package) {
+      $operations = array_merge($operations, $this->importPackage($package, $no_rebuild));
+    }
+    return $operations;
   }
 
 }

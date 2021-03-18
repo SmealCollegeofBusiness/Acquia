@@ -12,6 +12,8 @@ use weitzman\DrupalTestTraits\ExistingSiteBase;
  *
  * @group acquia_cms
  * @group acquia_cms_event
+ * @group medium_risk
+ * @group push
  */
 class UpcomingEventsBlockTest extends ExistingSiteBase {
 
@@ -67,7 +69,6 @@ class UpcomingEventsBlockTest extends ExistingSiteBase {
    */
   public function testUpcomingEventsBlock() {
     $this->drupalGet('');
-    $this->assertSession()->pageTextContains('Upcoming Events');
     $this->assertLinksExistInOrder();
   }
 

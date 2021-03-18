@@ -96,3 +96,6 @@ cohesion.settings:
     stylesheet_json_storage_keyvalue:
       type: boolean
       label: 'Use key/value storage for stylesheet json'
+    compress_outbound_request:
+      type: boolean
+      label: 'Send call to the Site studio API gzipped or not, default TRUE'

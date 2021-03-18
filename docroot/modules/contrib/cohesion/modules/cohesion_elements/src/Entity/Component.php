@@ -276,6 +276,19 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
   }
 
   /**
+   * {@inheritdoc }
+   */
+  public function delete() {
+
+    $template_api = $this->getApiPluginInstance();
+    $template_api->setEntity($this);
+    $template_api->delete();
+
+    return parent::delete();
+  }
+
+
+  /**
    * Return the URI of the twig template for this component.
    *
    * @return bool|string

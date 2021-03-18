@@ -9,6 +9,7 @@ use Drupal\Core\Path\PathValidatorInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\Token;
 use Drupal\samlauth\Controller\SamlController;
+use OneLogin\Saml2\Metadata;
 use OneLogin\Saml2\Utils as SamlUtils;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -113,11 +114,12 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#default_value' => $config->get('logout_menu_item_title'),
     ];
 
-    $form['saml_login_logout']['drupal_saml_login'] = [
+    // This is false by default, to maintain parity with core user/reset links.
+    $form['saml_login_logout']['logout_different_user'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Allow SAML users to log in directly'),
-      '#description' => $this->t('Drupal users who have previously logged in through the SAML Identity Provider can also log in through the standard Drupal login screen. (By default, they must always log in through the Identity Provider. This option does not affect Drupal user acounts that are never linked to a SAML login.)'),
-      '#default_value' => $config->get('drupal_saml_login'),
+      '#title' => $this->t('Log out different user upon re-authentication.'),
+      '#description' => $this->t('If a login (coming from the IdP) happens while another user is still logged into the site, that user is logged out and the new user is logged in. (By default, the old user stays logged in and a warning is displayed.)'),
+      '#default_value' => $config->get('logout_different_user'),
     ];
 
     $form['saml_login_logout']['login_redirect_url'] = [
@@ -134,6 +136,13 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#default_value' => $config->get('logout_redirect_url'),
     ];
 
+    $form['saml_login_logout']['error_redirect_url'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Error redirect URL'),
+      '#description' => $this->t("The default URL to redirect the user to after an error occurred. This should be an internal path starting with a slash, or an absolute URL. Defaults to the front page."),
+      '#default_value' => $config->get('error_redirect_url'),
+    ];
+
     $form['service_provider'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Service Provider'),
@@ -142,13 +151,21 @@ class SamlauthConfigureForm extends ConfigFormBase {
     $form['service_provider']['config_info'] = [
       '#theme' => 'item_list',
       '#items' => [
-        $this->t('Metadata URL') . ': ' . \Drupal::urlGenerator()->generateFromRoute('samlauth.saml_controller_metadata', [], ['absolute' => TRUE]),
-        $this->t('Assertion Consumer Service') . ': ' . Url::fromRoute('samlauth.saml_controller_acs', [], ['absolute' => TRUE])->toString(),
-        $this->t('Single Logout Service') . ': ' . Url::fromRoute('samlauth.saml_controller_sls', [], ['absolute' => TRUE])->toString(),
+        $this->t('Metadata URL: :url', [
+          ':url' => Url::fromRoute('samlauth.saml_controller_metadata', [], ['absolute' => TRUE])->toString(),
+        ]),
+        $this->t('Assertion Consumer Service: :url', [
+          ':url' => Url::fromRoute('samlauth.saml_controller_acs', [], ['absolute' => TRUE])->toString(),
+        ]),
+        $this->t('Single Logout Service: :url', [
+          ':url' => Url::fromRoute('samlauth.saml_controller_sls', [], ['absolute' => TRUE])->toString(),
+        ]),
       ],
       '#empty' => [],
       '#list_type' => 'ul',
-      '#suffix' => $this->t("The info advertised at the metadata URL are influenced by this configuration section, as well as by some more advanced SAML message options below. Those options often don't matter for getting SAML login into Drupal to work."),
+      '#suffix' => $this->t("Metadata is not exposed by default; see <a href=\":permissions\">permissions</a>. The contents are influenced by this configuration section, as well as by some more advanced SAML message options below. Those options often don't matter for getting SAML login into Drupal to work.", [
+        ':permissions' => Url::fromUri('base:admin/people/permissions', ['fragment' => 'module-samlauth'])->toString(),
+      ]),
     ];
 
     $form['service_provider']['sp_entity_id'] = [
@@ -211,18 +228,53 @@ class SamlauthConfigureForm extends ConfigFormBase {
       ],
     ];
 
+    $form['service_provider']['caching'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Caching / Validity'),
+      '#description' => $this->t('These values are low for newly installed sites, and should be raised when login is working.'),
+    ];
+
+    $value = $config->get('metadata_valid_secs');
+    $default = $this->makeReadableDuration(Metadata::TIME_VALID);
+    $form['service_provider']['caching']['metadata_valid_secs'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Metadata validity'),
+      // Default is inside the translatable string; it will almost never change.
+      '#description' => $this->t("The maximum amount of time that the metadata (which is often cached by IdPs) should be considered valid, in readable format, e.g. \"1 day 8 hours\". As the XML expresses \"validUntil\" as a specific date, a HTTP cache will contain XML with slowly decreasing validity. The default (when left empty) is $default."),
+      '#default_value' => $value ? $this->makeReadableDuration($value) : NULL,
+    ];
+
+    $form['service_provider']['caching']['metadata_cache_http'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Cache HTTP responses containing metadata'),
+      '#description' => $this->t("This affects just (Drupal's and external) response caches, whereas the above also affects caching by the IdP. Caching is only important if the metadata URL can be reached by anonymous visitors. The Max-Age value is derived from the validity."),
+      // TRUE on existing installations where the checkbox didn't exist before;
+      // FALSE in new installations.
+      '#default_value' => $config->get('metadata_cache_http') ?? TRUE,
+    ];
+
+    $form['service_provider']['caching']['requests_cache_http_secs'] = [
+      '#type' => 'number',
+      '#min' => 0,
+      '#title' => $this->t('Cache HTTP responses containing SAML requests'),
+      '#description' => $this->t('This is a number of seconds; 0 means "off"; suggested value is 600. The responses cached are redirects to the IdP at the start of login/logout flow, which contain a SAML request in the URL parameter.'),
+      // 0 on existing installations where the checkbox didn't exist before;
+      // 600 in new installations.
+      '#default_value' => $config->get('requests_cache_http_secs') ?? 0,
+    ];
+
     $form['identity_provider'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Identity Provider'),
     ];
 
     // @TODO: Allow a user to automagically populate this by providing a metadata URL for the IdP.
-    //    $form['identity_provider']['idp_metadata_url'] = [
-    //      '#type' => 'url',
-    //      '#title' => $this->t('Metadata URL'),
-    //      '#description' => $this->t('URL of the XML metadata for the identity provider'),
-    //      '#default_value' => $config->get('idp_metadata_url'),
-    //    ];
+    // $form['identity_provider']['idp_metadata_url'] = [
+    // '#type' => 'url',
+    // '#title' => $this->t('Metadata URL'),
+    // '#description' => $this->t('URL of the XML metadata for the IdP.'),
+    // '#default_value' => $config->get('idp_metadata_url'),
+    // ];
     $form['identity_provider']['idp_entity_id'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Entity ID'),
@@ -407,8 +459,8 @@ class SamlauthConfigureForm extends ConfigFormBase {
 
     $form['security']['request_set_name_id_policy'] = [
       '#type' => 'checkbox',
-      '#title' => t('Specify NameID policy'),
-      '#description' => t('A NameIDPolicy element is added in authentication requests. This is default behavior for the SAML Toolkit library, but may be unneeded. If checked, "NameID Format" may need to be specified too. If unchecked, the "Require NameID" checkbox may need to be unchecked too.'),
+      '#title' => $this->t('Specify NameID policy'),
+      '#description' => $this->t('A NameIDPolicy element is added in authentication requests. This is default behavior for the SAML Toolkit library, but may be unneeded. If checked, "NameID Format" may need to be specified too. If unchecked, the "Require NameID" checkbox may need to be unchecked too.'),
       // This is one of the few checkboxes that must be TRUE on existing
       // installations where the checkbox didn't exist before (in older module
       // versions). Others get their default only from the config/install file.
@@ -492,12 +544,12 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#type' => 'fieldset',
     ];
 
-    $form['other']['use_proxy_headers'] = array(
+    $form['other']['use_proxy_headers'] = [
       '#type' => 'checkbox',
       '#title' => $this->t("Use 'X-Forwarded-*' headers."),
       '#description' => $this->t("The SAML Toolkit will use 'X-Forwarded-*' HTTP headers (if present) for constructing/identifying the SP URL in sent/received messages. This is likely necessary if your SP is behind a reverse proxy, and your Drupal installation is not already <a href=\"https://www.drupal.org/node/425990\" target=\"_blank\">dealing with this</a>."),
       '#default_value' => $config->get('use_proxy_headers'),
-    );
+    ];
 
     $form['debugging'] = [
       '#title' => $this->t('Debugging'),
@@ -523,7 +575,7 @@ class SamlauthConfigureForm extends ConfigFormBase {
     // @TODO change default to TRUE; amend description (and d.o issue, and README
     $form['debugging']['security_lowercase_url_encoding'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t("'Raw' encoding of SAML messages"),
+      '#title' => $this->t("'Raw' encode signatures when signing messages"),
       '#description' => $this->t("If there is ever a reason to turn this option off, a bug report is greatly appreciated. (The module author believes this option is unnecessary and plans for a PR to the SAML Toolkit to re-document it / phase it out. If you installed this module prior to 8.x-3.0-alpha2 and this option is turned off already, that's fine - changing it should make no difference.)"),
       '#default_value' => $config->get('security_lowercase_url_encoding'),
       '#states' => [
@@ -596,6 +648,14 @@ class SamlauthConfigureForm extends ConfigFormBase {
         $form_state->setErrorByName('logout_redirect_url', $this->t('The Logout Redirect URL is not a valid path.'));
       }
     }
+    $error_redirect_url = $form_state->getValue('error_redirect_url');
+    if ($error_redirect_url) {
+      $error_redirect_url = $this->token->replace($error_redirect_url);
+      $error_url = $this->pathValidator->getUrlIfValidWithoutAccessCheck($error_redirect_url);
+      if (!$error_url) {
+        $form_state->setErrorByName('error_redirect_url', $this->t('The Error redirect URL is not a valid path.'));
+      }
+    }
 
     // Validate certs folder. Don't allow the user to save an empty folder; if
     // they want to save incomplete config data, they can switch to 'fields'.
@@ -609,12 +669,22 @@ class SamlauthConfigureForm extends ConfigFormBase {
         $form_state->setErrorByName('sp_cert_folder', $this->t('The Certificate folder does not contain the required certs/sp.key or certs/sp.crt files.'));
       }
     }
+
+    $duration = $form_state->getValue('metadata_valid_secs');
+    if ($duration || $duration == '0') {
+      $duration = $this->parseReadableDuration($form_state->getValue('metadata_valid_secs'));
+      if (!$duration) {
+        $form_state->setErrorByName('metadata_valid_secs', $this->t('Invalid period value.'));
+      }
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $config = $this->configFactory()->getEditable(SamlController::CONFIG_OBJECT_NAME);
+
     // Only store variables related to the sp_cert_type value. (If the user
     // switched from fields to folder, the cert/key values always get cleared
     // so no unused security sensitive data gets saved in the database.)
@@ -622,25 +692,38 @@ class SamlauthConfigureForm extends ConfigFormBase {
     $sp_x509_certificate = '';
     $sp_private_key = '';
     $sp_cert_folder = '';
-    if ($sp_cert_type == 'folder') {
+    if ($sp_cert_type === 'folder') {
       $sp_cert_folder = $this->fixFolderPath($form_state->getValue('sp_cert_folder'));
     }
     else {
-      $sp_x509_certificate =  $this->formatKeyOrCert($form_state->getValue('sp_x509_certificate'), FALSE);
-      $sp_private_key =  $this->formatKeyOrCert($form_state->getValue('sp_private_key'), FALSE, TRUE);
+      $sp_x509_certificate = $this->formatKeyOrCert($form_state->getValue('sp_x509_certificate'), FALSE);
+      $sp_private_key = $this->formatKeyOrCert($form_state->getValue('sp_private_key'), FALSE, TRUE);
     }
 
-    $this->configFactory()->getEditable(SamlController::CONFIG_OBJECT_NAME)
+    // This is never 0 but can be ''. (NULL would mean same as ''.) Unlike
+    // others, this value needs to be unset if empty.
+    $metadata_valid = $form_state->getValue('metadata_valid_secs');
+    if ($metadata_valid) {
+      $config->set('metadata_valid_secs', $this->parseReadableDuration($metadata_valid));
+    }
+    else {
+      $config->clear('metadata_valid_secs');
+    }
+
+    $config
       ->set('login_menu_item_title', $form_state->getValue('login_menu_item_title'))
       ->set('logout_menu_item_title', $form_state->getValue('logout_menu_item_title'))
-      ->set('drupal_saml_login', $form_state->getValue('drupal_saml_login'))
+      ->set('logout_different_user', $form_state->getValue('logout_different_user'))
       ->set('login_redirect_url', $form_state->getValue('login_redirect_url'))
       ->set('logout_redirect_url', $form_state->getValue('logout_redirect_url'))
+      ->set('error_redirect_url', $form_state->getValue('error_redirect_url'))
       ->set('sp_entity_id', $form_state->getValue('sp_entity_id'))
       ->set('sp_name_id_format', $form_state->getValue('sp_name_id_format'))
       ->set('sp_x509_certificate', $sp_x509_certificate)
       ->set('sp_private_key', $sp_private_key)
       ->set('sp_cert_folder', $sp_cert_folder)
+      ->set('metadata_cache_http', $form_state->getValue('metadata_cache_http'))
+      ->set('requests_cache_http_secs', $form_state->getValue('requests_cache_http_secs'))
       ->set('idp_entity_id', $form_state->getValue('idp_entity_id'))
       ->set('idp_single_sign_on_service', $form_state->getValue('idp_single_sign_on_service'))
       ->set('idp_single_log_out_service', $form_state->getValue('idp_single_log_out_service'))
@@ -688,8 +771,8 @@ class SamlauthConfigureForm extends ConfigFormBase {
    * textbox and not have to remove all the newlines manually, if we got them
    * delivered this way.
    *
-   * The side effect is that certificates/keys are re--un-formatted on every
-   * save operation, but that should be OK.
+   * The side effect is that certificates/keys are re- and un-formatted on
+   * every save operation, but that should be OK.
    *
    * @param string|null $value
    *   A certificate or private key, either with or without head/footer.
@@ -699,10 +782,11 @@ class SamlauthConfigureForm extends ConfigFormBase {
    * @param bool $key
    *   (optional) True if this is a private key rather than a certificate.
    *
-   * @return string $rsaKey Formatted private key
+   * @return string
+   *   (Un)formatted key or cert.
    */
   protected function formatKeyOrCert($value, $heads, $key = FALSE) {
-    if (is_string($value)) { //@TODO FIX LIKELY BUG test
+    if (is_string($value)) {
       $value = $key ?
         SamlUtils::formatPrivateKey($value, $heads) :
         SamlUtils::formatCert($value, $heads);
@@ -718,6 +802,91 @@ class SamlauthConfigureForm extends ConfigFormBase {
       $path = rtrim($path, '/');
     }
     return $path;
+  }
+
+  /**
+   * Converts number of seconds into a human readable 'duration' string.
+   *
+   * @param int $seconds
+   *   Number of seconds.
+   *
+   * @return string
+   *   The human readable duration description (e.g. "5 hours 3 minutes").
+   */
+  protected function makeReadableDuration($seconds) {
+    $calculation = [
+      'week' => 3600 * 24 * 7,
+      'day' => 3600 * 24,
+      'hour' => 3600,
+      'minute' => 60,
+      'second' => 1,
+    ];
+
+    $duration = '';
+    foreach ($calculation as $unit => $unit_amount) {
+      $amount = (int) ($seconds / $unit_amount);
+      if ($amount) {
+        if ($duration) {
+          $duration .= ', ';
+        }
+        $duration .= "$amount $unit" . ($amount > 1 ? 's' : '');
+      }
+      $seconds -= $amount * $unit_amount;
+    }
+
+    return $duration;
+  }
+
+  /**
+   * Parses a human readable 'duration' string.
+   *
+   * @param string $expression
+   *   The human readable duration description (e.g. "5 hours 3 minutes").
+   *
+   * @return int
+   *   The number of seconds; 0 implies invalid duration.
+   */
+  protected function parseReadableDuration($expression) {
+    $calculation = [
+      'week' => 3600 * 24 * 7,
+      'day' => 3600 * 24,
+      'hour' => 3600,
+      'minute' => 60,
+      'second' => 1,
+    ];
+    $expression = strtolower(trim($expression));
+    if (substr($expression, -1) === '.') {
+      $expression = rtrim(substr($expression, 0, strlen($expression) - 1));
+    }
+    $seconds = 0;
+    $seen = [];
+    // Numbers must be numeric. Valid: "X hours Y minutes" possibly separated
+    // by comma or "and". Months/years are not accepted because their length is
+    // ambiguous.
+    $parts = preg_split('/(\s+|\s*,\s*|\s+and\s+)(?=\d)/', $expression);
+    foreach ($parts as $part) {
+      if (!preg_match('/^(\d+)\s*((?:week|day|hour|min(?:ute)?|sec(?:ond)?)s?)$/', $part, $matches)) {
+        return 0;
+      }
+      if (substr($matches[2], -1) === 's') {
+        $matches[2] = substr($matches[2], 0, strlen($matches[2]) - 1);
+      }
+      elseif ($matches[1] != 1 && !in_array($matches[2], ['min', 'sec'], TRUE)) {
+        // We allow "1 min", "1 mins", "2 min", not "2 minute".
+        return 0;
+      }
+      $unit = $matches[2] === 'min' ? 'minute' : ($matches[2] === 'sec' ? 'second' : $matches[2]);
+      if (!isset($calculation[$unit])) {
+        return 0;
+      }
+      if (isset($seen[$unit])) {
+        return 0;
+      }
+      $seen[$unit] = TRUE;
+      $seconds += $calculation[$unit] * $matches[1];
+    }
+
+    return $seconds;
   }
 
 }

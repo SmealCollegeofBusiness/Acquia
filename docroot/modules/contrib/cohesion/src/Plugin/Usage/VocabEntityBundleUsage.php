@@ -64,12 +64,12 @@ class VocabEntityBundleUsage extends UsagePluginBase {
            $handler_settings = $field->getSetting('handler_settings');
 
            foreach($handler_settings['target_bundles'] as $bundle) {
-             $vocab_uuid = $this->taxonomyVocabularyBundleLoad($bundle);
-
-             $entities[] = [
-              'type' => $this->getEntityType(),
-              'uuid' => $vocab_uuid
-            ];
+             if($vocab_uuid = $this->taxonomyVocabularyBundleLoad($bundle)) {
+               $entities[] = [
+                'type' => $this->getEntityType(),
+                'uuid' => $vocab_uuid
+              ];
+             }
            }
           }
         }
@@ -93,7 +93,10 @@ class VocabEntityBundleUsage extends UsagePluginBase {
    */
   public function taxonomyVocabularyBundleLoad($bundle) {
     $vocab = \Drupal::service('entity_type.manager')->getStorage('taxonomy_vocabulary')->load($bundle);
-    return $vocab->uuid();
+    if($vocab) {
+      return $vocab->uuid();
+    }
+    return FALSE;
   }
 
   /**

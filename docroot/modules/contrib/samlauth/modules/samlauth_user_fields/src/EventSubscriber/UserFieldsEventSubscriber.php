@@ -11,7 +11,6 @@ use Drupal\samlauth\Event\SamlauthEvents;
 use Drupal\samlauth\Event\SamlauthUserLinkEvent;
 use Drupal\samlauth\Event\SamlauthUserSyncEvent;
 use Drupal\samlauth\UserVisibleException;
-use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -143,7 +142,7 @@ class UserFieldsEventSubscriber implements EventSubscriberInterface {
             '@query' => implode(',', $query),
           ]);
         }
-        $account = User::load(reset($results));
+        $account = $this->entityTypeManager->getStorage('user')->load(reset($results));
         if (!$account) {
           throw new \RuntimeException('Found user %uid to link on login, but it cannot be loaded.');
         }
@@ -224,7 +223,7 @@ class UserFieldsEventSubscriber implements EventSubscriberInterface {
     $mappings = $config->get('field_mappings');
     $validation_errors = [];
     if (is_array($mappings)) {
-      foreach ($mappings as $id => $mapping) {
+      foreach ($mappings as $mapping) {
         // If the attribute name is invalid, or the field does not exist, spam
         // the logs on every login until the mapping is fixed.
         if (empty($mapping['attribute_name']) || !is_string($mapping['attribute_name'])) {
@@ -375,29 +374,27 @@ class UserFieldsEventSubscriber implements EventSubscriberInterface {
     if ($field_definition) {
       $data = $this->typedDataManager->create($field_definition, $input_value);
       $violations = $data->validate();
-      $valid = !(bool) $violations;
-      if ($violations) {
-        // Don't cancel; just skip setting the value and log.
-        foreach ($violations as $violation) {
-          // We have the following options:
-          // - Log just the validation message. This makes it unclear where the
-          //   message comes from: it does not include the account, attribute
-          //   or field name.
-          // - Concatenate extra info into the validation message. This is
-          //   bad for translatability of the original message.
-          // - Log a second message mentioning the account and attribute name.
-          //   This spams logs and isn't very clear.
-          // We'll do the first, and hope that a caller will log extra info if
-          // necessary, so it can choose whether or not to be 'spammy'.
-          if ($violation instanceof ConstraintViolation) {
-            [$message, $context] = $this->getLoggableParameters($violation);
-            $this->logger->warning($message, $context);
-          }
-          else {
-            $this->logger->debug('Validation for user field %field encountered unloggable error (which points to an internal code error).', ['%field' => $account_field_name]);
-          }
+      // Don't cancel; just log.
+      foreach ($violations as $violation) {
+        // We have the following options:
+        // - Log just the validation message. This makes it unclear where the
+        //   message comes from: it does not include the account, attribute
+        //   or field name.
+        // - Concatenate extra info into the validation message. This is
+        //   bad for translatability of the original message.
+        // - Log a second message mentioning the account and attribute name.
+        //   This spams logs and isn't very clear.
+        // We'll do the first, and hope that a caller will log extra info if
+        // necessary, so it can choose whether or not to be 'spammy'.
+        if ($violation instanceof ConstraintViolation) {
+          [$message, $context] = $this->getLoggableParameters($violation);
+          $this->logger->warning($message, $context);
+        }
+        else {
+          $this->logger->debug('Validation for user field %field encountered unloggable error (which points to an internal code error).', ['%field' => $account_field_name]);
         }
       }
+      $valid = !$violations->count();
     }
 
     return $valid;

@@ -51,7 +51,6 @@ function cohesion_elements_library_info_alter(&$libraries, $extension) {
     // Otherwise relative from module/theme root.
     if ($cohesion_asset_libraries = Drupal::keyValue('cohesion.elements.asset.libraries')->getAll()) {
       foreach ($cohesion_asset_libraries as $library_key => $library_info) {
-
         $libraries[$library_key] = [];
 
         // Add the js assets to the library.

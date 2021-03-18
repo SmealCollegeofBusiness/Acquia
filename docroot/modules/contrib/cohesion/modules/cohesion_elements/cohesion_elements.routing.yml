@@ -98,7 +98,7 @@ cohesion_elements.component_content.add_page:
   options:
     _admin_route: TRUE
   requirements:
-    _permission: 'component content'
+    _permission: 'administer component content'
 
 # helpers index
 cohesion.settings.helpers:

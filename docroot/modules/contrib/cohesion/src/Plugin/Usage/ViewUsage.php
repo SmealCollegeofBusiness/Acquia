@@ -75,7 +75,7 @@ class ViewUsage extends UsagePluginBase {
         $iterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($entry['decoded']['model']));
         foreach ($iterator as $k => $v) {
           // View used directly.
-          if ($k == 'view' && $v != NULL) {
+          if ($k == 'view' && $v != NULL && !is_bool($v)) {
             if ($view_entity = $this->storage->load($v)) {
               $entities[] = [
                 'type' => $this->getEntityType(),

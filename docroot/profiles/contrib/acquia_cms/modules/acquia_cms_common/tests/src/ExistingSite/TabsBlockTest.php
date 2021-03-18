@@ -9,6 +9,9 @@ use weitzman\DrupalTestTraits\ExistingSiteBase;
  *
  * @group acquia_cms_common
  * @group acquia_cms
+ * @group low_risk
+ * @group pr
+ * @group push
  */
 class TabsBlockTest extends ExistingSiteBase {
 
@@ -39,7 +42,7 @@ class TabsBlockTest extends ExistingSiteBase {
       ]);
       $this->assertSame($account->id(), $node->getOwnerId());
       $this->drupalGet($node->toUrl());
-      $assert_session->elementExists('css', '#block-tabs');
+      $assert_session->elementExists('css', '#block-tabs-2');
     }
   }
 

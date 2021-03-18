@@ -106,7 +106,7 @@ class MediaLibraryImageBrowser extends ImageBrowserPluginBase {
 
       $allowed_media_types_query = http_build_query(['media_library_allowed_types' => $allowed_types]);
       $media_lib_state = MediaLibraryState::create('media_library.opener.cohesion', $allowed_types, $selected_type, 1);
-      $base_path = \Drupal::request()->getSchemeAndHttpHost();
+      $base_path = \Drupal::request()->getBasePath();
 
       $attachments['drupalSettings']['cohesion']['imageBrowser'] = [
         // Add the image browser iFrame URL.

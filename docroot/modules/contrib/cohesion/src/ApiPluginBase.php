@@ -706,7 +706,14 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
     if (strstr($this->entity->getEntityTypeId(), '_template')) {
       $this->data->delete_id = $this->entity->getEntityTypeId() . '_' . $this->entity->id();
     }
-    else {
+
+    // Components use id format of `cohesion_component_entity_id`.
+    if ($this->entity->getEntityTypeId() === 'cohesion_component') {
+      $this->data->delete_id = $this->entity->getEntityTypeId() . '_' . $this->entity->id();
+    }
+
+    // Default delete_id.
+    if (isset($this->data->delete_id) === FALSE) {
       $this->data->delete_id = $this->entity->id() . '_' . $this->entity->getConfigItemId();
     }
 

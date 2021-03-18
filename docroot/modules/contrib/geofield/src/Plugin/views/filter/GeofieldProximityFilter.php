@@ -287,7 +287,6 @@ class GeofieldProximityFilter extends NumericFilter {
     catch (\Exception $e) {
       watchdog_exception('geofield', $e);
     }
-
     parent::buildOptionsForm($form, $form_state);
   }
 

@@ -147,7 +147,7 @@ class ImceImageBrowser extends ImageBrowserPluginBase {
       // Add the stream wrapper array.
       $stream_wrappers = \Drupal::service('stream_wrapper_manager')->getWrappers(StreamWrapperInterface::ALL);
       $wrapper_keys = array_keys($stream_wrappers);
-      $base_path = \Drupal::request()->getSchemeAndHttpHost();
+      $base_path = \Drupal::request()->getBasePath();
 
       // Set default stream wrapper.
       $stream_wrapper = [

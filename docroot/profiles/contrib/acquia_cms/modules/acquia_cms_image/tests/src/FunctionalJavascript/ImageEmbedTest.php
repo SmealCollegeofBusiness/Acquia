@@ -10,13 +10,15 @@ use Drupal\Tests\acquia_cms_common\FunctionalJavascript\MediaEmbedTestBase;
  *
  * @group acquia_cms
  * @group acquia_cms_image
+ * @group medium_risk
+ * @group push
  */
 class ImageEmbedTest extends MediaEmbedTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['acquia_cms_image', 'focal_point'];
+  protected static $modules = ['acquia_cms_common', 'acquia_cms_image', 'focal_point'];
 
   /**
    * Disable strict config schema checks in this test.

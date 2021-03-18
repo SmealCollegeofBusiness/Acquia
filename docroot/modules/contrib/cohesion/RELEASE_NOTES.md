@@ -1,5 +1,477 @@
 # Release notes
 
+## 6.4.3
+
+### Bugfix: Child elements not rendering in layout canvas
+
+#### What is it?
+
+Fixes bug where children of elements would not render in the layout canvas
+
+#### What impact will there be?
+
+None.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 6.4.2
+
+### Bugfix: Custom element has no context of what element it belongs to
+
+#### What is it?
+
+Fixes bug where custon elements had no context of what element it belongs to
+
+#### What impact will there be?
+
+None
+
+#### What actions do I need to take?
+
+Re-save component using custom elements. It can also be done as part of a `cohesion:rebuild` 
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Bugfix: Typo/Incorrect permission for 'Add component content' route
+
+#### What is it?
+
+Fixes a permissions issue limiting access to the `add component content` page.
+
+#### What impact will there be?
+
+Users with `administer component content` can access Site Studio > Components > Component content > Add component content
+as expected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Unable to create a translation of component content
+
+#### What is it?
+
+Fixes an issue where creating a translation of component content could result an error and it was not appearing the sidebar browser.
+
+``Error: Call to a member function getCategoryEntity() on null in Drupal\cohesion\Services\CohesionUtils->getPayloadForLayoutCanvasDataMerge()``
+
+#### What impact will there be?
+
+No further error messages should occur when creating a translation of component content, they should also now appear as expected within the sidebar browser.
+
+#### What actions do I need to take?
+
+As part of the upgrade make sure to run `drush updb`.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Bugfix: Can't tokenize styles in the style builder on a component when TMGMT module is enabled
+
+#### What is it?
+When the TMGMT module is enabled users are unable to tokenize Styles in Style builder.
+
+#### What impact will there be?
+None.
+
+#### What actions do I need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+None
+
+### Compatibility with the Webprofiler module
+
+#### What is it?
+
+Fixes an issue where enabling the webprofiler module prevents some actions (eg. drush commands) from completing properly.
+
+#### What impact will there be?
+
+No code related issues will be observed relating to the webprofiler module being enabled.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Empty styles in the head
+
+#### What is it?
+
+Fixes an issue where if you have a component which applies styles to an element but the editor does not specify any value when using the component, an empty style in the head would be generated
+
+#### What impact will there be?
+
+No empty css selector will be printed on the page
+
+#### What actions do I need to take?
+
+`drush cohesion:rebuild`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Component content edit links containing two language prefixes
+
+#### What is it?
+
+Fixes an issue where if you have a default language prefix, the component content edit link from the layout canvas contained two language prefixes and therefore resulted in an invalid link.
+
+#### What impact will there be?
+
+If the default language has a prefix, the component content edit links from the layout canvas are now correct.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Unpublished content entities appearing in typeaheads
+
+#### What is it?
+
+Fixes an issue where unpublished content entities were appearing in typeaheads when searching for content.
+This meant that site editors could link to content that was not yet published and could lead to 404s.
+
+#### What impact will there be?
+
+Unpublished content entities no longer appear in typeaheads when searching for content in the Entity browser, Entity reference and link elements.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Can't insert media from media library after using the filters
+
+#### What is it?
+
+Fixes an issue where after using the filters in the Media Library you were not able to insert media, this resulted in an ajax error.
+
+#### What impact will there be?
+
+You will now be able to use the media library filters and insert media without error.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 6.4.1
+
+### Provide optional flag for sync:import to prevent calls to the API
+
+#### What is it?
+
+Adds new optional argument `--no-rebuild` to the `sync:import` drush command. When using the command with the argument, no entity rebuilds are triggered
+reducing calls to the API. This is useful when a rebuild is likely to be run in a subsequent script during a deployment for example.
+
+#### What impact will there be?
+
+Reduce the time and memory required to run the `sync:import` process.
+
+#### What actions do I need to take?
+
+Usage:
+
+  `drush sync:import --no-rebuild`
+
+#### Are there any risks I should be aware of?
+
+Ensure a rebuild step is included as part of your scripts when employing this flag.
+
+### Option to add `font-display` on Font libraries settings page
+
+#### What is it?
+
+Adds the ability to set the `font-display` CSS property when uploading a new web font.
+
+#### What impact will there be?
+
+None.
+
+#### What actions do I need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Entity browser element error appearing unexpectedly
+
+#### What is it?
+
+Fixes an issue where "This element requires the Entity browser or Media library modules enabled" error appeared even though users has either installed.
+Also resolves another issue where you could not select "Typeahead" without "Entity browser" module being installed.
+
+When adding a new Entity browser element to a Layout canvas the default option is now set to Typeahead as this is not module dependent.
+
+#### What impact will there be?
+
+The Typeahead option in the Entity browser element can be used without Entity browser or Media library modules installed and users should no longer experience the any error messages appearing unexpected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Compatibility with Link attributes module
+
+#### What is it?
+
+Fixes an issue when using the Link attributes module with Site studio.
+This error would appear in the logs: `User error: "0" is an invalid render array key in Drupal\Core\Render\Element::children() (line 97 of /var/www/drupal/standard/web/core/lib/Drupal/Core/Render/Element.php)`
+
+#### What impact will there be?
+
+If using the Link attributes module and Site studio you should no longer see any errors on your site.
+
+#### What actions do I need to take?
+
+When upgrading an Site Studio import and rebuild should be run.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Provide optional flag for sync:import to prevent the site going in maintenance mode
+
+#### What is it?
+
+By default the `sync:import` cli command will put the site into maintenance mode, this feature provides a `--no-maintenance` flag to optionally disable this action.
+This is useful on platforms such as ACSF where this behaviour is handled by the internal update hooks.
+
+#### What impact will there be?
+
+More granular control on how/when a site enters and leaves maintenance mode.
+
+#### What actions do I need to take?
+
+Usage:
+
+  `drush sync:import --no-maintenance`
+
+#### Are there any risks I should be aware of?
+
+A site *should* be in maintenance mode during the sync:import procedure to avoid cache issues, ensure this is handled by either the platform or additional scripts
+when employing the `--no-maintenance` option.
+
+### Compressing data to the Site studio API
+
+#### What is it?
+
+By default Site Studio will send data to its API using gzencode to reduce the traffic. It can be turned off by settings the config `cohesion.settings compress_outbound_request` to 0
+
+#### What impact will there be?
+
+If enabled, when saving an entity through the UI or via drush cohesion:rebuild, the process will be faster as less traffic will be necessary.
+
+#### What actions do I need to take?
+
+If your server does not have zlib you might want to turn this off by doing `drush config-set cohesion.settings compress_outbound_request 0` or install zlib.
+
+#### Are there any risks I should be aware of?
+
+This is now turned on by default, make sure zlib is installed on your server or you might see some failures. See `What actions do I need to take?`
+
+### Bugfix: IMCE & Media library not loading on sub-directory multi-site setups
+
+#### What is it?
+
+Fixes a bug when using IMCE and Media library integration with Site studio used relative URLS, where in a sub-directory multi-site setup, the URL returned was incorrect.
+
+#### What impact will there be?
+
+IMCE and Media library will now work for multi-sites that are configured in a sub-directory setup.
+For example: www.domain.com/site1 www.domain.com/site2
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Deleting a component removes it's styles from stylesheet
+
+#### What is it?
+
+Deleting Components with inline styles in Drupal now removes the styles for such components from the stylesheet. Previously this would be done only during rebuilds.
+
+#### What impact will there be?
+
+Deleting Components with inline styles will reduce size of stylesheets immediately, without having to run rebuild.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Limiting the number of twig cache file created when using inline styles
+
+#### What is it?
+
+A large number of twig cache file were created when rendering inline styles, causing the twig cache folder to grow overtime very quickly
+
+#### What impact will there be?
+
+The number of twig cache file will stop growing when using inline styles
+
+#### What actions do I need to take?
+
+If you want to clear the twig cache folder you should clear the cache
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Added the ability to not run a cache clear on drush cohesion:rebuild
+
+#### What is it?
+
+The drush command for rebuild now has a new option `--no-cache-clear` which removes the cache clear from the batch it performs.
+
+#### What impact will there be?
+
+If the option is specified the rebuild will take less memory to run.
+
+#### What actions do I need to take?
+
+Usage
+
+`drush cohesion:rebuild --no-cache-clear`
+
+#### Are there any risks I should be aware of?
+
+You will still need to run a `drush cr` after the rebuild
+
+### Reducing new lines within the inline CSS
+
+#### What is it?
+
+Reducing new lines within inline CSS style blocks that are generated by Site Studio.
+
+#### What impact will there be?
+
+Websites that use inline CSS styles generated by Site Studio, will now take up less space within the head of the page.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Inline editing pencil not always appearing
+
+#### What is it?
+
+Fixed a bug where in certain situations where the browser was zoomed in and specific widths, the Site Studio inline editing pencil did not always appear.
+
+#### What impact will there be?
+
+The inline editing pencils should now always show.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Bugfix: Translating with TMGMT, translated content sometimes resulting in "null"
+
+#### What is it?
+
+Fixes a bug where an error appeared when attempting to translate content, that had a Layout canvas field and other Drupal fields through TMGMT.
+This resulted in some translated content values being returned as "null".
+
+#### What impact will there be?
+
+Translating content using TMGMT in this scenario will no longer return an error and return the translated content.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Bugfix: Saving translated nodes could result in stream wrapper exceptions in Drupal logs
+
+#### What is it?
+
+Fixes a bug where the `translated://` stream wrapper and other hidden stream wrappers were being incorrectly passed into a Twig extensions function.
+
+#### What impact will there be?
+
+When saving a translated node you should no longer see these errors and it has been handled correctly.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Sync import batch to consume less memory
+
+#### What is it?
+
+The batch process has been reworked to hold less in memory
+
+#### What impact will there be?
+
+Large sync package will use less memory when imported via the UI and therefore will be less prone to out of memory errors
+
+#### What actions do I need to take?
+
+You might be able to decrease the memory limit needed to run a sync import via the UI if you had to increase it to overcome this issue
+
+#### Are there any risks I should be aware of?
+
+None.
+
 ## 6.4.0
 
 ### Style builder - field tokenization

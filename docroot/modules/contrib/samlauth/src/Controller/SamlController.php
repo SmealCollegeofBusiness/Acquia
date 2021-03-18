@@ -14,10 +14,12 @@ use Drupal\Core\Utility\Error;
 use Drupal\Core\Utility\Token;
 use Drupal\samlauth\SamlService;
 use Drupal\samlauth\UserVisibleException;
-use OneLogin\Saml2\Utils;
+use OneLogin\Saml2\Metadata;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 /**
  * Returns responses for samlauth module routes.
@@ -135,6 +137,7 @@ class SamlController extends ControllerBase {
    * after authenticating the user.
    *
    * @return \Drupal\Core\Routing\TrustedRedirectResponse
+   *   The HTTP response to send back.
    */
   public function login() {
     // $function returns a string and supposedly never calls 'external' Drupal
@@ -145,7 +148,7 @@ class SamlController extends ControllerBase {
     };
     // This response redirects to an external URL in all/common cases. We count
     // on the routing.yml to specify that it's not cacheable.
-    return $this->getTrustedRedirectResponse($function, 'initiating SAML login', '<front>');
+    return $this->getShortenedRedirectResponse($function, 'initiating SAML login', '<front>', TRUE);
   }
 
   /**
@@ -157,6 +160,7 @@ class SamlController extends ControllerBase {
    * first). We do usually log out before redirecting, though.
    *
    * @return \Drupal\Core\Routing\TrustedRedirectResponse
+   *   The HTTP response to send back.
    */
   public function logout() {
     // $function returns a string and supposedly never calls 'external' Drupal
@@ -167,17 +171,60 @@ class SamlController extends ControllerBase {
     };
     // This response redirects to an external URL in all/common cases. We count
     // on the routing.yml to specify that it's not cacheable.
-    return $this->getTrustedRedirectResponse($function, 'initiating SAML logout', '<front>');
+    return $this->getShortenedRedirectResponse($function, 'initiating SAML logout', '<front>', TRUE);
   }
 
   /**
    * Displays service provider metadata XML for iDP autoconfiguration.
    *
    * @return \Symfony\Component\HttpFoundation\Response
+   *   The HTTP response to send back.
    */
   public function metadata() {
+    $config = $this->config(self::CONFIG_OBJECT_NAME);
     try {
-      $metadata = $this->saml->getMetadata();
+      // Things we need to take into account:
+      // - The validUntil and cacheDuration properties are optional in the
+      //   SAML spec, but the SAML PHP Toolkit always assigns values. (At the
+      //   time of checking: "2 days into the future" and "1 week",
+      //   respectively. No reason provided for these figures.)
+      // - The only info we can find so far is one hint at wiki.shibboleth.net
+      //   MetadataManagementBestPractices: "[cacheDuration] is merely a hint
+      //   but metadata expiration [validUntil] is absolute". This matches bug
+      //   reports: if we send a validUntil in the past, logins stop working.
+      // - We want the HTTP response (with XML contents) to be cacheable
+      //   (which, hand-wavy, means 2 things: the Drupal render cache which is
+      //   controlled by CacheableResponse, and whatever other HTTP proxies
+      //   there may be which are controlled by HTTP headers.) Unlike the
+      //   SAML validUntil, we can turn this off for testing.
+      // - Once a cacheable response is sent, (we'll assume) we cannot purge it.
+      //   Once any response is sent, we cannot purge data from the requester
+      //   (IdP).
+      // So:
+      // - We must make sure no validUntil date in a cached response is ever in
+      //   the past - i.e. it must be equal/larger than the response 'expires'
+      //   value.
+      // - For configuration values, let's make the 'validUntil period'
+      //   configurable, plus a checkbox for response caching. Let's set the
+      //   response expiry to (validUntil - 10 seconds) to sidestep weird
+      //   response delays.
+      // - For the cacheDuration value, we don't have much of an idea what is a
+      //   good value - except, given the above defaults, it apparently doesn't
+      //   matter much if it is a lot higher than validUntil. A cached response
+      //   on our side could in extreme circumstances indicate a 'validUntil'
+      //   of 10 seconds from now, and a 'cacheDuration' of a week. Is that
+      //   bad? Apparently not, if "validUntil is absolute".
+      $metadata_valid = $config->get('metadata_valid_secs') ?: Metadata::TIME_VALID;
+      $metadata = $this->saml->getMetadata(time() + $metadata_valid);
+
+      // Default is TRUE for existing installs.
+      if ($config->get('metadata_cache_http') ?? TRUE) {
+        $response = new CacheableResponse($metadata, 200, ['Content-Type' => 'text/xml']);
+        $response->setMaxAge($metadata_valid > 10 ? $metadata_valid - 10 : $metadata_valid);
+      }
+      else {
+        $response = new Response($metadata, 200, ['Content-Type' => 'text/xml']);
+      }
     }
     catch (\Exception $e) {
       // This (invoking the exception handling that executes inside a render
@@ -192,12 +239,10 @@ class SamlController extends ControllerBase {
       $function = function () use ($e) {
         throw $e;
       };
-      return $this->getTrustedRedirectResponse($function, 'processing SAML SP metadata', '<front>');
+      $response = $this->getTrustedRedirectResponse($function, 'processing SAML SP metadata', '<front>');
     }
 
-    // The metadata is a 'regular' response and should be cacheable.
-    // @todo debugging option: make it not cacheable.
-    return new CacheableResponse($metadata, 200, ['Content-Type' => 'text/xml']);
+    return $response;
   }
 
   /**
@@ -207,6 +252,7 @@ class SamlController extends ControllerBase {
    * service on the IdP should redirect (or: execute a POST request to) here.
    *
    * @return \Symfony\Component\HttpFoundation\Response
+   *   The HTTP response to send back.
    */
   public function acs() {
     // We don't necessarily need to wrap our code in a render context: because
@@ -217,8 +263,8 @@ class SamlController extends ControllerBase {
     // possible 'leaky' code. We count on the routing.yml to specify the
     // response is not cacheable.
     $function = function () {
-      $this->saml->acs();
-      return $this->getRedirectUrlAfterProcessing(TRUE);
+      $ok = $this->saml->acs();
+      return $this->getRedirectUrlAfterProcessing(TRUE, !$ok);
     };
     return $this->getTrustedRedirectResponse($function, 'processing SAML authentication response', '<front>');
   }
@@ -230,6 +276,7 @@ class SamlController extends ControllerBase {
    * IdP should redirect here.
    *
    * @return \Symfony\Component\HttpFoundation\Response
+   *   The HTTP response to send back.
    */
   public function sls() {
     $function = function () {
@@ -239,13 +286,14 @@ class SamlController extends ControllerBase {
     // SP-initiated logout that was initially started from this SP, i.e.
     // through the logout() route). We count on the routing.yml to specify that
     // it's not cacheable.
-    return $this->getTrustedRedirectResponse($function, 'processing SAML single-logout response', '<front>');
+    return $this->getShortenedRedirectResponse($function, 'processing SAML single-logout response', '<front>');
   }
 
   /**
    * Redirects to the 'Change Password' service.
    *
    * @return \Symfony\Component\HttpFoundation\RedirectResponse
+   *   The HTTP response to send back.
    */
   public function changepw() {
     $function = function () {
@@ -303,67 +351,140 @@ class SamlController extends ControllerBase {
   /**
    * Returns a URL to redirect to.
    *
-   * This should be called only after successfully processing an ACS/logout
-   * response.
+   * This should be called only after processing an ACS/logout response.
    *
-   * @param bool $logged_in
-   *   (optional) TRUE if an ACS request was just processed.
+   * @param bool $after_acs
+   *   (Optional) TRUE if an ACS request was just processed.
+   * @param bool $ignore_relay_state
+   *   (Optional) TRUE if the RelayState parameter in the current request
+   *   should not be used.
    *
    * @return \Drupal\Core\Url
    *   The URL to redirect to.
    */
-  protected function getRedirectUrlAfterProcessing($logged_in = FALSE) {
-    $relay_state = $this->requestStack->getCurrentRequest()->get('RelayState');
-    if ($relay_state) {
-      // We should be able to trust the RelayState parameter at this point
-      // because the response from the IdP was verified. Only validate general
-      // syntax.
-      if (!UrlHelper::isValid($relay_state, TRUE)) {
-        $this->logger->error('Invalid RelayState parameter found in request: @relaystate', ['@relaystate' => $relay_state]);
-      }
-      // The SAML toolkit set a default RelayState to itself (saml/log(in|out))
-      // when starting the process; ignore this value.
-      elseif (strpos($relay_state, Utils::getSelfURLhost() . '/saml/') !== 0) {
-        $url = $relay_state;
+  protected function getRedirectUrlAfterProcessing($after_acs = FALSE, $ignore_relay_state = FALSE) {
+    if (!$ignore_relay_state) {
+      $relay_state = $this->requestStack->getCurrentRequest()->get('RelayState');
+      if ($relay_state) {
+        // We should be able to trust the RelayState parameter at this point
+        // because the response from the IdP was verified. Only validate general
+        // syntax.
+        if (!UrlHelper::isValid($relay_state, TRUE)) {
+          $this->logger->error('Invalid RelayState parameter found in request: @relaystate', ['@relaystate' => $relay_state]);
+        }
+        // The SAML toolkit set a default RelayState to itself
+        // (saml/log(in|out)) when starting the process, which will just cause
+        // an unnecessary intermediary redirect before AccessDeniedSubscriber
+        // routes us to the same place. Or, if the Drupal site has multiple
+        // domains and the user still isn't logged in on the domain in the
+        // RelayState, we'll have a redirect loop between us and the IdP.
+        elseif (!preg_match('|//[^/]+/saml/log|', $relay_state)) {
+          $url = $relay_state;
+        }
       }
     }
 
     if (empty($url)) {
       // If no url was specified, we check if it was configured.
-      $url = $this->config(self::CONFIG_OBJECT_NAME)->get($logged_in ? 'login_redirect_url' : 'logout_redirect_url');
+      $url = $this->config(self::CONFIG_OBJECT_NAME)->get($after_acs ? 'login_redirect_url' : 'logout_redirect_url');
+      $url = $this->token->replace($url);
     }
 
     if ($url) {
-      $url = $this->token->replace($url);
       // We don't check access here. If a URL was explicitly specified, we
       // prefer returning a 403 over silently redirecting somewhere else.
       $url_object = $this->pathValidator->getUrlIfValidWithoutAccessCheck($url);
       if (empty($url_object)) {
-        $type = $logged_in ? 'Login' : 'Logout';
+        $type = $after_acs ? 'Login' : 'Logout';
         $this->logger->warning("The $type Redirect URL is not a valid path; falling back to default.");
       }
     }
 
     if (empty($url_object)) {
       // If no url was configured, fall back to a hardcoded route.
-      $url_object = Url::fromRoute($logged_in ? 'user.page' : '<front>');
+      if ($this->currentUser()->isAuthenticated()) {
+        $url_object = Url::fromRoute('entity.user.canonical', ['user' => $this->currentUser()->id()]);
+      }
+      else {
+        $url_object = Url::fromRoute('<front>');
+      }
     }
 
     return $url_object;
   }
 
   /**
-   * Displays and/or logs exception message if a wrapped callable fails.
+   * Gets a redirect response and modifies it a bit.
    *
-   * Only called by getTrustedRedirectResponse() so far. Can be overridden to
-   * implement other ways of logging.
+   * Split off from getTrustedRedirectResponse() because that's in a trait.
    *
-   * @param \Exception $exception
-   *   The exception thrown.
+   * @param callable $callable
+   *   Callable.
    * @param string $while
-   *   (Optional) description of when the error was encountered.
+   *   Description of when we're doing this, for error logging.
+   * @param string $redirect_route_on_exception
+   *   Drupal route name to redirect to on exception.
+   * @param bool $set_max_age
+   *   (Optional) Set configured max-age.
    */
-  protected function handleExceptionInRenderContext(\Exception $exception, $while = '') {
+  protected function getShortenedRedirectResponse(callable $callable, $while, $redirect_route_on_exception, $set_max_age = FALSE) {
+    $response = $this->getTrustedRedirectResponse($callable, $while, $redirect_route_on_exception);
+    if ($set_max_age) {
+      // Sets configured max-age. (That doesn't mean that responses from
+      // callers which don't pass this parameters are not cached; that depends
+      // on the routing.yml. We just set our configurable value which is used
+      // for login/logout requests.)
+      $max_age = $this->config(self::CONFIG_OBJECT_NAME)->get('requests_cache_http_secs');
+      $response->setMaxAge($max_age > 0 ? $max_age : 0);
+    }
+    // Symfony RedirectResponses set a HTML document as content, which is going
+    // to be ugly with our long URLs. Almost noone sees this content for a
+    // HTTP redirect, but still: overwrite it with a similar HTML document that
+    // doesn't include the URL parameter blurb in the rendered parts.
+    $url = $response->getTargetUrl();
+    $pos = strpos($url, '?');
+    $shortened_url = $pos ? substr($url, 0, $pos) : $url;
+    // Almost literal copy from RedirectResponse::setTargetUrl():
+    $response->setContent(
+      sprintf('<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content="0;url=%1$s" />
+
+        <title>Redirecting to %2$s</title>
+    </head>
+    <body>
+        Redirecting to <a href="%1$s">%2$s</a>.
+    </body>
+</html>', htmlspecialchars($url, ENT_QUOTES, 'UTF-8'), $shortened_url));
+
+    return $response;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo reevaluate: do we actually want to always redirect from here? Or
+   *   would we provide sites with more flexibility if we threw a
+   *   AccessDeniedHttpException so they can handle errors in an event
+   *   subscriber? (It feels like there are contrib modules to help with that
+   *   which could have more flexible settings, like e.g. customerror /
+   *   error_redirect - analogous to the reason why we don't have any "auto
+   *   redirect when not logged in" functionality built into this module.) In
+   *   that case we would remove the 'error_redirect_url' setting.
+   */
+  protected function handleExceptionInRenderContext(\Exception $exception, $default_redirect_route, $while = '') {
+    if ($exception instanceof TooManyRequestsHttpException) {
+      // If this ever happens, don't spend time on a RedirectResponse (when the
+      // redirected page will need to spend time rendering the page that
+      // includes an error message. Throwing an exception here will fall
+      // through to the Symfony HttpKernel - and unfortunately for us, Drupal's
+      // CustomPageExceptionHtmlSubscriber will intercept the response handling
+      // and redirect anyway, unless we intercept it first in our own
+      // AccessDeniedSubscriber.)
+      throw $exception;
+    }
     if ($exception instanceof UserVisibleException || $this->config(self::CONFIG_OBJECT_NAME)->get('debug_display_error_details')) {
       // Show the full error on screen; also log, but with lowered severity.
       // Assume we don't need the "while" part for a user visible error because
@@ -382,10 +503,26 @@ class SamlController extends ControllerBase {
       $error = Error::decodeException($exception);
       unset($error['severity_level']);
       $this->logger->critical("%type encountered$while: @message in %function (line %line of %file).", $error);
-      // Don't expose the error to prevent information leakage; the user probably
+      // Don't expose the error to prevent information leakage; the user likely
       // can't do much with it anyway. But hint that more details are available.
       $this->messenger->addError("Error encountered{$while}; details have been logged.");
     }
+
+    // Get error URL.
+    $url = $this->config(self::CONFIG_OBJECT_NAME)->get('error_redirect_url');
+    $url_object = NULL;
+    if ($url) {
+      $url = $this->token->replace($url);
+      $url_object = $this->pathValidator->getUrlIfValidWithoutAccessCheck($url);
+      if (empty($url_object)) {
+        $this->getLogger('samlauth')->warning("The Error Redirect URL is not a valid path; falling back to provided route @route.", ['@route' => $default_redirect_route]);
+      }
+    }
+
+    if (empty($url_object)) {
+      $url_object = Url::fromRoute($default_redirect_route);
+    }
+    return $url_object;
   }
 
 }

@@ -32,9 +32,16 @@ class CohesionHtmlResponseSubscriber implements EventSubscriberInterface {
     // Extract and render the cohesion attachments styles in the DOM.
     $attachments = $response->getAttachments();
     if (isset($attachments['cohesion']) && !empty($attachments['cohesion'])) {
+
+      $inline_styles = [];
+      // loop over each style block and minify the CSS.
+      foreach($attachments['cohesion'] as $inline_css) {
+        $this->minifyStyleBlock($inline_styles, $inline_css);
+      }
+
       // Set inline styles for dx8 and
       // remove bigpipe token key from style output.
-      $content = str_replace(['<cohesion-placeholder></cohesion-placeholder>', 'big_pipe_nojs_placeholder_attribute_safe:'], [implode("\n", $attachments['cohesion']), ''], $response->getContent());
+      $content = str_replace(['<cohesion-placeholder></cohesion-placeholder>', 'big_pipe_nojs_placeholder_attribute_safe:'], [implode("\n", $inline_styles), ''], $response->getContent());
       $response->setContent($content);
     }
   }
@@ -46,6 +53,21 @@ class CohesionHtmlResponseSubscriber implements EventSubscriberInterface {
     $events[KernelEvents::RESPONSE][] = ['onRespondEarly', -100];
 
     return $events;
+  }
+
+  /**
+   *  Minify inline CSS style blocks.
+   *
+   * @param $inline_styles
+   * @param $inline_css
+   *
+   * @return mixed
+   */
+  public function minifyStyleBlock(&$inline_styles, $inline_css) {
+    // make it into one long line
+    $inline_css = str_replace(["\n","\r"],'', $inline_css);
+
+    return $inline_styles[] = $inline_css;
   }
 
 }

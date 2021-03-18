@@ -30,3 +30,9 @@
 .dx8-styles-panel .cke_panel_list.closed {
     display: none;
 }
+
+/* Video Embed */
+.coh-video .coh-video-inner {
+    background: #dbdbdc url('../css/video-icon.png') no-repeat center center;
+    min-height: 80px;
+}

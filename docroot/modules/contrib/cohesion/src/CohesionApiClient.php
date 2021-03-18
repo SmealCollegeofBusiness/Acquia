@@ -125,6 +125,8 @@ class CohesionApiClient {
    */
   protected function send($method, $uri, $data = [], $json_as_object = FALSE, $retry = TRUE) {
 
+    $body = Json::encode($data);
+
     // Build the headers for all requests.
     $options = [
       'headers' => array_merge([
@@ -133,9 +135,16 @@ class CohesionApiClient {
       ], $this->requestHeaders()),
       // Decompress inbound content.
       'decode_content' => TRUE,
-      // The body.
-      'body' => Json::encode($data),
     ];
+
+    $compress = \Drupal::configFactory()->get('cohesion.settings')->get('compress_outbound_request');
+    if ($compress !== FALSE) {
+      $options['headers']['Content-Encoding'] = 'gzip';
+      // Compression level set to 1 to get the network performance without affecting the client site performance
+      $options['body'] = gzencode($body, 1);
+    } else {
+      $options['body'] = $body;
+    }
 
     $code = NULL;
     $response_data = NULL;

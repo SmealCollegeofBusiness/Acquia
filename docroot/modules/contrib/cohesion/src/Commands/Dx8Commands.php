@@ -51,9 +51,10 @@ class Dx8Commands extends DrushCommands {
    *
    * @command cohesion:rebuild
    * @aliases dx8:rebuild
+   * @option no-cache-clear
    * @usage drush cohesion:rebuild
    */
-  public function rebuild($options = []) {
+  public function rebuild($options = ['no-cache-clear' => FALSE]) {
     $time_start = microtime(TRUE);
 
     $this->say($this->t('Rebuilding all entities.'));

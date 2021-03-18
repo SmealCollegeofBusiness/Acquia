@@ -589,6 +589,45 @@ function cohesion_elements_update_8903() {
 }
 
 /**
+ * Update cohesion_component_contents missing references to the component it was created from
+ */
+  function cohesion_elements_update_8904() {
+
+    // Get component content ids where the component field is NULL or empty string.
+    $query_condition = \Drupal::entityTypeManager()->getStorage('component_content')->getQuery()
+      ->orConditionGroup()
+      ->condition('component', '')
+      ->condition('component', NULL , 'IS NULL');
+
+    $component_content_ids = \Drupal::entityTypeManager()->getStorage('component_content')->getQuery()
+      ->condition($query_condition)->execute();
+
+    // If we have any ids then load and update the component field to have the component id.
+    if($component_content_ids) {
+      $component_contents = \Drupal\cohesion_elements\Entity\ComponentContent::loadMultiple($component_content_ids);
+
+      foreach ($component_contents as $component_content) {
+        // Get the layout canvas target id
+        $cc_target_layout_canvas = $component_content->get('layout_canvas')->target_id;
+
+        $component_id_query = Database::getConnection()->select('cohesion_layout_field_data', 'n')
+          ->fields('n', ['id', 'json_values'])
+          ->condition('id', $cc_target_layout_canvas)->execute()->fetch();
+
+        // Decode the layout canvas so we can get the component id & update in the database.
+        $layout_canvas_values = json_decode($component_id_query->json_values);
+        if($layout_canvas_values->canvas[0]->componentId) {
+          Database::getConnection()->update('component_contents_field_data')->fields([
+            'component' => $layout_canvas_values->canvas[0]->componentId,
+          ])
+            ->condition('id', $component_content->id(), '=')
+            ->execute();
+        }
+      }
+    }
+  }
+
+/**
  *
  * @param string $config_key
  * @param array $access_type
