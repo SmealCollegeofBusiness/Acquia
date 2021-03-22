@@ -47,6 +47,7 @@ use Drupal\workbench_email\TemplateInterface;
  *     "body",
  *     "bundles",
  *     "recipient_types",
+ *     "replyTo",
  *   }
  * )
  */
@@ -78,6 +79,13 @@ class Template extends ConfigEntityBase implements TemplateInterface {
    * @var string
    */
   protected $subject;
+
+  /**
+   * Message reply-to.
+   *
+   * @var string
+   */
+  protected $replyTo;
 
   /**
    * Configured recipient types for this template.
@@ -128,6 +136,13 @@ class Template extends ConfigEntityBase implements TemplateInterface {
   /**
    * {@inheritdoc}
    */
+  public function getReplyTo() {
+    return $this->replyTo;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setBody(array $body) {
     $this->body = $body;
     return $this;
@@ -138,6 +153,14 @@ class Template extends ConfigEntityBase implements TemplateInterface {
    */
   public function setSubject($subject) {
     $this->subject = $subject;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setReplyTo($replyTo) {
+    $this->replyTo = $replyTo;
     return $this;
   }
 

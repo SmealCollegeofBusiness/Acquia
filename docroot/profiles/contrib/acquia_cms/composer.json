@@ -2,7 +2,20 @@
     "name": "acquia/acquia_cms",
     "type": "drupal-profile",
     "description": "An implementation of Drupal 9 for running custom, low code websites on the Acquia platform.",
+    "homepage": "https://github.com/acquia/acquia_cms",
     "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Michael Sherron",
+            "email": "michael.sherron@acquia.com",
+            "role": "Author"
+        },
+        {
+            "name": "Acquia Engineering",
+            "email": "engineering@acquia.org",
+            "role": "Maintainer"
+        }
+    ],
     "require": {
         "acquia/cohesion": "^6.4",
         "acquia/cohesion-theme": "^6.4",
@@ -27,7 +40,7 @@
         "drupal/diff": "^1",
         "drupal/entity_clone": "1.0-beta4",
         "drupal/facets": "^1.5",
-        "drupal/facets_pretty_paths": "1.x-dev",
+        "drupal/facets_pretty_paths": "^1.1",
         "drupal/field_group": "^3",
         "drupal/focal_point": "1.5",
         "drupal/geocoder": "^3",
@@ -60,7 +73,8 @@
         "drupal/social_media_links": "^2.7",
         "drupal/username_enumeration_prevention": "1.1",
         "drupal/webform": "^6.0",
-        "drupal/workbench_email": "^1.7",
+        "drupal/workbench_email": "~2.0.0",
+        "drush/drush": "^10",
         "ergebnis/composer-normalize": "^2.9",
         "geocoder-php/google-maps-provider": "^4",
         "phpspec/prophecy-phpunit": "^2.0"
@@ -70,7 +84,6 @@
         "axelerant/drupal-quality-checker": "^1.1",
         "drupal/core-composer-scaffold": "^9.0.0",
         "drupal/core-dev": "^9",
-        "drush/drush": "^10",
         "friendsoftwig/twigcs": "^3.2",
         "oomphinc/composer-installers-extender": "^1.1 || ^2",
         "phpunit/phpunit": "~9.4.0",

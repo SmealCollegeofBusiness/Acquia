@@ -10,7 +10,7 @@ test_dependencies:
   - workbench_moderation:workbench_moderation
 configure: entity.workbench_email_template.collection
 
-# Information added by Drupal.org packaging script on 2020-07-13
-version: '8.x-1.7'
+# Information added by Drupal.org packaging script on 2021-03-03
+version: '2.0.1'
 project: 'workbench_email'
-datestamp: 1594680644
+datestamp: 1614808030

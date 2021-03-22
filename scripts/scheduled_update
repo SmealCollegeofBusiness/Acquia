@@ -9,7 +9,8 @@ yes | composer update --prefer-dist
 
 if [[ `git status --porcelain` ]]; then
   # Git status has returned results, meaning there are changes present and
-  # we need to commit them.
+  # we need to commit them. We also need to check for acsf-init changes.
+  ./vendor/bin/drush --include=docroot/modules/contrib/acsf/acsf_init acsf-init -y
   git add -A
   git commit -m "Scheduled ACMS update commit by Travis CI for Build ${TRAVIS_BUILD_ID}" .
   git push origin ${TRAVIS_BRANCH}

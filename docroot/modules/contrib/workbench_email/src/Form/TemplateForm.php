@@ -140,6 +140,15 @@ class TemplateForm extends EntityForm {
       '#required' => TRUE,
     ];
 
+    $form['contents']['replyTo'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Reply-To'),
+      '#maxlength' => 255,
+      '#default_value' => $workbench_email_template->getReplyTo(),
+      '#description' => $this->t('Email Reply-To. You can use tokens like [node:author:mail] depending on the entity type being updated.'),
+      '#required' => FALSE,
+    ];
+
     $default_body = $workbench_email_template->getBody() + [
       'value' => '',
       'format' => 'plain_text',

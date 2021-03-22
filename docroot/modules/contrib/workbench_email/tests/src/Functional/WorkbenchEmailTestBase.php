@@ -97,7 +97,7 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'workbench_email',
     'node',
     'options',
@@ -271,6 +271,7 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
       'label' => 'Content needs review',
       'body[value]' => 'Content with title [node:title] needs review. You can view it at [node:url].',
       'subject' => 'Content needs review',
+      'replyTo' => '[node:author:mail]',
       'enabled_recipient_types[role]' => TRUE,
       'recipient_types[role][settings][roles][approver]' => TRUE,
       'bundles[node:test]' => TRUE,
@@ -295,6 +296,7 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
       'label' => 'Content needs review',
       'body[value]' => 'Content with title [node:title] needs review. You can view it at [node:url].',
       'subject' => 'Content needs review: [node:title]',
+      'replyTo' => '[node:author:mail]',
     ], t('Save'));
     $assert->pageTextContains('Saved the Content needs review Email Template');
     // Edit the transition from needs review to published and use the
@@ -418,6 +420,8 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
     $this->assertEquals($expected, $mails);
     $this->assertEquals(sprintf('Content needs review: %s', $node->getTitle()), $last['subject']);
     $this->assertEquals(sprintf('Content needs review: %s', $node->getTitle()), $prev['subject']);
+    $this->assertEquals($this->editor->getEmail(), $last['reply-to']);
+    $this->assertEquals($this->editor->getEmail(), $prev['reply-to']);
     $this->assertStringContainsString(sprintf('Content with title %s needs review. You can view it at', $node->label()), preg_replace('/\s+/', ' ', $prev['body']));
     $this->assertStringContainsString(sprintf('Content with title %s needs review. You can view it at', $node->label()), preg_replace('/\s+/', ' ', $last['body']));
     $this->assertStringContainsString($node->toUrl('canonical', ['absolute' => TRUE])->toString(), preg_replace('/\s+/', ' ', $prev['body']));

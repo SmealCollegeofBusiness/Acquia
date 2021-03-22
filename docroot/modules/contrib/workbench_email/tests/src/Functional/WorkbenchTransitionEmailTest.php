@@ -16,7 +16,7 @@ class WorkbenchTransitionEmailTest extends WorkbenchEmailTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'workbench_moderation',
   ];
 

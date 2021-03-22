@@ -15,6 +15,14 @@ class RecipientPluginUpdatePathTest extends UpdatePathTestBase {
   /**
    * {@inheritdoc}
    */
+  protected static $modules = [
+    'content_moderation',
+    'workflows',
+  ];
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setDatabaseDumpFiles() {
     $this->databaseDumpFiles = [
       __DIR__ . '/../../fixtures/update/recipient-plugins.php.gz',

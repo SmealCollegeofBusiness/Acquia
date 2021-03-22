@@ -21,3 +21,10 @@ function workbench_email_post_update_move_to_recipient_plugins(&$sandbox = NULL)
   // Drupal core < 8.6, no config entity updater.
   \Drupal::classResolver()->getInstanceFromDefinition(UpdateHelper::class)->legacyUpdateToRecipientPlugin($sandbox);
 }
+
+/**
+ * Clear caches due to addition of replyTo field.
+ */
+function workbench_email_post_update_add_reply_to() {
+  // Empty post-update hook.
+}

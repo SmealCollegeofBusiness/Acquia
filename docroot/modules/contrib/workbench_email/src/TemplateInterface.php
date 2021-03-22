@@ -28,6 +28,14 @@ interface TemplateInterface extends ConfigEntityInterface, EntityWithPluginColle
   public function getBody();
 
   /**
+   * Gets the template reply-to.
+   *
+   * @return string
+   *   Template reply-to.
+   */
+  public function getReplyTo();
+
+  /**
    * Sets the body.
    *
    * @param string[] $body
@@ -48,6 +56,17 @@ interface TemplateInterface extends ConfigEntityInterface, EntityWithPluginColle
    *   Called instance.
    */
   public function setSubject($subject);
+
+  /**
+   * Sets the reply-to.
+   *
+   * @param string $replyTo
+   *   Template reply-to.
+   *
+   * @return self
+   *   Called instance.
+   */
+  public function setReplyTo($replyTo);
 
   /**
    * Returns the ordered collection of recipient type plugin instances or an individual plugin instance.

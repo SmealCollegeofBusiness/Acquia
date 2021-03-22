@@ -15,7 +15,7 @@ class ContentModerationWorkbenchEmailTest extends WorkbenchEmailTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'content_moderation',
     'workflows',
   ];

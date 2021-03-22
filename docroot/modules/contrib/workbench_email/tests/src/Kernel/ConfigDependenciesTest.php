@@ -13,6 +13,7 @@ use Drupal\workbench_email\Entity\Template;
  * Defines a class for testing config dependencies.
  *
  * @group workbench_email
+ * @requires module workbench_moderation
  */
 class ConfigDependenciesTest extends KernelTestBase {
 

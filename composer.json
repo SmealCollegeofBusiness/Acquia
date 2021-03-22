@@ -116,8 +116,5 @@
             "@composer clearcache --ansi",
             "@composer install --ansi"
         ]
-    },
-    "config": {
-        "discard-changes": false
     }
 }

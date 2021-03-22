@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "acquia/acquia_cms",
-            "version": "1.0.0-rc1",
+            "version": "v1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/acquia/acquia_cms",
-                "reference": "fd75bd63e84148ad049a23ef87d4d20b6eb1c2db"
+                "reference": "04d978babfcb667bb5100004529d6ebc74f48794"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acquia/acquia_cms/zipball/fd75bd63e84148ad049a23ef87d4d20b6eb1c2db",
-                "reference": "fd75bd63e84148ad049a23ef87d4d20b6eb1c2db",
+                "url": "https://api.github.com/repos/acquia/acquia_cms/zipball/04d978babfcb667bb5100004529d6ebc74f48794",
+                "reference": "04d978babfcb667bb5100004529d6ebc74f48794",
                 "shasum": ""
             },
             "require": {
@@ -44,7 +44,7 @@
                 "drupal/diff": "^1",
                 "drupal/entity_clone": "1.0-beta4",
                 "drupal/facets": "^1.5",
-                "drupal/facets_pretty_paths": "1.x-dev",
+                "drupal/facets_pretty_paths": "^1.1",
                 "drupal/field_group": "^3",
                 "drupal/focal_point": "1.5",
                 "drupal/geocoder": "^3",
@@ -77,7 +77,8 @@
                 "drupal/social_media_links": "^2.7",
                 "drupal/username_enumeration_prevention": "1.1",
                 "drupal/webform": "^6.0",
-                "drupal/workbench_email": "^1.7",
+                "drupal/workbench_email": "~2.0.0",
+                "drush/drush": "^10",
                 "ergebnis/composer-normalize": "^2.9",
                 "geocoder-php/google-maps-provider": "^4",
                 "phpspec/prophecy-phpunit": "^2.0"
@@ -87,7 +88,6 @@
                 "axelerant/drupal-quality-checker": "^1.1",
                 "drupal/core-composer-scaffold": "^9.0.0",
                 "drupal/core-dev": "^9",
-                "drush/drush": "^10",
                 "friendsoftwig/twigcs": "^3.2",
                 "oomphinc/composer-installers-extender": "^1.1 || ^2",
                 "phpunit/phpunit": "~9.4.0",
@@ -239,8 +239,21 @@
             "license": [
                 "GPL-2.0-or-later"
             ],
+            "authors": [
+                {
+                    "name": "Michael Sherron",
+                    "email": "michael.sherron@acquia.com",
+                    "role": "Author"
+                },
+                {
+                    "name": "Acquia Engineering",
+                    "email": "engineering@acquia.org",
+                    "role": "Maintainer"
+                }
+            ],
             "description": "An implementation of Drupal 9 for running custom, low code websites on the Acquia platform.",
-            "time": "2021-03-17T18:18:31+00:00"
+            "homepage": "https://github.com/acquia/acquia_cms",
+            "time": "2021-03-22T18:46:03+00:00"
         },
         {
             "name": "acquia/blt",
@@ -452,16 +465,16 @@
         },
         {
             "name": "acquia/cohesion-theme",
-            "version": "6.5.0",
+            "version": "6.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/acquia/cohesion-theme.git",
-                "reference": "7315b225c7ea4f6974e36a6ad788af2bd64c547a"
+                "reference": "8f846c57a0c7c2dfa87ab06d5e8dccf0a72986a0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acquia/cohesion-theme/zipball/7315b225c7ea4f6974e36a6ad788af2bd64c547a",
-                "reference": "7315b225c7ea4f6974e36a6ad788af2bd64c547a",
+                "url": "https://api.github.com/repos/acquia/cohesion-theme/zipball/8f846c57a0c7c2dfa87ab06d5e8dccf0a72986a0",
+                "reference": "8f846c57a0c7c2dfa87ab06d5e8dccf0a72986a0",
                 "shasum": ""
             },
             "type": "drupal-theme",
@@ -479,9 +492,9 @@
             "description": "Site Studio minimal theme",
             "support": {
                 "issues": "https://github.com/acquia/cohesion-theme/issues",
-                "source": "https://github.com/acquia/cohesion-theme/tree/6.5.0"
+                "source": "https://github.com/acquia/cohesion-theme/tree/6.4.3"
             },
-            "time": "2021-03-17T12:28:47+00:00"
+            "time": "2021-03-09T18:30:57+00:00"
         },
         {
             "name": "acquia/content-hub-php",
@@ -4616,11 +4629,17 @@
         },
         {
             "name": "drupal/facets_pretty_paths",
-            "version": "dev-1.x",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/facets_pretty_paths.git",
-                "reference": "5b7c276dd7f9c1fa9b7bfc07b28cb547176aab70"
+                "reference": "8.x-1.1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/facets_pretty_paths-8.x-1.1.zip",
+                "reference": "8.x-1.1",
+                "shasum": "ca7e362185e10d2b60b47f041adf018d660a14c6"
             },
             "require": {
                 "drupal/core": "^8 || ^9",
@@ -4641,15 +4660,12 @@
             },
             "type": "drupal-module",
             "extra": {
-                "branch-alias": {
-                    "dev-1.x": "1.x-dev"
-                },
                 "drupal": {
-                    "version": "8.x-1.0+2-dev",
-                    "datestamp": "1596143804",
+                    "version": "8.x-1.1",
+                    "datestamp": "1613565141",
                     "security-coverage": {
-                        "status": "not-covered",
-                        "message": "Dev releases are not covered by Drupal security advisories."
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
                     }
                 },
                 "composer-exit-on-patch-failure": true,
@@ -6547,7 +6563,7 @@
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/samlauth.git",
-                "reference": "ff4134a36c8f580658bebcc115f105db63043603"
+                "reference": "4d68e91f0d3b6e678b7b0ae69123cac5f66b9d8c"
             },
             "require": {
                 "drupal/core": "^8 || ^9",
@@ -6561,8 +6577,8 @@
                     "dev-8.x-3.x": "3.x-dev"
                 },
                 "drupal": {
-                    "version": "8.x-3.0-rc1+5-dev",
-                    "datestamp": "1615565059",
+                    "version": "8.x-3.0-rc1+7-dev",
+                    "datestamp": "1615999611",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "Dev releases are not covered by Drupal security advisories."
@@ -7601,29 +7617,29 @@
         },
         {
             "name": "drupal/workbench_email",
-            "version": "1.7.0",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/workbench_email.git",
-                "reference": "8.x-1.7"
+                "reference": "2.0.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/workbench_email-8.x-1.7.zip",
-                "reference": "8.x-1.7",
-                "shasum": "a381e3d6c8a470a08469049bf7c7dd911556a493"
+                "url": "https://ftp.drupal.org/files/projects/workbench_email-2.0.1.zip",
+                "reference": "2.0.1",
+                "shasum": "7f9c6e56906e8732f0ddb617b1692b4aa9a2b281"
             },
             "require": {
                 "drupal/core": "^8 || ^9"
             },
             "require-dev": {
-                "drupal/workbench_moderation": "*"
+                "drupal/workbench_moderation": "^1.0"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.7",
-                    "datestamp": "1594680642",
+                    "version": "2.0.1",
+                    "datestamp": "1614808028",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -7660,10 +7676,11 @@
                     "homepage": "https://www.drupal.org/user/731188"
                 }
             ],
-            "description": "Send emails to users when workbench transitions occur",
+            "description": "Extends Workbench/Content Moderation by adding the ability to add emails to specific transitions.",
             "homepage": "https://www.drupal.org/project/workbench_email",
             "support": {
-                "source": "https://git.drupalcode.org/project/workbench_email"
+                "source": "https://git.drupalcode.org/project/workbench_email",
+                "issues": "http://drupal.org/project/issues/workbench_email"
             }
         },
         {
@@ -7719,6 +7736,7 @@
                     "type": "github"
                 }
             ],
+            "abandoned": "loophp/phposinfo",
             "time": "2020-05-19T14:14:28+00:00"
         },
         {
@@ -8842,16 +8860,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.7.0",
+            "version": "1.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "53330f47520498c0ae1f61f7e2c90f55690c06a3"
+                "reference": "35ea11d335fd638b5882ff1725228b3d35496ab1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/53330f47520498c0ae1f61f7e2c90f55690c06a3",
-                "reference": "53330f47520498c0ae1f61f7e2c90f55690c06a3",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/35ea11d335fd638b5882ff1725228b3d35496ab1",
+                "reference": "35ea11d335fd638b5882ff1725228b3d35496ab1",
                 "shasum": ""
             },
             "require": {
@@ -8911,9 +8929,9 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
-                "source": "https://github.com/guzzle/psr7/tree/1.7.0"
+                "source": "https://github.com/guzzle/psr7/tree/1.8.1"
             },
-            "time": "2020-09-30T07:37:11+00:00"
+            "time": "2021-03-21T16:25:00+00:00"
         },
         {
             "name": "http-interop/http-factory-guzzle",
@@ -10248,23 +10266,23 @@
         },
         {
             "name": "pear/pear_exception",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pear/PEAR_Exception.git",
-                "reference": "dbb42a5a0e45f3adcf99babfb2a1ba77b8ac36a7"
+                "reference": "b14fbe2ddb0b9f94f5b24cf08783d599f776fff0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pear/PEAR_Exception/zipball/dbb42a5a0e45f3adcf99babfb2a1ba77b8ac36a7",
-                "reference": "dbb42a5a0e45f3adcf99babfb2a1ba77b8ac36a7",
+                "url": "https://api.github.com/repos/pear/PEAR_Exception/zipball/b14fbe2ddb0b9f94f5b24cf08783d599f776fff0",
+                "reference": "b14fbe2ddb0b9f94f5b24cf08783d599f776fff0",
                 "shasum": ""
             },
             "require": {
-                "php": ">=4.4.0"
+                "php": ">=5.2.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "*"
+                "phpunit/phpunit": "<9"
             },
             "type": "class",
             "extra": {
@@ -10303,7 +10321,7 @@
                 "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=PEAR_Exception",
                 "source": "https://github.com/pear/PEAR_Exception"
             },
-            "time": "2019-12-10T10:24:42+00:00"
+            "time": "2021-03-21T15:43:46+00:00"
         },
         {
             "name": "phar-io/manifest",

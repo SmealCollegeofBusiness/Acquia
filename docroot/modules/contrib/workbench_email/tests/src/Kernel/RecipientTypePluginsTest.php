@@ -16,6 +16,7 @@ use Drupal\workbench_moderation\Entity\ModerationStateTransition;
  * Defines a class for testing handlers.
  *
  * @group workbench_email
+ * @requires module workbench_moderation
  */
 class RecipientTypePluginsTest extends KernelTestBase {
 
@@ -234,7 +235,7 @@ class RecipientTypePluginsTest extends KernelTestBase {
 
     // Check mail goes to recipients.
     $captured_emails = $this->container->get('state')->get('system.test_mail_collector') ?: [];
-    $this->assertSame($expectedRecipients, array_map(function (array $mail) {
+    $this->assertEqualsCanonicalizing($expectedRecipients, array_map(function (array $mail) {
       return $mail['to'];
     }, $captured_emails));
     foreach ($captured_emails as $email) {

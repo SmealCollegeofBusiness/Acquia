@@ -129,13 +129,14 @@ class WorkbenchEmailProcessor extends QueueWorkerBase implements ContainerFactor
         $subject = $this->token->replace($template->getSubject(), [$entity->getEntityTypeId() => $entity]);
         $body['value'] = $this->token->replace($body['value'], [$entity->getEntityTypeId() => $entity]);
         $body = $this->checkMarkup($body['value'], $body['format']);
+        $replyTo = !empty($template->getReplyTo()) ? $this->token->replace($template->getReplyTo(), [$entity->getEntityTypeId() => $entity]) : NULL;
 
         // Send the email.
         $this->mailManager->mail('workbench_email', 'template::' . $template->id(), $data->getTo(), LanguageInterface::LANGCODE_DEFAULT, [
           'body' => $body,
           'template' => $template,
           'subject' => $subject,
-        ]);
+        ], $replyTo);
       }
     }
     else {

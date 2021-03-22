@@ -30,19 +30,19 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '44d4aaa2ddb840c361d191569b3cbe2190b3dcb5',
+    'reference' => '076199a9f95ba76a3811f1c74d7ff96b5bda63e8',
     'name' => 'acquia/sf_acms',
   ),
   'versions' => 
   array (
     'acquia/acquia_cms' => 
     array (
-      'pretty_version' => '1.0.0-rc1',
-      'version' => '1.0.0.0-RC1',
+      'pretty_version' => 'v1.0',
+      'version' => '1.0.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'fd75bd63e84148ad049a23ef87d4d20b6eb1c2db',
+      'reference' => '04d978babfcb667bb5100004529d6ebc74f48794',
     ),
     'acquia/blt' => 
     array (
@@ -73,12 +73,12 @@ private static $installed = array (
     ),
     'acquia/cohesion-theme' => 
     array (
-      'pretty_version' => '6.5.0',
-      'version' => '6.5.0.0',
+      'pretty_version' => '6.4.3',
+      'version' => '6.4.3.0',
       'aliases' => 
       array (
       ),
-      'reference' => '7315b225c7ea4f6974e36a6ad788af2bd64c547a',
+      'reference' => '8f846c57a0c7c2dfa87ab06d5e8dccf0a72986a0',
     ),
     'acquia/content-hub-php' => 
     array (
@@ -130,7 +130,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '44d4aaa2ddb840c361d191569b3cbe2190b3dcb5',
+      'reference' => '076199a9f95ba76a3811f1c74d7ff96b5bda63e8',
     ),
     'asm89/stack-cors' => 
     array (
@@ -1007,13 +1007,12 @@ private static $installed = array (
     ),
     'drupal/facets_pretty_paths' => 
     array (
-      'pretty_version' => 'dev-1.x',
-      'version' => 'dev-1.x',
+      'pretty_version' => '1.1.0',
+      'version' => '1.1.0.0',
       'aliases' => 
       array (
-        0 => '1.x-dev',
       ),
-      'reference' => '5b7c276dd7f9c1fa9b7bfc07b28cb547176aab70',
+      'reference' => '8.x-1.1',
     ),
     'drupal/field' => 
     array (
@@ -1535,7 +1534,7 @@ private static $installed = array (
       array (
         0 => '3.x-dev',
       ),
-      'reference' => 'ff4134a36c8f580658bebcc115f105db63043603',
+      'reference' => '4d68e91f0d3b6e678b7b0ae69123cac5f66b9d8c',
     ),
     'drupal/scheduler' => 
     array (
@@ -1814,12 +1813,12 @@ private static $installed = array (
     ),
     'drupal/workbench_email' => 
     array (
-      'pretty_version' => '1.7.0',
-      'version' => '1.7.0.0',
+      'pretty_version' => '2.0.1',
+      'version' => '2.0.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => '8.x-1.7',
+      'reference' => '2.0.1',
     ),
     'drupal/workflows' => 
     array (
@@ -2006,12 +2005,12 @@ private static $installed = array (
     ),
     'guzzlehttp/psr7' => 
     array (
-      'pretty_version' => '1.7.0',
-      'version' => '1.7.0.0',
+      'pretty_version' => '1.8.1',
+      'version' => '1.8.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => '53330f47520498c0ae1f61f7e2c90f55690c06a3',
+      'reference' => '35ea11d335fd638b5882ff1725228b3d35496ab1',
     ),
     'http-interop/http-factory-guzzle' => 
     array (
@@ -2215,12 +2214,12 @@ private static $installed = array (
     ),
     'pear/pear_exception' => 
     array (
-      'pretty_version' => 'v1.0.1',
-      'version' => '1.0.1.0',
+      'pretty_version' => 'v1.0.2',
+      'version' => '1.0.2.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'dbb42a5a0e45f3adcf99babfb2a1ba77b8ac36a7',
+      'reference' => 'b14fbe2ddb0b9f94f5b24cf08783d599f776fff0',
     ),
     'phar-io/manifest' => 
     array (
@@ -2447,8 +2446,8 @@ private static $installed = array (
     array (
       'provided' => 
       array (
-        0 => '1.0',
-        1 => '^1.0',
+        0 => '^1.0',
+        1 => '1.0',
       ),
     ),
     'psr/event-dispatcher' => 
