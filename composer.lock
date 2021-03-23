@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/acquia/acquia_cms",
-                "reference": "04d978babfcb667bb5100004529d6ebc74f48794"
+                "reference": "66d259f505ee57d94d980b0749bcbf3bcdff76e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acquia/acquia_cms/zipball/04d978babfcb667bb5100004529d6ebc74f48794",
-                "reference": "04d978babfcb667bb5100004529d6ebc74f48794",
+                "url": "https://api.github.com/repos/acquia/acquia_cms/zipball/66d259f505ee57d94d980b0749bcbf3bcdff76e3",
+                "reference": "66d259f505ee57d94d980b0749bcbf3bcdff76e3",
                 "shasum": ""
             },
             "require": {
@@ -253,7 +253,7 @@
             ],
             "description": "An implementation of Drupal 9 for running custom, low code websites on the Acquia platform.",
             "homepage": "https://github.com/acquia/acquia_cms",
-            "time": "2021-03-22T18:46:03+00:00"
+            "time": "2021-03-22T23:12:53+00:00"
         },
         {
             "name": "acquia/blt",
