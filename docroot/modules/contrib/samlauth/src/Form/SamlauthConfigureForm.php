@@ -141,6 +141,18 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#title' => $this->t('Error redirect URL'),
       '#description' => $this->t("The default URL to redirect the user to after an error occurred. This should be an internal path starting with a slash, or an absolute URL. Defaults to the front page."),
       '#default_value' => $config->get('error_redirect_url'),
+      '#states' => [
+        'disabled' => [
+          ':input[name="error_throw"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['saml_login_logout']['error_throw'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t("Bypass error handling"),
+      '#description' => $this->t("No redirection or meaningful logging is done. This better enables custom code to handle errors."),
+      '#default_value' => $config->get('error_throw'),
     ];
 
     $form['service_provider'] = [
@@ -251,16 +263,6 @@ class SamlauthConfigureForm extends ConfigFormBase {
       // TRUE on existing installations where the checkbox didn't exist before;
       // FALSE in new installations.
       '#default_value' => $config->get('metadata_cache_http') ?? TRUE,
-    ];
-
-    $form['service_provider']['caching']['requests_cache_http_secs'] = [
-      '#type' => 'number',
-      '#min' => 0,
-      '#title' => $this->t('Cache HTTP responses containing SAML requests'),
-      '#description' => $this->t('This is a number of seconds; 0 means "off"; suggested value is 600. The responses cached are redirects to the IdP at the start of login/logout flow, which contain a SAML request in the URL parameter.'),
-      // 0 on existing installations where the checkbox didn't exist before;
-      // 600 in new installations.
-      '#default_value' => $config->get('requests_cache_http_secs') ?? 0,
     ];
 
     $form['identity_provider'] = [
@@ -717,13 +719,13 @@ class SamlauthConfigureForm extends ConfigFormBase {
       ->set('login_redirect_url', $form_state->getValue('login_redirect_url'))
       ->set('logout_redirect_url', $form_state->getValue('logout_redirect_url'))
       ->set('error_redirect_url', $form_state->getValue('error_redirect_url'))
+      ->set('error_throw', $form_state->getValue('error_throw'))
       ->set('sp_entity_id', $form_state->getValue('sp_entity_id'))
       ->set('sp_name_id_format', $form_state->getValue('sp_name_id_format'))
       ->set('sp_x509_certificate', $sp_x509_certificate)
       ->set('sp_private_key', $sp_private_key)
       ->set('sp_cert_folder', $sp_cert_folder)
       ->set('metadata_cache_http', $form_state->getValue('metadata_cache_http'))
-      ->set('requests_cache_http_secs', $form_state->getValue('requests_cache_http_secs'))
       ->set('idp_entity_id', $form_state->getValue('idp_entity_id'))
       ->set('idp_single_sign_on_service', $form_state->getValue('idp_single_sign_on_service'))
       ->set('idp_single_log_out_service', $form_state->getValue('idp_single_log_out_service'))
