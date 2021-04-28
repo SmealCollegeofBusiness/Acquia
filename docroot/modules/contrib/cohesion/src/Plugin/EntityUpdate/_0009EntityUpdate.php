@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion\Plugin\EntityUpdate;
 
-use Drupal\cohesion_elements\Entity\CohesionElementEntityBase;
 use Drupal\cohesion\EntityUpdatePluginInterface;
+use Drupal\cohesion_elements\Entity\CohesionElementEntityBase;
 use Drupal\Component\Plugin\PluginBase;
 
 /**

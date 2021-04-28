@@ -2,13 +2,13 @@
 
 namespace Drupal\cohesion_website_settings\Form;
 
+use Drupal\cohesion\EntityGroupsPluginManager;
 use Drupal\cohesion\Services\RebuildInuseBatch;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\cohesion\EntityGroupsPluginManager;
 
 /**
  * Class WebsiteSettingsGroupFormBase.
@@ -188,6 +188,7 @@ abstract class WebsiteSettingsGroupFormBase extends ConfigFormBase {
         ],
         '#cohFormGroup' => 'website_settings',
         '#cohFormId' => get_class($this)::COH_FROM_ID,
+        '#isContentEntity' => FALSE,
       ];
 
       // Change save button text.

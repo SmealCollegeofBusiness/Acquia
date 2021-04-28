@@ -10,7 +10,7 @@ services:
 
   cohesion_sync.drush_helpers:
     class: \Drupal\cohesion_sync\Drush\CommandHelpers
-    arguments: ['@entity_type.manager', '@config.factory', '@cohesion_sync.packager', '@entity.repository', '@state', '@file_system']
+    arguments: ['@entity_type.manager', '@config.factory', '@cohesion_sync.packager', '@entity.repository', '@state', '@file_system', '@uuid']
 
   cohesion_sync.config_import_subscriber.decorator:
     class: Drupal\cohesion_sync\EventSubscriber\SyncConfigImportSubscriber

@@ -2,11 +2,11 @@
 
 namespace Drupal\cohesion;
 
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepository;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Config\Entity\ConfigEntityBase;
 
 /**
  * Class UsageUpdateManager.
@@ -121,12 +121,12 @@ class UsageUpdateManager {
     // Now loop through all the plugins and find dependencies within this data.
     if (!empty($scannable_data)) {
       foreach ($this->usagePluginManager->getDefinitions() as $id => $definition) {
-        if(!empty(array_intersect($scan_groups, $definition['scan_groups']))) {
-        // Check to see if we can scan for nested types (components in
-        // components for example).
-        if ($entity->getEntityTypeId() == $definition['entity_type'] && !$definition['scan_same_type']) {
-          continue;
-        }
+        if (!empty(array_intersect($scan_groups, $definition['scan_groups']))) {
+          // Check to see if we can scan for nested types (components in
+          // components for example).
+          if ($entity->getEntityTypeId() == $definition['entity_type'] && !$definition['scan_same_type']) {
+            continue;
+          }
 
           // Send the scannable data to this plugin and return entities.
           if ($instance = $this->usagePluginManager->createInstance($id)) {
@@ -314,7 +314,8 @@ class UsageUpdateManager {
         // Get the edit URL.
         try {
           $entity_edit_url = $entity->toUrl('edit-form')->toString();
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
           $entity_edit_url = FALSE;
         }
 

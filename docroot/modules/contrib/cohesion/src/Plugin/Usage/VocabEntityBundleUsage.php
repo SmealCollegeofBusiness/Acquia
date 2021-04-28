@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class VocabEntityBundleUsage.
+ * Plugin for view entity bundle usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *
@@ -35,12 +35,12 @@ class VocabEntityBundleUsage extends UsagePluginBase {
     // Get taxonomy fields.
     $vocab_fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('taxonomy_term', $entity->get('vid'));
 
-    foreach($vocab_fields as $field) {
-        $scannable[] = [
-          'type' => 'drupal_field',
-          'entity_type' => 'field_config',
-          'uuid' => $field->getUniqueIdentifier()
-        ];
+    foreach ($vocab_fields as $field) {
+      $scannable[] = [
+        'type' => 'drupal_field',
+        'entity_type' => 'field_config',
+        'uuid' => $field->getUniqueIdentifier(),
+      ];
     }
 
     return $scannable;
@@ -59,18 +59,19 @@ class VocabEntityBundleUsage extends UsagePluginBase {
         $field = $this->drupalFieldLoad($entry['uuid']);
 
         // Check if the field is an entity reference and references taxonomy terms.
-        if(!empty($field) && $field->getType() == 'entity_reference') {
-          if($field->getSetting('handler') == 'default:taxonomy_term') {
-           $handler_settings = $field->getSetting('handler_settings');
+        if (!empty($field) && $field->getType() == 'entity_reference') {
+          if ($field->getSetting('handler') == 'default:taxonomy_term') {
+            $handler_settings = $field->getSetting('handler_settings');
 
-           foreach($handler_settings['target_bundles'] as $bundle) {
-             if($vocab_uuid = $this->taxonomyVocabularyBundleLoad($bundle)) {
-               $entities[] = [
-                'type' => $this->getEntityType(),
-                'uuid' => $vocab_uuid
-              ];
-             }
-           }
+            foreach ($handler_settings['target_bundles'] as $bundle) {
+              if ($vocab_uuid = $this->taxonomyVocabularyBundleLoad($bundle)) {
+
+                $entities[] = [
+                  'type' => $this->getEntityType(),
+                  'uuid' => $vocab_uuid,
+                ];
+              }
+            }
           }
         }
       }
@@ -78,7 +79,7 @@ class VocabEntityBundleUsage extends UsagePluginBase {
       if ($entry['type'] == 'taxonomy_vocabulary') {
         $entities[] = [
           'type' => $this->getEntityType(),
-          'uuid' => $entry['uuid']
+          'uuid' => $entry['uuid'],
         ];
       }
     }

@@ -48,7 +48,7 @@ class _0021EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
   }
 
   /**
-   * @param $model \Drupal\cohesion\LayoutCanvas\ElementModel
+   * @param \Drupal\cohesion\LayoutCanvas\ElementModel $model
    * @param $json_values
    */
   private function updateEnablePadding($model, &$json_values) {

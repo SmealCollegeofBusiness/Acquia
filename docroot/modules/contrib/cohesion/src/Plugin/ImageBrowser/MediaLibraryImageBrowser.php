@@ -3,12 +3,12 @@
 namespace Drupal\cohesion\Plugin\ImageBrowser;
 
 use Drupal\cohesion\ImageBrowserPluginBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\media_library\MediaLibraryState;
 
 /**
- * Class MediaLibraryImageBrowser.
+ * Plugin for media library image browser element.
  *
  * @package Drupal\cohesion
  *
@@ -90,7 +90,7 @@ class MediaLibraryImageBrowser extends ImageBrowserPluginBase {
       $selected_type = array_shift($image_browser_object[$type]['cohesion_media_lib_types']);
 
       // If no media types have been set, allow all.
-      if(empty($allowed_types)) {
+      if (empty($allowed_types)) {
 
         $media_types = \Drupal::service('entity_type.bundle.info')
           ->getBundleInfo('media');

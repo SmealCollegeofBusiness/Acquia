@@ -16,7 +16,8 @@ use Drupal\Core\Link;
 class StyleHelpersController extends EntityController implements ContainerInjectionInterface {
 
   /**
-   * Get an array of the available custom style types
+   * Get an array of the available custom style types.
+   *
    * (@see cohesion_custom_styles.views.inc)
    */
   private function getCustomStyleTypes() {
@@ -32,12 +33,14 @@ class StyleHelpersController extends EntityController implements ContainerInject
   /**
    * Displays add content links for available custom style types.
    *
-   * Redirects to custom_style_types/add/{type} if only one custom style type is available.
+   * Redirects to custom_style_types/add/{type} if only one custom style
+   * type is available.
    *
    * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
-   *   A render array for a list of the custom style types that can be added however if there is
-   *   only one custom style type defined for the site, the function will return a RedirectResponse
-   *   to the custom style add page for that one custom style type
+   *   A render array for a list of the custom style types that can be added
+   *   however if there is only one custom style type defined for the site,
+   *   the function will return a RedirectResponse to the custom style add page
+   *   for that one custom style type
    */
   public function addPage($entity_type_id) {
     // Get complete list of custom style types.

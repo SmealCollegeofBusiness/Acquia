@@ -2,12 +2,12 @@
 
 namespace Drupal\cohesion\Controller;
 
-use Drupal\views\Views;
-use Drupal\views\Entity\View;
+use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
+use Drupal\views\Entity\View;
+use Drupal\views\Views;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\cohesion\CohesionJsonResponse;
 
 /**
  * Class CohesionDrupalViewEndpointController

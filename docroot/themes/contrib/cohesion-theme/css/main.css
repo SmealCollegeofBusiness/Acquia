@@ -1,5 +1,5 @@
 .dx8-tabs {
-  background-color: #DBDBDB;
+  background-color: #dbdbdb;
 }
 
 @media screen and (min-width: 37.5em) {
@@ -13,18 +13,18 @@
 
 .dx8-tabs li a {
   color: #000;
-  background: #CECECE;
+  background: #cecece;
   display: block;
   font-size: 0.929em;
   padding: 11px 20px;
 }
 
 .dx8-tabs li a:hover {
-  background: #B3B3B3;
+  background: #b3b3b3;
 }
 
 .dx8-tabs li.is-active a {
-  background: #F1F1F1;
+  background: #f1f1f1;
   pointer-events: none;
 }
 
@@ -39,10 +39,8 @@
   .dx8-tabs li {
     display: block;
     float: left;
-    
     vertical-align: bottom;
     margin: 0 1px 0 0;
-    
   }
   [dir="rtl"] .dx8-tabs li {
     margin: 0 0 0 1px;
@@ -55,7 +53,7 @@
 #user-pass,
 #search-form,
 #search-block-form {
-  border: 1px solid #DBDBDB;
+  border: 1px solid #dbdbdb;
   margin-top: -1px;
   margin-bottom: 15px;
   padding: 15px 30px;
@@ -121,7 +119,7 @@
 #user-pass details.form-wrapper .dx8-details-content,
 #search-form details.form-wrapper .dx8-details-content,
 #search-block-form details.form-wrapper .dx8-details-content {
-  border: 1px solid #DBDBDB;
+  border: 1px solid #dbdbdb;
   border-top: 0;
   padding: 15px 30px;
 }
@@ -150,7 +148,7 @@
 #search-form details.form-wrapper .dx8-details-content > fieldset > legend,
 #search-block-form details.form-wrapper .dx8-details-content > fieldset > legend {
   width: 100%;
-  border-bottom: 1px solid #DBDBDB;
+  border-bottom: 1px solid #dbdbdb;
 }
 
 #user-login-form details.form-wrapper summary,
@@ -159,7 +157,7 @@
 #search-form details.form-wrapper summary,
 #search-block-form details.form-wrapper summary {
   padding: 10px;
-  background: #DBDBDB;
+  background: #dbdbdb;
 }
 
 #user-login-form .form-type-checkbox label,
@@ -197,7 +195,8 @@
   border: 0;
 }
 
-#search-block-form:before, #search-block-form:after {
+#search-block-form:before,
+#search-block-form:after {
   content: "";
   display: table;
 }
@@ -221,26 +220,27 @@
 }
 
 .node-preview-container {
-  background-color: #DBDBDB;
+  background-color: #dbdbdb;
 }
 
 .node-preview-container .node-preview-backlink {
   display: inline-block;
   line-height: 14px;
   padding: 4px 15px;
-  background: #0071B8 linear-gradient(to bottom, #007BC6, #0071B8);
-  border: 1px solid #1E5C90;
+  background: #0071b8 linear-gradient(to bottom, #007bc6, #0071b8);
+  border: 1px solid #1e5c90;
   border-radius: 20px;
   font: 700 14px Arial;
-  color: #FFF;
+  color: #fff;
   text-shadow: 0 1px rgba(0, 0, 0, 0.5);
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
 
-.node-preview-container .node-preview-backlink:hover, .node-preview-container .node-preview-backlink:focus {
-  background: #2369A6 linear-gradient(to bottom, #0C97ED, #1F86C7);
-  border-color: #1F86C7;
+.node-preview-container .node-preview-backlink:hover,
+.node-preview-container .node-preview-backlink:focus {
+  background: #2369a6 linear-gradient(to bottom, #0c97ed, #1f86c7);
+  border-color: #1f86c7;
 }
 
 .node-preview-container .node-preview-backlink:hover {
@@ -248,12 +248,12 @@
 }
 
 .node-preview-container .node-preview-backlink:focus {
-  border-color: #1280DF;
+  border-color: #1280df;
 }
 
 .node-preview-container .node-preview-backlink:active {
-  background: #0071B8 linear-gradient(to bottom, #08639B, #0071B8);
-  border-color: #144B78;
+  background: #0071b8 linear-gradient(to bottom, #08639b, #0071b8);
+  border-color: #144b78;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 

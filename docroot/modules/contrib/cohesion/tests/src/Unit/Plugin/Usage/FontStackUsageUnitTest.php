@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\cohesion_website_settings\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion_website_settings\Plugin\Usage\FontStackUsage;
 use Drupal\cohesion_website_settings\Entity\FontStack;
+use Drupal\cohesion_website_settings\Plugin\Usage\FontStackUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * @group Cohesion

@@ -2,14 +2,14 @@
 
 namespace Drupal\cohesion\Plugin\ImageBrowser;
 
-use Drupal\imce\Entity\ImceProfile;
 use Drupal\cohesion\ImageBrowserPluginBase;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\imce\Entity\ImceProfile;
 
 /**
- * Class ImceImageBrowser.
+ * Plugin for imce image browser element.
  *
  * @package Drupal\cohesion
  *

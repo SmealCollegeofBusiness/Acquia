@@ -24,6 +24,9 @@ class WebsiteSettingsApi extends StylesApiPluginBase {
    * @var \Drupal\cohesion_website_settings\Entity\WebsiteSettings*/
   protected $entity;
 
+  /**
+   *
+   */
   public function getForms() {
     return [
       $this->getFormElement($this->entity->getResourceObject()),
@@ -51,7 +54,7 @@ class WebsiteSettingsApi extends StylesApiPluginBase {
 
         $data = $styles['css'];
         // Check to see if there are actually some stylesheets to process.
-        if (isset($data['base']) && !empty($data['base']) && isset($data['theme']) && !empty($data['theme']) && isset($data['master']) && !empty($data['master'])) {
+        if (isset($data['master']) && !empty($data['master'])) {
 
           // Create admin icon library and website settings stylesheet for admin.
           $master = Json::decode($data['master']);

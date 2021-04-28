@@ -2,11 +2,10 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion\Plugin\Usage\FileUsage;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Plugin\Usage\FileUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * Mock for the core File entity.
@@ -14,8 +13,10 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
  * @package Drupal\Tests\cohesion\Unit\Plugin\Usage
  */
 class MockFile extends CohesionConfigEntityBase implements CohesionSettingsInterface {
-  public function getApiPluginInstance(){
+
+  public function getApiPluginInstance() {
   }
+
 }
 
 /**
@@ -55,8 +56,8 @@ class FileUsageUnitTest extends UsagePluginBaseUnitTest {
             "value2" => [
               "subkey" => "START: public://someotherfile.jpg :END",
             ],
-          ]
-        ])
+          ],
+        ]),
       ],
       [
         'type' => 'json_string',
@@ -68,8 +69,8 @@ class FileUsageUnitTest extends UsagePluginBaseUnitTest {
             "value2" => [
               "subkey" => "START: [media-reference:file:someothermediareferenceuuid] :END",
             ],
-          ]
-        ])
+          ],
+        ]),
       ],
     ];
 

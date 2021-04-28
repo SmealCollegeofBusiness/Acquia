@@ -2,14 +2,14 @@
 
 namespace Drupal\cohesion;
 
-use Drupal\Core\Extension\ModuleHandler;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\file\FileInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepository;
+use Drupal\Core\Extension\ModuleHandler;
+use Drupal\file\FileInterface;
 
 /**
- * Class ImageBrowserUpdateManager.
+ * Defines the image browser update manager.
  *
  * @package Drupal\cohesion
  */
@@ -64,7 +64,7 @@ class ImageBrowserUpdateManager {
 
     $this->image_browser_config = $configFactory->get('cohesion.settings')->get('image_browser');
 
-    if(isset($this->image_browser_config['config']['type'])) {
+    if (isset($this->image_browser_config['config']['type'])) {
       // Get an instance of the active image browser plugin.
       try {
         $this->pluginInstanceConfig = $this->pluginManager->createInstance($this->image_browser_config['config']['type']);
@@ -73,12 +73,13 @@ class ImageBrowserUpdateManager {
         if (!$this->moduleHandler->moduleExists($this->pluginInstanceConfig->getModule())) {
           $this->pluginInstanceConfig = NULL;
         }
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         $this->pluginInstanceConfig = NULL;
       }
     }
 
-    if(isset($this->image_browser_config['content']['type'])) {
+    if (isset($this->image_browser_config['content']['type'])) {
       // Get an instance of the active image browser plugin.
       try {
         $this->pluginInstanceContent = $this->pluginManager->createInstance($this->image_browser_config['content']['type']);
@@ -87,7 +88,8 @@ class ImageBrowserUpdateManager {
         if (!$this->moduleHandler->moduleExists($this->pluginInstanceContent->getModule())) {
           $this->pluginInstanceContent = NULL;
         }
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         $this->pluginInstanceContent = NULL;
       }
     }
@@ -195,10 +197,9 @@ class ImageBrowserUpdateManager {
           // If not a file or media, its another entity type from an Entity browser so just display the title.
           default:
             return [
-                'path' => '',
-                'label' => $entity->label(),
-              ];
-            break;
+              'path' => '',
+              'label' => $entity->label(),
+            ];
         }
       }
     }

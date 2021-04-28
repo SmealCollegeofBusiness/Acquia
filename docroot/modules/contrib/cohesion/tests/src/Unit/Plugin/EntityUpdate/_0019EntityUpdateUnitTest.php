@@ -2,11 +2,8 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
-use Drupal\cohesion\Entity\EntityJsonValuesInterface;
-use Drupal\cohesion\Plugin\EntityUpdate\_0018EntityUpdate;
 use Drupal\cohesion\Plugin\EntityUpdate\_0019EntityUpdate;
 use Drupal\Tests\UnitTestCase;
-
 
 class _0019EntityUpdateMock extends _0019EntityUpdate {
 
@@ -23,7 +20,8 @@ class _0019EntityUpdateMock extends _0019EntityUpdate {
  */
 class _0019EntityUpdateUnitTest extends UnitTestCase {
 
-  /** @var $unit \Drupal\cohesion\Plugin\EntityUpdate\_0019EntityUpdate  */
+  /**
+   * @var unit\Drupal\cohesion\Plugin\EntityUpdate\_0019EntityUpdate*/
   protected $unit;
 
   private $fixture = '{"model":{"24dce085-7d16-44b6-8c7d-71ef0daa8bb2":{"e9d545ae-bea2-43d5-8989-1d26426d6e91":600,"22990136-13ce-4635-b10f-1c7191bb08c6":{"name":"Black","uid":"black","value":{"hex":"#000000","rgba":"rgba(0, 0, 0, 1)"},"wysiwyg":true,"class":".coh-color-black","variable":"$coh-color-black","inuse":false},"fa23a0f4-1967-47a0-bbc0-66dda8ca1778":"[media-reference:file:0e9e72b4-a708-4efa-8331-4770b6b23163]","e8b8d279-e00d-4da5-ac21-37544c3d6f31":"fictive-class-name","a2adb371-d8d3-4535-bcfa-7749277b4a8b":"span","9f5c3dcc-bc51-4fe5-91c0-fab6ece92c06":"Text for inline element"}},"changedFields":["model.24dce085-7d16-44b6-8c7d-71ef0daa8bb2.e9d545ae-bea2-43d5-8989-1d26426d6e91","model.24dce085-7d16-44b6-8c7d-71ef0daa8bb2.22990136-13ce-4635-b10f-1c7191bb08c6","model.24dce085-7d16-44b6-8c7d-71ef0daa8bb2.fa23a0f4-1967-47a0-bbc0-66dda8ca1778","model.24dce085-7d16-44b6-8c7d-71ef0daa8bb2.e8b8d279-e00d-4da5-ac21-37544c3d6f31","model.24dce085-7d16-44b6-8c7d-71ef0daa8bb2.a2adb371-d8d3-4535-bcfa-7749277b4a8b","model.24dce085-7d16-44b6-8c7d-71ef0daa8bb2.9f5c3dcc-bc51-4fe5-91c0-fab6ece92c06"]}';
@@ -32,7 +30,7 @@ class _0019EntityUpdateUnitTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->unit = new _0019EntityUpdateMock([], null, null);
+    $this->unit = new _0019EntityUpdateMock([], NULL, NULL);
   }
 
   /**
@@ -48,4 +46,5 @@ class _0019EntityUpdateUnitTest extends UnitTestCase {
     $this->assertEquals($json_values->model->{'24dce085-7d16-44b6-8c7d-71ef0daa8bb2'}->{"e8b8d279-e00d-4da5-ac21-37544c3d6f31"}, TRUE);
 
   }
+
 }

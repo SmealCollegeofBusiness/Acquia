@@ -2,8 +2,9 @@
 
 namespace Drupal\cohesion_elements;
 
-use Drupal\Core\Entity\EntityViewBuilder;
+use Drupal\cohesion_elements\Event\CohesionLayoutViewBuilderEvent;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityViewBuilder;
 
 /**
  * Class CohesionLayoutViewBuilder.
@@ -18,6 +19,7 @@ class CohesionLayoutViewBuilder extends EntityViewBuilder {
    * {@inheritdoc}
    */
   public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
+    /** @var EntityInterface $host */
     $host = $entity->getParentEntity();
     $entities = [];
     $cache_tags = [];
@@ -52,6 +54,12 @@ class CohesionLayoutViewBuilder extends EntityViewBuilder {
 
     $content = '<style>' . $entity->getStyles() . '</style>';
     $build['#attached'] = ['cohesion' => [$content]];
+
+    // Let other module alter the view build
+    $event = new CohesionLayoutViewBuilderEvent($build, $entity);
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event_dispatcher->dispatch($event::ALTER, $event);
+    $build = $event->getBuild();
 
     return $build;
   }

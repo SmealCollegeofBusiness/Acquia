@@ -8,7 +8,7 @@ use Drupal\cohesion_website_settings\Entity\IconLibrary;
 use Drupal\Component\Plugin\PluginBase;
 
 /**
- * Update Font and Icon libraries cohesion stream wrapper
+ * Update Font and Icon libraries cohesion stream wrapper.
  *
  * @package Drupal\cohesion
  *
@@ -37,6 +37,9 @@ class _0022EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
 
   }
 
+  /**
+   *
+   */
   public function updateLibrary(&$entity) {
     $json_values = $entity->getDecodedJsonValues(TRUE);
 

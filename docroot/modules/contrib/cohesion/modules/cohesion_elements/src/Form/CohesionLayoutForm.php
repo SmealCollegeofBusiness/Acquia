@@ -3,10 +3,11 @@
 namespace Drupal\cohesion_elements\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Language\LanguageInterface;
 
 /**
@@ -110,6 +111,7 @@ class CohesionLayoutForm extends EntityForm {
       '#entity' => $this->entity,
       '#cohFormGroup' => 'in_context',
       '#cohFormId' => 'component',
+      '#isContentEntity' => $this->entity instanceof ContentEntityInterface,
     ];
 
     $form['cohesion']['#token_browser'] = 'all';

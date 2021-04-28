@@ -7,7 +7,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class ViewUsage.
+ * Plugin for view usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *

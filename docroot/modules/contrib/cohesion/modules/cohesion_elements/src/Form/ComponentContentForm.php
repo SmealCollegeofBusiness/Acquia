@@ -4,13 +4,13 @@ namespace Drupal\cohesion_elements\Form;
 
 use Drupal\cohesion_elements\Entity\Component;
 use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Component\Serialization\Json;
 
 /**
  * Class ComponentContentForm.
@@ -32,8 +32,8 @@ class ComponentContentForm extends ContentEntityForm {
    * ComponentContentForm constructor.
    *
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface|NULL $entity_type_bundle_info
-   * @param \Drupal\Component\Datetime\TimeInterface|NULL $time
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface|null $entity_type_bundle_info
+   * @param \Drupal\Component\Datetime\TimeInterface|null $time
    * @param \Drupal\Core\Session\AccountInterface $current_user
    */
   public function __construct(EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info, TimeInterface $time, AccountInterface $current_user) {

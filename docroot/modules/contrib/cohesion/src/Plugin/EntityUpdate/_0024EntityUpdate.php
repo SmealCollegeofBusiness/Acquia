@@ -77,7 +77,7 @@ class _0024EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
   }
 
   /**
-   * @param $element \Drupal\cohesion\LayoutCanvas\Element
+   * @param \Drupal\cohesion\LayoutCanvas\Element $element
    * @param $machine_names
    */
   private function assignMachineName(&$element, &$machine_names) {

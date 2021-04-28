@@ -2,13 +2,12 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\Usage;
 
+use Drupal\cohesion\Entity\CohesionConfigEntityBase;
+use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Plugin\Usage\MediaEntityBundleUsage;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\media\Entity\MediaType;
 use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion\Plugin\Usage\MediaEntityBundleUsage;
-use Drupal\cohesion\Entity\CohesionConfigEntityBase;
-use Drupal\cohesion\Entity\CohesionSettingsInterface;
-
 
 /**
  * Mock for the core media type entity.
@@ -16,8 +15,10 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
  * @package Drupal\Tests\cohesion\Unit\Plugin\Usage
  */
 class MediaTypeMock extends CohesionConfigEntityBase implements CohesionSettingsInterface {
-  public function getApiPluginInstance(){
+
+  public function getApiPluginInstance() {
   }
+
 }
 
 class MediaEntityBundleUsageUnitTestMock extends MediaEntityBundleUsage {
@@ -33,12 +34,14 @@ class MediaEntityBundleUsageUnitTestMock extends MediaEntityBundleUsage {
   public function drupalFieldLoad($entry_uuid) {
     return new FieldConfig($this->fixture_drupal_field, 'field_config');
   }
+
 }
 
 /**
  * @group Cohesion
  */
 class MediaEntityBundleUsageUnitTest extends UsagePluginBaseUnitTest {
+
   /**
    * {@inheritdoc}
    */
@@ -64,8 +67,8 @@ class MediaEntityBundleUsageUnitTest extends UsagePluginBaseUnitTest {
     $fixture = [
       [
         'type' => 'drupal_field',
-        'uuid' => 'de8a6765-cff0-4ef0-a7a7-db5b3df2795d6'
-      ]
+        'uuid' => 'de8a6765-cff0-4ef0-a7a7-db5b3df2795d6',
+      ],
     ];
 
     $entities = $this->unit->scanForInstancesOfThisType($fixture, new MediaTypeMock([], 'media_type'));

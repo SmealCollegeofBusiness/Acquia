@@ -11,6 +11,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Url;
+use Drupal\externalauth\Authmap;
 use Drupal\externalauth\ExternalAuth;
 use Drupal\samlauth\Event\SamlauthEvents;
 use Drupal\samlauth\Event\SamlauthUserLinkEvent;
@@ -22,6 +23,7 @@ use OneLogin\Saml2\Error as SamlError;
 use OneLogin\Saml2\Utils as SamlUtils;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 /**
@@ -52,6 +54,13 @@ class SamlService {
   protected $externalAuth;
 
   /**
+   * The Authmap service.
+   *
+   * @var \Drupal\externalauth\Authmap
+   */
+  protected $authmap;
+
+  /**
    * The config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
@@ -78,6 +87,13 @@ class SamlService {
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
   protected $eventDispatcher;
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
 
   /**
    * Private store for SAML session data.
@@ -112,6 +128,8 @@ class SamlService {
    *
    * @param \Drupal\externalauth\ExternalAuth $external_auth
    *   The ExternalAuth service.
+   * @param \Drupal\externalauth\Authmap $authmap
+   *   The Authmap service.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -120,6 +138,8 @@ class SamlService {
    *   A logger instance.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+   *   The request stack.
    * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
    *   A temp data store factory object.
    * @param \Drupal\Core\Flood\FloodInterface $flood
@@ -131,19 +151,27 @@ class SamlService {
    * @param \Drupal\Core\StringTranslation\TranslationInterface $translation
    *   The string translation service.
    */
-  public function __construct(ExternalAuth $external_auth, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, EventDispatcherInterface $event_dispatcher, PrivateTempStoreFactory $temp_store_factory, FloodInterface $flood, AccountInterface $current_user, MessengerInterface $messenger, TranslationInterface $translation) {
+  public function __construct(ExternalAuth $external_auth, Authmap $authmap, ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, LoggerInterface $logger, EventDispatcherInterface $event_dispatcher, RequestStack $request_stack, PrivateTempStoreFactory $temp_store_factory, FloodInterface $flood, AccountInterface $current_user, MessengerInterface $messenger, TranslationInterface $translation) {
     $this->externalAuth = $external_auth;
+    $this->authmap = $authmap;
     $this->configFactory = $config_factory;
     $this->entityTypeManager = $entity_type_manager;
     $this->logger = $logger;
     $this->eventDispatcher = $event_dispatcher;
+    $this->requestStack = $request_stack;
     $this->privateTempStore = $temp_store_factory->get('samlauth');
     $this->flood = $flood;
     $this->currentUser = $current_user;
     $this->messenger = $messenger;
     $this->setStringTranslation($translation);
 
-    if ($this->configFactory->get('samlauth.authentication')->get('use_proxy_headers')) {
+    $config = $this->configFactory->get('samlauth.authentication');
+    // setProxyVars lets the SAML PHP Toolkit use 'X-Forwarded-*' HTTP headers
+    // for identifying the SP URL, but we should pass the Drupal/Symfony base
+    // URL to into the toolkit instead. That uses headers/trusted values in the
+    // same way as the rest of Drupal (as configured in settings.php).
+    // @todo remove this in v4.x
+    if ($config->get('use_proxy_headers') && !$config->get('use_base_url')) {
       // Use 'X-Forwarded-*' HTTP headers for identifying the SP URL.
       SamlUtils::setProxyVars(TRUE);
     }
@@ -196,7 +224,7 @@ class SamlService {
     $config = $this->configFactory->get('samlauth.authentication');
     $url = $this->getSamlAuth()->login($return_to, $parameters, FALSE, FALSE, TRUE, $config->get('request_set_name_id_policy') ?? TRUE);
     if ($config->get('debug_log_saml_out')) {
-      $this->logger->debug('Sending SAML login request: <pre>@message</pre>', ['@message' => $this->getSamlAuth()->getLastRequestXML()]);
+      $this->logger->debug('Sending SAML authentication request: <pre>@message</pre>', ['@message' => $this->getSamlAuth()->getLastRequestXML()]);
     }
     return $url;
   }
@@ -327,7 +355,7 @@ class SamlService {
   }
 
   /**
-   * Processes a SAML login response; throws an exception if it isn't valid.
+   * Processes a SAML authentication response; throws an exception if invalid.
    *
    * The mechanics of checking whether there are any errors are not so
    * straightforward, so this helper function hopes to abstract that away.
@@ -353,14 +381,14 @@ class SamlService {
     if ($errors) {
       // We have one or multiple error types / short descriptions, and one
       // 'reason' for the last error.
-      throw new \RuntimeException('Error(s) encountered during processing of login response. Type(s): ' . implode(', ', array_unique($errors)) . '; reason given for last error: ' . $auth->getLastErrorReason());
+      throw new \RuntimeException('Error(s) encountered during processing of authentication response. Type(s): ' . implode(', ', array_unique($errors)) . '; reason given for last error: ' . $auth->getLastErrorReason());
     }
     if (!$auth->isAuthenticated()) {
       // Looking at the current code, isAuthenticated() just means "response
       // is valid" because it is mutually exclusive with $errors and exceptions
       // being thrown. So we should never get here. We're just checking it in
       // case the library code changes - in which case we should reevaluate.
-      throw new \RuntimeException('SAML login response was apparently not fully validated even when no error was provided.');
+      throw new \RuntimeException('SAML authentication response was apparently not fully validated even when no error was provided.');
     }
   }
 
@@ -370,9 +398,9 @@ class SamlService {
    * Split off from acs() to... have at least some kind of split.
    *
    * @param string $unique_id
-   *   The user account contained in the SAML response.
+   *   The unique ID (attribute value) contained in the SAML response.
    * @param \Drupal\Core\Session\AccountInterface|null $account
-   *   The user account derived from the SAML response.
+   *   The existing user account derived from the unique ID, if any.
    */
   protected function doLogin($unique_id, AccountInterface $account = NULL) {
     $config = $this->configFactory->get('samlauth.authentication');
@@ -381,7 +409,7 @@ class SamlService {
       $this->logger->debug('No matching local users found for unique SAML ID @saml_id.', ['@saml_id' => $unique_id]);
 
       // Try to link an existing user: first through a custom event handler,
-      // then by name, then by e-mail.
+      // then by name, then by email.
       if ($config->get('map_users')) {
         $event = new SamlauthUserLinkEvent($this->getAttributes());
         $this->eventDispatcher->dispatch(SamlauthEvents::USER_LINK, $event);
@@ -389,36 +417,71 @@ class SamlService {
         if ($account) {
           $this->logger->info('Existing user @name (@uid) was newly matched to SAML login attributes; linking user and logging in.', ['@name' => $account->getAccountName(), '@uid' => $account->id()]);
         }
-        else {
-          // The linking by name / e-mail cannot be bypassed at this point
-          // because it makes no sense to create a new account from the SAML
-          // attributes if one of these two basic properties is already in use.
-          // (In this case a newly created and logged-in account would get a
-          // cryptic machine name because  synchronizeUserAttributes() cannot
-          // assign the proper name while saving.)
-          $name = $this->getAttributeByConfig('user_name_attribute');
-          if ($name && $account_search = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => $name])) {
-            $account = reset($account_search);
-            $this->logger->info('Matching local user @uid found for name @name (as provided in a SAML attribute); linking user and logging in.', ['@name' => $name, '@uid' => $account->id()]);
+      }
+      // Linking by name / email: we also select accounts if they are blocked
+      // (and throw an exception later on) because 1) we don't want the
+      // selection to be dependent on the current account's state; 2) name and
+      // email are unique and would otherwise lead to another error while
+      // trying to create a new account with duplicate values.
+      if (!$account) {
+        $name = $this->getAttributeByConfig('user_name_attribute');
+        if ($name && $account_search = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => $name])) {
+          if ($config->get('map_users_name')) {
+            $account = current($account_search);
+            $this->logger->info('SAML login for name @name (as provided in a SAML attribute) matches existing Drupal account @uid; linking account and logging in.', ['@name' => $name, '@uid' => $account->id()]);
           }
           else {
-            $mail = $this->getAttributeByConfig('user_mail_attribute');
-            if ($mail && $account_search = $this->entityTypeManager->getStorage('user')->loadByProperties(['mail' => $mail])) {
-              $account = reset($account_search);
-              $this->logger->info('Matching local user @uid found for e-mail @mail (as provided in a SAML attribute); linking user and logging in.', ['@mail' => $mail, '@uid' => $account->id()]);
-            }
+            // We're not configured to link the account by name, but we still
+            // looked it up by name so we can give a better error message than
+            // the one caused by trying to save a new account with a duplicate
+            // name, later.
+            $this->logger->warning('Denying login: SAML login for unique ID @saml_id matches existing Drupal account name @name and we are not configured to automatically link accounts.', ['@saml_id' => $unique_id, '@name' => $account->getAccountName()]);
+            throw new UserVisibleException('A local user account with your login name already exists, and we are disallowed from linking it.');
+          }
+        }
+      }
+      if (!$account) {
+        $mail = $this->getAttributeByConfig('user_mail_attribute');
+        if ($mail && $account_search = $this->entityTypeManager->getStorage('user')->loadByProperties(['mail' => $mail])) {
+          if ($config->get('map_users_mail')) {
+            $account = current($account_search);
+            $this->logger->info('SAML login for email @mail (as provided in a SAML attribute) matches existing Drupal account @uid; linking account and logging in.', ['@mail' => $mail, '@uid' => $account->id()]);
+          }
+          else {
+            // Treat duplicate email same as duplicate name above.
+            $this->logger->warning('Denying login: SAML login for unique ID @saml_id matches existing Drupal account email @mail and we are not configured to automatically link the account.', ['@saml_id' => $unique_id, '@mail' => $account->getEmail()]);
+            throw new UserVisibleException('A local user account with your login email address name already exists, and we are disallowed from linking it.');
           }
         }
       }
 
       if ($account) {
-        // There is a chance that the following call will not actually link the
-        // account (if a mapping to this account already exists from another
-        // unique ID). If that happens, it does not matter much to us; we will
-        // just log the account in anyway. Next time the same not-yet-linked
-        // user logs in, we will again try to link the account in the same way
-        // and (falsely) log that we are linking the user.
+        $allowed_roles = $config->get('map_users_roles');
+        $disallowed_roles = array_diff($account->getRoles(), $allowed_roles, [AccountInterface::AUTHENTICATED_ROLE]);
+        if ($disallowed_roles) {
+          $this->logger->warning('Denying login: SAML login for unique ID @saml_id matches existing Drupal account @uid which we are not allowed to link because it has roles @roles.', [
+            '@saml_id' => $unique_id,
+            '@uid' => $account->id(),
+            '@roles' => implode(', ', $disallowed_roles),
+          ]);
+          throw new UserVisibleException('A local user account matching your login already exists, and we are disallowed from linking it.');
+        }
         $this->externalAuth->linkExistingAccount($unique_id, 'samlauth', $account);
+        // linkExistingAccount() does not tell us whether the link was actually
+        // successful; it silently continues if the account was already linked
+        // to a different unique ID. This would mean a user who has the power
+        // to change their user name / email on the IdP side, potentially has
+        // the power to log into different accounts (as long as they only log
+        // into accounts that already are linked to a different IdP user).
+        $linked_id = $this->authmap->get($account->id(), 'samlauth');
+        if ($linked_id != $unique_id) {
+          $this->logger->warning('Denying login: existing Drupal account @uid matches SAML login for unique ID @saml_id, but the account is already linked to SAML login ID @linked_id. If a new account should be created despite the earlier match, temporarily turn off matching. If this login should be linked to user @uid, remove the earlier link.', [
+            '@uid' => $account->id(),
+            '@saml_id' => $unique_id,
+            '@linked_id' => $linked_id,
+          ]);
+          throw new UserVisibleException('Your login data match an earlier login by a different SAML user.');
+        }
         $first_saml_login = TRUE;
       }
     }
@@ -679,7 +742,16 @@ class SamlService {
    */
   protected function getSamlAuth() {
     if (!isset($this->samlAuth)) {
-      $this->samlAuth = new Auth(static::reformatConfig($this->configFactory->get('samlauth.authentication')));
+      $base_url = '';
+      $config = $this->configFactory->get('samlauth.authentication');
+      if ($config->get('use_base_url')) {
+        $request = $this->requestStack->getCurrentRequest();
+        // The 'base url' for the SAML Toolkit is apparently 'all except the
+        // last part of the endpoint URLs'. (Whoever wants a better explanation
+        // can try to extract it from e.g. Utils::getSelfRoutedURLNoQuery().)
+        $base_url = $request->getSchemeAndHttpHost() . $request->getBaseUrl() . '/saml';
+      }
+      $this->samlAuth = new Auth(static::reformatConfig($config, $base_url));
     }
 
     return $this->samlAuth;
@@ -737,11 +809,13 @@ class SamlService {
    *
    * @param \Drupal\Core\Config\ImmutableConfig $config
    *   The module configuration.
+   * @param string $base_url
+   *   (Optional) base URL to set.
    *
    * @return array
    *   The library configuration array.
    */
-  protected static function reformatConfig(ImmutableConfig $config) {
+  protected static function reformatConfig(ImmutableConfig $config, $base_url = '') {
     // Check if we want to load the certificates from a folder. Either folder or
     // cert+key settings should be defined. If both are defined, "folder" is the
     // preferred method and we ignore cert/path values; we don't do more
@@ -791,10 +865,10 @@ class SamlService {
         'logoutRequestSigned' => (bool) $config->get('security_logout_requests_sign'),
         'logoutResponseSigned' => (bool) $config->get('security_logout_responses_sign'),
         'wantAssertionsEncrypted' => (bool) $config->get('security_assertions_encrypt'),
+        'wantAssertionsSigned' => (bool) $config->get('security_assertions_signed'),
         'wantMessagesSigned' => (bool) $config->get('security_messages_sign'),
         'requestedAuthnContext' => (bool) $config->get('security_request_authn_context'),
         'lowercaseUrlencoding' => (bool) $config->get('security_lowercase_url_encoding'),
-        'signatureAlgorithm' => $config->get('security_signature_algorithm'),
         // This is the first setting that is TRUE by default AND must be TRUE
         // on existing installations that didn't have the setting before, so
         // it's the first one to get a default value. (If we didn't have the
@@ -804,6 +878,13 @@ class SamlService {
       ],
       'strict' => (bool) $config->get('strict'),
     ];
+    $sig_alg = $config->get('security_signature_algorithm');
+    if ($sig_alg) {
+      $library_config['security']['signatureAlgorithm'] = $sig_alg;
+    }
+    if ($base_url) {
+      $library_config['baseurl'] = $base_url;
+    }
 
     // Check for the presence of a multi cert situation.
     $multi = $config->get('idp_cert_type');

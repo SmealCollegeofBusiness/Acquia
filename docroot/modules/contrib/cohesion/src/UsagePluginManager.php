@@ -2,13 +2,13 @@
 
 namespace Drupal\cohesion;
 
-use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\cohesion\Annotation\Usage;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\cohesion\Annotation\Usage;
+use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Class UsagePluginManager.
+ * Site studio Usage plugin manager.
  *
  * @package Drupal\cohesion
  */

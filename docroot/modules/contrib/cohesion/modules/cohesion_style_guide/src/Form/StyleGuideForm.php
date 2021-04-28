@@ -128,7 +128,8 @@ class StyleGuideForm extends CohesionBaseForm {
       if ($current_entity) {
         $current_canvas = $current_entity->getLayoutCanvasInstance();
       }
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
     }
 
     parent::save($form, $form_state);

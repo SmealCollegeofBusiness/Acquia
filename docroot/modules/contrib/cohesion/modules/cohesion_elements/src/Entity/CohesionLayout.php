@@ -4,18 +4,18 @@ namespace Drupal\cohesion_elements\Entity;
 
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\EntityJsonValuesTrait;
+use Drupal\cohesion\EntityUpdateInterface;
+use Drupal\cohesion_elements\CohesionLayoutInterface;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\entity_reference_revisions\EntityNeedsSaveTrait;
-use Drupal\Component\Serialization\Json;
-use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\TypedData\TranslatableInterface;
-use Drupal\cohesion_elements\CohesionLayoutInterface;
-use Drupal\cohesion\EntityUpdateInterface;
+use Drupal\entity_reference_revisions\EntityNeedsSaveTrait;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Defines the CohesionLayout entity.
@@ -135,7 +135,8 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
       $templates = JSON::decode($this->get('template')->value);
       if (is_array($templates) && isset($templates[$theme])) {
         return Json::decode($templates[$theme])['twig'];
-      }elseif(isset($templates['coh-generic-theme'])) {
+      }
+      elseif (isset($templates['coh-generic-theme'])) {
         return Json::decode($templates['coh-generic-theme'])['twig'];
       }
     }
@@ -235,7 +236,8 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
 
     try {
       $parent = $this->entityTypeManager()->getStorage($this->get('parent_type')->value)->load($this->get('parent_id')->value);
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       return NULL;
     }
 
@@ -315,7 +317,7 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
   }
 
   /**
-   * Sets the styles and template for the entity from the response from the API
+   * Sets the styles and template for the entity from the response from the API.
    *
    * @param array $responseData
    */
@@ -325,7 +327,7 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
     $template_only_themes = \Drupal::service('cohesion.utils')->getCohesionTemplateOnlyEnabledThemes();
     foreach ($responseData as $themeData) {
       if (isset($themeData['themeName'])) {
-        if (isset($themeData['css']['theme']) && !in_array($themeData['themeName'], $template_only_themes)) {
+        if (isset($themeData['css']['theme']) && $themeData['css']['theme'] !== '' && !in_array($themeData['themeName'], $template_only_themes)) {
           $css_data = \Drupal::service('twig')->renderInline($themeData['css']['theme'])->__toString();
           $styles[$themeData['themeName']] = $css_data;
         }
@@ -404,7 +406,8 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
           }
         }
 
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         return;
       }
     }

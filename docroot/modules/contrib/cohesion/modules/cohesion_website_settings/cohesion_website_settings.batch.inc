@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * @file
+ */
+
+/**
  * Copy temporary stylesheets to live.
  * Copy temporary templates to live.
  * Notify the user.
@@ -55,7 +59,7 @@ function entity_rebuild_temp_to_live($verbose = FALSE, &$context = []) {
       $context['message'] = t('Moving all templates and stylesheets into place. (@time seconds, @memory MB (total) @memory_peak MB (peak))', [
         '@time' => number_format((float) microtime(TRUE) - $time_start, 2, '.', ''),
         '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ','),
-        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ',')
+        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ','),
       ]);
     }
     else {
@@ -79,7 +83,7 @@ function batch_drupal_flush_all_caches($verbose = FALSE, &$context = []) {
       $context['message'] = t('Flushing caches. (@time seconds, @memory MB (total) @memory_peak MB (peak))', [
         '@time' => number_format((float) microtime(TRUE) - $time_start, 2, '.', ''),
         '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ','),
-        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ',')
+        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ','),
       ]);
     }
     else {

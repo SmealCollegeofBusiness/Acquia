@@ -2,20 +2,22 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\cohesion\Plugin\EntityUpdate\_0002EntityUpdate;
 use Drupal\cohesion_custom_styles\Entity\CustomStyle;
+use Drupal\Tests\UnitTestCase;
 
 /**
- * Class _0002EntityUpdateMock
+ * Class _0002EntityUpdateMock.
  *
  * @package Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate
  */
 class _0002EntityUpdateMock extends _0002EntityUpdate {
+
   public function getCustomStyle($parent_id) {
     $parent_custom_style = new CustomStyle(['id' => 'parent', 'class_name' => '.coh-parent-class', 'parent' => FALSE], 'cohesion_custom_style');
     return $parent_custom_style;
   }
+
 }
 
 /**
@@ -29,7 +31,7 @@ class _0002EntityUpdateUnitTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->unit = new _0002EntityUpdateMock([], null, null);
+    $this->unit = new _0002EntityUpdateMock([], NULL, NULL);
   }
 
   /**
@@ -49,4 +51,5 @@ class _0002EntityUpdateUnitTest extends UnitTestCase {
     $this->assertEquals($child_custom_style->getClass(), '.coh-child-class');
     $this->assertEquals($child_custom_style->getParent(), '.coh-parent-class');
   }
+
 }

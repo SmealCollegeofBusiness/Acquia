@@ -2,20 +2,14 @@
 
 namespace Drupal\cohesion\Element;
 
-use Drupal\cohesion\Entity\EntityJsonValuesInterface;
-use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
-use Drupal\cohesion_elements\Entity\Component;
-use Drupal\cohesion_elements\Entity\ComponentContent;
-use Drupal\Component\Serialization\Json;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element\FormElement;
-use Drupal\Core\Render\BubbleableMetadata;
-use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
-use Drupal\Core\Site\Settings;
-use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\Component\Utility\Environment;
-use GuzzleHttp\Exception\ClientException;
+use Drupal\cohesion\Entity\EntityJsonValuesInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Render\Element\FormElement;
+use Drupal\Core\Site\Settings;
 
 /**
  * Provides a layout form element. This is used in the BaseForm and
@@ -52,7 +46,7 @@ class CohesionField extends FormElement {
     $entity = $element['#entity'];
     if ($entity instanceof CohesionSettingsInterface || $entity instanceof CohesionLayout) {
       $entity->setJsonValue($element['#json_values']);
-      if(!$entity->isLayoutCanvas()) {
+      if (!$entity->isLayoutCanvas()) {
         $entity->setJsonMapper($element['#json_mapper']);
       }
       $errors = $entity->jsonValuesErrors();
@@ -141,7 +135,7 @@ class CohesionField extends FormElement {
           $element['#attached']['drupalSettings']['cohesion']['deletedComponents'] = $response['data']->deletedComponents;
         }
         else {
-          throw new \Exception('Unable to parse layout canvas: '.$response['data']['error']);
+          throw new \Exception('Unable to parse layout canvas: ' . $response['data']['error']);
         }
       }
     }
@@ -168,7 +162,7 @@ class CohesionField extends FormElement {
 
     // Image browser page attachments.
     \Drupal::service('cohesion_image_browser.update_manager')
-      ->sharedPageAttachments($element['#attached'], $element['#entity'] instanceof ContentEntityInterface ? 'content' : 'config');
+      ->sharedPageAttachments($element['#attached'], $element['#isContentEntity'] ? 'content' : 'config');
 
     // Attach the editor.module text format settings.
     $pluginManager = \Drupal::service('plugin.manager.editor');

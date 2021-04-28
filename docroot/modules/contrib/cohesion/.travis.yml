@@ -86,7 +86,7 @@ jobs:
     # @see https://github.com/acquia/orca/blob/master/docs/understanding-orca.md#continuous-integration
     - { name: "Static code analysis", env: ORCA_JOB=STATIC_CODE_ANALYSIS }
     - { name: "Deprecated code scan", env: ORCA_JOB=DEPRECATED_CODE_SCAN }
-    - { name: "Isolated test w/ recommended package versions", env: ORCA_JOB=ISOLATED_RECOMMENDED }
+    # - { name: "Isolated test w/ recommended package versions", env: ORCA_JOB=ISOLATED_RECOMMENDED }
     # To send PHPUnit test coverage data to Coveralls (coveralls.io), configure
     # your GitHub repository and uncomment the following line. The job on the
     # line immediately before is otherwise identical and can be removed. Note:
@@ -95,7 +95,7 @@ jobs:
     # @see https://github.com/acquia/orca/blob/master/docs/faq.md#coveralls
     # @see https://github.com/acquia/orca/blob/master/docs/advanced-usage.md#ORCA_COVERALLS_ENABLE
     # @see https://github.com/acquia/orca/blob/master/docs/advanced-usage.md#ORCA_COVERAGE_ENABLE
-    # - { name: "Isolated test w/ recommended package versions and code coverage", env: ORCA_JOB=ISOLATED_RECOMMENDED ORCA_COVERALLS_ENABLE=TRUE }
+    - { name: "Isolated test w/ recommended package versions and code coverage", env: ORCA_JOB=ISOLATED_RECOMMENDED ORCA_COVERALLS_ENABLE=TRUE }
     #
     # To generate test coverage data to send somewhere other than Coveralls, use
     # the ORCA_COVERAGE_ENABLE variable instead.
@@ -115,14 +115,14 @@ jobs:
   # @see https://docs.travis-ci.com/user/customizing-the-build#rows-that-are-allowed-to-fail
   allow_failures:
     # Dev jobs are allowed to fail due to their inherent instability.
-    - env: ORCA_JOB=ISOLATED_DEV
-    - env: ORCA_JOB=INTEGRATED_DEV
     - env: ORCA_JOB=CORE_NEXT
+    - env: ORCA_JOB=STATIC_CODE_ANALYSIS
 
 # Install ORCA and prepare the environment.
 before_install:
   # Set Node.js to a version compatible with Drupal 9 + Nightwatch.js.
   - nvm use 12.13.1
+  - composer self-update 1.10.16
   - composer create-project --no-dev acquia/orca ../orca "$ORCA_VERSION"
   - ../orca/bin/travis/before_install.sh
 
@@ -136,6 +136,7 @@ before_script:
 
 # Run the test script.
 script:
+  - ./tests/orca/orca_add_dependencies.sh
   - ../orca/bin/travis/script.sh
 
 # Reserved for future use.

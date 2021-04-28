@@ -2,24 +2,23 @@
 
 namespace Drupal\cohesion\Controller;
 
+use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\cohesion\Plugin\DX8JsonFormUtils;
-use Drupal\cohesion\Services\CohesionUtils;
+use Drupal\cohesion\Services\CohesionEndpointHelper;
+use Drupal\cohesion_elements\Controller\ElementsController;
 use Drupal\cohesion_elements\Entity\CohesionElementEntityBase;
 use Drupal\cohesion_elements\Entity\Component;
-use Drupal\cohesion_elements\Entity\ComponentContent;
+use Drupal\Component\Serialization\Json;
+use Drupal\cohesion\Services\CohesionUtils;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Drupal\cohesion\CohesionJsonResponse;
-use Drupal\Component\Serialization\Json;
-use Drupal\cohesion_elements\Controller\ElementsController;
-use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\Core\Field\FieldConfigInterface;
-use Drupal\cohesion\Services\CohesionEndpointHelper;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityRepository;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\field\Entity\FieldStorageConfig;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class CohesionEndpointController.
@@ -61,7 +60,7 @@ class CohesionEndpointController extends ControllerBase {
   /**
    * Cohesion utils service
    *
-   * @var CohesionUtils
+   * @var \Drupal\cohesion\Services\CohesionUtils
    */
   protected $cohesionUtils;
 
@@ -70,7 +69,7 @@ class CohesionEndpointController extends ControllerBase {
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
-   * @param CohesionUtils $cohesion_utils
+   * @param \Drupal\cohesion\Services\CohesionUtils $cohesion_utils
    */
   public function __construct(EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EntityRepository $entity_repository, CohesionUtils $cohesion_utils) {
     $this->entityFieldManager = $entity_field_manager;
@@ -226,8 +225,8 @@ class CohesionEndpointController extends ControllerBase {
         continue;
       }
 
-      // if element_id exists then load the component entity.
-      if($element_id) {
+      // If element_id exists then load the component entity.
+      if ($element_id) {
         $entity = Component::load($element_id);
       }
 
@@ -265,20 +264,21 @@ class CohesionEndpointController extends ControllerBase {
       // Get the preview_image URL.
       try {
         $element['preview_image']['url'] = ElementsController::getElementPreviewImageURL($entity_type, $entity->id());
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         $element['preview_image']['url'] = FALSE;
       }
 
       // Set the category as the class name.
       // Ignore if user does not have access to this category.
-        if (isset($categories) && isset($categories[$element['category']])) {
-          $element['category'] = $categories[$element['category']]['class'];
-            // Add the element as a child of the category.
-            if (isset($element_categories[$entity->get('category')]['dx8_access'])) {
-              $element_categories[$entity->get('category')]['children'][] = $element;
-            }
-          }
+      if (isset($categories) && isset($categories[$element['category']])) {
+        $element['category'] = $categories[$element['category']]['class'];
+        // Add the element as a child of the category.
+        if (isset($element_categories[$entity->get('category')]['dx8_access'])) {
+          $element_categories[$entity->get('category')]['children'][] = $element;
+        }
       }
+    }
 
     // Clean out the categories with no children.
     $element_categories_formatted = $element_categories;
@@ -289,10 +289,11 @@ class CohesionEndpointController extends ControllerBase {
       }
     }
 
-    // if element_id is set we only want to return that one component
-    if($element_id) {
+    // If element_id is set we only want to return that one component.
+    if ($element_id) {
       $data = $element;
-    } else {
+    }
+    else {
       // Return the data.
       $data = [
         'categories' => array_values($element_categories_formatted),
@@ -323,7 +324,7 @@ class CohesionEndpointController extends ControllerBase {
       'enabled' => $entity->get('status'),
       'category' => $entity->get('category'),
       'json_values' => $entity->get('json_values'),
-      'json_mapper' => $entity->get('json_mapper')
+      'json_mapper' => $entity->get('json_mapper'),
     ];
 
     return $element;
@@ -396,31 +397,6 @@ class CohesionEndpointController extends ControllerBase {
       'status' => 'error',
       'data' => ['error' => t('entity not found')],
     ], 404);
-  }
-
-  /**
-   * Get model JSON for entity.
-   *
-   * @param $uid
-   *
-   * @return \Drupal\cohesion\CohesionJsonResponse
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   */
-  private function getModelEntity($entity_type, $uid) {
-    // Get the uid of the component from the request.
-    $data = [];
-    // Load the component.
-    if (isset($uid) && ($component_entity = $this->entityTypeManager()->getStorage($entity_type)->load($uid))) {
-      // Return the json data.
-      $data = $component_entity->getDecodedJsonValues();
-    }
-    $error = !empty($data) ? FALSE : TRUE;
-    return new CohesionJsonResponse([
-      'status' => !$error ? 'success' : 'error',
-      'data' => $data,
-    ]);
   }
 
   /**
@@ -574,7 +550,7 @@ class CohesionEndpointController extends ControllerBase {
       'preview_image' => isset($content['preview_image']) ? $content['preview_image'] : FALSE,
       'json_values' => $content['json_values'],
       'selectable' => TRUE,
-      'modified' => TRUE
+      'modified' => TRUE,
     ];
     // Save the element.
     list($error, $message) = $this->helper->saveElement($values, $content);
@@ -676,7 +652,7 @@ class CohesionEndpointController extends ControllerBase {
     $reference = $request->attributes->get('reference') ?: NULL;
 
     if ($image = \Drupal::service('cohesion_image_browser.update_manager')->decodeToken($reference)) {
-      if($image['path']) {
+      if ($image['path']) {
         $image['path'] = file_create_url($image['path']);
       }
 

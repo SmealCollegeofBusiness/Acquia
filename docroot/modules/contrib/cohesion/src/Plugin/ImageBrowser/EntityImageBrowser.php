@@ -3,8 +3,8 @@
 namespace Drupal\cohesion\Plugin\ImageBrowser;
 
 use Drupal\cohesion\ImageBrowserPluginBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Class MediaImageBrowser.

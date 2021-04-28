@@ -5,25 +5,71 @@
  * Update and uninstall functions for the samlauth module.
  */
 
+use Drupal\Core\Config\FileStorage;
+use Drupal\Core\Config\InstallStorage;
 use Drupal\samlauth\Controller\SamlController;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
+use Drupal\views\Entity\View;
 
 /**
- * Migrate 'Allow SAML users to log in directly' config value to permission.
+ * Import view for authmap entries.
+ */
+function samlauth_install($is_syncing = FALSE) {
+  // It's strange to me that this would be explicitly necessary, and all docs
+  // I read suggest it should happen automatically, but I can't seem to
+  // simulate a module install procedure where it does happen automatically.
+  // (Code is a copy from samlauth_post_update_add_view_samlauth_map().)
+  if (!$is_syncing && \Drupal::moduleHandler()->moduleExists('views') && !View::load('samlauth_map')) {
+    $module_path = \Drupal::moduleHandler()->getModule('samlauth')->getPath();
+    $file_storage = new FileStorage($module_path . '/' . InstallStorage::CONFIG_OPTIONAL_DIRECTORY);
+    $view = \Drupal::entityTypeManager()->getStorage('view')->create($file_storage->read('views.view.samlauth_map'));
+    $view->save();
+  }
+}
+
+/**
+ * Empty.
  */
 function samlauth_update_8301() {
+}
+
+/**
+ * Populate "Roles allowed to use Drupal login" from config or permission.
+ */
+function samlauth_update_8302() {
+  $config_role_names = [];
+  // Migrate from either a single checkbox config value (pre-3.0-RC1) or from
+  // a permission.
   $config = \Drupal::configFactory()->getEditable(SamlController::CONFIG_OBJECT_NAME);
-  if ($config->get('drupal_saml_login')) {
-    $roles = Role::loadMultiple();
-    foreach ($roles as $role) {
-      /** @var \Drupal\user\Entity\Role $role */
-      if (!$role->hasPermission('bypass saml login') && !$role->id() != RoleInterface::ANONYMOUS_ID) {
-        $role->grantPermission('bypass saml login');
-        $role->save();
-      }
+  $old_config_value = $config->get('drupal_saml_login');
+  $existing_roles = Role::loadMultiple();
+  foreach ($existing_roles as $role) {
+    // Prefer the config value. Always check for / revoke the permission,
+    // though we can't really have both the permission and $config_value set.
+    /** @var \Drupal\user\Entity\Role $role */
+    if ($role->id() !== RoleInterface::ANONYMOUS_ID
+        && (isset($old_config_value) ? $old_config_value : $role->hasPermission('bypass saml login'))) {
+      $config_role_names[] = $role->id();
+    }
+    if ($role->hasPermission('bypass saml login')) {
+      $role->revokePermission('bypass saml login');
+      $role->save();
     }
   }
   $config->clear('drupal_saml_login');
+  $config->set('drupal_login_roles', $config_role_names);
   $config->save(TRUE);
+}
+
+/**
+ * Copy setting 'Attempt to link SAML data' into more fine grained settings.
+ */
+function samlauth_update_8303() {
+  $config = \Drupal::configFactory()->getEditable(SamlController::CONFIG_OBJECT_NAME);
+  if ($config->get('map_users')) {
+    $config->set('map_users_name', TRUE);
+    $config->set('map_users_mail', TRUE);
+    $config->save(TRUE);
+  }
 }

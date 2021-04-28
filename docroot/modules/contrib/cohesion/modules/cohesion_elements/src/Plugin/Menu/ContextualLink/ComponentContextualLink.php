@@ -2,10 +2,10 @@
 
 namespace Drupal\cohesion_elements\Plugin\Menu\ContextualLink;
 
-use Symfony\Component\HttpFoundation\Request;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Menu\ContextualLinkDefault;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Component\Serialization\Json;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ComponentContextualLink

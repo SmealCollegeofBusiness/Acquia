@@ -2,10 +2,10 @@
 
 namespace Drupal\cohesion_sync\Form;
 
+use Drupal\cohesion\UsagePluginManager;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\cohesion\UsagePluginManager;
 
 /**
  * Class PackageForm.
@@ -126,7 +126,7 @@ class PackageForm extends EntityForm {
     ];
 
     $form['excluded']['excluded_types'] = [
-      '#markup' => '<div id="package-excluded-container" class="package-loading-overlay"></div>',
+      '#markup' => '<div id="package-excluded-container" class="coh-app package-loading-overlay"></div>',
     ];
 
     /**
@@ -144,7 +144,7 @@ class PackageForm extends EntityForm {
     ];
 
     $form_requirements['package_requirements_container'] = [
-      '#markup' => '<div id="package-requirements-container" class="package-loading-overlay"></div>',
+      '#markup' => '<div id="package-requirements-container" class="coh-app package-loading-overlay"></div>',
     ];
 
     /**
@@ -162,7 +162,7 @@ class PackageForm extends EntityForm {
     ];
 
     $form_contents['package_contents_container'] = [
-      '#markup' => '<div id="package-contents-container" class="package-loading-overlay"></div>',
+      '#markup' => '<div id="package-contents-container" class="coh-app package-loading-overlay"></div>',
     ];
 
     // LHS / RHS columns.

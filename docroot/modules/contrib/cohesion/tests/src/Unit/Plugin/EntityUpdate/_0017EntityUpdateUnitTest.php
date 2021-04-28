@@ -3,13 +3,11 @@
 namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
-use Drupal\cohesion\EntityJsonValuesTrait;
 use Drupal\cohesion\Plugin\EntityUpdate\_0017EntityUpdate;
 use Drupal\Tests\UnitTestCase;
 
-
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -21,7 +19,8 @@ class _0017MockUpdateEntity extends EntityMockBase implements EntityJsonValuesIn
  */
 class _0017EntityUpdateUnitTest extends UnitTestCase {
 
-  /** @var $unit _0017MockUpdateEntity  */
+  /**
+   * @var unit_0017MockUpdateEntity*/
   protected $unit;
 
   private $fixture_layout = '{
@@ -98,7 +97,7 @@ class _0017EntityUpdateUnitTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->unit = new _0017EntityUpdate([], null, null);
+    $this->unit = new _0017EntityUpdate([], NULL, NULL);
   }
 
   /**
@@ -106,7 +105,7 @@ class _0017EntityUpdateUnitTest extends UnitTestCase {
    */
   public function testRunUpdate() {
 
-    // WYSIWYG in layout canvas
+    // WYSIWYG in layout canvas.
     $layout = new _0017MockUpdateEntity($this->fixture_layout, TRUE);
     $this->assertionsLayoutCanvasBefore($layout->getDecodedJsonValues());
     $this->unit->runUpdate($layout);
@@ -115,11 +114,12 @@ class _0017EntityUpdateUnitTest extends UnitTestCase {
     $this->assertionsLayoutCanvasAfter($layout->getDecodedJsonValues());
   }
 
-  private function assertionsLayoutCanvasBefore($layout_array_before){
+  private function assertionsLayoutCanvasBefore($layout_array_before) {
     $this->assertArrayNotHasKey("options", $layout_array_before['model']['50505cbc-2b01-4caf-8803-0258c5ad0e98']['settings']);
   }
 
-  private function assertionsLayoutCanvasAfter($layout_array_after){
-    $this->assertEquals(true, $layout_array_after['model']['50505cbc-2b01-4caf-8803-0258c5ad0e98']['settings']['options']['noPlugin']);
+  private function assertionsLayoutCanvasAfter($layout_array_after) {
+    $this->assertEquals(TRUE, $layout_array_after['model']['50505cbc-2b01-4caf-8803-0258c5ad0e98']['settings']['options']['noPlugin']);
   }
+
 }

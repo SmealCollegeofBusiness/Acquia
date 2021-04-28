@@ -31,11 +31,14 @@ function samlauth_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_form_FORM_ID_alter() for the user edit form.
  */
 function samlauth_form_user_form_alter(&$form, FormStateInterface $form_state) {
-  // Only affect SAML-linked users without the 'bypass' permission; see also
-  // samlauth_check_saml_user().
+  // Only affect SAML-linked users without a role that is allowed to log in
+  // locally.
   /** @var \Drupal\user\Entity\User $account */
   $account = $form_state->getBuildInfo()['callback_object']->getEntity();
-  if ($account->id() == \Drupal::currentUser()->id() && !$account->hasPermission('bypass saml login')) {
+  if ($account->id() == \Drupal::currentUser()->id() && !array_intersect(
+      $account->getRoles(),
+      \Drupal::config(SamlController::CONFIG_OBJECT_NAME)->get('drupal_login_roles') ?? []
+    )) {
     /** @var \Drupal\externalauth\AuthmapInterface $authmap */
     $authmap = \Drupal::service('externalauth.authmap');
     if ($authmap->get($account->id(), 'samlauth')) {
@@ -50,7 +53,7 @@ function samlauth_form_user_form_alter(&$form, FormStateInterface $form_state) {
       // for a user whose account was created locally and linked to a SAML
       // login afterwards, to know their password. If not being able to change
       // their e-mail is a concern, then this needs to be solved by role /
-      // permission tweaking, by custom code or by an issue in the samlauth
+      // configuration tweaking, by custom code or by an issue in the samlauth
       // module queue that makes a clear case for solving this in a general
       // manner.)
       $form['account']['mail']['#disabled'] = TRUE;
@@ -78,29 +81,79 @@ function samlauth_form_user_login_form_alter(&$form, FormStateInterface $form_st
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter() for the password reset form.
+ */
+function samlauth_form_user_pass_alter(&$form, FormStateInterface $form_state) {
+  $form['#validate'][] = 'samlauth_check_saml_user';
+}
+
+/**
  * Validation callback for SAML users logging in through the normal methods.
  */
-function samlauth_check_saml_user($form, FormStateInterface $form_state) {
+function samlauth_check_saml_user(&$form, FormStateInterface $form_state) {
   // If previous validation has already failed (name/pw incorrect or blocked),
   // bail out so we don't disclose any details about a user that otherwise
   // wouldn't be authenticated. Also skip unworkable form state.
   if (!$form_state->hasAnyErrors() && $form_state->hasValue('name')) {
     // If the user has logged into the site using samlauth before, block them
-    // depending on a permission. (There is no option to disallow _any_ user
-    // without that permission from logging in locally; that's not considered
-    // the business of this module.)
+    // if they don't have a role that is allowed to log in locally. The 'name'
+    // element may contain a user name or e-mail address; the latter happens
+    // for the password reset form, and for the login form if certain contrib
+    // modules are installed.
     /** @var \Drupal\user\Entity\User $account */
     $account = user_load_by_name($form_state->getValue('name'));
     if (!$account) {
+      $account = user_load_by_mail($form_state->getValue('name'));
+    }
+    if (!$account) {
       $form_state->setErrorByName('name', t('Could not load user to do a validation check.'));
     }
-    elseif (!$account->hasPermission('bypass saml login')) {
+    elseif (!array_intersect(
+      $account->getRoles(),
+      \Drupal::config(SamlController::CONFIG_OBJECT_NAME)->get('drupal_login_roles') ?? []
+    )) {
       /** @var \Drupal\externalauth\AuthmapInterface $authmap */
       $authmap = \Drupal::service('externalauth.authmap');
       if ($authmap->get($account->id(), 'samlauth')) {
-        $form_state->setErrorByName('name', t('This user is only allowed to log in through an external authentication provider.'));
+        // Are we allowed to tell the user why they cannot use this form, or
+        // should we use the exact same messages as when a user does not exist
+        // (to prevent disclosing info about which accounts exist)?
+        if (\Drupal::config(SamlController::CONFIG_OBJECT_NAME)->get('local_login_saml_error')) {
+          $form_state->setErrorByName('name', t('This user is only allowed to log in through an external authentication provider.'));
+        }
+        elseif (!isset($form['#form_id']) || $form['#form_id'] !== 'user_pass') {
+          $query = $form_state->hasValue('name') ? ['name' => $form_state->getValue('name')] : [];
+          $form_state->setErrorByName('name', t('Unrecognized username or password. <a href=":password">Forgot your password?</a>', [
+            ':password' => Url::fromRoute('user.pass', [], ['query' => $query])->toString(),
+          ]));
+          \Drupal::logger('user')->notice('Local login attempt denied to SAML-only account %user.', ['%user' => $form_state->getValue('name')]);
+        }
+        else {
+          if (version_compare(\Drupal::VERSION, '9.2.0-dev') >= 0) {
+            \Drupal::messenger()->addStatus(t('If %identifier is a valid account, an email will be sent with instructions to reset your password.', [
+              '%identifier' => $form_state->getValue('name'),
+            ]));
+          }
+          else {
+            \Drupal::messenger()->addStatus(t('Further instructions have been sent to your email address.'));
+          }
+          \Drupal::logger('user')->notice('Prevented sending password reset instructions mailed to %name at %email.', ['%name' => $account->getAccountName(), '%email' => $account->getEmail()]);
+          // Prevent executing the submit callback that sends the mail and
+          // prints the same message.
+          $form['#submit'] = [];
+        }
       }
     }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for the Core account settings form.
+ */
+function samlauth_form_user_admin_settings_alter(&$form, FormStateInterface $form_state) {
+  if (\Drupal::config(SamlController::CONFIG_OBJECT_NAME)->get('create_users')
+      && !isset($form['registration_cancellation']['#description'])) {
+    $form['registration_cancellation']['#description'] = t('Registration settings do not apply to accounts created by logging in through an external authentication provider.');
   }
 }
 
@@ -136,5 +189,45 @@ function samlauth_user_presave(UserInterface $account) {
       $recursion_detection = TRUE;
       $saml_service->synchronizeUserAttributes($account, TRUE);
     }
+  }
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function samlauth_views_data_alter(array &$data) {
+  if (!isset($data['authmap']['uid'])) {
+    $data['authmap']['uid'] = [
+      'title' => t('Drupal User ID'),
+      'help' => t('The user linked to the authname'),
+      // The 'join' on the users_field_data table in the original table
+      // definition (in externalauth.views.inc) essentially means that this
+      // table's fields can be used in a 'Users' view. This 'relationship'
+      // makes it possible to add User fields to a view of authmap entries.
+      'relationship' => [
+        'base' => 'users_field_data',
+        'base field' => 'uid',
+        'id' => 'standard',
+        'label' => t('Linked Drupal user'),
+      ],
+      'field' => [
+        'id' => 'numeric',
+      ],
+      'filter' => [
+        'id' => 'numeric',
+      ],
+      'sort' => [
+        'id' => 'standard',
+      ],
+    ];
+  }
+  if (!isset($data['authmap']['delete'])) {
+    $data['authmap']['delete'] = [
+      'title' => t('Link to delete @label entry.', ['@label' => 'authmap']),
+      'help' => t('Provide a link to delete the @label entry.', ['@label' => 'authmap']),
+      'field' => [
+        'id' => 'samlauth_link_delete',
+      ],
+    ];
   }
 }

@@ -4,13 +4,13 @@ namespace Drupal\cohesion_sync\Controller;
 
 use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\cohesion\UsagePluginManager;
+use Drupal\cohesion_sync\PackagerManager;
 use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\cohesion_sync\PackagerManager;
-use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Entity\EntityRepository;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class PackageFormRefreshController.
@@ -89,7 +89,7 @@ class PackageFormRefreshController extends ControllerBase {
 
       // Build the group data (sorted by label).
       $query = $definition['storage']->getQuery();
-      if($definition['entity_type']->hasKey('label')) {
+      if ($definition['entity_type']->hasKey('label')) {
         $query->sort($definition['entity_type']->getKey('label'), 'ASC');
       }
 
@@ -102,7 +102,7 @@ class PackageFormRefreshController extends ControllerBase {
         $group_id = str_replace(' ', '_', $group_label);
 
         // iI the entity is a content template, we want to filter by only modified ones.
-        if($entity_type_id != 'cohesion_content_templates' || $entity->isModified()) {
+        if ($entity_type_id != 'cohesion_content_templates' || $entity->isModified()) {
           // Add the entity to the group array.
           $groups[$group_id]['label'] = $group_label;
 
@@ -139,9 +139,12 @@ class PackageFormRefreshController extends ControllerBase {
         // Set source entity type details in the form.
         $package_contents_form[$source_entity_type_id]['label'] = $source_entity_type_label;
 
-        // Lop over the dependency groups.
+        // Loop over the dependency groups.
         $dependency_groups = [];
+        $dependencies = [];
         foreach ($this->packagerManager->buildPackageEntityList([$source_entity], $excluded_entity_type_ids) as $dependency) {
+          $dependencies[] = $dependency['entity']->uuid();
+
           // Get the label of the entity type.
           $entity_type_label = ucfirst($this->entityTypeManager->getDefinition($dependency['type'])->getPluralLabel()->__toString());
 
@@ -157,6 +160,16 @@ class PackageFormRefreshController extends ControllerBase {
           ];
         }
         ksort($dependency_groups);
+
+        // check if the dependencies and the package contents have the same items.
+        $items_to_remove = [];
+        foreach($meta['items'] as $i => $item) {
+          if(!in_array($i, $dependencies)) {
+            $items_to_remove[] = $i;
+          }
+        }
+
+        $no_longer_dependencies = $items_to_remove;
 
         // Build the top level entry.
         $package_contents_form[$source_entity_type_id]['entities'][$source_entity->uuid()] = [
@@ -193,6 +206,7 @@ class PackageFormRefreshController extends ControllerBase {
       'packageRequirementsForm' => $package_requirements_form,
       'packageContentsForm' => $package_contents_form,
       'excludedEntityTypesForm' => $excluded_entity_types_form,
+      'noLongerDependencies' => $no_longer_dependencies ?? []
     ]);
   }
 
@@ -216,7 +230,7 @@ class PackageFormRefreshController extends ControllerBase {
       foreach (explode(',', $usage['group_key']) as $index => $group_key) {
 
         // The group is the string of the group key value.
-        if (!$usage['group_key_entity_type'][$index]) {
+        if (!$usage['group_key_entity_type']) {
           // Probably a content template.
           if ($group_key) {
             $label[] = $entity->get($group_key);

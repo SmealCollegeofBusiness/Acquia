@@ -4,11 +4,11 @@ namespace Drupal\Tests\cohesion_style_guide\Unit\Services;
 
 use Drupal\cohesion\Services\CohesionUtils;
 use Drupal\cohesion\UsageUpdateManager;
+use Drupal\cohesion_style_guide\Services\StyleGuideManagerHandler;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Tests\UnitTestCase;
-use Drupal\cohesion_style_guide\Services\StyleGuideManagerHandler;
 
 /**
  * @group Cohesion

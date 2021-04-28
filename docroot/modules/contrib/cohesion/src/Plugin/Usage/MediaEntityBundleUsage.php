@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class MediaEntityBundleUsage.
+ * Plugin for media entity bundle usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *
@@ -32,15 +32,15 @@ class MediaEntityBundleUsage extends UsagePluginBase {
   public function getScannableData(EntityInterface $entity) {
     $scannable = [];
 
-    // Get media entity fields
+    // Get media entity fields.
     $bundle_fields = \Drupal::service('entity_field.manager')->getFieldDefinitions('media', $entity->get('id'));
 
-    foreach($bundle_fields as $field) {
-        $scannable[] = [
-          'type' => 'drupal_field',
-          'entity_type' => 'field_config',
-          'uuid' => $field->getUniqueIdentifier()
-        ];
+    foreach ($bundle_fields as $field) {
+      $scannable[] = [
+        'type' => 'drupal_field',
+        'entity_type' => 'field_config',
+        'uuid' => $field->getUniqueIdentifier(),
+      ];
     }
 
     return $scannable;
@@ -59,17 +59,17 @@ class MediaEntityBundleUsage extends UsagePluginBase {
         $field = $this->drupalFieldLoad($entry['uuid']);
 
         // Check if the field is an entity reference and references media types.
-        if(!empty($field) && $field->getType() == 'entity_reference') {
-          if($field->getSetting('handler') == 'default:media') {
+        if (!empty($field) && $field->getType() == 'entity_reference') {
+          if ($field->getSetting('handler') == 'default:media') {
             $handler_settings = $field->getSetting('handler_settings');
 
-            // get each media type that is set on the field.
-            foreach($handler_settings['target_bundles'] as $bundle) {
+            // Get each media type that is set on the field.
+            foreach ($handler_settings['target_bundles'] as $bundle) {
               $media_type_uuid = $this->mediaEntityBundleLoad($bundle);
 
               $entities[] = [
                 'type' => $this->getEntityType(),
-                'uuid' => $media_type_uuid
+                'uuid' => $media_type_uuid,
               ];
             }
           }
@@ -79,7 +79,7 @@ class MediaEntityBundleUsage extends UsagePluginBase {
       if ($entry['type'] == 'media_type') {
         $entities[] = [
           'type' => $this->getEntityType(),
-          'uuid' => $entry['uuid']
+          'uuid' => $entry['uuid'],
         ];
       }
     }

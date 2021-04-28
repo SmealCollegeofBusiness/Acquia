@@ -1,5 +1,0 @@
-acquia_contenthub_publisher.add_webhook:
-  route_name: acquia_contenthub_publisher.add_webhook
-  title: 'Add Webhook'
-  appears_on:
-    - acquia_contenthub.subscription_settings

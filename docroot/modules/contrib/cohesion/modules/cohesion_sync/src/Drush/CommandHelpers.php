@@ -6,6 +6,7 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\cohesion_sync\PackagerManager;
+use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Site\Settings;
@@ -61,6 +62,13 @@ final class CommandHelpers {
   protected $state;
 
   /**
+   * The uuid service
+   *
+   * @var \Drupal\Component\Uuid\UuidInterface
+   */
+  protected $uuidGenerator;
+
+  /**
    * DrushCommandHelpers constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -69,14 +77,16 @@ final class CommandHelpers {
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository
    * @param \Drupal\Core\State\StateInterface $state
    * @param \Drupal\Core\File\FileSystemInterface $fileSystem
+   * @param \Drupal\Component\Uuid\UuidInterface $uuid
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, PackagerManager $packagerManager, EntityRepositoryInterface $entityRepository, StateInterface $state, FileSystemInterface $fileSystem) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, ConfigFactoryInterface $configFactory, PackagerManager $packagerManager, EntityRepositoryInterface $entityRepository, StateInterface $state, FileSystemInterface $fileSystem, UuidInterface $uuid) {
     $this->entityTypeManager = $entityTypeManager;
     $this->configFactory = $configFactory;
     $this->packagerManager = $packagerManager;
     $this->entityRepository = $entityRepository;
     $this->state = $state;
     $this->fileSystem = $fileSystem;
+    $this->uuidGenerator = $uuid;
 
     /** @var \Drupal\Core\Config\ImmutableConfig config */
     $this->config = $this->configFactory->get('cohesion.sync.settings');
@@ -92,7 +102,7 @@ final class CommandHelpers {
   }
 
   /**
-   * Get the sync directory to use for import/export
+   * Get the sync directory to use for import/export.
    *
    * @return mixed|string
    */
@@ -240,60 +250,23 @@ final class CommandHelpers {
     }
 
     $batch_operations = [];
+    $store_key = 'drush_sync_validation' . $this->uuidGenerator->generate() ;
 
     // Import each file in the paths list.
     foreach ($paths as $path) {
-
-      try {
-        $action_data = $this->packagerManager->validateYamlPackageStream($path);
-        // Prevent from importing if some content will be broken/lost and it is set to overwrite all entities.
-        if ($overwrite && !$force) {
-          $broken_entities = $this->packagerManager->validateYamlPackageContentIntegrity($path);
-          $error_messages = [];
-          $drupal_translate = \Drupal::translation();
-          foreach ($broken_entities as $broken_entity) {
-            /** @var \Drupal\cohesion\Entity\CohesionConfigEntityBase $entity */
-            $entity = $broken_entity['entity'];
-            $error_messages[] = "\n";
-            $error_messages[] = $drupal_translate->translate('Cannot import @entity_type \'@label\' (id: @id). This entity is missing populated fields. If you proceed, content in these fields will be lost.', ['@entity_type' => $entity->getEntityType()->getLabel(), '@label' => $entity->label(), '@id' => $entity->id()]);
-            $error_messages[] = $drupal_translate->formatPlural(count($broken_entity['entities']), '1 entity affected:', '@count entities affected:');
-            foreach ($broken_entity['entities'] as $entity) {
-              $error_messages[] = $drupal_translate->translate('@entity_type \'@label\' (id: @id)', ['@entity_type' => $entity->getEntityType()->getLabel(), '@label' => $entity->label(), '@id' => $entity->id()]);
-            }
-          }
-
-          if (!empty($error_messages)) {
-            $error_messages[] = "\n" . $drupal_translate->translate('You can choose to ignore and proceed with the import by adding `--force` to your command');
-            throw new \Exception(implode("\n", $error_messages));
-          }
-        }
-      }
-      catch (\Exception $e) {
-        $no_maintenance ?: $this->state->set('system.maintenance_mode', FALSE);
-        throw new \Exception('Error in ' . $path . ' ' . $e->getMessage());
-      }
-
-      // Set the status of the action items.
-      foreach ($action_data as $uuid => $action) {
-        if ($action['entry_action_state'] == ENTRY_EXISTING_ASK) {
-          if ($overwrite) {
-            $action_data[$uuid]['entry_action_state'] = ENTRY_EXISTING_OVERWRITTEN;
-          }
-          if ($keep) {
-            $action_data[$uuid]['entry_action_state'] = ENTRY_EXISTING_IGNORED;
-          }
-        }
-      }
-
-      // Process the action items.
-      $batch_operations = array_merge($batch_operations, $this->packagerManager->applyBatchYamlPackageStream($path, $action_data, $no_rebuild));
-      $batch_operations[] = [
-        '\Drupal\cohesion_sync\Controller\BatchImportController::batchReportCallback',
-        [$path]
-      ];
+      $batch_operations = $this->packagerManager->validatePackageBatch($path, $store_key);
     }
 
-    $no_maintenance ?: $this->state->set('system.maintenance_mode', FALSE);
+    $batch_operations[] = [
+      '\Drupal\cohesion_sync\Controller\BatchImportController::setImportBatch',
+      [$path, $store_key, $overwrite, $keep, $force, $no_rebuild, $no_maintenance],
+    ];
+
+    $operations[] = [
+      '\Drupal\cohesion_sync\Controller\BatchImportController::batchDrushValidationFinishedCallback',
+      [$no_maintenance]
+    ];
+
     return $batch_operations;
   }
 

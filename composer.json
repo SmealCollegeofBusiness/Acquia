@@ -29,7 +29,6 @@
                 "[web-root]/.htaccess": false,
                 "[profile-root]/.editorconfig": false,
                 "[profile-root]/.gitattributes": false,
-                "[profile-root]/hooks": false,
                 "[profile-root]/drush/sites/acms.site.yml": false,
                 "[profile-root]/.coveralls.yml": false,
                 "[profile-root]/.travis.yml": false,

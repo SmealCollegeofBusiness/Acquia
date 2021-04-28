@@ -2,9 +2,9 @@
 
 namespace Drupal\cohesion_style_helpers\Controller;
 
+use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\cohesion\CohesionJsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

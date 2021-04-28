@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion_elements;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\content_translation\ContentTranslationHandler;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Class ComponentContentTranslationHandler.

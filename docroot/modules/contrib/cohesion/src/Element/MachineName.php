@@ -8,7 +8,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Render\Element\MachineName as CoreMachineName;
 
 /**
- * Class MachineName.
+ * Extends the core machine name functionalities.
  *
  * @FormElement("ajax_machine_name")
  */

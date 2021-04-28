@@ -76,7 +76,7 @@ class MasterTemplates extends CohesionTemplateBase implements CohesionSettingsIn
 
   const ASSET_GROUP_ID = 'master_template';
 
-  const entity_machine_name_prefix = 'mstr_tpl_';
+  const ENTITY_MACHINE_NAME_PREFIX = 'mstr_tpl_';
 
   /**
    * Import a list of entities.

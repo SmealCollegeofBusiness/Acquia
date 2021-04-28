@@ -2,10 +2,10 @@
 
 namespace Drupal\cohesion\Controller;
 
-use Drupal\Core\Entity\Controller\EntityController;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Entity\Controller\EntityController;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Class CohesionEntityController.

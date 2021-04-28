@@ -48,7 +48,7 @@ class _0023EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
   }
 
   /**
-   * @param $element Element
+   * @param Element $element
    * @param $json_values
    */
   private function updateResponsiveSettings($element, &$json_values) {

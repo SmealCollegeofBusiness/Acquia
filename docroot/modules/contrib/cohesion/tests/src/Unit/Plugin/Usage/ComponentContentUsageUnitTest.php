@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\cohesion_elements\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion_elements\Plugin\Usage\ComponentContentUsage;
 use Drupal\cohesion_elements\Entity\Component;
+use Drupal\cohesion_elements\Plugin\Usage\ComponentContentUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * @group Cohesion

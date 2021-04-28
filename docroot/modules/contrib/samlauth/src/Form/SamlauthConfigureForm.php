@@ -3,20 +3,30 @@
 namespace Drupal\samlauth\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Path\PathValidatorInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\Token;
 use Drupal\samlauth\Controller\SamlController;
+use Drupal\user\UserInterface;
 use OneLogin\Saml2\Metadata;
 use OneLogin\Saml2\Utils as SamlUtils;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a configuration form for samlauth module settings and IdP/SP info.
  */
 class SamlauthConfigureForm extends ConfigFormBase {
+
+  /**
+   * The EntityTypeManager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
 
   /**
    * The PathValidator service.
@@ -37,13 +47,16 @@ class SamlauthConfigureForm extends ConfigFormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The EntityTypeManager service.
    * @param \Drupal\Core\Path\PathValidatorInterface $path_validator
    *   The PathValidator service.
    * @param \Drupal\Core\Utility\Token $token
    *   The token service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, PathValidatorInterface $path_validator, Token $token) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, PathValidatorInterface $path_validator, Token $token) {
     parent::__construct($config_factory);
+    $this->entityTypeManager = $entity_type_manager;
     $this->pathValidator = $path_validator;
     $this->token = $token;
   }
@@ -54,6 +67,7 @@ class SamlauthConfigureForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('entity_type.manager'),
       $container->get('path.validator'),
       $container->get('token')
     );
@@ -120,6 +134,32 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#title' => $this->t('Log out different user upon re-authentication.'),
       '#description' => $this->t('If a login (coming from the IdP) happens while another user is still logged into the site, that user is logged out and the new user is logged in. (By default, the old user stays logged in and a warning is displayed.)'),
       '#default_value' => $config->get('logout_different_user'),
+    ];
+
+    /** @var \Drupal\user\Entity\Role[] $roles */
+    $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
+    unset($roles[UserInterface::ANONYMOUS_ROLE]);
+    $role_options = [];
+    foreach ($roles as $name => $role) {
+      $role_options[$name] = $role->label();
+    }
+    $form['saml_login_logout']['linking']['drupal_login_roles'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Roles allowed to use Drupal login also when linked to a SAML login'),
+      '#description' => $this->t('Users who have previously logged in through the SAML Identity Provider can only use the standard Drupal login method if they have one of the roles selected here. Drupal users that have never logged in through the IdP are not affected by this restriction.'),
+      '#options' => $role_options,
+      '#default_value' => $config->get('drupal_login_roles') ?? [],
+    ];
+
+    $form['saml_login_logout']['local_login_saml_error'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Tell disallowed users they must log in using SAML.'),
+      '#description' => $this->t('If not checked, we show the generic "Unrecognized username or password" message to users who cannot use the standard Drupal login method. This prevents disclosing information about whether the account name exists, but is untrue / potentially confusing.', [
+        ':permission' => Url::fromUri('base:admin/people/permissions', ['fragment' => 'module-samlauth'])->toString(),
+      ]),
+      // TRUE on existing installations where the checkbox didn't exist before;
+      // FALSE on new installations.
+      '#default_value' => $config->get('local_login_saml_error') ?? TRUE,
     ];
 
     $form['saml_login_logout']['login_redirect_url'] = [
@@ -261,7 +301,7 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#title' => $this->t('Cache HTTP responses containing metadata'),
       '#description' => $this->t("This affects just (Drupal's and external) response caches, whereas the above also affects caching by the IdP. Caching is only important if the metadata URL can be reached by anonymous visitors. The Max-Age value is derived from the validity."),
       // TRUE on existing installations where the checkbox didn't exist before;
-      // FALSE in new installations.
+      // FALSE on new installations.
       '#default_value' => $config->get('metadata_cache_http') ?? TRUE,
     ];
 
@@ -348,17 +388,48 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#default_value' => $config->get('unique_id_attribute') ?: 'eduPersonTargetedID',
     ];
 
-    $form['user_info']['map_users'] = [
-      '#type' => 'checkbox',
+    $form['user_info']['linking'] = [
       '#title' => $this->t('Attempt to link SAML data to existing local users'),
-      '#description' => $this->t('If the unique ID in the SAML assertion is not linked to a Drupal user, and the name / e-mail attribute matches an existing Drupal user, that user will be linked and logged in. (By default, a new user is created with the same data depending on the next option - which may result in an error about a duplicate or missing user.)'),
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#description' => t('If enabled, whenever the unique ID in the SAML assertion is not already linked to a Drupal user but the assertion data can be matched with an existing non-linked user, that user will be linked and logged in. Matching is attempted in the order of below enabled checkboxes, until a user is found.')
+      . '<br><br><em>' . t('Warning: if the data used for matching can be changed by the IdP user, this has security implications; it enables a user to influence which Drupal user they take over.') . '</em>',
+    ];
+
+    $form['user_info']['linking']['map_users'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable custom matching'),
+      '#description' => $this->t("Allows user matching by the included 'User Fields Mapping' module as well as any other code (event subscriber) installed for this purpose."),
       '#default_value' => $config->get('map_users'),
+    ];
+
+    $form['user_info']['linking']['map_users_name'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable matching on name'),
+      '#description' => $this->t("Allows matching an existing local user name with value of the user name attribute."),
+      '#default_value' => $config->get('map_users_name'),
+    ];
+
+    $form['user_info']['linking']['map_users_mail'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable matching on email'),
+      '#description' => $this->t("Allows matching an existing local user email with value of the user email attribute."),
+      '#default_value' => $config->get('map_users_mail'),
+    ];
+
+    unset($role_options[UserInterface::AUTHENTICATED_ROLE]);
+    $form['user_info']['linking']['map_users_roles'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Roles allowed for linking'),
+      '#description' => $this->t('If a matched account has any role that is not explicitly allowed here, linking/login is denied.'),
+      '#options' => $role_options,
+      '#default_value' => $config->get('map_users_roles') ?? [],
     ];
 
     $form['user_info']['create_users'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Create users from SAML data'),
-      '#description' => $this->t('If data in the SAML assertion is not linked to a Drupal user, a new user is created using the name / e-mail attributes from the response.'),
+      '#description' => $this->t('If data in the SAML assertion is not linked to a Drupal user, a new user is created using the name / email attributes from the response.'),
       '#default_value' => $config->get('create_users'),
     ];
 
@@ -383,7 +454,7 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#default_value' => $config->get('user_name_attribute'),
       '#states' => [
         'invisible' => [
-          ':input[name="map_users"]' => ['checked' => FALSE],
+          ':input[name="map_users_name"]' => ['checked' => FALSE],
           ':input[name="create_users"]' => ['checked' => FALSE],
           ':input[name="sync_name"]' => ['checked' => FALSE],
         ],
@@ -397,7 +468,7 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#default_value' => $config->get('user_mail_attribute'),
       '#states' => [
         'invisible' => [
-          ':input[name="map_users"]' => ['checked' => FALSE],
+          ':input[name="map_users_mail"]' => ['checked' => FALSE],
           ':input[name="create_users"]' => ['checked' => FALSE],
           ':input[name="sync_mail"]' => ['checked' => FALSE],
         ],
@@ -433,13 +504,13 @@ class SamlauthConfigureForm extends ConfigFormBase {
     $form['security']['security_signature_algorithm'] = [
       '#type' => 'select',
       '#title' => $this->t('Signature algorithm'),
-      // The first option is the library default.
       '#options' => [
-        'http://www.w3.org/2000/09/xmldsig#rsa-sha1' => 'RSA-sha1',
-        'http://www.w3.org/2000/09/xmldsig#hmac-sha1' => 'HMAC-sha1',
-        'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256' => 'sha256',
-        'http://www.w3.org/2001/04/xmldsig-more#rsa-sha384' => 'sha384',
-        'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512' => 'sha512',
+        '' => $this->t('library default'),
+        XMLSecurityKey::RSA_SHA1 => 'RSA-SHA1',
+        XMLSecurityKey::HMAC_SHA1 => 'HMAC-SHA1',
+        XMLSecurityKey::RSA_SHA256 => 'SHA256',
+        XMLSecurityKey::RSA_SHA384 => 'SHA384',
+        XMLSecurityKey::RSA_SHA512 => 'SHA512',
       ],
       '#description' => $this->t('Algorithm used in the signing process.'),
       '#default_value' => $config->get('security_signature_algorithm'),
@@ -486,7 +557,7 @@ class SamlauthConfigureForm extends ConfigFormBase {
     $form[$group]['security_want_name_id'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Require NameID'),
-      '#description' => $this->t('The login response from the IdP must contain a NameID attribute. (This is default behavior for the SAML Toolkit library, but the SAML Authentication module does not use NameID values, so it seems this can be unchecked safely.)'),
+      '#description' => $this->t('The authentication response from the IdP must contain a NameID attribute. (This is default behavior for the SAML Toolkit library, but the SAML Authentication module does not use NameID values, so it seems this can be unchecked safely.)'),
       // This is one of the few checkboxes that must be TRUE on existing
       // installations where the checkbox didn't exist before (in older module
       // versions). Others get their default only from the config/install file.
@@ -531,13 +602,20 @@ class SamlauthConfigureForm extends ConfigFormBase {
       ],
     ];
 
+    $form[$group]['security_assertions_signed'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Require assertions to be signed'),
+      '#description' => $this->t('Assertion elements in authentication responses from the IdP are expected to be signed. (When strict validation is turned off, this check is not performed but the expectation is still specified in the SP metadata.)'),
+      '#default_value' => $config->get('security_assertions_signed'),
+    ];
+
     $form[$group]['security_assertions_encrypt'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Require assertions to be encrypted'),
       // The metadata changes if wantAssertionsEncrypted OR wantNameIdEncrypted
       // are set. But we don't have wantNameIdEncrypted yet, so we'll describe
       // this option as the way to change the metadata.
-      '#description' => $this->t("Assertion elements in responses from the IdP are expected to be encrypted. (When strict validation is turned off, this option still has the effect of specifying this expectation in the SP metadata.)"),
+      '#description' => $this->t('Assertion elements in responses from the IdP are expected to be encrypted. (When strict validation is turned off, this check is not performed but the expectation is still specified in the SP metadata.)'),
       '#default_value' => $config->get('security_assertions_encrypt'),
     ];
 
@@ -546,11 +624,25 @@ class SamlauthConfigureForm extends ConfigFormBase {
       '#type' => 'fieldset',
     ];
 
+    $form['other']['use_base_url'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t("Use Drupal base URL in toolkit library"),
+      '#description' => $this->t('This is supposedly a better version of the below that works for all Drupal configurations and (for reverse proxies) only uses HTTP headers/hostnames when you configured them as <a href=":trusted">trusted</a>. Please turn this on and file an issue if it doesn\'t work for you; it will be standard and non-configurable (and the above option will be removed) in the next major module versoin.', [
+        ':trusted' => 'https://www.drupal.org/docs/installing-drupal/trusted-host-settings#s-trusted-host-security-setting-in-drupal-8',
+      ]),
+      '#default_value' => $config->get('use_base_url'),
+    ];
+
     $form['other']['use_proxy_headers'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t("Use 'X-Forwarded-*' headers."),
-      '#description' => $this->t("The SAML Toolkit will use 'X-Forwarded-*' HTTP headers (if present) for constructing/identifying the SP URL in sent/received messages. This is likely necessary if your SP is behind a reverse proxy, and your Drupal installation is not already <a href=\"https://www.drupal.org/node/425990\" target=\"_blank\">dealing with this</a>."),
+      '#title' => $this->t("Use 'X-Forwarded-*' headers (deprecated)"),
+      '#description' => $this->t("The SAML Toolkit will use 'X-Forwarded-*' HTTP headers (if present) for constructing/identifying the SP URL in sent/received messages. This used to be necessary if your SP is behind a reverse proxy."),
       '#default_value' => $config->get('use_proxy_headers'),
+      '#states' => [
+        'disabled' => [
+          ':input[name="use_base_url"]' => ['checked' => TRUE],
+        ],
+      ],
     ];
 
     $form['debugging'] = [
@@ -716,8 +808,10 @@ class SamlauthConfigureForm extends ConfigFormBase {
       ->set('login_menu_item_title', $form_state->getValue('login_menu_item_title'))
       ->set('logout_menu_item_title', $form_state->getValue('logout_menu_item_title'))
       ->set('logout_different_user', $form_state->getValue('logout_different_user'))
+      ->set('local_login_saml_error', $form_state->getValue('local_login_saml_error'))
       ->set('login_redirect_url', $form_state->getValue('login_redirect_url'))
       ->set('logout_redirect_url', $form_state->getValue('logout_redirect_url'))
+      ->set('drupal_login_roles', $form_state->getValue('drupal_login_roles'))
       ->set('error_redirect_url', $form_state->getValue('error_redirect_url'))
       ->set('error_throw', $form_state->getValue('error_throw'))
       ->set('sp_entity_id', $form_state->getValue('sp_entity_id'))
@@ -735,6 +829,9 @@ class SamlauthConfigureForm extends ConfigFormBase {
       ->set('idp_x509_certificate_multi', $this->formatKeyOrCert($form_state->getValue('idp_x509_certificate_multi'), FALSE))
       ->set('unique_id_attribute', $form_state->getValue('unique_id_attribute'))
       ->set('map_users', $form_state->getValue('map_users'))
+      ->set('map_users_name', $form_state->getValue('map_users_name'))
+      ->set('map_users_mail', $form_state->getValue('map_users_mail'))
+      ->set('map_users_roles', $form_state->getValue('map_users_roles'))
       ->set('create_users', $form_state->getValue('create_users'))
       ->set('sync_name', $form_state->getValue('sync_name'))
       ->set('sync_mail', $form_state->getValue('sync_mail'))
@@ -753,6 +850,7 @@ class SamlauthConfigureForm extends ConfigFormBase {
       ->set('security_signature_algorithm', $form_state->getValue('security_signature_algorithm'))
       ->set('strict', $form_state->getValue('strict'))
       ->set('use_proxy_headers', $form_state->getValue('use_proxy_headers'))
+      ->set('use_base_url', $form_state->getValue('use_base_url'))
       ->set('debug_display_error_details', $form_state->getValue('debug_display_error_details'))
       ->set('debug_log_saml_out', $form_state->getValue('debug_log_saml_out'))
       ->set('debug_log_saml_in', $form_state->getValue('debug_log_saml_in'))

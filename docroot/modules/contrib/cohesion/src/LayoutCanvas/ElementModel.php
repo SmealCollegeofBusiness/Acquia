@@ -262,9 +262,10 @@ class ElementModel implements \JsonSerializable {
                     }
                     elseif ($this->getProperty($uuid)) {
                       $this->processValue($this->model->{$uuid}, $element, $component_model_value, $inner_component_model_values);
-                    }else{
+                    }
+                    else {
                       foreach ($this->model as $uuid_key => $multifield) {
-                        if(is_array($multifield)) {
+                        if (is_array($multifield)) {
                           foreach ($multifield as $key => $val) {
                             if(is_object($val) && property_exists($val, $uuid)) {
                               $this->processValue($this->model->{$uuid_key}[$key]->{$uuid}, $element, $component_model_value, $inner_component_model_values);
@@ -285,6 +286,9 @@ class ElementModel implements \JsonSerializable {
     return $vars;
   }
 
+  /**
+   *
+   */
   private function processValue(&$value, $element, $component_model_value, $inner_component_model_values) {
     // If the model value is an object or array loop over it to hash each value
     // If in the outer most component and the key in the model exists in a child component, get the path from the child

@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion_base_styles\Form;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\cohesion\Form\CohesionStyleBuilderForm;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Class CohesionBaseForm.

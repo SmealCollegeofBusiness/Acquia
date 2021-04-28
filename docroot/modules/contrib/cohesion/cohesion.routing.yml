@@ -411,6 +411,8 @@ drupal_data_endpoint.element_group_info:
     entity_type_access: 'all'
     bundle_access: 'all'
     element_id: ''
+    componentPath: ''
+    access_elements: ''
   methods:  [GET]
   requirements:
     _user_is_logged_in: 'TRUE'

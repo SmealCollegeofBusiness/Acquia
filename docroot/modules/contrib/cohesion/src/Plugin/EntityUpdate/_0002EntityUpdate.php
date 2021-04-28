@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion\Plugin\EntityUpdate;
 
-use Drupal\cohesion_custom_styles\Entity\CustomStyle;
 use Drupal\cohesion\EntityUpdatePluginInterface;
+use Drupal\cohesion_custom_styles\Entity\CustomStyle;
 use Drupal\Component\Plugin\PluginBase;
 
 /**

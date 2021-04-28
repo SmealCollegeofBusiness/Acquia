@@ -79,7 +79,7 @@ class JsonXss {
           }
 
           // Check Javascript in link to page.
-          if(($linkToPage =  $model->getProperty(['settings', 'linkToPage'])) || ($url = $model->getProperty(['settings', 'url']))) {
+          if(($linkToPage = $model->getProperty(['settings', 'linkToPage'])) || ($url = $model->getProperty(['settings', 'url']))) {
 
             if($linkToPage) {
               $link_url = $linkToPage;
@@ -90,7 +90,7 @@ class JsonXss {
             // check link_url is set and if the value is a valid URL? - accounts for node::1, external & internal links.
             if($link_url && !UrlHelper::isValid($link_url)) {
               // mock anchor
-              $mock = '<a href="' . addslashes($link_url) .'"></a>';
+              $mock = '<a href="' . addslashes($link_url) . '"></a>';
 
               if (Xss::filterAdmin($mock) !== $mock) {
                 // If it fails validation, add link to page path so it gets disabled by the app.

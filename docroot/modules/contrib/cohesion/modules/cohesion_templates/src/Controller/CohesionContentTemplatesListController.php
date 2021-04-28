@@ -3,10 +3,10 @@
 namespace Drupal\cohesion_templates\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Link;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Class CohesionContentTemplatesListController.

@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class ImageStyleUsage.
+ * Plugin for image style usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *

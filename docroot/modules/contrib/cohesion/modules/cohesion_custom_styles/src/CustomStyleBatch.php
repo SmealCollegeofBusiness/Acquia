@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion_custom_styles;
 
-use Drupal\Core\Url;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Url;
 
 /**
  * Class CustomStyleBatch.
@@ -39,7 +39,7 @@ class CustomStyleBatch {
     foreach ($entity_list as $entity) {
 
       $api_plugin = $entity->getApiPluginInstance();
-      if($api_plugin){
+      if ($api_plugin) {
         $api_plugin->setEntity($entity);
         $forms = array_merge($forms, $api_plugin->getForms());
       }

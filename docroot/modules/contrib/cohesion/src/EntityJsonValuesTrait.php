@@ -2,9 +2,9 @@
 
 namespace Drupal\cohesion;
 
+use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
 use Drupal\cohesion_elements\Entity\Component;
 use Drupal\Component\Serialization\Json;
-use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
 
 /**
  * Trait for EntityJsonValuesTrait.

@@ -6,7 +6,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Database\Database;
 
 /**
- * Class CohesionApiElementStorage.
+ * Service to handle storage of cohesion elements.
  *
  * @package Drupal\cohesion
  */

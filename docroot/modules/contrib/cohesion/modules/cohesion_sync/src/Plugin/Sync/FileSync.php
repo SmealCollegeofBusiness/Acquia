@@ -145,8 +145,8 @@ class FileSync extends SyncPluginBase {
         if ($entity->hasField($key) && $key !== 'fid' && $key !== 'created' && $key !== 'changed') {
           $entity_val = $entity->get($key)->getValue()[0];
 
-          if($key == 'uri') {
-            if(strpos($value, 'cohesion://') !== FALSE) {
+          if ($key == 'uri') {
+            if (strpos($value, 'cohesion://') !== FALSE) {
               $value = str_replace('cohesion://', 'public://cohesion/', $value);
             }
           }
@@ -166,7 +166,8 @@ class FileSync extends SyncPluginBase {
           // Ask the user what to do.
           return ENTRY_EXISTING_ASK;
         }
-      } else {
+      }
+      else {
         throw new \Exception("File {$entry['uri']} does not exist on the local filesystem although the entity exists.");
       }
 
@@ -194,8 +195,8 @@ class FileSync extends SyncPluginBase {
     }
 
     $uri = $entry['uri'];
-    // Patch old entities using the cohesion stream wrapper
-    if(strpos($uri, 'cohesion://') !== FALSE) {
+    // Patch old entities using the cohesion stream wrapper.
+    if (strpos($uri, 'cohesion://') !== FALSE) {
       $uri = str_replace('cohesion://', 'public://cohesion/', $uri);
     }
 

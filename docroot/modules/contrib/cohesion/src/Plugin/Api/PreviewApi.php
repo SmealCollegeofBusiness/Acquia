@@ -8,7 +8,7 @@ use Drupal\cohesion_custom_styles\Entity\CustomStyle;
 use Drupal\Component\Serialization\Json;
 
 /**
- * Class PreviewApi.
+ * Send site studio preview template to its API.
  *
  * @package Drupal\cohesion
  *
@@ -41,6 +41,9 @@ class PreviewApi extends StylesApiPluginBase {
    */
   protected $style_mapper;
 
+  /**
+   *
+   */
   public function getForms() {
     $form = [
       'parent' => [
@@ -49,7 +52,7 @@ class PreviewApi extends StylesApiPluginBase {
         'bundle' => 'preview_1',
         'values' => Json::encode($this->style_model),
         'mapper' => Json::encode($this->style_mapper),
-      ]
+      ],
     ];
 
     if ($this->entity_type_id != 'cohesion_base_styles') {
@@ -57,7 +60,7 @@ class PreviewApi extends StylesApiPluginBase {
     }
 
     return [
-      $form
+      $form,
     ];
   }
 
@@ -74,9 +77,10 @@ class PreviewApi extends StylesApiPluginBase {
     $this->entity_type_id = $entity_type_id;
 
     // And save the values.
-    if($this->entity_type_id == 'cohesion_custom_style'){
+    if ($this->entity_type_id == 'cohesion_custom_style') {
       $this->type = CustomStyle::ASSET_GROUP_ID;
-    }else{
+    }
+    else {
       $this->type = BaseStyles::ASSET_GROUP_ID;
     }
   }

@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class CohesionEndpointController
+ * Class CohesionEndpointController.
  *
  * Returns Drupal data to Angular (views, blocks, node lists, etc).
  * See function index() for the entry point.
@@ -36,7 +36,8 @@ class StyleGuideController extends ControllerBase {
   protected $themeManager;
 
 
-  /** @var \Drupal\cohesion\Services\LocalFilesManager*/
+  /**
+   * @var \Drupal\cohesion\Services\LocalFilesManager*/
   protected $localFilesManager;
 
   /**
@@ -119,6 +120,9 @@ class StyleGuideController extends ControllerBase {
     return $response;
   }
 
+  /**
+   *
+   */
   public function buildStyleGuidePreview(Request $request) {
     $preview_json_values = $request->getContent();
     $active_theme = $this->themeManager->getActiveTheme();
@@ -128,20 +132,20 @@ class StyleGuideController extends ControllerBase {
     $preview_sgm_values = $preview_json_values;
     $preview_decoded_json = json_decode($preview_json_values);
     $in_use_entities = [];
-    // The current active theme values
+    // The current active theme values.
     $style_guide_manager = json_decode($this->styleGuideManagerHandler->getStyleGuideManagerJson($active_theme->getName()));
-    // Get all entities that needs to be build for the style guides that has been modified
-    if(property_exists($preview_decoded_json, 'model') && property_exists($preview_decoded_json, 'changedFields')) {
+    // Get all entities that needs to be build for the style guides that has been modified.
+    if (property_exists($preview_decoded_json, 'model') && property_exists($preview_decoded_json, 'changedFields')) {
       foreach ($preview_decoded_json->model as $style_guide_uuid => $style_guide_values) {
 
         // Check whether some value(s) of the current style guide in the loop has been changed
         // and flag it $getInuseStyleGuide = TRUE so we can retrieve where this style guide is in use
-        // and send the related entities to the Site Studio API to be generated for the preview
+        // and send the related entities to the Site Studio API to be generated for the preview.
         $getInuseStyleGuide = FALSE;
         foreach ($style_guide_values as $style_guide_value_uuid => $style_guide_value) {
           // A values is concidered to have changed if it's in the `changedFields` array of a sent values
-          // and if in the currently saved values it does not exist or the value is different
-          if(in_array('model.' . $style_guide_uuid . '.' . $style_guide_value_uuid, $preview_decoded_json->changedFields)
+          // and if in the currently saved values it does not exist or the value is different.
+          if (in_array('model.' . $style_guide_uuid . '.' . $style_guide_value_uuid, $preview_decoded_json->changedFields)
           && (!property_exists($style_guide_manager, 'model') || !property_exists($style_guide_manager->model, $style_guide_uuid)
             || !property_exists($style_guide_manager->model->$style_guide_uuid, $style_guide_value_uuid) || $style_guide_manager->model->$style_guide_uuid->$style_guide_value_uuid != $style_guide_value)) {
             $getInuseStyleGuide = TRUE;
@@ -174,7 +178,7 @@ class StyleGuideController extends ControllerBase {
       ->createInstance('styles_api');
     $send_to_api->setForms($forms);
     $send_to_api->setWithTimestamp(FALSE);
-    if(!$send_to_api->sendWithoutSave()){
+    if (!$send_to_api->sendWithoutSave()) {
       return new CohesionJsonResponse([
         'status' => 'error',
         'data' => $send_to_api->getData(),

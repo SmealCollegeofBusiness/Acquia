@@ -1,5 +1,164 @@
 # Release notes
 
+## 6.5.0
+
+### Site Studio Visual Page Builder Module
+
+#### What is it?
+
+A new module available as part of Site Studio that provides a front-end page building and content authoring experience using Site Studio drag and drop components. The visual page builder is a companion to the Layout canvas that is used in the back-end Drupal user interface.
+
+#### What impact will there be?
+
+When installed, the module will add a new ‘Page builder’ button to pages that have a Site Studio layout canvas. When the button is clicked, users enter the new page builder mode.
+
+#### What actions do I need to take?
+
+To use the Page Builder you will need to install the Visual Page Builder module.
+
+#### Are there any risks I should be aware of?
+
+There are no known risks.
+
+### Bugfix: Sync package entity dependencies not being removed if no longer used on the entity
+
+#### What is it?
+
+Fixes a bug where a sync package contains entities that then have their dependencies updated, but the sync package contained both the original and new dependency. 
+For example your component exists in a package, you then update that components default image, both images files were included in the sync package rather than the latest one.
+
+#### What impact will there be?
+
+Old entity dependencies should no longer appear in your sync package. Sync package files may also be smaller in size if there were multiple "old" dependencies. 
+
+#### What actions do I need to take?
+
+You may need to re-save your sync package.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Provide an override for sync:import batch limit
+
+#### What is it?
+
+By default the sync:import process will handle 10 items at a time to reduce the memory required to run this operation.
+This feature exposes a method for increasing that number via Drupal settings.
+
+#### What impact will there be?
+
+Where more memory is available the `sync_max_entity` can be set to a number greater than 10 to process the import faster.
+
+#### What actions do I need to take?
+
+Add a settings value such as:
+
+    `$settings['sync_max_entity'] = 20;`
+
+#### Are there any risks I should be aware of?
+
+Increasing the `sync_max_entity` value will require more memory to process each sync:import batch.
+
+### Link elements - support for `rel` attribute
+
+#### What is it?
+
+The `rel` attribute defines the relationship between a linked resource and the current document. Support has been added for three of the most important values:
+
+- `nofollow` - prevents backlink endorsement, so that search engines don't pass page rank to the linked resource.
+- `noopener` - prevents linked resource getting partial access to linking page, something that is otherwise exploitable by malicious websites.
+- `noreferrer` - similar to `noopener` (especially for older browsers), but also prevents the browser sending the referring webpage's address.
+
+#### What impact will there be?
+
+For each of the following Site Studio elements:
+
+- `Link`
+- `Container`
+- `Slide item`
+- `Column`
+
+Checkbox toggles for `No follow`, `No opener` and `No referrer` will appear when the following conditions are met:
+
+- Link `Type` is set to `URL`
+- Link `Target` is set to `New window`
+
+When checked, they will be added to the created link HTML in the format `rel="nofollow noopener noreferrer"` (if all are enabled).
+
+#### What actions do I need to take?
+
+Existing components that you would like to use this feature on need to be updated, as these toggles are `OFF` by default.
+
+#### Are there any risks I should be aware of?
+
+- Use of the `No follow` toggle will have an impact on SEO, given that it stops search engines passing page rank endorsement to the linked resource.
+This is often used in blog comments or forums, as these can be a source of spam or low-quality links.
+Google and other search engines require `nofollow` to be added to sponsored links and advertisements.
+
+- Use of the `No referrer` toggle will affect analytics, as it will report traffic as direct instead of referred.
+
+### Menu templates - support for Drupal `<nolink>` token
+
+#### What is it?
+
+When creating Drupal menus, it's possible to use a `<nolink>` token to render the link text only, which outputs as a `span` instead of an `a` tag.
+
+This can be useful for creating headings for menu sub-levels.
+
+#### What impact will there be?
+
+Previously Site Studio menu templates would ignore the `<nolink>` token and still render an `a` tag with an empty `href` attribute.
+
+Now as per Drupal behaviour, these are rendered as `span` tags.
+
+If a different HTML element has been specified in the Site Studio menu template (`Menu link` settings), this setting will take priority.
+
+This is recommended if you are using `<nolink>` for creating menu sub-level headings.
+
+#### What actions do I need to take?
+
+1. Update your Drupal menu with the `<nolink>` token where needed.
+2. Re-save the relevant Site Studio menu template, or run a site rebuild. Both of these actions will refresh the menu template code.
+
+#### Are there any risks I should be aware of?
+
+You many need to create additional menu template styles to account for the tag change from `a` to `span`, depending on how current styles are being applied.
+
+### Accordion accessibility enhancements
+
+#### What is it?
+
+The accessibility of `Accordion tabs` elements has been improved, when in the accordion display mode.
+
+#### What impact will there be?
+
+- Accordion header links now have the `aria-expanded` attribute, which toggles between `true` and `false` when expanded and collapsed, respectively.
+- Accordion header links now have `aria-disabled="true"` set if the parent `Accordion tabs container` has the `Collapsible` setting toggled `OFF`. This is only applied when the item is expanded, to indicate to a screen reader that the panel cannot be collapsed manually.
+
+  When the panel is collapsed because a sibling accordion item is expanded, the `aria-disabled` attribute is removed.
+- Accordion header links now have `aria-disabled="true"` permanently set if the accordion item has been disabled through `Navigation link` settings.
+
+### Option to add `font-display` on Font libraries settings page
+
+#### What is it?
+
+Adds the ability to set the `font-display` CSS property when uploading a new web font.
+
+#### What impact will there be?
+
+None.
+
+#### What actions do I need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+---
+
 ## 6.4.3
 
 ### Bugfix: Child elements not rendering in layout canvas
@@ -472,6 +631,8 @@ You might be able to decrease the memory limit needed to run a sync import via t
 
 None.
 
+---
+
 ## 6.4.0
 
 ### Style builder - field tokenization
@@ -604,6 +765,8 @@ Note that when using the contributed module content browser the browser modal us
 
 The ability for the content or other entities to be selected within the Entity browser element.
 
+---
+
 ## 6.3.5
 
 ### Bugfix: Unable to upload icon and font library files on Drupal 9
@@ -717,6 +880,8 @@ None.
 
 None.
 
+---
+
 ## 6.3.4
 
 ### Bugfix: Views and image styles can't be excluded from full sync export
@@ -790,6 +955,8 @@ None.
 #### Are there any risks I should be aware of?
 
 None.
+
+---
 
 ## 6.3.3
 
@@ -867,6 +1034,8 @@ We recommend that you update your site to use `$settings["site_studio_sync"]` ra
 
 None.
 
+---
+
 ## 6.3.2
 
 ### Bugfix: Tokenised Drupal fields in view are displaying incorrect translation
@@ -923,6 +1092,8 @@ None.
 
 None.
 
+---
+
 ## 6.3.1
 
 ### Bugfix: Inputting an incorrect token in a component causing twig errors
@@ -942,6 +1113,8 @@ A Site studio import and rebuild should be run after upgrading.
 #### Are there any risks I should be aware of?
 
 None.
+
+---
 
 ## 6.3.0
 
@@ -1155,6 +1328,8 @@ None.
 #### Are there any risks I should be aware of?
 
 None.
+
+---
 
 ## 6.2.0
 
@@ -1386,7 +1561,6 @@ None.
 
 None.
 
-
 ### Bugfix: Component templates not always being generated
 
 #### What is is it?
@@ -1425,6 +1599,8 @@ None.
 #### What actions do I need to take?
 
 None.
+
+---
 
 ## 6.1.3
 
@@ -1486,6 +1662,8 @@ None.
 
 None.
 
+---
+
 ## 6.1.2
 
 ### Bugfix: Twig error when rendering a component with a link field
@@ -1505,6 +1683,8 @@ None.
 #### What actions do I need to take?
 
 None.
+
+---
 
 ## 6.1.1
 
@@ -1587,7 +1767,6 @@ If your website is running on an older version of Drupal core you will need to u
 
 None.
 
-
 ### Bugfix: When the lazy-loading setting is set on the picture element, images are not loaded
 
 #### What is is it?
@@ -1625,6 +1804,8 @@ Users will be able to save styles and rebuild successfully without this error.
 #### Are there any risks I should be aware of?
 
 None.
+
+---
 
 ## 6.1.0
 
@@ -2029,6 +2210,8 @@ Upgrade to Drush version 9 or higher wherever you use Site Studio Drush commands
 
 Failing to upgrade could result in your deployments or CI failing.
 
+---
+
 ## 6.0.3
 
 ### Fix warnings on style guide manager preview
@@ -2049,7 +2232,6 @@ None
 
 None.
 
-
 ### Improve caching of endpoint when using a component with existing selects
 
 #### What is is it?
@@ -2068,6 +2250,7 @@ A Site Studio import via the UI or `drush cohesion:import` is required on existi
 
 None.
 
+---
 
 ## 6.0.2
 
@@ -2116,6 +2299,8 @@ None.
 #### Are there any risks I should be aware of?
 
 None.
+
+---
 
 ## 6.0.1
 
@@ -2180,6 +2365,8 @@ No actions are required.
 #### Are there any risks I should be aware of?
 
 No
+
+---
 
 ## 6.0.0
 
@@ -2380,6 +2567,8 @@ If the component is in-use on component content and the site builder deletes it,
 
 It will be easier to detect potential data loss issues with package imports.
 
+---
+
 ## 5.7.11
 
 ### Multiple contexts on single element not applying correctly
@@ -2390,11 +2579,15 @@ Fixed an issue if multiple contexts are set on an element and the pass condition
 
 Fixed an issue where in some cases having aggregation turned on would result in some missing styles.
 
+---
+
 ## 5.7.10
 
 ### Colors in the color palette could not be selected in certain circumstances
 
 Fixed an issue where if you had 2 or more colors only differentiated by their alpha transparency value then clicking any of them in the colour picker would always just select the first one.
+
+---
 
 ## 5.7.9
 
@@ -2428,11 +2621,15 @@ Fixes a bug where duplicating a component with a component inside would not reta
 
 Fixes an issue that prevented using `0` as a value for a style guide field.
 
+---
+
 ## 5.7.8
 
 ### PHP out of memory on drush dx8:rebuild
 
 Improves memory usage when executing `drush dx8:rebuild` so that less memory is used to run the process.
+
+---
 
 ## 5.7.7
 
@@ -2452,6 +2649,8 @@ Fixes a bug where ordering custom styles with similar weights were not retained.
 
 Fixed a few `dblog` warnings and code style issues related to Drupal `8.8.0`.
 
+---
+
 ## 5.7.6
 
 ### Nested components not rendering with multiple Cohesion enabled themes enabled
@@ -2466,6 +2665,8 @@ Example:
 ```
 The validation failed with the following message: Custom style with UUID 00000000-0000-0000-0000-0000000000000 already exists but the machine name "coh_existing_machine_name" of the existing entity does not match the machine name "coh_mismatched_machine_name" of the entity being imported.`
 ```
+
+---
 
 ## 5.7.5
 
@@ -2488,6 +2689,8 @@ Fixed an issue where theme settings that are not included in a style guide form 
 ### The numerical value of the range slider not always displayed correctly
 
 Fixed an issue where the numerical value of the range slider was not always rendering correctly.
+
+---
 
 ## 5.7.4
 
@@ -2538,11 +2741,15 @@ This fixes an issue that prevented the re-ordering of the custom styles.
 
 Added code to ensure the text in the Help Text element is loaded on the SGM forms.
 
+---
+
 ## 5.7.3
 
 ### Fix an issue where the master template was not rendering
 
 This fixes an issue where when using style guide manager tokens in master template it would not render the master template.
+
+---
 
 ## 5.7.2
 
@@ -2556,6 +2763,8 @@ Warning: Illegal string offset 'template' in Drupal\cohesion\Plugin\Api\Template
 Warning: Illegal string offset 'themeName' in Drupal\cohesion\Plugin\Api\TemplatesApi->send()
 ```
 
+---
+
 ## 5.7.1
 
 ### Fixed function declaration warning.
@@ -2565,6 +2774,8 @@ Fixed a function declaration that was incompatible with the interface. It was ca
 ```
 Declaration of Drupal\cohesion\StreamWrapper\CohesionStream::basePath($site_path = NULL) should be compatible with Drupal\Core\StreamWrapper\PublicStream::basePath(?SplString $site_path = NULL)
 ```
+
+---
 
 ## 5.7.0
 
@@ -2680,6 +2891,8 @@ Fixed an issue where after creating a helper from an element, it would have the 
 
 This would clash if you placed that helper back onto the same layout canvas it was saved from, resulting in form data being overwritten with blank values.
 
+---
+
 ## 5.6.2
 
 ### Bugfix: Elements inside dropzones being lost when importing templates and components.
@@ -2714,6 +2927,8 @@ The `RESTful Web Services` module is now enabled as part of an update script.
 
 This only affects websites being upgraded from versions prior to `5.6.0` and the rest module does not need to be enabled manually before upgrading.
 
+---
+
 ## 5.6.1
 
 ### Bugfix: composer issue
@@ -2723,6 +2938,8 @@ Removed `Entity reference revisions` patch from Cohesion `composer.json` as vers
 ### Custom element fields can now be required
 
 When developing custom elements for Cohesion, developers can now make text inputs, text areas, selects and file browsers required and set a custom validation message.
+
+---
 
 ## 5.6.0
 

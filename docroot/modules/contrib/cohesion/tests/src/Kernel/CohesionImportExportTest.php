@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\cohesion\Kernel;
 
-
 /**
  * Class CohesionImportExportTest.
  *
@@ -32,7 +31,7 @@ class CohesionImportExportTest extends CohesionContentHubImportExportTest {
   ];
 
   protected static $configSchemaCheckerExclusions = [
-    'cohesion_templates.cohesion_content_templates.user_user_compact'
+    'cohesion_templates.cohesion_content_templates.user_user_compact',
   ];
 
   /**
@@ -49,7 +48,7 @@ class CohesionImportExportTest extends CohesionContentHubImportExportTest {
     'entity_reference_revisions',
     'token',
     'cohesion_templates',
-    'image'
+    'image',
   ];
 
   /**
@@ -90,7 +89,7 @@ class CohesionImportExportTest extends CohesionContentHubImportExportTest {
     ];
     $count_uuid = 0;
 
-    $current_uuid =  $this->container->get('uuid');
+    $current_uuid = $this->container->get('uuid');
 
     $uuid = $this->createMock('Drupal\Component\Uuid\Php');
     $uuid->expects($this->any())
@@ -99,7 +98,7 @@ class CohesionImportExportTest extends CohesionContentHubImportExportTest {
 
         $backtrace = debug_backtrace();
         foreach ($backtrace as $trace) {
-          if($trace['function'] == 'resetElementsUUIDs') {
+          if ($trace['function'] == 'resetElementsUUIDs') {
             $uuid = $uuids[$count_uuid];
             $count_uuid++;
             return $uuid;
@@ -107,7 +106,7 @@ class CohesionImportExportTest extends CohesionContentHubImportExportTest {
         }
 
         return $current_uuid->generate();
-    }));
+      }));
 
     \Drupal::service('file_system')->mkdir(COHESION_TEMPLATE_PATH, 0777, FALSE);
 

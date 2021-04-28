@@ -2,13 +2,13 @@
 
 namespace Drupal\cohesion\Form;
 
-use Drupal\Core\Form\ConfigFormBase;
 use Drupal\cohesion\ImageBrowserPluginManager;
 use Drupal\cohesion\ImageBrowserUpdateManager;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Implements the  form controller.
@@ -253,7 +253,8 @@ class SystemSettingsForm extends ConfigFormBase {
       try {
         $plugin_form = $this->imageBrowserPluginManager->createInstance($plugin_id)
           ->buildForm($form_state, $browser_type, $this->image_browser_object);
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         $plugin_form = [];
       }
 
@@ -325,7 +326,8 @@ class SystemSettingsForm extends ConfigFormBase {
     try {
       $this->imageBrowserPluginManager->createInstance($form_state->getValue('image_browser_config'))
         ->validateForm($form_state);
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
     }
   }
 
@@ -366,7 +368,8 @@ class SystemSettingsForm extends ConfigFormBase {
         $instance = $this->imageBrowserPluginManager->createInstance($form_state->getValue('image_browser_config'));
         $instance->submitForm($form_state, 'config', $this->image_browser_object);
         $instance->onInit();
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         return;
       }
     }
@@ -381,7 +384,8 @@ class SystemSettingsForm extends ConfigFormBase {
         $instance = $this->imageBrowserPluginManager->createInstance($form_state->getValue('image_browser_content'));
         $instance->submitForm($form_state, 'content', $this->image_browser_object);
         $instance->onInit();
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
         return;
       }
     }

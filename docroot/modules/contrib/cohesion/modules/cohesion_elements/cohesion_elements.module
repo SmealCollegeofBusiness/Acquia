@@ -109,17 +109,6 @@ function preprocess_cohesion_elements_component(&$variables) {
 }
 
 /**
- * Preprocess the component preview iframe page.html.twig
- * See: templates/page--cohesionapi--component--preview.html.twig.
- *
- * @param $variables
- */
-function preprocess_cohesion_preview_page(&$variables) {
-  // Load the build created in CohesionComponentController::preview.
-  $variables['preview_build'] = &drupal_static('component_preview_build');
-}
-
-/**
  * Implements hook_theme().
  */
 function cohesion_elements_theme($existing, $type, $theme, $path) {
@@ -246,7 +235,8 @@ function cohesion_elements_page_attachments(array &$attachments) {
 
   // If the user has contextual links enabled, attach the component settings
   // tray overrides.
-  if (\Drupal::currentUser()->hasPermission('access contextual links') && \Drupal::currentUser()->hasPermission('access components') && $route_name != 'cohesion_elements.component.preview') {
+  $route = \Drupal::routeMatch()->getRouteObject();
+  if (!\Drupal::service('router.admin_context')->isAdminRoute($route) && \Drupal::currentUser()->hasPermission('access contextual links') && \Drupal::currentUser()->hasPermission('access components') && $route_name != 'cohesion_elements.component.preview') {
     $attachments['#attached']['library'][] = 'cohesion_elements/settings-tray';
   }
 }

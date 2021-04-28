@@ -42,35 +42,31 @@ function hook_dx8_api_outbound_data_alter(array &$data, \Drupal\Core\Entity\Enti
 /**
  * Alter the token variable name for a particular entity type.
  *
- * @param  $variable
+ * @param $variable
  *   The variable used for the entity type
- *
  */
 function hook_dx8_ENTITY_TYPE_drupal_token_context_alter(&$variable) {
   $variable = 'product_entity';
 }
 
 /**
- * Alter the variable name where the main content is stored for a particular entity type
+ * Alter the variable name where the main content is stored for a particular entity type.
  *
- *
- * @param  $variable
+ * @param $variable
  *   The variable used for the entity type
- *
  */
 function hook_dx8_ENTITY_TYPE_drupal_field_prefix_alter(&$variable) {
   // By default the content of the page is stored in the twig variable content
   // But this not a strict rule and other module can store the main information inside
   // different variables. For example Commerce stores every field of their product
-  // inside the product variable
+  // inside the product variable.
   $variable = 'product';
 }
 
 /**
- * Alter the list of available twig variables available on the field element for a specific entity type
+ * Alter the list of available twig variables available on the field element for a specific entity type.
  *
  * @param array $variables
- *
  */
 function hook_dx8_ENTITY_TYPE_drupal_field_variable_alter(&$variables) {
   $variables[] = [
@@ -80,10 +76,9 @@ function hook_dx8_ENTITY_TYPE_drupal_field_variable_alter(&$variables) {
 }
 
 /**
- * Alter the list of available twig variables available on the field element for a specific entity type and bundle
+ * Alter the list of available twig variables available on the field element for a specific entity type and bundle.
  *
  * @param array $variables
- *
  */
 function hook_dx8_ENTITY_TYPE_BUNDLE_drupal_field_variable_alter(&$variables) {
   $variables[] = [
@@ -93,10 +88,9 @@ function hook_dx8_ENTITY_TYPE_BUNDLE_drupal_field_variable_alter(&$variables) {
 }
 
 /**
- * Alter the list of available twig variables available on the field element for all entity types
+ * Alter the list of available twig variables available on the field element for all entity types.
  *
  * @param array $variables
- *
  */
 function hook_dx8_drupal_field_variable_alter(&$variables) {
   $variables[] = [

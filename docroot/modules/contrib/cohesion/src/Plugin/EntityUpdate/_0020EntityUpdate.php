@@ -7,7 +7,7 @@ use Drupal\cohesion\EntityUpdatePluginInterface;
 use Drupal\Component\Plugin\PluginBase;
 
 /**
- * Update help text elements to new value storage
+ * Update help text elements to new value storage.
  *
  * @package Drupal\cohesion
  *
@@ -53,7 +53,7 @@ class _0020EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
   }
 
   /**
-   * @param $model \Drupal\cohesion\LayoutCanvas\ElementModel
+   * @param \Drupal\cohesion\LayoutCanvas\ElementModel $model
    * @param $json_values
    */
   private function updateHelpText($model, &$json_values) {

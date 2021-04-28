@@ -40,8 +40,8 @@ class CategoryRelationshipsManager {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function processCategory($category_id, $category_entity_type_id, $category_entity_class) {
-    $element_entity_type = $category_entity_class::target_entity_type;
-    $default_category_id = $category_entity_class::default_category_id;
+    $element_entity_type = $category_entity_class::TARGET_ENTITY_TYPE;
+    $default_category_id = $category_entity_class::DEFAULT_CATEGORY_ID;
 
     // Setup.
     $category_storage = $this->entityTypeManager->getStorage($category_entity_type_id);

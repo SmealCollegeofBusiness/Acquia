@@ -13,3 +13,11 @@ services:
     class: Drupal\cohesion_elements\CategoryRelationshipsManager
     arguments: ['@entity_type.manager']
 
+  cohesion_elements.eventsubscriber:
+    class: '\Drupal\cohesion_elements\EventSubscriber\CohesionElementsEventSubscriber'
+    arguments:
+      - '@current_user'
+      - '@current_route_match'
+      - '@entity_field.manager'
+    tags:
+      - { name: 'event_subscriber' }

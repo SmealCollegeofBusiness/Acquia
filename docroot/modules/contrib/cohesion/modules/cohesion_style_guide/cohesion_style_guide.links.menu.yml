@@ -12,4 +12,3 @@ entity.cohesion_style_guide.add_page:
   route_name: entity.cohesion_style_guide.add_form
   parent: entity.cohesion_style_guide
   weight: 0
-

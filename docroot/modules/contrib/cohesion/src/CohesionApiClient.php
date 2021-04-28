@@ -3,8 +3,8 @@
 namespace Drupal\cohesion;
 
 use Drupal\Component\Serialization\Json;
-use GuzzleHttp\Exception\RequestException;
 use Drupal\Core\Site\Settings;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * Client to perform API calls to Site Studio API.

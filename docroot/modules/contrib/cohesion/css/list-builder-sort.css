@@ -3,17 +3,17 @@ Various icons and styles for use in the Drupal backend.
 */
 
 .coh-style-draggable {
-    table-layout: fixed;
+  table-layout: fixed;
 }
 
 .coh-style-draggable .tabledrag-handle + span {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .coh-extended-style .tabledrag-handle {
-    cursor: default !important;
+  cursor: default !important;
 }
 
 .coh-extended-style .tabledrag-handle .handle {

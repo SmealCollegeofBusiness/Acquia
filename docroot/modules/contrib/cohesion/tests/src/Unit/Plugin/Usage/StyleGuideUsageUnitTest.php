@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\cohesion_style_guide\Unit\Plugin\Usage;
 
+use Drupal\cohesion_style_guide\Entity\StyleGuide;
 use Drupal\cohesion_style_guide\Plugin\Usage\StyleGuideUsage;
 use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion_style_guide\Entity\StyleGuide;
 
 /**
  * @group Cohesion

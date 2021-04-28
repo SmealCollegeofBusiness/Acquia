@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class ContentEntityFieldUsage.
+ * Plugin for content entity field usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *
@@ -34,7 +34,7 @@ class ContentEntityFieldUsage extends UsagePluginBase {
 
     $scannable[] = [
       'type' => 'field_storage_config',
-      'id' => $entity->getFieldStorageDefinition()->get('uuid')
+      'id' => $entity->getFieldStorageDefinition()->get('uuid'),
     ];
 
     return $scannable;
@@ -51,7 +51,7 @@ class ContentEntityFieldUsage extends UsagePluginBase {
       if ($entry['type'] == 'drupal_field') {
         $entities[] = [
           'type' => $this->getEntityType(),
-          'uuid' => $entry['uuid']
+          'uuid' => $entry['uuid'],
         ];
       }
     }

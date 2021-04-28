@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class WebformUsage.
+ * Plugin for webform usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *

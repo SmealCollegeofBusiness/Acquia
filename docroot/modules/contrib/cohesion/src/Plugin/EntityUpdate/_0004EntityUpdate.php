@@ -2,9 +2,9 @@
 
 namespace Drupal\cohesion\Plugin\EntityUpdate;
 
+use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\EntityUpdatePluginInterface;
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 
 /**
  * Convert all /settings-endpoint/ strings to /cohesionapi/.

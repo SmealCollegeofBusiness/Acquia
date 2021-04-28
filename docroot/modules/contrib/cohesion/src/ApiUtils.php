@@ -2,12 +2,12 @@
 
 namespace Drupal\cohesion;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Site\Settings;
-use Drupal\Component\Serialization\Json;
 
 /**
- * Class ApiUtils.
+ * Helper functions for Site studio API client.
  *
  * @package Drupal\cohesion\Plugin
  */
@@ -101,8 +101,9 @@ class ApiUtils {
       // Search key for UUIDS.
       if (preg_match_all($pattern, $key, $this_uuids)) {
         $uuids[] = $key;
-// Recurse unless the parent is a uuid which means this is component in a component
-      }elseif (is_array($value)) {
+        // Recurse unless the parent is a uuid which means this is component in a component.
+      }
+      elseif (is_array($value)) {
         $this->extractUUIDKeys($value, $uuids);
       }
     }

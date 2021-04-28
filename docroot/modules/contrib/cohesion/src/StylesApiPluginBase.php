@@ -5,11 +5,10 @@ namespace Drupal\cohesion;
 use Drupal\cohesion_website_settings\Entity\WebsiteSettings;
 
 /**
- * Class StylesApiPluginBase.
+ * Site studio Plugin API for sending style to the API.
  *
  * @package Drupal\cohesion
  *
- * )
  */
 abstract class StylesApiPluginBase extends ApiPluginBase {
 
@@ -40,7 +39,8 @@ abstract class StylesApiPluginBase extends ApiPluginBase {
               if (isset($background['backgroundImage']) && isset($background['backgroundLayerType']['value']) && $background['backgroundLayerType']['value'] == 'image') {
                 if ((!isset($background['backgroundImage']['value']) || $background['backgroundImage']['value'] == '') && isset($previous_bp[$key])) {
                   $background['backgroundImage']['value'] = $previous_bp[$key];
-                } else {
+                }
+                else {
                   if (isset($background['backgroundImage']['value'])) {
                     $current_bp[$key] = $background['backgroundImage']['value'];
                   }

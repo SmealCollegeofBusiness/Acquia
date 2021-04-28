@@ -2,15 +2,16 @@
 
 namespace Drupal\cohesion\Form;
 
+use Drupal\cohesion\ApiUtils;
+use Drupal\cohesion\Services\JsonXss;
 use Drupal\cohesion_elements\Entity\Component;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\cohesion\ApiUtils;
-use Drupal\cohesion\Services\JsonXss;
 
 /**
- * Class CohesionBaseForm.
+ * Base form for site studio cohesionfield base forms.
  *
  * @package Drupal\cohesion\Form
  */
@@ -111,7 +112,7 @@ class CohesionBaseForm extends EntityForm {
     }
 
     // Regenerate UUID for duplicate component entity.
-    // @todo - this logic should be in the child form.
+    // @todo this logic should be in the child form.
     if ($this->getOperation() == 'duplicate' && $entity instanceof Component) {
       $jsonValue = $this->apiUtils->uniqueJsonKeyUuids($jsonValue);
     }
@@ -131,6 +132,7 @@ class CohesionBaseForm extends EntityForm {
       '#entity' => $entity,
       '#cohFormGroup' => $entity->getAssetGroupId(),
       '#cohFormId' => $entity->id(),
+      '#isContentEntity' => $entity instanceof ContentEntityInterface,
     ];
 
     if ($entity->isLayoutCanvas()) {

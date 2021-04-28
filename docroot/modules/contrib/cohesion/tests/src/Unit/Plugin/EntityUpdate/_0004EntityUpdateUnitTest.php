@@ -2,12 +2,12 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\Plugin\EntityUpdate\_0004EntityUpdate;
+use Drupal\Tests\UnitTestCase;
 
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -26,11 +26,10 @@ class _0004EntityUpdateUnitTest extends UnitTestCase {
    */
   public function setUp() {
     // Create a mock of the Php uuid generator service.
-    //$prophecy = $this->prophesize(Php::CLASS);
-    //$prophecy->generate()->willReturn('0000-0000-0000-0000');
-    //$uuid_service_mock = $prophecy->reveal();
-
-    $this->unit = new _0004EntityUpdate([], null, null);
+    // $prophecy = $this->prophesize(Php::CLASS);
+    // $prophecy->generate()->willReturn('0000-0000-0000-0000');
+    // $uuid_service_mock = $prophecy->reveal();
+    $this->unit = new _0004EntityUpdate([], NULL, NULL);
   }
 
   /**
@@ -45,4 +44,5 @@ class _0004EntityUpdateUnitTest extends UnitTestCase {
 
     $this->assertEquals($entity->getJsonValues(), $expected_json_values);
   }
+
 }

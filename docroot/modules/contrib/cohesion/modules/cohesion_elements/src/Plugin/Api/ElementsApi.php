@@ -16,6 +16,9 @@ use Drupal\cohesion\ApiPluginBase;
  */
 class ElementsApi extends ApiPluginBase {
 
+  /**
+   *
+   */
   public function getForms() {
     return [];
   }

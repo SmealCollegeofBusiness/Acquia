@@ -40,10 +40,10 @@ class ContentEntityFieldStorageUsage extends UsagePluginBase {
     $entities = parent::scanForInstancesOfThisType($data, $entity);
 
     foreach ($data as $entry) {
-      if($entry['type'] == 'field_storage_config') {
+      if ($entry['type'] == 'field_storage_config') {
         $entities[] = [
           'type' => $this->getEntityType(),
-          'uuid' => $entry['id']
+          'uuid' => $entry['id'],
         ];
       }
     }

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
+class ComposerStaticInitd88d56d68be35b1978898373d1824b34
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -76,10 +76,6 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
             'Zumba\\Amplitude\\Test\\' => 21,
             'Zumba\\Amplitude\\' => 16,
             'ZipStream\\' => 10,
-        ),
-        'X' => 
-        array (
-            'XdgBaseDir\\' => 11,
         ),
         'W' => 
         array (
@@ -250,10 +246,8 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'A' => 
         array (
             'Asm89\\Stack\\' => 12,
-            'Acquia\\Hmac\\' => 12,
             'Acquia\\DrupalEnvironmentDetector\\Tests\\' => 39,
             'Acquia\\DrupalEnvironmentDetector\\' => 33,
-            'Acquia\\ContentHubClient\\' => 24,
             'Acquia\\Blt\\Tests\\Robo\\' => 22,
             'Acquia\\Blt\\Tests\\' => 17,
             'Acquia\\Blt\\' => 11,
@@ -295,10 +289,6 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'ZipStream\\' => 
         array (
             0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
-        ),
-        'XdgBaseDir\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/dnoegel/php-xdg-base-dir/src',
         ),
         'Webmozart\\PathUtil\\' => 
         array (
@@ -778,10 +768,6 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         array (
             0 => __DIR__ . '/..' . '/asm89/stack-cors/src/Asm89/Stack',
         ),
-        'Acquia\\Hmac\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/acquia/http-hmac-php/src',
-        ),
         'Acquia\\DrupalEnvironmentDetector\\Tests\\' => 
         array (
             0 => __DIR__ . '/..' . '/acquia/drupal-environment-detector/tests',
@@ -789,10 +775,6 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'Acquia\\DrupalEnvironmentDetector\\' => 
         array (
             0 => __DIR__ . '/..' . '/acquia/drupal-environment-detector/src',
-        ),
-        'Acquia\\ContentHubClient\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/acquia/content-hub-php/src',
         ),
         'Acquia\\Blt\\Tests\\Robo\\' => 
         array (
@@ -971,59 +953,9 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'Acquia\\Blt\\Robo\\Wizards\\Wizard' => __DIR__ . '/..' . '/acquia/blt/src/Robo/Wizards/Wizard.php',
         'Acquia\\Blt\\Update\\Updater' => __DIR__ . '/..' . '/acquia/blt/src/Update/Updater.php',
         'Acquia\\Blt\\Update\\Updates' => __DIR__ . '/..' . '/acquia/blt/src/Update/Updates.php',
-        'Acquia\\ContentHubClient\\Asset' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Asset.php',
-        'Acquia\\ContentHubClient\\CDFAttribute' => __DIR__ . '/..' . '/acquia/content-hub-php/src/CDFAttribute.php',
-        'Acquia\\ContentHubClient\\CDFDocument' => __DIR__ . '/..' . '/acquia/content-hub-php/src/CDFDocument.php',
-        'Acquia\\ContentHubClient\\CDF\\CDFObject' => __DIR__ . '/..' . '/acquia/content-hub-php/src/CDF/CDFObject.php',
-        'Acquia\\ContentHubClient\\CDF\\CDFObjectInterface' => __DIR__ . '/..' . '/acquia/content-hub-php/src/CDF/CDFObjectInterface.php',
-        'Acquia\\ContentHubClient\\CDF\\ClientCDFObject' => __DIR__ . '/..' . '/acquia/content-hub-php/src/CDF/ClientCDFObject.php',
-        'Acquia\\ContentHubClient\\ContentHubClient' => __DIR__ . '/..' . '/acquia/content-hub-php/src/ContentHubClient.php',
-        'Acquia\\ContentHubClient\\ContentHubLibraryEvents' => __DIR__ . '/..' . '/acquia/content-hub-php/src/ContentHubLibraryEvents.php',
-        'Acquia\\ContentHubClient\\EventSubscriber\\ClientCDF' => __DIR__ . '/..' . '/acquia/content-hub-php/src/EventSubscriber/ClientCDF.php',
-        'Acquia\\ContentHubClient\\EventSubscriber\\DefaultCDF' => __DIR__ . '/..' . '/acquia/content-hub-php/src/EventSubscriber/DefaultCDF.php',
-        'Acquia\\ContentHubClient\\Event\\GetCDFTypeEvent' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Event/GetCDFTypeEvent.php',
-        'Acquia\\ContentHubClient\\Guzzle\\Middleware\\RequestResponseHandler' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Guzzle/Middleware/RequestResponseHandler.php',
-        'Acquia\\ContentHubClient\\Guzzle\\Middleware\\RequestResponseLogger' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Guzzle/Middleware/RequestResponseLogger.php',
-        'Acquia\\ContentHubClient\\ObjectFactory' => __DIR__ . '/..' . '/acquia/content-hub-php/src/ObjectFactory.php',
-        'Acquia\\ContentHubClient\\SearchCriteria\\SearchCriteria' => __DIR__ . '/..' . '/acquia/content-hub-php/src/SearchCriteria/SearchCriteria.php',
-        'Acquia\\ContentHubClient\\SearchCriteria\\SearchCriteriaBuilder' => __DIR__ . '/..' . '/acquia/content-hub-php/src/SearchCriteria/SearchCriteriaBuilder.php',
-        'Acquia\\ContentHubClient\\Settings' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Settings.php',
-        'Acquia\\ContentHubClient\\Webhook' => __DIR__ . '/..' . '/acquia/content-hub-php/src/Webhook.php',
         'Acquia\\DrupalEnvironmentDetector\\AcquiaDrupalEnvironmentDetector' => __DIR__ . '/..' . '/acquia/drupal-environment-detector/src/AcquiaDrupalEnvironmentDetector.php',
         'Acquia\\DrupalEnvironmentDetector\\EnvironmentNames' => __DIR__ . '/..' . '/acquia/drupal-environment-detector/src/EnvironmentNames.php',
         'Acquia\\DrupalEnvironmentDetector\\FilePaths' => __DIR__ . '/..' . '/acquia/drupal-environment-detector/src/FilePaths.php',
-        'Acquia\\Hmac\\AuthorizationHeader' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/AuthorizationHeader.php',
-        'Acquia\\Hmac\\AuthorizationHeaderBuilder' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/AuthorizationHeaderBuilder.php',
-        'Acquia\\Hmac\\AuthorizationHeaderInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/AuthorizationHeaderInterface.php',
-        'Acquia\\Hmac\\Base64KeyLoader' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Base64KeyLoader.php',
-        'Acquia\\Hmac\\Digest\\Digest' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Digest/Digest.php',
-        'Acquia\\Hmac\\Digest\\DigestInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Digest/DigestInterface.php',
-        'Acquia\\Hmac\\Exception\\InvalidRequestException' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Exception/InvalidRequestException.php',
-        'Acquia\\Hmac\\Exception\\InvalidSignatureException' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Exception/InvalidSignatureException.php',
-        'Acquia\\Hmac\\Exception\\KeyNotFoundException' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Exception/KeyNotFoundException.php',
-        'Acquia\\Hmac\\Exception\\MalformedRequestException' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Exception/MalformedRequestException.php',
-        'Acquia\\Hmac\\Exception\\MalformedResponseException' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Exception/MalformedResponseException.php',
-        'Acquia\\Hmac\\Exception\\TimestampOutOfRangeException' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Exception/TimestampOutOfRangeException.php',
-        'Acquia\\Hmac\\Guzzle\\HmacAuthMiddleware' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Guzzle/HmacAuthMiddleware.php',
-        'Acquia\\Hmac\\Key' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Key.php',
-        'Acquia\\Hmac\\KeyInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/KeyInterface.php',
-        'Acquia\\Hmac\\KeyLoader' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/KeyLoader.php',
-        'Acquia\\Hmac\\KeyLoaderInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/KeyLoaderInterface.php',
-        'Acquia\\Hmac\\RequestAuthenticator' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/RequestAuthenticator.php',
-        'Acquia\\Hmac\\RequestAuthenticatorInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/RequestAuthenticatorInterface.php',
-        'Acquia\\Hmac\\RequestSigner' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/RequestSigner.php',
-        'Acquia\\Hmac\\RequestSignerInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/RequestSignerInterface.php',
-        'Acquia\\Hmac\\ResponseAuthenticator' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/ResponseAuthenticator.php',
-        'Acquia\\Hmac\\ResponseAuthenticatorInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/ResponseAuthenticatorInterface.php',
-        'Acquia\\Hmac\\ResponseSigner' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/ResponseSigner.php',
-        'Acquia\\Hmac\\ResponseSignerInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/ResponseSignerInterface.php',
-        'Acquia\\Hmac\\SignatureInterface' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/SignatureInterface.php',
-        'Acquia\\Hmac\\Symfony\\HmacAuthenticationEntryPoint' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Symfony/HmacAuthenticationEntryPoint.php',
-        'Acquia\\Hmac\\Symfony\\HmacAuthenticationListener' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Symfony/HmacAuthenticationListener.php',
-        'Acquia\\Hmac\\Symfony\\HmacAuthenticationProvider' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Symfony/HmacAuthenticationProvider.php',
-        'Acquia\\Hmac\\Symfony\\HmacFactory' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Symfony/HmacFactory.php',
-        'Acquia\\Hmac\\Symfony\\HmacResponseListener' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Symfony/HmacResponseListener.php',
-        'Acquia\\Hmac\\Symfony\\HmacToken' => __DIR__ . '/..' . '/acquia/http-hmac-php/src/Symfony/HmacToken.php',
         'Archive_Tar' => __DIR__ . '/..' . '/pear/archive_tar/Archive/Tar.php',
         'Asm89\\Stack\\Cors' => __DIR__ . '/..' . '/asm89/stack-cors/src/Asm89/Stack/Cors.php',
         'Asm89\\Stack\\CorsService' => __DIR__ . '/..' . '/asm89/stack-cors/src/Asm89/Stack/CorsService.php',
@@ -1144,6 +1076,7 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'Composer\\Installers\\MauticInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MauticInstaller.php',
         'Composer\\Installers\\MayaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MayaInstaller.php',
         'Composer\\Installers\\MediaWikiInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MediaWikiInstaller.php',
+        'Composer\\Installers\\MiaoxingInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MiaoxingInstaller.php',
         'Composer\\Installers\\MicroweberInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MicroweberInstaller.php',
         'Composer\\Installers\\ModxInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ModxInstaller.php',
         'Composer\\Installers\\MoodleInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/MoodleInstaller.php',
@@ -1179,12 +1112,14 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'Composer\\Installers\\TYPO3CmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TYPO3CmsInstaller.php',
         'Composer\\Installers\\TYPO3FlowInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TYPO3FlowInstaller.php',
         'Composer\\Installers\\TaoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TaoInstaller.php',
+        'Composer\\Installers\\TastyIgniterInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TastyIgniterInstaller.php',
         'Composer\\Installers\\TheliaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TheliaInstaller.php',
         'Composer\\Installers\\TuskInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/TuskInstaller.php',
         'Composer\\Installers\\UserFrostingInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/UserFrostingInstaller.php',
         'Composer\\Installers\\VanillaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/VanillaInstaller.php',
         'Composer\\Installers\\VgmcpInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/VgmcpInstaller.php',
         'Composer\\Installers\\WHMCSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WHMCSInstaller.php',
+        'Composer\\Installers\\WinterInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WinterInstaller.php',
         'Composer\\Installers\\WolfCMSInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WolfCMSInstaller.php',
         'Composer\\Installers\\WordPressInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/WordPressInstaller.php',
         'Composer\\Installers\\YawikInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/YawikInstaller.php',
@@ -3665,6 +3600,7 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'Enlightn\\SecurityChecker\\JsonFormatter' => __DIR__ . '/..' . '/enlightn/security-checker/src/JsonFormatter.php',
         'Enlightn\\SecurityChecker\\SecurityChecker' => __DIR__ . '/..' . '/enlightn/security-checker/src/SecurityChecker.php',
         'Enlightn\\SecurityChecker\\SecurityCheckerCommand' => __DIR__ . '/..' . '/enlightn/security-checker/src/SecurityCheckerCommand.php',
+        'Enlightn\\SecurityChecker\\ZipExtractor' => __DIR__ . '/..' . '/enlightn/security-checker/src/ZipExtractor.php',
         'Ergebnis\\Composer\\Normalize\\Command\\NormalizeCommand' => __DIR__ . '/..' . '/ergebnis/composer-normalize/src/Command/NormalizeCommand.php',
         'Ergebnis\\Composer\\Normalize\\Exception\\Exception' => __DIR__ . '/..' . '/ergebnis/composer-normalize/src/Exception/Exception.php',
         'Ergebnis\\Composer\\Normalize\\Exception\\ShouldNotHappen' => __DIR__ . '/..' . '/ergebnis/composer-normalize/src/Exception/ShouldNotHappen.php',
@@ -5429,6 +5365,7 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'Psy\\ConsoleColorFactory' => __DIR__ . '/..' . '/psy/psysh/src/ConsoleColorFactory.php',
         'Psy\\Context' => __DIR__ . '/..' . '/psy/psysh/src/Context.php',
         'Psy\\ContextAware' => __DIR__ . '/..' . '/psy/psysh/src/ContextAware.php',
+        'Psy\\EnvInterface' => __DIR__ . '/..' . '/psy/psysh/src/EnvInterface.php',
         'Psy\\Exception\\BreakException' => __DIR__ . '/..' . '/psy/psysh/src/Exception/BreakException.php',
         'Psy\\Exception\\DeprecatedException' => __DIR__ . '/..' . '/psy/psysh/src/Exception/DeprecatedException.php',
         'Psy\\Exception\\ErrorException' => __DIR__ . '/..' . '/psy/psysh/src/Exception/ErrorException.php',
@@ -5474,6 +5411,7 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'Psy\\Shell' => __DIR__ . '/..' . '/psy/psysh/src/Shell.php',
         'Psy\\Sudo' => __DIR__ . '/..' . '/psy/psysh/src/Sudo.php',
         'Psy\\Sudo\\SudoVisitor' => __DIR__ . '/..' . '/psy/psysh/src/Sudo/SudoVisitor.php',
+        'Psy\\SuperglobalsEnv' => __DIR__ . '/..' . '/psy/psysh/src/SuperglobalsEnv.php',
         'Psy\\TabCompletion\\AutoCompleter' => __DIR__ . '/..' . '/psy/psysh/src/TabCompletion/AutoCompleter.php',
         'Psy\\TabCompletion\\Matcher\\AbstractContextAwareMatcher' => __DIR__ . '/..' . '/psy/psysh/src/TabCompletion/Matcher/AbstractContextAwareMatcher.php',
         'Psy\\TabCompletion\\Matcher\\AbstractDefaultParametersMatcher' => __DIR__ . '/..' . '/psy/psysh/src/TabCompletion/Matcher/AbstractDefaultParametersMatcher.php',
@@ -8072,7 +8010,6 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
         'Webmozart\\Assert\\Mixin' => __DIR__ . '/..' . '/webmozart/assert/src/Mixin.php',
         'Webmozart\\PathUtil\\Path' => __DIR__ . '/..' . '/webmozart/path-util/src/Path.php',
         'Webmozart\\PathUtil\\Url' => __DIR__ . '/..' . '/webmozart/path-util/src/Url.php',
-        'XdgBaseDir\\Xdg' => __DIR__ . '/..' . '/dnoegel/php-xdg-base-dir/src/Xdg.php',
         'ZipStream\\Bigint' => __DIR__ . '/..' . '/maennchen/zipstream-php/src/Bigint.php',
         'ZipStream\\DeflateStream' => __DIR__ . '/..' . '/maennchen/zipstream-php/src/DeflateStream.php',
         'ZipStream\\Exception' => __DIR__ . '/..' . '/maennchen/zipstream-php/src/Exception.php',
@@ -8287,11 +8224,11 @@ class ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit3a8b5198e2dd84053246140fb129e2e2::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitd88d56d68be35b1978898373d1824b34::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitd88d56d68be35b1978898373d1824b34::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitd88d56d68be35b1978898373d1824b34::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitd88d56d68be35b1978898373d1824b34::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitd88d56d68be35b1978898373d1824b34::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -20,6 +20,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 
@@ -134,7 +135,7 @@ function cohesion_preprocess_html(&$variables) {
   }
   else {
     // Add browser-specific classes to non-admin pages.
-    $ua = $_SERVER['HTTP_USER_AGENT'];
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
     if ((bool) preg_match('/msie 9./i', $ua)) {
       $variables['attributes']['class'][] = 'coh-ie9';
@@ -209,7 +210,7 @@ function cohesion_page_attachments(array &$attachments) {
   }
 
   // Add Site Studio libraries to Template, Custom styles list pages
-  // @todo - this should be done on each list builder (or a parent list builder). You know, OOP.
+  // @todo this should be done on each list builder (or a parent list builder). You know, OOP.
   $route_name = \Drupal::routeMatch()->getRouteName();
   $allowed_pages = [
     'entity.cohesion_master_templates.collection',
@@ -270,6 +271,17 @@ function cohesion_page_attachments(array &$attachments) {
   // Use Site Studio
   $attachments['#attached']['drupalSettings']['cohesion']['use_dx8'] = \Drupal::service('cohesion.utils')
     ->usedx8Status();
+  // Url collection for js app
+
+  $event = new \Drupal\cohesion\Event\FrontendUrlsEvent();
+  $event_dispatcher = \Drupal::service('event_dispatcher');
+  $event_dispatcher->dispatch($event::EVENT_NAME, $event);
+
+  if($is_admin){
+    $attachments['#attached']['drupalSettings']['cohesion']['urls'] = $event->getUrls($event::ADMIN_TYPE);
+  }else {
+    $attachments['#attached']['drupalSettings']['cohesion']['urls'] = $event->getUrls($event::FRONTEND_TYPE);
+  }
   // View style.
   $attachments['#attached']['drupalSettings']['cohesion']['sidebar_view_style'] = \Drupal::config('cohesion.settings')
     ->get('sidebar_view_style') ?: 'titles';
@@ -436,7 +448,7 @@ function cohesion_theme_registry_alter(array &$theme_registry) {
     $template = Drupal::service('file_system')->basename($file, '.html.twig');
     $theme_hook = str_replace('-', '_', $template);
 
-    list($base_theme_hook, ) = explode('__', $theme_hook, 2);
+    list($base_theme_hook,) = explode('__', $theme_hook, 2);
 
     // Override existing theme hook or duplicate the base hook (if one exists).
     if (isset($theme_registry[$base_theme_hook]) || $base_theme_hook === 'component') {
@@ -768,9 +780,17 @@ function cohesion_tmgmt_source_suggestions(array $items, JobInterface $job) {
                   $layout_canvas = $layout_canvas_entity->getLayoutCanvasInstance();
 
                   foreach ($layout_canvas->getEntityReferences() as $reference) {
-                    $target = $entity = \Drupal::service('entity_type.manager')
-                      ->getStorage($reference['entity_type'])
-                      ->load($reference['entity_id']);
+                    if (Uuid::isValid($reference['entity_id'])) {
+                      $results = $entity = \Drupal::service('entity_type.manager')
+                        ->getStorage($reference['entity_type'])
+                        ->loadByProperties(['uuid' => $reference['entity_id']]);
+                      $target = reset($results);
+                    }
+                    else {
+                      $target = $entity = \Drupal::service('entity_type.manager')
+                        ->getStorage($reference['entity_type'])
+                        ->load($reference['entity_id']);
+                    }
                     $enabled = $content_translation_manager->isEnabled($target->getEntityTypeId(), $target->bundle());
                     if ($enabled && $target->hasTranslation($job->getSourceLangcode())) {
                       // @todo add the component field title maybe the component field name to the reason
@@ -868,11 +888,19 @@ function cohesion_config_schema_info_alter(&$definitions) {
 }
 
 /**
+ * Preprocess the component preview iframe page.html.twig
+ * See: templates/page--cohesionapi--component--preview.html.twig.
+ *
+ * @param $variables
+ */
+function preprocess_cohesion_preview_page(&$variables) {
+  // Load the build created in CohesionComponentController::preview.
+  $variables['preview_build'] = &drupal_static('component_preview_build');
+}
+
+/**
  * Implements hook_form_alter().
  *
- * @param $form
- * @param \Drupal\Core\Form\FormStateInterface $form_state
- * @param $form_id
  */
 function cohesion_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $request = \Drupal::request();

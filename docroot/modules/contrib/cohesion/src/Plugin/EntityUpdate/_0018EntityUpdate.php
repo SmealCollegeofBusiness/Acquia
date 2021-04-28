@@ -9,7 +9,7 @@ use Drupal\cohesion_style_helpers\Entity\StyleHelper;
 use Drupal\Component\Plugin\PluginBase;
 
 /**
- * Update link animations and modifiers
+ * Update link animations and modifiers.
  *
  * @package Drupal\cohesion
  *
@@ -42,14 +42,17 @@ class _0018EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
     return TRUE;
   }
 
+  /**
+   *
+   */
   public function recurseMapper(&$mapper) {
-    if(is_object($mapper) || is_array($mapper)){
+    if (is_object($mapper) || is_array($mapper)) {
 
-      if(is_object($mapper) && property_exists($mapper, 'form') && property_exists($mapper, 'formDefinition')){
+      if (is_object($mapper) && property_exists($mapper, 'form') && property_exists($mapper, 'formDefinition')) {
         $mapper->form = NULL;
       }
 
-      foreach ($mapper as &$child){
+      foreach ($mapper as &$child) {
         $this->recurseMapper($child);
       }
 

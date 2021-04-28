@@ -3,9 +3,8 @@
 namespace Drupal\cohesion_templates\Entity;
 
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
-use Drupal\Core\File\Exception\FileException;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Class CohesionTemplateBase

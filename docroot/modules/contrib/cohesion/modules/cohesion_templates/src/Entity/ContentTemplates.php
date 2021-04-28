@@ -290,7 +290,7 @@ class ContentTemplates extends CohesionTemplateBase implements CohesionSettingsI
       return FALSE;
     }
 
-    if($this->get('view_mode') !== 'full' && $this->get('modified') === FALSE){
+    if ($this->get('view_mode') !== 'full' && $this->get('modified') === FALSE) {
       return TRUE;
     }
 

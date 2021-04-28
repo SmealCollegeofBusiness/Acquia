@@ -2,12 +2,12 @@
 
 namespace Drupal\cohesion_sync\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\cohesion_sync\PackagerManager;
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityRepository;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\Core\Entity\EntityRepository;
 
 /**
  * Class OperationExportController.
@@ -71,8 +71,7 @@ class LockToggleController extends ControllerBase {
       $entity->save();
 
       // Show success.
-      // @todo
-      \Drupal::messenger()->addMessage($this->t('%template_name has been %status', [
+      $this->messenger()->addMessage($this->t('%template_name has been %status', [
         '%template_name' => $entity->label(),
         '%status' => $entity->isLocked() ? 'locked' : 'unlocked',
       ]));
@@ -81,7 +80,7 @@ class LockToggleController extends ControllerBase {
       return new RedirectResponse($entity->toUrl('collection')->toString());
     }
     else {
-      \Drupal::messenger()->addError($this->t('Entity could not be loaded.'));
+      $this->messenger()->addError($this->t('Entity could not be loaded.'));
       return $this->redirect('cohesion.settings');
     }
   }

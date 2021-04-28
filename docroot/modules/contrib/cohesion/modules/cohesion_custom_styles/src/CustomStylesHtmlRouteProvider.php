@@ -2,9 +2,9 @@
 
 namespace Drupal\cohesion_custom_styles;
 
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\cohesion\CohesionHtmlRouteProvider;
 use Drupal\cohesion_custom_styles\Controller\CustomStylesController;
+use Drupal\Core\Entity\EntityTypeInterface;
 
 /**
  * Class CustomStylesHtmlRouteProvider.

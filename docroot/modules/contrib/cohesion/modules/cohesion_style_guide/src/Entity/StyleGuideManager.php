@@ -73,6 +73,9 @@ class StyleGuideManager extends CohesionConfigEntityBase implements CohesionSett
     return FALSE;
   }
 
+  /**
+   *
+   */
   public function getApiPluginInstance() {
     return FALSE;
   }

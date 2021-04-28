@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion_website_settings\Entity;
 
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the Site Studio website settings entity.

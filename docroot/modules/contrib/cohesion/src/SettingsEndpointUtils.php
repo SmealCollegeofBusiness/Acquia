@@ -312,7 +312,7 @@ class SettingsEndpointUtils {
    *
    * @return array|null
    *
-   * @todo - the hardcoded/switch logic should be moved into the corresponding entity class file.
+   * @todo the hardcoded/switch logic should be moved into the corresponding entity class file.
    */
   private function getWebsiteSettingsValuesById($id = NULL) {
     $result = [];
@@ -323,7 +323,8 @@ class SettingsEndpointUtils {
         try {
           $plugin = $this->entityGroupsManager->createInstance('font_libraries_entity_groups');
           $result[$id] = $plugin->getGroupJsonValues();
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
         }
         break;
 
@@ -332,7 +333,8 @@ class SettingsEndpointUtils {
         try {
           $plugin = $this->entityGroupsManager->createInstance('icon_libraries_entity_groups');
           $result[$id] = $plugin->getGroupJsonValues();
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
         }
         break;
 
@@ -350,7 +352,8 @@ class SettingsEndpointUtils {
                 $website_settings = $storage->load(reset($entityId));
               }
             }
-          } catch (\Exception $ex) {
+          }
+          catch (\Exception $ex) {
             return [];
           }
         }
@@ -392,7 +395,8 @@ class SettingsEndpointUtils {
             $website_settings_ids = $storage->loadMultiple($ids);
           }
         }
-      } catch (\Exception $ex) {
+      }
+      catch (\Exception $ex) {
         return [];
       }
     }
@@ -523,7 +527,8 @@ class SettingsEndpointUtils {
             try {
               // This is probably a JSON object, so try and decode it.
               $content = Json::decode($result['content']);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
               // Failed to decode, so just store the content as its raw value.
               $content = $result['content'];
             }
@@ -636,7 +641,8 @@ class SettingsEndpointUtils {
         try {
           \Drupal::service('file_system')->saveData($asset_content, $asset_file_path, FileSystemInterface::EXISTS_REPLACE);
           $asset[$type][$key]['asset_url'] = $asset_file_path;
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e) {
           $asset[$type][$key]['asset_url'] = '';
         }
       }

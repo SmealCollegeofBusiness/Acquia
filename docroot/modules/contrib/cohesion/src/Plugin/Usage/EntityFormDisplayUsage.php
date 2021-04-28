@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class EntityFormDisplayUsage.
+ * Plugin for entity form display usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *
@@ -44,7 +44,7 @@ class EntityFormDisplayUsage extends UsagePluginBase {
       if ($entry['type'] == 'drupal_form_display') {
         $entities[] = [
           'type' => $this->getEntityType(),
-          'uuid' => $entry['uuid']
+          'uuid' => $entry['uuid'],
         ];
       }
     }

@@ -2,10 +2,10 @@
 
 namespace Drupal\cohesion_templates\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
  * Plugin implementation of the 'cohesion_template_selector_widget' widget.

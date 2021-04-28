@@ -2,7 +2,6 @@
 
 namespace Drupal\cohesion\Services;
 
-use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion_elements\Entity\Component;
 use Drupal\cohesion_elements\Entity\ComponentContent;
 use Drupal\Component\Utility\Html;
@@ -16,7 +15,7 @@ use Drupal\Core\Url;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 
 /**
- * Class CohesionUtils.
+ * Generic helper functions
  *
  * @package Drupal\cohesion
  */
@@ -128,6 +127,9 @@ class CohesionUtils {
     return $themes;
   }
 
+  /**
+   *
+   */
   public function getCohesionTemplateOnlyEnabledThemes() {
     $themes = [];
     foreach ($this->themeHandler->listInfo() as $theme_info) {
@@ -193,7 +195,7 @@ class CohesionUtils {
 
   /**
    * @return bool
-   * @todo - store as a static.
+   * @todo store as a static.
    */
   public function usedx8Status() {
     $dx8_config = \Drupal::config('cohesion.settings');
@@ -241,7 +243,7 @@ class CohesionUtils {
 
   /**
    * @param $fieldValue
-   * @param $model \Drupal\cohesion\LayoutCanvas\ElementModel
+   * @param \Drupal\cohesion\LayoutCanvas\ElementModel $model
    * @param null $default
    *
    * @return \Drupal\Core\GeneratedUrl|false|mixed|string
@@ -296,7 +298,7 @@ class CohesionUtils {
               }
             }
 
-            // In not in the select options fallback to default value
+            // In not in the select options fallback to default value.
             if (!$is_in_select) {
               if ($default) {
                 $fieldValue = $default;
@@ -321,7 +323,7 @@ class CohesionUtils {
           break;
 
         default:
-          if(is_string($fieldValue) || is_object($fieldValue) && method_exists($fieldValue, '__toString')) {
+          if (is_string($fieldValue) || is_object($fieldValue) && method_exists($fieldValue, '__toString')) {
             $content = json_decode($fieldValue);
             if ($content !== NULL && (is_object($content) || is_array($content))) {
               $fieldValue = json_encode($this->escapeJson($content));
@@ -329,7 +331,8 @@ class CohesionUtils {
             else {
               $fieldValue = Html::escape($fieldValue);
             }
-          }else{
+          }
+          else {
             $fieldValue = $this->escapeJson($fieldValue);
           }
           break;
@@ -342,7 +345,7 @@ class CohesionUtils {
   /**
    * @param $json
    *
-   * @return array|\stdClass|string|null
+   * @return array|object|string|null
    */
   private function escapeJson($json) {
 
@@ -360,9 +363,10 @@ class CohesionUtils {
         $escaped[Html::escape($key)] = $this->escapeJson($value);
       }
     }
-    elseif(is_string($json)){
+    elseif (is_string($json)) {
       $escaped = Html::escape($json);
-    } else {
+    }
+    else {
       $escaped = $json;
     }
 
@@ -400,7 +404,8 @@ class CohesionUtils {
                       // @todo Views should expect and store a leading /. See:
                       //   https://www.drupal.org/node/2423913
                       return Url::fromUserInput('/' . $path)->toString();
-                    } catch (NotAcceptableHttpException $e) {
+                    }
+                    catch (NotAcceptableHttpException $e) {
                       return '/' . $path;
                     }
                   }
@@ -421,7 +426,7 @@ class CohesionUtils {
               ->getStorage($entity_type_id)) {
               if ($entity = $entity_type->load($entity_id)) {
                 $language = $this->languageManager->getCurrentLanguage()->getId();
-                if($entity->hasTranslation($language)){
+                if ($entity->hasTranslation($language)) {
                   $entity = $entity->getTranslation($language);
                 }
                 return $entity->toUrl()->toString();
@@ -503,5 +508,4 @@ class CohesionUtils {
 
     return FALSE;
   }
-
 }

@@ -3,7 +3,7 @@
 namespace Drupal\cohesion\LayoutCanvas;
 
 /**
- * Class LayoutCanvas.
+ * Parser for Layout canvas to hold data in a structured way.
  *
  * @package Drupal\cohesion
  *
@@ -83,7 +83,7 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
   protected $is_api_ready = FALSE;
 
   /**
-   * Meta information
+   * Meta information.
    *
    * @var null
    */
@@ -145,6 +145,9 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
     }
   }
 
+  /**
+   *
+   */
   public function getCanvasElements() {
     return $this->canvasElements;
   }
@@ -274,7 +277,7 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
   }
 
   /**
-   * Get references to entities on components and component content
+   * Get references to entities on components and component content.
    *
    * @return array
    */
@@ -282,27 +285,28 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
     $references = [];
 
     foreach ($this->iterateCanvas() as $element) {
-      if($element->isComponentContent()) {
+      if ($element->isComponentContent()) {
         $references[] = [
           'entity_type' => 'component_content',
-          'entity_id' => $element->getComponentContentId()
+          'entity_id' => $element->getComponentContentId(),
         ];
       }
 
-      if($element->getModel()) {
+      if ($element->getModel()) {
         foreach ($element->getModel()->getValues() as $key => $value) {
           if (preg_match(ElementModel::MATCH_UUID, $key) && is_object($value)) {
-            if(property_exists($value, 'entity') && property_exists($value, 'entity_type')) {
-            // Entity reference
+            if (property_exists($value, 'entity') && property_exists($value, 'entity_type')) {
+              // Entity reference.
               $references[] = [
                 'entity_type' => $value->entity_type,
-                'entity_id' => $value->entity
+                'entity_id' => $value->entity,
               ];
-            }elseif (property_exists($value, 'entity') && property_exists($value->entity, 'entityId') && property_exists($value->entity, 'entityType')) {
-              // Entity browser
+            }
+            elseif (property_exists($value, 'entity') && property_exists($value->entity, 'entityId') && property_exists($value->entity, 'entityType')) {
+              // Entity browser.
               $references[] = [
                 'entity_type' => $value->entity->entityType,
-                'entity_id' => $value->entity->entityId
+                'entity_id' => $value->entity->entityId,
               ];
             }
           }

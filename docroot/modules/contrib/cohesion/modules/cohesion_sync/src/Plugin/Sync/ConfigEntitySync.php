@@ -2,26 +2,26 @@
 
 namespace Drupal\cohesion_sync\Plugin\Sync;
 
+use Drupal\cohesion\EntityUpdateManager;
+use Drupal\cohesion\UsageUpdateManager;
+use Drupal\cohesion_sync\SyncConfigImporter;
 use Drupal\cohesion_sync\SyncPluginBase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\EntityRepository;
-use Drupal\Core\Config\StorageInterface;
-use Drupal\Core\Extension\ModuleExtensionList;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\config\StorageReplaceDataWrapper;
-use Drupal\Core\Config\StorageComparer;
-use Drupal\Core\Config\ConfigManagerInterface;
 use Drupal\Core\Config\ConfigImporterException;
+use Drupal\Core\Config\ConfigManagerInterface;
+use Drupal\Core\Config\StorageComparer;
+use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Entity\EntityRepository;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Drupal\cohesion_sync\SyncConfigImporter;
-use Drupal\cohesion\UsageUpdateManager;
-use Drupal\cohesion\EntityUpdateManager;
 
 /**
  * Class ConfigEntitySync.
@@ -244,6 +244,7 @@ class ConfigEntitySync extends SyncPluginBase {
     );
 
     // If it's a custom style, ask the user what they want to do.
+    // Special case as it needs to be loaded by class name
     if ($this->entityTypeStorage->getEntityTypeId() === 'cohesion_custom_style') {
       // Load any entities that contain the same class name.
       $custom_style_ids = \Drupal::entityQuery('cohesion_custom_style')
@@ -268,7 +269,8 @@ class ConfigEntitySync extends SyncPluginBase {
           // Make sure this will apply.
           try {
             $config_importer->validate();
-          } catch (ConfigImporterException $e) {
+          }
+          catch (ConfigImporterException $e) {
             throw new \Exception(strip_tags($e->getMessage()));
           }
 
@@ -309,7 +311,8 @@ class ConfigEntitySync extends SyncPluginBase {
         // Make sure this will apply.
         try {
           $this->validate($entry, $config_importer);
-        } catch (ConfigImporterException $e) {
+        }
+        catch (ConfigImporterException $e) {
           throw new \Exception(strip_tags($e->getMessage()));
         }
 
@@ -337,12 +340,39 @@ class ConfigEntitySync extends SyncPluginBase {
       // Make sure it will apply.
       try {
         $this->validate($entry, $config_importer);
-      } catch (ConfigImporterException $e) {
+      }
+      catch (ConfigImporterException $e) {
         throw new \Exception(strip_tags($e->getMessage()));
       }
 
       // Apply the entry.
       return ENTRY_NEW_IMPORTED;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function applyPackageEntry($entry) {
+    parent::applyPackageEntry($entry);
+    // A custom style with this classname already exists.
+    if ($this->entityTypeStorage->getEntityTypeId() === 'cohesion_custom_style') {
+      try {
+        $ids = \Drupal::entityQuery('cohesion_custom_style')
+          ->condition('class_name', $entry['class_name'])
+          ->execute();
+
+        /** @var \Drupal\cohesion_custom_styles\Entity\CustomStyle $existing_entity */
+        // Key must be an array of string or integer otherwise loadMultiple() throws a warning.
+        if ($key = key($ids)) {
+          if ($existing_entity = $this->entityTypeStorage->load($key)) {
+            $existing_entity->delete();
+          }
+        }
+      }
+      catch (\Throwable $e) {
+        return;
+      }
     }
   }
 
@@ -360,7 +390,7 @@ class ConfigEntitySync extends SyncPluginBase {
 
     $config_name = $this->entityTypeDefinition->getConfigPrefix() . '.' . $entry[$this->id_key];
     $config = $this->configStorage->read($config_name);
-    if($config && $config['uuid'] != $entry['uuid']) {
+    if ($config && $config['uuid'] != $entry['uuid']) {
       $action_data['replace_uuid'] = $config['uuid'];
     }
 

@@ -1,22 +1,18 @@
 <?php
 
-use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\cohesion_elements\Entity\Component;
 use Drupal\cohesion_templates\Entity\MasterTemplates;
 use Drupal\file\Entity\File;
-use Drupal\node\Entity\Node;
-use Drupal\node\Entity\NodeType;
+use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
-use Drupal\cohesion_templates\Entity\ContentTemplates;
-use Drupal\user\Entity\User;
 
 /**
  * Class UsageTest.
  *
  * @group Cohesion
+ * @group orca_ignore
  *
  * @requires module cohesion
- *
  */
 class UsageTest extends EntityKernelTestBase {
 
@@ -50,7 +46,7 @@ class UsageTest extends EntityKernelTestBase {
   }
 
   /**
-   * Test cohesion dependencies on cohesion entities
+   * Test cohesion dependencies on cohesion entities.
    *
    * @covers \Drupal\cohesion\UsageUpdateManager::getDependencies
    * @covers \Drupal\cohesion\UsageUpdateManager::buildRequires
@@ -68,9 +64,8 @@ class UsageTest extends EntityKernelTestBase {
     $master_template = MasterTemplates::create([
       'id' => $this->generateRandomEntityId(),
       'json_values' => '{"model":{"eebab09e-88eb-4599-9b29-17d427a048a1":{"settings":{"title":"Text"},"6b671446-cb09-46cb-b84a-7366da00be36":{"text":"<p>The European languages are members of the same family. Their separate existence is a myth. For science, music, sport, etc, Europe uses the same vocabulary. The languages only differ in their grammar, their pronunciation and their most common words. Everyone realizes why a new common language would be desirable: one could refuse to pay expensive translators. To achieve this, it would be necessary to have uniform grammar, pronunciation and more common words.<\/p>\n\n<p>If several languages coalesce, the grammar of the resulting language is more simple and regular than that of the individual languages. The new common language will be more simple and regular than the existing European languages. It will be as simple as Occidental; in fact, it will be Occidental. To an English person, it will seem like simplified English, as a skeptical Cambridge friend of mine told me what Occidental is. The European languages are members of the same family. Their separate existence is a myth.<\/p>\n\n<p>For science, music, sport, etc, Europe uses the same vocabulary. The languages only differ in their grammar, their pronunciation and their most common words. Everyone realizes why a new common language would be desirable: one could refuse to pay expensive translators. To achieve this, it would be necessary to have uniform grammar, pronunciation and more common words. If several languages coalesce, the grammar of the resulting language is more simple and regular than that of the individual languages.<\/p>\n","textFormat":"cohesion"},"fdaea1d1-6b7c-4aad-978a-e6981fb5eb7d":{"name":"White","uid":"white","value":{"hex":"#ffffff","rgba":"rgba(255, 255, 255, 1)"},"wysiwyg":true,"class":".coh-color-white","variable":"$coh-color-white","inuse":true,"link":true},"e6f07bf5-1bfa-4fef-8baa-62abb3016788":"coh-style-max-width---narrow","165f1de9-336c-42cc-bed2-28ef036ec7e3":"coh-style-padding-bottom---large","4c27d36c-a473-47ec-8d43-3b9696d45d74":""}},"mapper":{},"previewModel":{"eebab09e-88eb-4599-9b29-17d427a048a1":{}},"variableFields":{"eebab09e-88eb-4599-9b29-17d427a048a1":[]},"meta":{},"canvas":[{"uid":"3fedc674","type":"component","title":"Text","enabled":true,"category":"category-3","componentId":"3fedc674","componentType":"container","parentUid":"root","uuid":"eebab09e-88eb-4599-9b29-17d427a048a1","isContainer":0,"children":[]}],"componentForm":[]}',
-      ]);
+    ]);
     $master_template->save();
-
 
     $dependencies_count = $this->container->get('cohesion_usage.update_manager')
       ->buildRequires($master_template);
@@ -88,7 +83,7 @@ class UsageTest extends EntityKernelTestBase {
   }
 
   /**
-   * Test core,cohesion dependencies on cohesion entities
+   * Test core,cohesion dependencies on cohesion entities.
    *
    * @covers \Drupal\cohesion\UsageUpdateManager::getDependencies
    * @covers \Drupal\cohesion\UsageUpdateManager::buildRequires
@@ -134,57 +129,57 @@ class UsageTest extends EntityKernelTestBase {
     $this->assertEqual($dependencies[$file->uuid()], 'file');
   }
 
-//  /**
-//   * Test core,cohesion dependencies on core entities
-//   *
-//   * @covers \Drupal\cohesion\UsageUpdateManager::getDependencies
-//   * @covers \Drupal\cohesion\UsageUpdateManager::buildRequires
-//   */
-//  public function testCoreCohesionCoreDependencies() {
-//    $dx8_no_send_to_api = &drupal_static('cohesion_sync_lock');
-//    $dx8_no_send_to_api = TRUE;
-//
-//    $type = NodeType::create([
-//      'type' => 'article',
-//      'name' => 'Article',
-//    ]);
-//    $type->save();
-//
-//    $account = User::create([
-//      'name' => $this->randomString(),
-//    ]);
-//    $account->save();
-//
-//    $title = $this->randomMachineName();
-//    $node = Node::create([
-//      'type' => 'article',
-//      'title' => $title,
-//      'uid' => $account->id(),
-//    ]);
-//    $node->save();
-//
-//    // Core,Cohesion dependency
-//    $content_template = ContentTemplates::create([
-//      'id' => $this->generateRandomEntityId(),
-//      'entity_type' => $node->getEntityTypeId(),
-//      'bundle' => $node->bundle(),
-//      'view_mode' => 'full',
-//      'default' => TRUE
-//    ]);
-//    $content_template->save();
-//
-//    $dependencies_count = $this->container->get('cohesion_usage.update_manager')
-//      ->buildRequires($node);
-//
-//    $dependencies = $this->container->get('database')->select('coh_usage', 'c1')
-//      ->fields('c1', ['requires_uuid', 'requires_type'])
-//      ->condition('c1.source_uuid', $node->uuid(), '=')
-//      ->execute()
-//      ->fetchAllKeyed();
-//
-//    $this->assertEqual($dependencies_count, 1);
-//    $this->assertEqual(count($dependencies), 1);
-//    $this->assertArrayHasKey($content_template->uuid(), $dependencies);
-//    $this->assertEqual($dependencies[$content_template->uuid()], 'cohesion_content_templates');
-//  }
+  // /**
+  //   * Test core,cohesion dependencies on core entities
+  //   *
+  //   * @covers \Drupal\cohesion\UsageUpdateManager::getDependencies
+  //   * @covers \Drupal\cohesion\UsageUpdateManager::buildRequires
+  //   */
+  //  public function testCoreCohesionCoreDependencies() {
+  //    $dx8_no_send_to_api = &drupal_static('cohesion_sync_lock');
+  //    $dx8_no_send_to_api = TRUE;
+  //
+  //    $type = NodeType::create([
+  //      'type' => 'article',
+  //      'name' => 'Article',
+  //    ]);
+  //    $type->save();
+  //
+  //    $account = User::create([
+  //      'name' => $this->randomString(),
+  //    ]);
+  //    $account->save();
+  //
+  //    $title = $this->randomMachineName();
+  //    $node = Node::create([
+  //      'type' => 'article',
+  //      'title' => $title,
+  //      'uid' => $account->id(),
+  //    ]);
+  //    $node->save();
+  //
+  //    // Core,Cohesion dependency
+  //    $content_template = ContentTemplates::create([
+  //      'id' => $this->generateRandomEntityId(),
+  //      'entity_type' => $node->getEntityTypeId(),
+  //      'bundle' => $node->bundle(),
+  //      'view_mode' => 'full',
+  //      'default' => TRUE
+  //    ]);
+  //    $content_template->save();
+  //
+  //    $dependencies_count = $this->container->get('cohesion_usage.update_manager')
+  //      ->buildRequires($node);
+  //
+  //    $dependencies = $this->container->get('database')->select('coh_usage', 'c1')
+  //      ->fields('c1', ['requires_uuid', 'requires_type'])
+  //      ->condition('c1.source_uuid', $node->uuid(), '=')
+  //      ->execute()
+  //      ->fetchAllKeyed();
+  //
+  //    $this->assertEqual($dependencies_count, 1);
+  //    $this->assertEqual(count($dependencies), 1);
+  //    $this->assertArrayHasKey($content_template->uuid(), $dependencies);
+  //    $this->assertEqual($dependencies[$content_template->uuid()], 'cohesion_content_templates');
+  //  }
 }

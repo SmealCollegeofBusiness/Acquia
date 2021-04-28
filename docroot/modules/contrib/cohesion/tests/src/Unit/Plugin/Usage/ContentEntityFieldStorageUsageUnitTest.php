@@ -2,11 +2,10 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion\Plugin\Usage\ContentEntityFieldStorageUsage;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Plugin\Usage\ContentEntityFieldStorageUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * Mock for the core field entity.
@@ -14,8 +13,10 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
  * @package Drupal\Tests\cohesion\Unit\Plugin\Usage
  */
 class MockFieldStorage extends CohesionConfigEntityBase implements CohesionSettingsInterface {
-  public function getApiPluginInstance(){
+
+  public function getApiPluginInstance() {
   }
+
 }
 
 /**
@@ -47,8 +48,8 @@ class ContentEntityFieldStorageUsageUnitTest extends UsagePluginBaseUnitTest {
     $fixture = [
       [
         'type' => 'field_storage_config',
-        'id' => 'c277fbdb-2f2b-4e55-a2df-c119fd9b90f5'
-      ]
+        'id' => 'c277fbdb-2f2b-4e55-a2df-c119fd9b90f5',
+      ],
     ];
 
     $entities = $this->unit->scanForInstancesOfThisType($fixture, new MockFieldStorage([], 'field_storage_config'));

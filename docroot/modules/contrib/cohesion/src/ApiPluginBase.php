@@ -4,23 +4,25 @@ namespace Drupal\cohesion;
 
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\Services\CohesionUtils;
+use Drupal\cohesion\Services\LocalFilesManager;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Config\ConfigInstallerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\StreamWrapper\StreamWrapperInterface;
-use Drupal\cohesion\Services\LocalFilesManager;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Class ApiPluginBase.
+ *
+ * Defines PluginBase for API.
  *
  * @package Drupal\cohesion
  */
@@ -92,7 +94,7 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
   protected $data;
 
   /**
-   * Whether the stylesheet should return with a timestamp
+   * Whether the stylesheet should return with a timestamp.
    *
    * @var bool
    */
@@ -257,14 +259,14 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
       // If the one of the form being saved is a website settings use it rather then the one
       // from the database as it has the latest data.
       /** @var \Drupal\cohesion_website_settings\Entity\WebsiteSettings $website_settings */
-      foreach ($this->data->settings->forms as $form){
-        if(isset($form['parent']) && is_object($form['parent']) && property_exists($form['parent'], 'type') && property_exists($form['parent'], 'bundle') &&
+      foreach ($this->data->settings->forms as $form) {
+        if (isset($form['parent']) && is_object($form['parent']) && property_exists($form['parent'], 'type') && property_exists($form['parent'], 'bundle') &&
           $form['parent']->type == 'website_settings' && $form['parent']->bundle == $website_settings_type) {
           $this->data->settings->website_settings->$website_settings_type = $form['parent'];
         }
       }
 
-      if(!property_exists($this->data->settings->website_settings, $website_settings_type)) {
+      if (!property_exists($this->data->settings->website_settings, $website_settings_type)) {
         // Otherwise, load the entity in and use its json values.
         $website_settings = $website_settings_storage->load($website_settings_type);
         if ($website_settings) {
@@ -304,14 +306,15 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
       if ($this->themeHandler->getDefault() == $theme_info->getName() || theme_get_setting('features.cohesion_build_assets', $theme_info->getName())) {
         if ($attach_css == TRUE) {
           $this->data->css[$theme_info->getName()] = $this->localFilesManager->getStyleSheetJson($theme_info->getName());
-        } else {
+        }
+        else {
           $this->data->css[$theme_info->getName()] = '';
         }
       }
     }
 
     // Attach a generic theme if the templates should be built but not the styles (main use is for AMP page)
-    if(!empty($this->cohesionUtils->getCohesionTemplateOnlyEnabledThemes())) {
+    if (!empty($this->cohesionUtils->getCohesionTemplateOnlyEnabledThemes())) {
       $this->data->css['coh-generic-theme'] = '';
     }
   }
@@ -486,7 +489,7 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
     $running_dx8_batch = &drupal_static('running_dx8_batch');
     $currentCssTimestamp = $this->localFilesManager->getStylesheetTimestamp();
     foreach ($this->getData() as $styles) {
-      // Do not process styles for theme that should only generate templates
+      // Do not process styles for theme that should only generate templates.
       $template_only_themes = $this->cohesionUtils->getCohesionTemplateOnlyEnabledThemes();
 
       if (isset($styles['css']) && $styles['themeName'] && !in_array($styles['themeName'], $template_only_themes)) {
@@ -495,7 +498,7 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
         $theme_id = $styles['themeName'];
 
         // Check to see if there are actually some stylesheets to process.
-        if (isset($data['base']) && !empty($data['base']) && isset($data['theme']) && !empty($data['theme']) && isset($data['master']) && !empty($data['master'])) {
+        if (isset($data['base'], $data['theme'], $data['master']) && !empty($data['master'])) {
 
           // First check to see if the stylesheets have updated since your request was made.
           if ($currentCssTimestamp != $requestCSSTimestamp) {
@@ -517,7 +520,7 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
               $this->localFilesManager->setStyleSheetJson($stylesheet_json_content, $theme_id);
             }
             catch (\Throwable $e) {
-              $this->cohesionUtils->errorHandler('The specified file: ' . $stylesheet_json_path . ' could not be saved for "' . $this->entity->getEntityTypeId() . '" entity "' . $this->entity->label() . '"');
+              $this->cohesionUtils->errorHandler('The specified file: ' . $this->localFilesManager->getStyleSheetFilename('json', $theme_id) . ' could not be saved for "' . $this->entity->getEntityTypeId() . '" entity "' . $this->entity->label() . '"');
             }
 
           }
@@ -529,25 +532,27 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
           ];
 
           foreach ($style_types as $section_name) {
-
             // Make sure the directory exists.
             $base_path = COHESION_CSS_PATH . '/' . $section_name;
             if (!is_dir($base_path) && !file_exists($base_path)) {
               \Drupal::service('file_system')->mkdir($base_path, 0777, FALSE);
             }
-
-            // The filename...
             $destination = $this->localFilesManager->getStyleSheetFilename($section_name, $theme_id);
+
+            // Trim and render the css
             $css_data = str_replace([
               "\r\n",
               "\n\n",
             ], "\n", ltrim($data[$section_name]));
 
-            $css_data = \Drupal::service('twig')
-              ->renderInline($css_data)
-              ->__toString();
+            if(!empty($css_data)) {
 
-            // Save the file.
+              $css_data = \Drupal::service('twig')
+                ->renderInline($css_data)
+                ->__toString();
+            }
+
+            // Save the css.
             try {
               \Drupal::service('file_system')->saveData($css_data, $destination, FileSystemInterface::EXISTS_REPLACE);
 
@@ -671,14 +676,14 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
   }
 
   /**
-   * set build the stylesheets without timestamp prepended
+   * Set build the stylesheets without timestamp prepended.
    */
   public function setWithTimestamp($with_timestamp = TRUE) {
     $this->with_timestamp = $with_timestamp;
   }
 
   /**
-   * get build the stylesheets without timestamp prepended
+   * Get build the stylesheets without timestamp prepended.
    */
   public function getWithTimestamp() {
     return $this->with_timestamp;

@@ -36,10 +36,10 @@ class _0029EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
 
       if (is_object($json_mapper) && property_exists($json_values, 'styles')) {
         $mapper_style_uuids = [];
-          // Loop over the mapper.
-          $this->walkStyleMapper($json_mapper, function ($uuid) use (&$mapper_style_uuids) {
-            $mapper_style_uuids[] = $uuid;
-          });
+        // Loop over the mapper.
+        $this->walkStyleMapper($json_mapper, function ($uuid) use (&$mapper_style_uuids) {
+          $mapper_style_uuids[] = $uuid;
+        });
 
         // Check the style mapper uuids against the model style uuids
         $this->processStyleModel($json_values, $mapper_style_uuids);
@@ -124,7 +124,6 @@ class _0029EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
       }
     }
   }
-
 
   /**
    *  Process style entity model

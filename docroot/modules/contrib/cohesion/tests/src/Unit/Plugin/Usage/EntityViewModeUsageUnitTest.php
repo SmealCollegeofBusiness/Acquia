@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion\Plugin\Usage\EntityViewModeUsage;
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Plugin\Usage\EntityViewModeUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * Mock for the core view mode entity.
@@ -13,8 +13,10 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
  * @package Drupal\Tests\cohesion\Unit\Plugin\Usage
  */
 class MockViewMode extends CohesionConfigEntityBase implements CohesionSettingsInterface {
-  public function getApiPluginInstance(){
+
+  public function getApiPluginInstance() {
   }
+
 }
 
 /**
@@ -47,8 +49,8 @@ class EntityViewModeUsageUnitTest extends UsagePluginBaseUnitTest {
     $fixture = [
       [
         'type' => 'drupal_view_mode',
-        'uuid' => 'f646b8e6-6606-4cb4-ad3e-5f9e9ba88e7e'
-      ]
+        'uuid' => 'f646b8e6-6606-4cb4-ad3e-5f9e9ba88e7e',
+      ],
     ];
 
     $entities = $this->unit->scanForInstancesOfThisType($fixture, new MockViewMode([], 'drupal_view_mode'));

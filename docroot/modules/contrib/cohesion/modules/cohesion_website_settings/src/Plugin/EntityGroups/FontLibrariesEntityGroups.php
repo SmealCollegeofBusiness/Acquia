@@ -3,9 +3,9 @@
 namespace Drupal\cohesion_website_settings\Plugin\EntityGroups;
 
 use Drupal\cohesion\EntityGroupsPluginBase;
-use Drupal\Component\Serialization\Json;
 use Drupal\cohesion_website_settings\Entity\FontLibrary;
 use Drupal\cohesion_website_settings\Entity\FontStack;
+use Drupal\Component\Serialization\Json;
 
 /**
  * Class FontLibrariesEntityGroups.

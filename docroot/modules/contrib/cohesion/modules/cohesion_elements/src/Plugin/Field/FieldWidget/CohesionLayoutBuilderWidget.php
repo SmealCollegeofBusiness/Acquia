@@ -2,20 +2,21 @@
 
 namespace Drupal\cohesion_elements\Plugin\Field\FieldWidget;
 
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\cohesion\Services\JsonXss;
 use Drupal\cohesion_elements\Entity\ComponentContent;
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Url;
 use Drupal\token\TokenEntityMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Plugin implementation of the 'cohesion_layout_builder_widget' widget.
@@ -87,13 +88,12 @@ class CohesionLayoutBuilderWidget extends WidgetBase implements ContainerFactory
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    /** @var CohesionLayout $layout_entity */
     $layout_entity = NULL;
     $values = $items->getValue();
     $target_type = $this->getFieldSetting('target_type');
     $entity_storage = $this->entityTypeManager->getStorage($target_type);
 
-    /** @var CohesionLayout $layout_entity */
+    /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $layout_entity */
     if (empty($values[$delta]['target_id'])) {
       $layout_entity = $entity_storage->create();
     }
@@ -209,6 +209,7 @@ class CohesionLayoutBuilderWidget extends WidgetBase implements ContainerFactory
       '#title' => $items->getDataDefinition()->getLabel(),
       '#required' => $items->getDataDefinition()->isRequired(),
       '#token_browser' => $this->tokenEntityMapper->getTokenTypeForEntityType($host->getEntityTypeId(), ''),
+      '#isContentEntity' => $layout_entity instanceof ContentEntityInterface,
     ];
 
     // Stash the Xss paths for this entity.

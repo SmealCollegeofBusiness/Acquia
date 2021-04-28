@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion\Controller;
 
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\cohesion\CohesionJsonResponse;
@@ -32,7 +33,7 @@ class PreviewStyleEndpoint extends ControllerBase {
 
     $style_model = $req;
     $mapper = [];
-    if(isset($style_model['mapper'])) {
+    if (isset($style_model['mapper'])) {
       $mapper = $style_model['mapper'];
       unset($style_model['mapper']);
     }
@@ -55,7 +56,10 @@ class PreviewStyleEndpoint extends ControllerBase {
           $data = $send_to_api->getResponseStyles('base') ? $send_to_api->getResponseStyles('base') : [];
         }
 
-        $data = \Drupal::service('twig')->renderInline($data)->__toString();
+        $data = \Drupal::service('twig')->renderInline($data);
+        if($data instanceof MarkupInterface) {
+          $data = $data->__toString();
+        }
       }
       $error = FALSE;
       $status = 200;

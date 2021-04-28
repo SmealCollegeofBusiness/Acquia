@@ -3,7 +3,7 @@
 namespace Drupal\cohesion\Plugin\Usage;
 
 /**
- * Class BlockContentUsage.
+ * Plugin for entity block content usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *

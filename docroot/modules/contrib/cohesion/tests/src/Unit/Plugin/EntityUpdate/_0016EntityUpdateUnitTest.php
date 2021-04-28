@@ -3,12 +3,11 @@
 namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
-use Drupal\cohesion\EntityJsonValuesTrait;
 use Drupal\cohesion\Plugin\EntityUpdate\_0016EntityUpdate;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -20,7 +19,8 @@ class _0016MockUpdateEntity extends EntityMockBase implements EntityJsonValuesIn
  */
 class _0016EntityUpdateUnitTest extends UnitTestCase {
 
-  /** @var $unit _0016MockUpdateEntity  */
+  /**
+   * @var unit_0016MockUpdateEntity*/
   protected $unit;
 
   private $fixture_layout_false = '{"model":{"8e8ef97d-455a-41df-b193-711725d7bc2f":{"settings":{"title":"Color picker","type":"cohColourPickerOpener","colourPickerOptions":{"flat":true,"showOnly":""},"schema":{"type":"object"},"allowAll":false},"contextVisibility":{"condition":"ALL"}}},"mapper":{},"previewModel":{"8e8ef97d-455a-41df-b193-711725d7bc2f":{}},"variableFields":{"8e8ef97d-455a-41df-b193-711725d7bc2f":[]},"canvas":[],"componentForm":[{"type":"form-field","uid":"form-colorpicker","title":"Color picker","parentIndex":"form-fields","status":{"collapsed":false},"parentUid":"root","uuid":"8e8ef97d-455a-41df-b193-711725d7bc2f","humanId":"Field 1","isContainer":false}]}';
@@ -30,7 +30,7 @@ class _0016EntityUpdateUnitTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->unit = new _0016EntityUpdate([], null, null);
+    $this->unit = new _0016EntityUpdate([], NULL, NULL);
   }
 
   /**
@@ -41,12 +41,13 @@ class _0016EntityUpdateUnitTest extends UnitTestCase {
     $layout = new _0016MockUpdateEntity($this->fixture_layout_true, TRUE);
     $this->unit->runUpdate($layout);
     $this->assertEquals("none", json_decode($layout->getJsonValues())->model->{"8e8ef97d-455a-41df-b193-711725d7bc2f"}->settings->restrictBy);
-    $this->assertArrayNotHasKey("allowAll", (array)json_decode($layout->getJsonValues())->model->{"8e8ef97d-455a-41df-b193-711725d7bc2f"}->settings);
+    $this->assertArrayNotHasKey("allowAll", (array) json_decode($layout->getJsonValues())->model->{"8e8ef97d-455a-41df-b193-711725d7bc2f"}->settings);
 
     $layout = new _0016MockUpdateEntity($this->fixture_layout_false, TRUE);
     $this->unit->runUpdate($layout);
     $this->assertEquals("colors", json_decode($layout->getJsonValues())->model->{"8e8ef97d-455a-41df-b193-711725d7bc2f"}->settings->restrictBy);
-    $this->assertArrayNotHasKey("allowAll", (array)json_decode($layout->getJsonValues())->model->{"8e8ef97d-455a-41df-b193-711725d7bc2f"}->settings);
+    $this->assertArrayNotHasKey("allowAll", (array) json_decode($layout->getJsonValues())->model->{"8e8ef97d-455a-41df-b193-711725d7bc2f"}->settings);
 
   }
+
 }

@@ -3,12 +3,12 @@
 namespace Drupal\cohesion_elements\Entity;
 
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Entity\ContentIntegrityInterface;
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\LayoutCanvas\ElementModel;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\Core\File\Exception\FileException;
 
 /**
  * Defines the Site Studio component entity.
@@ -83,7 +83,7 @@ use Drupal\Core\File\Exception\FileException;
  *   }
  * )
  */
-class Component extends CohesionElementEntityBase implements CohesionSettingsInterface, CohesionElementSettingsInterface {
+class Component extends CohesionElementEntityBase implements CohesionSettingsInterface, CohesionElementSettingsInterface, ContentIntegrityInterface {
 
   const ASSET_GROUP_ID = 'component';
 
@@ -92,7 +92,7 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
   // When styles are saved for this entity, this is the message.
   const STYLES_UPDATED_SAVE_MESSAGE = 'Your component styles have been updated.';
 
-  const entity_machine_name_prefix = 'cpt_';
+  const ENTITY_MACHINE_NAME_PREFIX = 'cpt_';
 
   /**
    * {@inheritdoc}
@@ -108,14 +108,7 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
   }
 
   /**
-   * Check whether the content defined where this component has been used is
-   * still usable Content may not be usable anymore (and might be lost) if a
-   * component field has been remove
-   *
-   * @param $json_values NULL|string - Values to check against if not using the
-   *   stored values
-   *
-   * @return array - the list of entities with broken integrity
+   * {@inheritdoc}
    */
   public function checkContentIntegrity($json_values = NULL) {
     $broken_entities = [];
@@ -129,6 +122,7 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
       $component_field_uuids[] = $form_element->getUUID();
     }
 
+    // Get the of entities where this component is being used
     $in_use_list = \Drupal::service('cohesion_usage.update_manager')
       ->getInUseEntitiesList($this);
 
@@ -137,33 +131,22 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
       $entity = \Drupal::service('entity.repository')
         ->loadEntityByUuid($type, $uuid);
 
+      // If content entity find the layout canvas entity
       if ($entity instanceof ContentEntityInterface) {
         foreach ($entity->getFieldDefinitions() as $field) {
-          if ($field instanceof FieldConfig) {
-            // cohesion_layout reference.
-            if ($field->getSetting('handler') == 'default:cohesion_layout') {
-              /** @var \Drupal\Core\Entity\ContentEntityInterface $item */
-              foreach ($entity->get($field->getName()) as $item) {
-                try {
-                  $target_id = $item->getValue()['target_id'];
-                  if (!is_null($item->getValue()['target_id'])) {
-                    /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $cohesion_layout_entity */
-                    $cohesion_layout_entity = \Drupal::service('entity_type.manager')
-                      ->getStorage('cohesion_layout')
-                      ->load($target_id);
-                    if(!$this->hasDefinedContentForRemovedComponentField($cohesion_layout_entity, $component_field_uuids)) {
-                      $broken_entities[$entity->uuid()] = $entity;
-                    }
-                  }
-                } catch (\Exception $e) {
-                  break;
+          if ($field instanceof FieldConfig && $field->getSetting('handler') == 'default:cohesion_layout') {
+            foreach ($entity->get($field->getName()) as $item) {
+              if ($target_id = $item->getValue()['target_id']) {
+                $cohesion_layout_entity = CohesionLayout::load($target_id);
+                if ($cohesion_layout_entity && !$this->hasDefinedContentForRemovedComponentField($cohesion_layout_entity, $component_field_uuids)) {
+                  $broken_entities[$entity->uuid()] = $entity;
                 }
               }
             }
           }
         }
       }
-      elseif(!$this->hasDefinedContentForRemovedComponentField($entity, $component_field_uuids)) {
+      elseif (!$this->hasDefinedContentForRemovedComponentField($entity, $component_field_uuids)) {
         $broken_entities[$entity->uuid()] = $entity;
       }
     }
@@ -173,10 +156,12 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
 
   /**
    * Check whether an entity using this component has content defined for a field that no
-   * long exists in the component form
+   * long exists in the component form.
    *
-   * @param $entity \Drupal\Core\Entity\EntityInterface - the entity using this component
-   * @param $component_field_uuids array - the list of field's uuid for this component
+   * @param $entity
+   *   \Drupal\Core\Entity\EntityInterface - the entity using this component
+   * @param $component_field_uuids
+   *   array - the list of field's uuid for this component
    *
    * @return bool
    */
@@ -185,7 +170,7 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
       $canvas = $entity->getLayoutCanvasInstance();
       foreach ($canvas->iterateCanvas() as $canvas_element) {
         $element_model = $canvas_element->getModel();
-        if ($canvas_element->getProperty('componentId') == $this->id()) {
+        if (!$canvas_element->getComponentContentId() && $element_model && $canvas_element->getProperty('componentId') == $this->id()) {
           foreach ($element_model->getValues() as $model_key => $model_value) {
             if (preg_match(ElementModel::MATCH_UUID, $model_key) && !in_array($model_key, $component_field_uuids)) {
               return FALSE;
@@ -286,7 +271,6 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
 
     return parent::delete();
   }
-
 
   /**
    * Return the URI of the twig template for this component.

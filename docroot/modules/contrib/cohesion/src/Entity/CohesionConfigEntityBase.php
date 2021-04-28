@@ -3,10 +3,10 @@
 namespace Drupal\cohesion\Entity;
 
 use Drupal\cohesion\EntityJsonValuesTrait;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Component\Serialization\Json;
 use Drupal\cohesion\EntityUpdateInterface;
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Defines a base configuration entity class.
@@ -20,7 +20,7 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
   // When styles are saved for this entity, this is the message.
   const STYLES_UPDATED_SAVE_MESSAGE = 'Your styles have been updated.';
 
-  const entity_machine_name_prefix = '';
+  const ENTITY_MACHINE_NAME_PREFIX = '';
 
   /**
    * The Site Studio website settings ID.
@@ -450,12 +450,12 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
    */
   public function getEntityMachineNamePrefix() {
     // If the entity already exists and doesn't contain the prefix, don't use the prefix.
-    if ($this->id !== NULL && substr($this->id, 0, strlen($this::entity_machine_name_prefix)) !== $this::entity_machine_name_prefix) {
+    if ($this->id !== NULL && substr($this->id, 0, strlen($this::ENTITY_MACHINE_NAME_PREFIX)) !== $this::ENTITY_MACHINE_NAME_PREFIX) {
       return '';
     }
     // Otherwise use the prefix.
     else {
-      return $this::entity_machine_name_prefix;
+      return $this::ENTITY_MACHINE_NAME_PREFIX;
     }
   }
 

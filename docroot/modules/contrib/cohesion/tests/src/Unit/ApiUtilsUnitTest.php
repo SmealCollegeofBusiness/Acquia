@@ -2,16 +2,17 @@
 
 namespace Drupal\Tests\cohesion\Unit;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\cohesion\ApiUtils;
 use Drupal\Component\Uuid\Php;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * @group Cohesion
  */
 class ApiUtilsUnitTest extends UnitTestCase {
 
-  /** @var ApiUtils */
+  /**
+   * @var \Drupal\cohesion\ApiUtils*/
   protected $unit;
 
   /**
@@ -37,14 +38,16 @@ class ApiUtilsUnitTest extends UnitTestCase {
     // Json contains UUIDs in keys and content.
     $json = json_encode([
       '7eb642eb-eb42-4640-a01a-07871203abe9' => [
-        'content' => 'f743d762-7bec-42c4-a3f9-df54174aa669'
-      ]
+        'content' => 'f743d762-7bec-42c4-a3f9-df54174aa669',
+      ],
     ]);
 
     $processed_json = $this->unit->uniqueJsonKeyUuids($json);
 
-    $this->assertNotContains('7eb642eb-eb42-4640-a01a-07871203abe9', $processed_json); // The UUIS in the content should not have changed.
-    $this->assertContains('f743d762-7bec-42c4-a3f9-df54174aa669', $processed_json); // The UUID as a key should have changed.
+    // The UUIS in the content should not have changed.
+    $this->assertStringNotContainsString('7eb642eb-eb42-4640-a01a-07871203abe9', $processed_json);
+    // The UUID as a key should have changed.
+    $this->assertStringContainsString('f743d762-7bec-42c4-a3f9-df54174aa669', $processed_json);
 
   }
 
@@ -55,4 +58,5 @@ class ApiUtilsUnitTest extends UnitTestCase {
   public function tearDown() {
     unset($this->unit);
   }
+
 }

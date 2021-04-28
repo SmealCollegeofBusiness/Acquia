@@ -2,17 +2,17 @@
 
 namespace Drupal\cohesion;
 
-use Drupal\Component\Plugin\PluginBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\StreamWrapper\StreamWrapperManager;
-use Drupal\Core\Database\Connection;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class UsagePluginBase.
+ * Base class for usage plugin.
  *
  * @package Drupal\cohesion
  */

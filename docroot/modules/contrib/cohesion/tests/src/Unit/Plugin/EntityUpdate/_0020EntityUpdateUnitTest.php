@@ -6,9 +6,8 @@ use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\Plugin\EntityUpdate\_0020EntityUpdate;
 use Drupal\Tests\UnitTestCase;
 
-
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -20,7 +19,8 @@ class _0020MockUpdateEntity extends EntityMockBase implements EntityJsonValuesIn
  */
 class _0020EntityUpdateUnitTest extends UnitTestCase {
 
-  /** @var $unit _0020MockUpdateEntity  */
+  /**
+   * @var unit_0020MockUpdateEntity*/
   protected $unit;
 
   private $fixture_layout = '{
@@ -152,7 +152,7 @@ class _0020EntityUpdateUnitTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->unit = new _0020EntityUpdate([], null, null);
+    $this->unit = new _0020EntityUpdate([], NULL, NULL);
   }
 
   /**
@@ -160,7 +160,7 @@ class _0020EntityUpdateUnitTest extends UnitTestCase {
    */
   public function testRunUpdate() {
 
-    // WYSIWYG in layout canvas
+    // WYSIWYG in layout canvas.
     $layout = new _0020MockUpdateEntity($this->fixture_layout, TRUE);
     $this->assertionsLayoutCanvasBefore($layout->getDecodedJsonValues());
     $this->unit->runUpdate($layout);
@@ -169,12 +169,13 @@ class _0020EntityUpdateUnitTest extends UnitTestCase {
     $this->assertionsLayoutCanvasAfter($layout->getDecodedJsonValues());
   }
 
-  private function assertionsLayoutCanvasBefore($layout_array_before){
+  private function assertionsLayoutCanvasBefore($layout_array_before) {
     $this->assertEquals('This component should only be used at the top of \'Landing pages\'.', $layout_array_before['model']['048ee42a-8224-43c5-ba43-628d843bbc82']['model']['value']);
   }
 
-  private function assertionsLayoutCanvasAfter($layout_array_after){
+  private function assertionsLayoutCanvasAfter($layout_array_after) {
     $this->assertEquals('This component should only be used at the top of \'Landing pages\'.', $layout_array_after['model']['048ee42a-8224-43c5-ba43-628d843bbc82']['settings']['options']['helpText']);
     $this->assertArrayNotHasKey('model', $layout_array_after['model']['048ee42a-8224-43c5-ba43-628d843bbc82']['settings']);
   }
+
 }

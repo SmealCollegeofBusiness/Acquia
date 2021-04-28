@@ -36,6 +36,7 @@ class Element implements LayoutCanvasElementInterface, \JsonSerializable {
 
   /**
    * The element properties without children.
+   *
    * @var object
    */
   protected $element;
@@ -183,12 +184,12 @@ class Element implements LayoutCanvasElementInterface, \JsonSerializable {
   }
 
   /**
-   * Get the component content id
+   * Get the component content id.
    *
    * @return mixed|object|string|string[]|null
    */
   public function getComponentContentId() {
-    if($this->isComponentContent()) {
+    if ($this->isComponentContent()) {
       return str_replace('cc_', '', $this->getProperty('componentContentId'));
     }
 

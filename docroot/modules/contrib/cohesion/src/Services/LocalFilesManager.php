@@ -4,11 +4,11 @@ namespace Drupal\cohesion\Services;
 
 use Drupal\Component\FileSecurity\FileSecurity;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\File\Exception\FileException;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 
 /**
@@ -24,7 +24,7 @@ class LocalFilesManager {
   use StringTranslationTrait;
 
   /**
-   * Wether the stylesheet json is stored in the key value storage or in files
+   * Wether the stylesheet json is stored in the key value storage or in files.
    *
    * @var bool
    */
@@ -87,14 +87,15 @@ class LocalFilesManager {
    */
   public function liveToTemp() {
 
-    if($this->stylesheetJsonKeyvalue === TRUE) {
-      // If the store is set to key value move the stylesheet jsons from the main key value to the private storage
+    if ($this->stylesheetJsonKeyvalue === TRUE) {
+      // If the store is set to key value move the stylesheet jsons from the main key value to the private storage.
       $keyvalue_store_stylesheet_jsons = $this->keyValueStore->get($this->getStylesheetJsonCollectionName(TRUE));
-      if(!empty($keyvalue_store_stylesheet_jsons)) {
+      if (!empty($keyvalue_store_stylesheet_jsons)) {
         $this->sharedTempStore->set($this->getStylesheetJsonCollectionName(), $keyvalue_store_stylesheet_jsons);
       }
-    } else {
-      // If the store as been set to files, loop over each enabled theme and move the files to the main site studio folder
+    }
+    else {
+      // If the store as been set to files, loop over each enabled theme and move the files to the main site studio folder.
       foreach ($this->cohesionUtils->getCohesionEnabledThemes() as $theme_info) {
         $from = $this->getStyleSheetFilename('json', $theme_info->getName(), TRUE);
         $to = $this->getStyleSheetFilename('json', $theme_info->getName());
@@ -114,14 +115,15 @@ class LocalFilesManager {
    */
   public function tempToLive() {
 
-    if($this->stylesheetJsonKeyvalue === TRUE) {
-      // If the store is set to key value move the stylesheet jsons from the private to the main key value storage
+    if ($this->stylesheetJsonKeyvalue === TRUE) {
+      // If the store is set to key value move the stylesheet jsons from the private to the main key value storage.
       $private_stylesheet_jsons = $this->sharedTempStore->get($this->getStylesheetJsonCollectionName());
-      if(!empty($private_stylesheet_jsons)) {
+      if (!empty($private_stylesheet_jsons)) {
         $this->keyValueStore->set($this->getStylesheetJsonCollectionName(TRUE), $private_stylesheet_jsons);
       }
-    } else {
-      // If the store as been set to files, loop over each enabled theme and move the files to the main site studio folder
+    }
+    else {
+      // If the store as been set to files, loop over each enabled theme and move the files to the main site studio folder.
       foreach ($this->cohesionUtils->getCohesionEnabledThemes() as $theme_info) {
         $from = $this->getStyleSheetFilename('json', $theme_info->getName());
         $to = $this->getStyleSheetFilename('json', $theme_info->getName(), TRUE);
@@ -330,23 +332,27 @@ class LocalFilesManager {
   }
 
   /**
-   * Return the store that should be used depending on the batch running
+   * Return the store that should be used depending on the batch running.
    *
    * @return \Drupal\Core\KeyValueStore\KeyValueStoreInterface|\Drupal\Core\TempStore\PrivateTempStore|\Drupal\Core\TempStore\PrivateTempStoreFactory
    */
   private function getKeyValueStore() {
     $running_dx8_batch = &drupal_static('running_dx8_batch');
-    if($running_dx8_batch) {
+    if ($running_dx8_batch) {
       return $this->sharedTempStore;
-    } else {
+    }
+    else {
       return $this->keyValueStore;
     }
   }
 
+  /**
+   *
+   */
   private function getStylesheetJsonCollectionName($permanent = FALSE) {
     $name = 'sitestudio_stylesheet_json';
     $batch =& batch_get();
-    if(isset($batch['id']) && $this->getKeyValueStore() === $this->sharedTempStore && $permanent === FALSE){
+    if (isset($batch['id']) && $this->getKeyValueStore() === $this->sharedTempStore && $permanent === FALSE) {
       $name = $batch['id'] . ':' . $name;
     }
 
@@ -354,7 +360,7 @@ class LocalFilesManager {
   }
 
   /**
-   * Get the stylesheet.json for a specific theme from the storage set in the config
+   * Get the stylesheet.json for a specific theme from the storage set in the config.
    *
    * @param $theme_name
    *
@@ -365,20 +371,22 @@ class LocalFilesManager {
     $original_css_contents = '';
 
     // If site studio is set to store the stysheet json to the key value store only get it from it
-    // Otherwise get it from the file system
-    if($this->stylesheetJsonKeyvalue === TRUE) {
+    // Otherwise get it from the file system.
+    if ($this->stylesheetJsonKeyvalue === TRUE) {
       $stylesheet_json_value = $this->getKeyValueStore()->get($this->getStylesheetJsonCollectionName());
-      if(isset($stylesheet_json_value[$theme_name]['json'])) {
-        // Return the stylesheet json for the theme
+      if (isset($stylesheet_json_value[$theme_name]['json'])) {
+        // Return the stylesheet json for the theme.
         return $stylesheet_json_value[$theme_name]['json'];
       }
-    } else {
+    }
+    else {
       $original_css_path = $this->getStyleSheetFilename('json', $theme_name);
       if (file_exists($original_css_path)) {
         $content = file_get_contents($original_css_path);
         if (!$content) {
           $this->cohesionUtils->errorHandler('File system reported that "' . $original_css_path . '" exists but was unable to load it.');
-        } else {
+        }
+        else {
           $original_css_contents = $content;
         }
 
@@ -389,20 +397,21 @@ class LocalFilesManager {
   }
 
   /**
-   * Set the stylesheet.json from the storage set in the config
+   * Set the stylesheet.json from the storage set in the config.
    *
    * @param $stylesheet_json_content
    * @param $theme_id
    */
   public function setStyleSheetJson($stylesheet_json_content, $theme_id) {
-    if($this->stylesheetJsonKeyvalue === TRUE) {
+    if ($this->stylesheetJsonKeyvalue === TRUE) {
       $stylesheet_json_value = $this->getKeyValueStore()->get($this->getStylesheetJsonCollectionName());
       $stylesheet_json_value[$theme_id] = [
-          'json' => $stylesheet_json_content,
-          'timestamp' => \Drupal::time()->getCurrentTime(),
-        ];
+        'json' => $stylesheet_json_content,
+        'timestamp' => \Drupal::time()->getCurrentTime(),
+      ];
       $this->getKeyValueStore()->set($this->getStylesheetJsonCollectionName(), $stylesheet_json_value);
-    } else {
+    }
+    else {
       $stylesheet_json_path = $this->getStyleSheetFilename('json', $theme_id);
       \Drupal::service('file_system')->saveData($stylesheet_json_content, $stylesheet_json_path, FileSystemInterface::EXISTS_REPLACE);
     }
@@ -417,16 +426,17 @@ class LocalFilesManager {
   public function getStylesheetTimestamp() {
     $stylesheet_timestamp = 0;
 
-    if($this->stylesheetJsonKeyvalue === TRUE) {
+    if ($this->stylesheetJsonKeyvalue === TRUE) {
       $stylesheet_json_value = $this->getKeyValueStore()->get($this->getStylesheetJsonCollectionName());
-      if(!empty($stylesheet_json_value)) {
+      if (!empty($stylesheet_json_value)) {
         foreach ($stylesheet_json_value as $json_values) {
-          if(isset($stylesheet_json_value['timestamp']) && $stylesheet_json_value['timestamp'] > $stylesheet_timestamp) {
+          if (isset($stylesheet_json_value['timestamp']) && $stylesheet_json_value['timestamp'] > $stylesheet_timestamp) {
             $stylesheet_timestamp = $stylesheet_json_value['timestamp'];
           }
         }
       }
-    } else {
+    }
+    else {
       foreach ($this->cohesionUtils->getCohesionEnabledThemes() as $theme_info) {
         $originalCssPath = $this->getStyleSheetFilename('json', $theme_info->getName());
 

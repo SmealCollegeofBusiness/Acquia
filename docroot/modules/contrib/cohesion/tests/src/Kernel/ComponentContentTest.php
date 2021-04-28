@@ -4,16 +4,13 @@ namespace Drupal\Tests\cohesion\Kernel;
 
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
-
 /**
  * Class ComponentContentTest.
  *
  * @group Cohesion
  *
  * @requires module cohesion
- *
-*/
-
+ */
 class ComponentContentTest extends EntityKernelTestBase {
 
   /**
@@ -39,7 +36,7 @@ class ComponentContentTest extends EntityKernelTestBase {
   }
 
   /**
-   * Tests view mode is installed on component content
+   * Tests view mode is installed on component content.
    */
   public function testViewMode() {
     $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');

@@ -10,8 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- *
- * deprecated
+ * Deprecated.
  *
  * Provides a Custom style type Resource.
  *

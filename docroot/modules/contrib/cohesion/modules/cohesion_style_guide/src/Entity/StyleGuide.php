@@ -4,6 +4,7 @@ namespace Drupal\cohesion_style_guide\Entity;
 
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Entity\ContentIntegrityInterface;
 use Drupal\cohesion\LayoutCanvas\ElementModel;
 use Drupal\Core\Entity\EntityStorageInterface;
 
@@ -73,7 +74,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *   }
  * )
  */
-class StyleGuide extends CohesionConfigEntityBase implements CohesionSettingsInterface {
+class StyleGuide extends CohesionConfigEntityBase implements CohesionSettingsInterface, ContentIntegrityInterface {
 
   const ASSET_GROUP_ID = 'style_guide';
 
@@ -128,6 +129,9 @@ class StyleGuide extends CohesionConfigEntityBase implements CohesionSettingsInt
     return NULL;
   }
 
+  /**
+   *
+   */
   public function getApiPluginInstance() {
     return FALSE;
   }
@@ -166,14 +170,7 @@ class StyleGuide extends CohesionConfigEntityBase implements CohesionSettingsInt
   }
 
   /**
-   * Check whether the content defined where this component has been used is
-   * still usable Content may not be usable anymore (and might be lost) if a
-   * component field has been remove
-   *
-   * @param $json_values NULL|string - Values to check against if not using the
-   *   stored values
-   *
-   * @return array - the list of entities with broken integrity
+   * {@inheritdoc}
    */
   public function checkContentIntegrity($json_values = NULL) {
     $broken_entities = [];

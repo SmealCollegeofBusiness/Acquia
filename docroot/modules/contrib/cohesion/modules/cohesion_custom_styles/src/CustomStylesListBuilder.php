@@ -2,17 +2,17 @@
 
 namespace Drupal\cohesion_custom_styles;
 
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
-use Drupal\cohesion_custom_styles\Entity\CustomStyle;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\cohesion\CohesionListBuilder;
+use Drupal\cohesion_custom_styles\Entity\CustomStyle;
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Form\FormBuilderInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Class CustomStylesListBuilder.
@@ -170,7 +170,8 @@ class CustomStylesListBuilder extends CohesionListBuilder implements FormInterfa
         if ($parent_entity && !$parent_entity->status()) {
           unset($operations['enable']);
         }
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
 
       }
     }
@@ -231,7 +232,8 @@ class CustomStylesListBuilder extends CohesionListBuilder implements FormInterfa
       try {
         $type_entity = $this->entityTypeManager->getStorage('custom_style_type')
           ->load($entity->getCustomStyleType());
-      } catch (InvalidPluginDefinitionException $ex) {
+      }
+      catch (InvalidPluginDefinitionException $ex) {
         watchdog_exception('cohesion', $ex);
         $type_entity = NULL;
       }
@@ -327,7 +329,8 @@ class CustomStylesListBuilder extends CohesionListBuilder implements FormInterfa
 
     try {
       $entities = $this->entityTypeManager->getStorage('cohesion_custom_style')->loadMultiple($sort_data);
-    } catch (\Exception $ex) {
+    }
+    catch (\Exception $ex) {
       $entities = [];
     }
 
@@ -337,13 +340,14 @@ class CustomStylesListBuilder extends CohesionListBuilder implements FormInterfa
       $weight = 0;
       foreach ($entities as $id => $entity) {
 
-        // Store the current order so we can use it to sort custom styles in stylesheet.json
+        // Store the current order so we can use it to sort custom styles in stylesheet.json.
         $config_name = $entity->getConfigDependencyName();
         try {
           $config = \Drupal::configFactory()->getEditable($config_name);
           $config->set('weight', $weight);
           $config->save(TRUE);
-        } catch (\Exception $ex) {
+        }
+        catch (\Exception $ex) {
 
         }
 

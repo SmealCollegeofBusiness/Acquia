@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion_templates;
 
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\cohesion\CohesionHtmlRouteProvider;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Symfony\Component\Routing\Route;
 
 /**

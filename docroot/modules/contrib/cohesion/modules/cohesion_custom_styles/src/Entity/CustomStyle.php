@@ -3,9 +3,9 @@
 namespace Drupal\cohesion_custom_styles\Entity;
 
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
+use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\cohesion\EntityHasResourceObjectTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\cohesion\Entity\CohesionSettingsInterface;
 
 /**
  * Defines the DX8 Custom Styles entity.
@@ -297,7 +297,7 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
             $child->save();
           }
         }
-        // @todo - Set child entities' parent to this classname.
+        // @todo Set child entities' parent to this classname.
       }
     }
   }

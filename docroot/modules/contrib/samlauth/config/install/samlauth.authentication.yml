@@ -11,6 +11,8 @@ metadata_cache_http: false
 # is evaluated to 172800 == 2 days by the SAML Toolkit, so it's probably good
 # to set the same (or delete / not set this config value) on production systems.
 metadata_valid_secs: 60
+# This is TRUE on older installs; FALSE on new installs.
+local_login_saml_error: false
 #
 # We will enable some security settings by default, since it is possible but
 # not recommended for the module to operate without them. This is a deviation
@@ -41,3 +43,5 @@ security_want_name_id: true
 # was saved without explicitly checking the checkbox. We'll set it to True for
 # new installations.
 security_request_authn_context: true
+# False on older installs; will be removed (and be 'standard true') in v4.x.
+use_base_url: true

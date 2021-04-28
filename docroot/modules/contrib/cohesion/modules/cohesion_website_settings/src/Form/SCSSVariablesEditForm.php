@@ -35,7 +35,8 @@ class SCSSVariablesEditForm extends WebsiteSettingsGroupFormBase {
     if (is_array($variables->SCSSVariables)) {
       list($this->in_use_list, $this->changed_entities) = $this->getEntityGroupsPlugin()->saveFromModel($variables);
 
-      // (Optionally) run SCSS variables rebuild batch for entities using changed SCSS variables.
+      // (Optionally) run SCSS variables rebuild batch for entities using
+      // changed SCSS variables.
       if (count($this->in_use_list)) {
 
         // The plugin cannot be serialized across pages, so needs clearing.
@@ -62,8 +63,7 @@ class SCSSVariablesEditForm extends WebsiteSettingsGroupFormBase {
   }
 
   /**
-   * @param array $form
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
 

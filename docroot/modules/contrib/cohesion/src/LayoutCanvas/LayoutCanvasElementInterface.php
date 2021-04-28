@@ -3,7 +3,7 @@
 namespace Drupal\cohesion\LayoutCanvas;
 
 /**
- * Interface LayoutCanvasElementInterface.
+ * Interface for Element of LayoutCanvas.
  *
  * @package Drupal\cohesion\LayoutCanvas
  */

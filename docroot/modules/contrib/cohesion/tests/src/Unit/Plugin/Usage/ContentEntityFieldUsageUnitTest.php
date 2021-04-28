@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion\Plugin\Usage\ContentEntityFieldUsage;
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Plugin\Usage\ContentEntityFieldUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * Mock for the core field entity.
@@ -13,8 +13,10 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
  * @package Drupal\Tests\cohesion\Unit\Plugin\Usage
  */
 class MockField extends CohesionConfigEntityBase implements CohesionSettingsInterface {
-  public function getApiPluginInstance(){
+
+  public function getApiPluginInstance() {
   }
+
 }
 
 /**
@@ -48,8 +50,8 @@ class ContentEntityFieldUsageUnitTest extends UsagePluginBaseUnitTest {
       [
         'type' => 'drupal_field',
         'entity_type' => 'field_config',
-        'uuid' => '9c55f394-382b-4003-850c-97a003ede078'
-      ]
+        'uuid' => '9c55f394-382b-4003-850c-97a003ede078',
+      ],
     ];
 
     $entities = $this->unit->scanForInstancesOfThisType($fixture, new MockField([], 'field_config'));

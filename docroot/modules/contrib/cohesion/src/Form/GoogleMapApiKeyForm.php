@@ -2,10 +2,10 @@
 
 namespace Drupal\cohesion\Form;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Site\Settings;
-use Drupal\Core\Access\AccessResult;
 
 /**
  * Implements the  form controller.
@@ -55,7 +55,7 @@ class GoogleMapApiKeyForm extends ConfigFormBase {
       '#title' => $this->t('Google Maps Geocoding API key'),
       '#wrapper_attributes' => ['class' => ['clearfix']],
       '#open' => FALSE,
-      '#description' => 'If left blank the Google Maps API key will be used.'
+      '#description' => $this->t('If left blank the Google Maps API key will be used.'),
     ];
 
     $form["google_map_api_key_geo_accordion"]["google_map_api_key_geo"] = [

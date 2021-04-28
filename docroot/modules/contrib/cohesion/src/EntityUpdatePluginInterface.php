@@ -5,7 +5,7 @@ namespace Drupal\cohesion;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
- * Interface EntityUpdatePluginInterface.
+ * Defines an interface for entity updates.
  *
  * @package Drupal\cohesion
  */

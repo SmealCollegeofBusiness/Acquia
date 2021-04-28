@@ -2,9 +2,9 @@
 
 namespace Drupal\cohesion_custom_styles\Form;
 
+use Drupal\cohesion\Form\CohesionStyleBuilderForm;
 use Drupal\cohesion_custom_styles\Entity\CustomStyleType;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\cohesion\Form\CohesionStyleBuilderForm;
 use Drupal\Core\Url;
 
 /**

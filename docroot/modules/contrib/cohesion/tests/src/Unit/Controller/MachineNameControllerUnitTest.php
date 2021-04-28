@@ -2,11 +2,14 @@
 
 namespace Drupal\Tests\cohesion\Unit\Controller;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\cohesion\Controller\MachineNameController;
+use Drupal\Component\Transliteration\TransliterationInterface;
+use Drupal\Core\Access\CsrfTokenGenerator;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Tests\UnitTestCase;
 
 /**
- * Class MachineNameStorageMock
+ * Class MachineNameStorageMock.
  *
  * @package Drupal\Tests\cohesion\Unit\Controller
  */
@@ -20,17 +23,20 @@ class MachineNameStorageMock {
   public function load($id) {
     return in_array($id, $this->entity_ids);
   }
+
 }
 
 /**
- * Class MachineNameControllerMock
+ * Class MachineNameControllerMock.
  *
  * @package Drupal\Tests\cohesion\Unit\Controller
  */
 class MachineNameControllerMock extends MachineNameController {
+
   public function setStorage($storage) {
     $this->storage = $storage;
   }
+
 }
 
 /**
@@ -42,13 +48,13 @@ class MachineNameControllerUnitTest extends UnitTestCase {
 
   public function setUp() {
     // Create a mock of the classes required to init MachineNameController.
-    $prophecy = $this->prophesize(\Drupal\Component\Transliteration\TransliterationInterface::CLASS);
+    $prophecy = $this->prophesize(TransliterationInterface::CLASS);
     $transliteration_interface = $prophecy->reveal();
 
-    $prophecy = $this->prophesize(\Drupal\Core\Access\CsrfTokenGenerator::CLASS);
+    $prophecy = $this->prophesize(CsrfTokenGenerator::CLASS);
     $csrf = $prophecy->reveal();
 
-    $prophecy = $this->prophesize(\Drupal\Core\Entity\EntityTypeManagerInterface::CLASS);
+    $prophecy = $this->prophesize(EntityTypeManagerInterface::CLASS);
     $entity_type_manager = $prophecy->reveal();
 
     $this->mockUnit = new MachineNameControllerMock($transliteration_interface, $csrf, $entity_type_manager);
@@ -58,8 +64,7 @@ class MachineNameControllerUnitTest extends UnitTestCase {
    * @covers \Drupal\cohesion\Controller\MachineNameController::getUniqueEntityId
    */
   public function testEntityDoesNotExistNoTruncation() {
-    $this->mockUnit->setStorage(new MachineNameStorageMock([
-    ]));
+    $this->mockUnit->setStorage(new MachineNameStorageMock([]));
 
     $input = 'very_short';
     $field_prefix = '';
@@ -73,8 +78,7 @@ class MachineNameControllerUnitTest extends UnitTestCase {
    * @covers \Drupal\cohesion\Controller\MachineNameController::getUniqueEntityId
    */
   public function testEntityDoesNotExistTruncation() {
-    $this->mockUnit->setStorage(new MachineNameStorageMock([
-    ]));
+    $this->mockUnit->setStorage(new MachineNameStorageMock([]));
 
     $input = 'this_string_is_way_longer_than_the_maxlength';
     $field_prefix = '';
@@ -89,7 +93,7 @@ class MachineNameControllerUnitTest extends UnitTestCase {
    */
   public function testEntityExistsNoTruncation() {
     $this->mockUnit->setStorage(new MachineNameStorageMock([
-      'existing_entity'
+      'existing_entity',
     ]));
 
     $input = 'existing_entity';
@@ -108,7 +112,7 @@ class MachineNameControllerUnitTest extends UnitTestCase {
       'existing_entity',
       'existing_entity_0',
       'existing_entity_1',
-      'existing_entity_2'
+      'existing_entity_2',
     ]));
 
     $input = 'existing_entity';
@@ -124,7 +128,7 @@ class MachineNameControllerUnitTest extends UnitTestCase {
    */
   public function testEntityExistsTruncation() {
     $this->mockUnit->setStorage(new MachineNameStorageMock([
-      'this_entit'
+      'this_entit',
     ]));
 
     $input = 'this_entity_already_exists';
@@ -165,8 +169,7 @@ class MachineNameControllerUnitTest extends UnitTestCase {
    * @covers \Drupal\cohesion\Controller\MachineNameController::getUniqueEntityId
    */
   public function testEntityNumericSuffixButDoesNotExist() {
-    $this->mockUnit->setStorage(new MachineNameStorageMock([
-    ]));
+    $this->mockUnit->setStorage(new MachineNameStorageMock([]));
 
     $input = 'this_ent_3';
     $field_prefix = '';
@@ -181,7 +184,7 @@ class MachineNameControllerUnitTest extends UnitTestCase {
    */
   public function testEntityNumericSuffixButSeriesDoesNotExist() {
     $this->mockUnit->setStorage(new MachineNameStorageMock([
-      'this_ent_3'
+      'this_ent_3',
     ]));
 
     $input = 'this_ent_3';
@@ -197,7 +200,7 @@ class MachineNameControllerUnitTest extends UnitTestCase {
    */
   public function testEntityMatchesThisEntityNoTruncation() {
     $this->mockUnit->setStorage(new MachineNameStorageMock([
-      'very_short'
+      'very_short',
     ]));
 
     $input = 'very_short';
@@ -207,6 +210,5 @@ class MachineNameControllerUnitTest extends UnitTestCase {
 
     $this->assertEquals('very_short', $this->mockUnit->getUniqueEntityId($input, $field_prefix, $entity_id, $maxlength));
   }
-
 
 }

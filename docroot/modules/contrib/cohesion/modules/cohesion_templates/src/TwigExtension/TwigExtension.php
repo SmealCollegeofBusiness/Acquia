@@ -3,36 +3,37 @@
 namespace Drupal\cohesion_templates\TwigExtension;
 
 use Drupal\cohesion\Services\CohesionUtils;
-use Drupal\Core\Link;
-use Drupal\Core\Breadcrumb\Breadcrumb;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\cohesion_elements\Entity\ComponentContent;
+use Drupal\Component\Render\HtmlEscapedText;
+use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\Utility\Xss;
 use Drupal\Component\Uuid\UuidInterface;
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Render\BubbleableMetadata;
-use Drupal\Core\Theme\ThemeManagerInterface;
-use Drupal\Core\Utility\Token;
-use Drupal\Component\Render\HtmlEscapedText;
 use Drupal\Core\Render\Markup;
-use Twig\Markup as TwigMarkup;
-use Drupal\image\Entity\ImageStyle;
-use Drupal\Core\Theme\Registry;
-use Drupal\Component\Serialization\Json;
-use Drupal\Core\Template\TwigEnvironment;
-use Drupal\Core\Menu\MenuTreeParameters;
-use Drupal\Core\StreamWrapper\StreamWrapperInterface;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\Core\Template\TwigEnvironment;
+use Drupal\Core\Theme\Registry;
+use Drupal\Core\Theme\ThemeManagerInterface;
+use Drupal\Core\Url;
+use Drupal\Core\Utility\Token;
+use Drupal\image\Entity\ImageStyle;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
+use Twig\Markup as TwigMarkup;
 
 /**
- * Class TwigExtension
+ * Class TwigExtension.
  *
  * @package Drupal\cohesion_templates\TwigExtension
  */
@@ -205,6 +206,8 @@ class TwigExtension extends \Twig_Extension {
       new \Twig_SimpleFunction('setViewIterate', [$this, 'setViewIterate'], ['needs_context' => TRUE]),
       new \Twig_SimpleFunction('getViewIterate', [$this, 'getViewIterate'], ['needs_context' => TRUE]),
       new \Twig_SimpleFunction('incrementViewIterate', [$this, 'incrementViewIterate'], ['needs_context' => TRUE]),
+      new \Twig_SimpleFunction('frontendBuilderDropzone', [$this, 'frontendBuilderDropzone'], ['needs_context' => TRUE]),
+      new \Twig_SimpleFunction('isFrontendEditor', [$this, 'isFrontendEditor'], []),
     ];
   }
 
@@ -233,7 +236,7 @@ class TwigExtension extends \Twig_Extension {
 
   /**
    * Fixes a similar double escaping issue:
-   * https://www.drupal.org/project/drupal/issues/2598502
+   * https://www.drupal.org/project/drupal/issues/2598502.
    *
    * @param $string
    *
@@ -246,7 +249,8 @@ class TwigExtension extends \Twig_Extension {
   /**
    * Fixes youtube urls so they are consistent.
    *
-   * @param $string - Youtube url in any format shown here
+   * @param $string
+   *   - Youtube url in any format shown here
    *   https://regex101.com/r/x3JCIu/1
    *
    * @return string - youtube url in format
@@ -285,7 +289,8 @@ class TwigExtension extends \Twig_Extension {
           $stream_path = str_replace('test.txt', '', $stream_path);
 
           $content = str_replace($uri, $stream_path, $content);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
           $this->loggerChannel->error($e->getTraceAsString());
         }
       }
@@ -300,18 +305,20 @@ class TwigExtension extends \Twig_Extension {
    * @param $content
    *
    * @return \Drupal\Component\Render\MarkupInterface|mixed
+   *
    * @throws \Exception
    */
   public function renderInlineStyle($content) {
-    if(!in_array($this->themeManager->getActiveTheme()->getName(), $this->cohesionUtils->getCohesionTemplateOnlyEnabledThemes())) {
+    if (!in_array($this->themeManager->getActiveTheme()->getName(), $this->cohesionUtils->getCohesionTemplateOnlyEnabledThemes())) {
       $content = $this->streamWrappers($content);
-      // Allow quotes in inline styles
+      // Allow quotes in inline styles.
       $content = str_replace('&quot;', '"', $content);
       $content = str_replace('&#039;', "'", $content);
       $content = str_replace('&amp;', '&', $content);
 
       $is_ajax = \Drupal::request()->isXmlHttpRequest();
 
+      // If it's an ajax call or a preview render style inline other send to the head
       if ($is_ajax) {
         return $content;
       }
@@ -374,13 +381,13 @@ class TwigExtension extends \Twig_Extension {
    */
   public function clean($input) {
 
-    // Remove leading and trailing whitspace
+    // Remove leading and trailing whitspace.
     $input = implode("\n", array_map("trim", explode("\n", $input)));
 
-    // Remove newlines
+    // Remove newlines.
     $input = str_replace("\n", " ", $input);
 
-    // Compress multiple spaces to a single space
+    // Compress multiple spaces to a single space.
     $input = preg_replace('/\s+/', ' ', $input);
 
     // Return it!
@@ -414,7 +421,7 @@ class TwigExtension extends \Twig_Extension {
       if (isset($_context['item']['content']['#menu_link_content'])) {
         $data[key($data)] = $_context['item']['content']['#menu_link_content'];
       }
-      // default drupal.
+      // Default drupal.
       elseif (isset($_context['item']['original_link'])) {
         $def = $_context['item']['original_link']->getPluginDefinition();
         $def = explode(':', $def['id']);
@@ -429,7 +436,8 @@ class TwigExtension extends \Twig_Extension {
               $data[key($data)] = $entity;
             }
           }
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e) {
           $this->loggerChannel->error($e->getTraceAsString());
         }
       }
@@ -440,7 +448,7 @@ class TwigExtension extends \Twig_Extension {
     else {
       if (empty($data[key($data)])) {
         if (isset($_context['content']['#' . key($data)])) {
-          // Allow tokens_token to render this (the
+          // Allow tokens_token to render this (the.
           $data[key($data)] = $_context['content']['#' . key($data)];
         }
       }
@@ -449,7 +457,7 @@ class TwigExtension extends \Twig_Extension {
     // https://www.drupal.org/node/2580723#comment-11249413
     $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
     foreach ($data as $item) {
-      if($item instanceof ContentEntityInterface) {
+      if ($item instanceof ContentEntityInterface) {
         $language = \Drupal::languageManager()->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId();
       }
     }
@@ -458,12 +466,55 @@ class TwigExtension extends \Twig_Extension {
       'clear' => TRUE,
     ], new BubbleableMetadata());
 
-    // If layout canvas, decode entities as component will take care of escaping
+    // If layout canvas, decode entities as component will take care of escaping.
     if (!$isTemplate) {
       $token_replacement = Html::decodeEntities($token_replacement);
     }
 
     return Markup::create($token_replacement);
+  }
+
+  private function addComponentFrontEndBuilderMarkup($renderer, $_context, $componentInstanceUuid, $component_content_uuid = NULL, $component_content_id = NULL) {
+
+    $build = [];
+
+    if($this->isFrontendEditor() && !isset($_context['hideContextualLinks']) && !isset($_context['isPreview']) && $this->hasDrupalPermission(["access contextual links", "access components"])) {
+
+      if(!isset($_context['component_content'])) {
+        $coh_start = [
+          '#type' => 'container',
+          '#attributes' => [
+            'data-coh-start' => [$componentInstanceUuid],
+          ],
+        ];
+
+        if($component_content_uuid !== NULL) {
+          $coh_start['#attributes']['data-coh-component-content-uuid'] = $component_content_uuid;
+        }
+
+        if($component_content_id !== NULL) {
+          $coh_start['#attributes']['data-coh-component-content-id'] = $component_content_id;
+        }
+
+        $build[] = $coh_start;
+      }
+
+      $build[] = $renderer;
+
+      if(!isset($_context['component_content'])) {
+        $build[] = [
+          '#type' => 'container',
+          '#attributes' => [
+            'data-coh-end' => [$componentInstanceUuid],
+          ],
+        ];
+      }
+    }else {
+      $build[] = $renderer;
+    }
+
+    return $build;
+
   }
 
   /**
@@ -474,29 +525,31 @@ class TwigExtension extends \Twig_Extension {
    * @param $_context
    * @param $componentFields
    * @param null $componentInstanceUuid
-   * @param FALSE $componentContentId
+   * @param false $componentContentId
    *
    * @return array | \Drupal\Component\Render\MarkupInterface
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \LogicException
    * @throws \Exception
    */
   public function renderComponent($componentId, $isTemplate, $_context, $componentFields, $componentInstanceUuid = NULL, $componentContentId = FALSE) {
 
-    // Render component content if specified
+    // Render component content if specified.
     if ($componentContentId && is_numeric($componentContentId) && (!isset($_context['component_content']) || $_context['component_content'] instanceof ComponentContent && $_context['component_content']->id() !== $componentContentId)) {
       /** @var \Drupal\cohesion_elements\Entity\ComponentContent $componentContent */
       $componentContent = ComponentContent::load($componentContentId);
       if ($componentContent && $componentContent->isPublished()) {
         $view_builder = $this->entityTypeManager->getViewBuilder('component_content');
         $build = $view_builder->view($componentContent);
-        return $this->renderer->render($build);
+        $renderer = $build;
+        return $this->addComponentFrontEndBuilderMarkup($renderer, $_context, $componentInstanceUuid, $componentContent->uuid(), $componentContent->id());
       }
       return [];
     }
 
     // First, check the component actually exists.
-    // @TODO this can probably be moved further down and in buildComponentFields and would benefit from a loadMultiple
+    // @todo this can probably be moved further down and in buildComponentFields and would benefit from a loadMultiple
     /** @var \Drupal\cohesion_elements\Entity\Component $component */
     $component = $this->entityTypeManager->getStorage('cohesion_component')
       ->load($componentId);
@@ -512,17 +565,18 @@ class TwigExtension extends \Twig_Extension {
       // Set up contextual links.
       if (isset($_context['layout_builder_entity'])) {
 
-        if(!isset($_context['layout_builder_entity']['entity']) || !$_context['layout_builder_entity']['entity'] instanceof CohesionLayout){
+        if (!isset($_context['layout_builder_entity']['entity']) || !$_context['layout_builder_entity']['entity'] instanceof CohesionLayout) {
           $cohesion_layout = $this->entityTypeManager->getStorage($_context['layout_builder_entity']['entity_type_id'])
             ->loadRevision($_context['layout_builder_entity']['revision_id']);
-        }else{
+        }
+        else {
           $cohesion_layout = $_context['layout_builder_entity']['entity'];
         }
 
         if ($_context['layout_builder_entity']['id'] !== NULL) {
           if ($cohesion_layout instanceof CohesionLayout) {
             if ($cohesion_layout->get('parent_type')->value == 'component_content') {
-              // Add Edit component content contextual link
+              // Add Edit component content contextual link.
               $contextual_content['#contextual_links']['cohesion_component_content_edit'] = [
                 'route_parameters' => [
                   'component_content' => $cohesion_layout->get('parent_id')->value,
@@ -530,7 +584,7 @@ class TwigExtension extends \Twig_Extension {
               ];
             }
             else {
-              // Add Edit component contextual link
+              // Add Edit component contextual link.
               $contextual_content['#contextual_links']['cohesion_elements'] = [
                 'route_parameters' => [
                   'entity_type_id' => $_context['layout_builder_entity']['entity_type_id'],
@@ -565,7 +619,7 @@ class TwigExtension extends \Twig_Extension {
 
       $template = 'component__cohesion_' . str_replace('-', '_', $componentId);
 
-      return [
+      $renderer = [
         '#theme' => $template,
         '#content' => isset($contextual_content) ? $contextual_content : '',
         '#cache' => [
@@ -573,20 +627,66 @@ class TwigExtension extends \Twig_Extension {
           'contexts' => $cache_contexts,
         ],
         '#parentContext' => $_context,
-        // this is used inside preprocess_cohesion_elements_component()
+        // This is used inside preprocess_cohesion_elements_component()
         '#parentIsComponent' => TRUE,
         // Tell children elements that its parent is a component (for components in component)
         '#componentFieldsValues' => $componentFieldsValues,
         '#componentUuid' => $componentInstanceUuid,
         '#template' => $template,
       ];
+
+      return $this->addComponentFrontEndBuilderMarkup($renderer, $_context, $componentInstanceUuid);
     }
+  }
+
+  /**
+   * Add and start element or end element (div) to the DOM to delimiter a dropzone
+   * area for the frontend builder
+   *
+   * @param $_context
+   * @param $element_uuid
+   * @param $stratStop
+   *
+   * @return array|void
+   */
+  public function frontendBuilderDropzone($_context, $element_uuid, $stratStop) {
+    // This only applies on the frontend builder endpoint
+    // and only for components, not component content
+    if($this->isFrontendEditor() && !isset($_context['component_content']) && !isset($_context['hideContextualLinks']) && !isset($_context['isPreview']) && $this->hasDrupalPermission(["access contextual links", "access components"])) {
+      return [
+        '#type' => 'container',
+        '#attributes' => array(
+          'data-coh-dropzone-' . $stratStop => array($element_uuid),
+        ),
+      ];
+    }
+
+    return;
+  }
+
+  /**
+   * Return True if the current route is the frontend builder route, FALSE otherwise
+   *
+   * @return bool
+   */
+  public function isFrontendEditor() {
+    // We have some default content in acquia_cms_starter module
+    // which create a content of page type for home page
+    // here we have used layout canvas filed and during enablement
+    // of starter module we noticed this function is being called
+    // which is causing error, hence we have added some additional
+    // check for route object to be preset, then only getOption
+    // function should be called else simply return false.
+    if (\Drupal::routeMatch()->getRouteObject()) {
+      return \Drupal::routeMatch()->getRouteObject()->getOption('sitestudio_build') == 'TRUE';
+    }
+    return FALSE;
   }
 
   /**
    * @param $component_field_id
    * @param $uuid
-   * @param $component_model \Drupal\cohesion\LayoutCanvas\ElementModel[]
+   * @param \Drupal\cohesion\LayoutCanvas\ElementModel[] $component_model
    * @param $_context
    * @param $isTemplate
    *
@@ -598,14 +698,15 @@ class TwigExtension extends \Twig_Extension {
       return $component_field_id;
     }
     elseif (is_array($component_field_id)) {
-      // Object token field
+      // Object token field.
       $componentFields = [];
       foreach ($component_field_id as $key => $v) {
-        // If the key on the values exists in the model then it's a multifield value
-        if(isset($component_model[$key])) {
+        // If the key on the values exists in the model then it's a multifield value.
+        if (isset($component_model[$key])) {
           $componentFields['#' . $key] = $this->buildComponentFields($v, $key, $component_model, $_context, $isTemplate);
-        }else{
-          // Enclose key with # so not treated as child in render array
+        }
+        else {
+          // Enclose key with # so not treated as child in render array.
           $componentFields['#' . $key] = $this->buildComponentFields($v, $uuid, $component_model, $_context, $isTemplate);
         }
       }
@@ -622,7 +723,7 @@ class TwigExtension extends \Twig_Extension {
    *
    * @param $component_field_id
    * @param $uuid
-   * @param $component_model \Drupal\cohesion\LayoutCanvas\ElementModel[]
+   * @param \Drupal\cohesion\LayoutCanvas\ElementModel[] $component_model
    * @param $_context
    * @param $isTemplate
    *
@@ -634,7 +735,7 @@ class TwigExtension extends \Twig_Extension {
       // Escape values for security reason
       // Escape only once at the top most parent component, child component (component in component)
       // should not escape again, also the model in a component is considered secure as it is done by
-      // site builder and they should have as much power as possible
+      // site builder and they should have as much power as possible.
       if (!$isTemplate || !empty($component_model[$uuid]->getProperty(['settings', 'toggleType']))) {
         $default_value = $component_model[$uuid]->getProperty(['model', 'value']);
         $fieldValue = $this->cohesionUtils->processFieldValues($fieldValue, $component_model[$uuid], $default_value);
@@ -650,6 +751,7 @@ class TwigExtension extends \Twig_Extension {
    * @param $id
    *
    * @return array
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function drupalBlock($id) {
@@ -746,7 +848,6 @@ class TwigExtension extends \Twig_Extension {
    *   If a #pre_render callback throws an exception, it is caught to mark the
    *   renderer as no longer being in a root render call, if any. Then the
    *   exception is rethrown.
-   *
    */
   public function drupalViewItem($view_modes, $rows) {
     if (is_array($rows) && isset($rows['#rows'])) {
@@ -772,7 +873,7 @@ class TwigExtension extends \Twig_Extension {
 
         if (is_array($view_modes)) {
           $view_modes_bundle = [];
-          // Add view modes for the current entity type per bundle to an key value array
+          // Add view modes for the current entity type per bundle to an key value array.
           foreach ($view_modes as $view_mode_data) {
             // Cast any Twig_Markup values to strings.
             foreach ($view_mode_data as $view_mode_data_key => $view_mode_data_value) {
@@ -782,10 +883,10 @@ class TwigExtension extends \Twig_Extension {
             }
 
             // We only register defined view modes for the entity type of the current entity
-            // We don't register view mode set as default as it is already in the resultrow array
+            // We don't register view mode set as default as it is already in the resultrow array.
             if ($view_mode_data['entity_type'] == $entity_type && $view_mode_data['view_mode'] !== 'default') {
 
-              // Bundle may not be in the json in older version
+              // Bundle may not be in the json in older version.
               if (!isset($view_mode_data['bundle'])) {
                 $view_modes_bundle['all'] = $view_mode_data['view_mode'];
               }
@@ -807,7 +908,7 @@ class TwigExtension extends \Twig_Extension {
           }
         }
         else {
-          //For backward compatibility
+          // For backward compatibility.
           $resultrow['#view_mode'] = $view_modes;
         }
 
@@ -842,9 +943,9 @@ class TwigExtension extends \Twig_Extension {
       $alias = \Drupal::service('path.alias_manager')
         ->getAliasByPath('/node/' . $nid);
       return $alias;
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       $this->loggerChannel->error($e->getTraceAsString());
-
       return '';
     }
   }
@@ -870,7 +971,7 @@ class TwigExtension extends \Twig_Extension {
 
     // Try and load the given image style.
     try {
-      if($image_style != ''){
+      if ($image_style != '') {
         if ($is = ImageStyle::load($image_style)) {
           $url = $is->buildUrl($file_uri);
           $url = parse_url($url);
@@ -883,7 +984,8 @@ class TwigExtension extends \Twig_Extension {
           return $decoded;
         }
       }
-    } catch (\Error $e) {
+    }
+    catch (\Error $e) {
       $this->loggerChannel->error($e->getTraceAsString());
 
     }
@@ -899,6 +1001,9 @@ class TwigExtension extends \Twig_Extension {
     return $decoded;
   }
 
+  /**
+   *
+   */
   public function cohesionImageMimeType($file_uri, $image_style) {
     // If created as a component field, the image style will come as Twig_Markup.
     if (is_object($image_style) && $image_style instanceof \Twig_Markup) {
@@ -909,7 +1014,7 @@ class TwigExtension extends \Twig_Extension {
 
     $extension = pathinfo($file_uri, PATHINFO_EXTENSION);
     $fake_path = 'dx8_image.' . $extension;
-    if($image_style != '') {
+    if ($image_style != '') {
       if ($image_style_entity = ImageStyle::load($image_style)) {
         $fake_path = 'dx8_image.' . $image_style_entity->getDerivativeExtension($extension);
       }
@@ -942,7 +1047,7 @@ class TwigExtension extends \Twig_Extension {
     }
     $markup = [];
 
-    // Sort filter may have the same id as filter id so they are prefixed bu coh_sort_
+    // Sort filter may have the same id as filter id so they are prefixed bu coh_sort_.
     $is_sort = FALSE;
     if (strpos($filter, 'coh_sort_') === 0) {
       $filter = substr($filter, strlen('coh_sort_'));
@@ -1000,7 +1105,7 @@ class TwigExtension extends \Twig_Extension {
       }
     }
 
-    // if it's a list of items, possibly change the theme type (<ul><li></ul> style).
+    // If it's a list of items, possibly change the theme type (<ul><li></ul> style).
     if ($display_type == 'list') {
 
       $list_markup = [];
@@ -1035,7 +1140,7 @@ class TwigExtension extends \Twig_Extension {
         ];
       }
 
-      // Overwrite the form element style with the new array of <li>
+      // Overwrite the form element style with the new array of <li>.
       $markup[$filter_identifier] = $list_markup;
     }
 
@@ -1101,7 +1206,7 @@ class TwigExtension extends \Twig_Extension {
         $variables += $info['variables'];
       }
 
-      // Infinite scroll load automatically
+      // Infinite scroll load automatically.
       if (isset($view_data['settings']['pager']['infinite']['loadAutomatically'])) {
         $variables['options']['automatically_load_content'] = $view_data['settings']['pager']['infinite']['loadAutomatically'];
       }
@@ -1205,7 +1310,8 @@ class TwigExtension extends \Twig_Extension {
       // Suggest the menu template.
       $menu['#theme'] = 'menu__cohesion_' . $templateId;
       $menu['#attributes'] = [];
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       $this->loggerChannel->error($e->getTraceAsString());
     }
 
@@ -1375,8 +1481,7 @@ class TwigExtension extends \Twig_Extension {
   }
 
   /**
-   *
-   * Render an Entity
+   * Render an Entity.
    *
    * @param $entity_type
    * @param $view_mode
@@ -1408,8 +1513,9 @@ class TwigExtension extends \Twig_Extension {
       }
 
       if (!empty($entity_type) && !empty($view_mode) && !empty($entity_id)) {
-        $entity = $this->entityTypeManager->getStorage($entity_type)
-          ->load($entity_id);
+        $results = $this->entityTypeManager->getStorage($entity_type)->loadByProperties(['uuid' => $entity_id]);
+        $entity = reset($results);
+
         if ($entity) {
           $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
           $view_builder = $this->entityTypeManager->getViewBuilder($entity_type);
@@ -1418,7 +1524,8 @@ class TwigExtension extends \Twig_Extension {
         }
       }
 
-    } catch (\Exception $exception) {
+    }
+    catch (\Exception $exception) {
       $this->loggerChannel->error($exception->getTraceAsString());
     }
 
@@ -1447,6 +1554,9 @@ class TwigExtension extends \Twig_Extension {
     return UrlHelper::stripDangerousProtocols($url);
   }
 
+  /**
+   *
+   */
   public function getComponentFieldValue($context, $key, $sub_key_path = NULL) {
     $keys = [];
     // If we need to find the find further down the array
@@ -1456,11 +1566,13 @@ class TwigExtension extends \Twig_Extension {
 
     // If within the context of a field repeater check if the key exists
     // otherwise check in the component field values
-    if(isset($context['coh_repeater_val']['#' . $key])) {
+    if (isset($context['coh_repeater_val']['#' . $key])) {
       $value = $context['coh_repeater_val']['#' . $key];
-    } elseif(isset($context['componentFieldsValues'][$key])) {
+    }
+    elseif (isset($context['componentFieldsValues'][$key])) {
       $value = $context['componentFieldsValues'][$key];
-    } else {
+    }
+    else {
       // Try to find the key in all componentFieldsValues
       // If this is a field inside a field repeater but used outside a pattern repeater
       // use case: Hide if no data
@@ -1487,14 +1599,14 @@ class TwigExtension extends \Twig_Extension {
           }
         }
       }
-
       return FALSE;
     }
 
     foreach ($keys as $key) {
-      if(is_array($value) && isset($value[$key])) {
+      if (is_array($value) && isset($value[$key])) {
         $value = $value[$key];
-      } else {
+      }
+      else {
         return FALSE;
       }
     }

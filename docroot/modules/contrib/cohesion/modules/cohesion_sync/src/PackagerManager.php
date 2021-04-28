@@ -2,23 +2,21 @@
 
 namespace Drupal\cohesion_sync;
 
-use Drupal\config\StorageReplaceDataWrapper;
-use Drupal\Core\Config\ConfigException;
+use Drupal\cohesion\UsageUpdateManager;
+use Drupal\cohesion_sync\Entity\Package;
 use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\Config\StorageComparer;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Entity\EntityRepository;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\cohesion_sync\Entity\Package;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystem;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Serialization\Yaml;
-use Drupal\cohesion\UsageUpdateManager;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 define('ENTRY_NEW_IMPORTED', 1);
 define('ENTRY_EXISTING_ASK', 2);
@@ -29,6 +27,8 @@ define('ENTRY_EXISTING_NO_CHANGES', 6);
 
 /**
  * Class PackagerManager.
+ *
+ * Defines cohesion PackagerManager.
  *
  * @package Drupal\cohesion_sync
  */
@@ -163,6 +163,11 @@ class PackagerManager {
     }
   }
 
+  /**
+   * @param $uri
+   * @param $uuid
+   * @return mixed|null
+   */
   public function getExportByUUID($uri, $uuid) {
     if ($handle = @ fopen($uri, 'r')) {
       $yaml = '';
@@ -174,7 +179,7 @@ class PackagerManager {
         // Hit the end of an array entry.
         if ($yaml != '' && $line == "-\n") {
           $entry_data = Yaml::decode($yaml)[0];
-          if($entry_data ['export']['uuid'] == $uuid) {
+          if($entry_data['export']['uuid'] == $uuid) {
             $entry = $entry_data;
           }
           $yaml = $line;
@@ -221,7 +226,7 @@ class PackagerManager {
       }
 
       $entry_data = Yaml::decode($yaml)[0];
-      if(in_array($entry_data ['export']['uuid'], $uuids)) {
+      if(in_array($entry_data['export']['uuid'], $uuids)) {
         $entries[] = $entry_data;
       }
 
@@ -235,92 +240,60 @@ class PackagerManager {
    * Validate a package list via the plugin and return the actions.
    *
    * @param $entry
-   * @param $action_list
    *
    * @throws \Exception
    */
-  private function validatePackageEntry($entry, &$action_list) {
+  public function validatePackageEntry($entry) {
     // Get the Sync plugin for this entity type.
     try {
       $type_definition = $this->entityTypeManager->getDefinition($entry['type']);
       /** @var SyncPluginInterface $plugin */
       $plugin = $this->getPluginInstanceFromType($type_definition);
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       throw new \Exception("Entity type {$entry['type']} not found.");
     }
 
     // Check to see if the entry can be applied without asking what to do.
     $action_state = $plugin->validatePackageEntryShouldApply($entry['export']);
 
-    $action_data = $plugin->getActionData($entry['export'], $action_state);
-
-    // Add the action object to the list if it will apply or requires user input.
-    $action_list[$entry['export']['uuid']] = $action_data;
+    return $plugin->getActionData($entry['export'], $action_state);
   }
 
   /**
-   * Given a URI, validate the stream.
+   * Sets the batch for validating a package.
    *
-   * @param $uri
+   * @param $file_uri string
+   * @param $store_key string
    *
-   * @return array
-   *
-   * @throws \Exception
+   * @return array - operations for the batch
    */
-  public function validateYamlPackageStream($uri) {
-    // Make sure the $uri is accessible.
-    if (@ !fopen($uri, 'r')) {
-      throw new \Exception("Cannot access {$uri}");
-    }
+  public function validatePackageBatch($file_uri, $store_key) {
 
-    // Process it.
-    $action_list = [];
+    $operations = [];
 
-    $this->logger->notice(t('Validating Site Studio sync import file'));
-    $this->parseYaml($uri, function ($entry) use (&$action_list) {
-      $this->validatePackageEntry($entry, $action_list);
+    $operations[] = [
+      '\Drupal\cohesion_sync\Controller\BatchImportController::batchValidatePackage',
+      [$file_uri],
+    ];
+
+    $entity_uuids_to_validate = [];
+    $this->parseYaml($file_uri, function ($entry) use (&$operations, $file_uri, $store_key, &$entity_uuids_to_validate) {
+      $entity_uuids_to_validate[] = $entry['export']['uuid'];
     });
 
-    return $action_list;
-  }
+    // Set a limit for the batch process or use a configured override of X.
+    $batch_limit = Settings::get('sync_max_entity', 10);
 
-  /**
-   * Given a URI, validate a package for removed component or style guide
-   * fields that would lead to data loss.
-   *
-   * @param $uri
-   *
-   * @return array
-   *
-   * @throws \Exception
-   */
-  public function validateYamlPackageContentIntegrity($uri) {
-    // Make sure the $uri is accessible.
-    if (@ !fopen($uri, 'r')) {
-      throw new \Exception("Cannot access {$uri}");
+    for ($i=0; $i < count($entity_uuids_to_validate); $i += $batch_limit) {
+      $ids = array_slice($entity_uuids_to_validate, $i, $batch_limit);
+      $operations[] = [
+        '\Drupal\cohesion_sync\Controller\BatchImportController::batchValidateEntry',
+        [$file_uri, $ids, $store_key],
+      ];
     }
 
-    $broken_components = [];
-
-    $this->parseYaml($uri, function ($entry) use (&$broken_components) {
-      // Load existing entity.
-      try {
-        if ($entry['type'] == 'cohesion_component' || $entry['type'] == 'cohesion_style_guide') {
-          $entity = $this->entityRepository->loadEntityByUuid($entry['type'], $entry['export']['uuid']);
-          $broken_entities = $entity->checkContentIntegrity($entry['export']['json_values']);
-          if (!empty($broken_entities)) {
-            $broken_components[$entity->get('uuid')] = [
-              'entity' => $entity,
-              'entities' => $broken_entities,
-            ];
-          }
-        }
-
-      } catch (\Throwable $e) {
-      }
-    });
-
-    return $broken_components;
+    return $operations;
   }
 
   /**
@@ -336,7 +309,8 @@ class PackagerManager {
       $type_definition = $this->entityTypeManager->getDefinition($entry['type']);
       /** @var SyncPluginInterface $plugin */
       $plugin = $this->getPluginInstanceFromType($type_definition);
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
       throw new \Exception("Entity type {$entry['type']} not found.");
     }
 
@@ -364,7 +338,8 @@ class PackagerManager {
           }
         }
         $this->usageUpdateManager->buildRequires($entity);
-      } catch (\Exception $e) {
+      }
+      catch (\Exception $e) {
       }
     }
   }
@@ -378,33 +353,28 @@ class PackagerManager {
    * @param bool $no_rebuild
    *   True if no entity rebuilds required.
    *
-   *
-   * @throws \Exception
-   *
    * @return array|bool
    */
   public function applyBatchYamlPackageStream($uri, $action_data, $no_rebuild = FALSE) {
 
     $operations = [];
 
-    $uuids_batch = [];
+    $uuids = [];
     foreach ($action_data as $uuid => $action) {
-      // Add new batch if empty or the last element has 10 items
-      // This way each batch operation will process 10 items
-      if(!end($uuids_batch) || count(end($uuids_batch)) >= 10) {
-        $uuids_batch[] = [];
-      }
-
-      $uuids = array_pop($uuids_batch);
       if(in_array($action['entry_action_state'], [
         ENTRY_NEW_IMPORTED,
         ENTRY_EXISTING_OVERWRITTEN,
       ])) {
         $uuids[] = $uuid;
       }
+    }
 
-      $uuids_batch[] = $uuids;
+    // Set a limit for the batch process or use a configured override of X.
+    $batch_limit = Settings::get('sync_max_entity', 10);
 
+    $uuids_batch = [];
+    for ($i=0; $i < count($uuids); $i += $batch_limit) {
+      $uuids_batch[] = array_slice($uuids, $i, $batch_limit);
     }
 
     foreach ($uuids_batch as $uuids) {
@@ -436,26 +406,29 @@ class PackagerManager {
       }
     }
 
-    $operations[] = [
-      'cohesion_elements_get_elements_style_process_batch',
-      [],
-    ];
+    // Apllies only if there has been some imports
+    if(!empty($uuids_batch)) {
+      $operations[] = [
+        'cohesion_elements_get_elements_style_process_batch',
+        [],
+      ];
 
-    // Generate content template entities for any new entity type / bundle / view mode
-    $operations[] = [
-      '_cohesion_templates_generate_content_template_entities',
-      [],
-    ];
+      // Generate content template entities for any new entity type / bundle / view mode.
+      $operations[] = [
+        '_cohesion_templates_generate_content_template_entities',
+        [],
+      ];
+    }
 
     return $operations;
   }
 
   /**
-   * Set the data to be replaced int the storage replace
+   * Set the data to be replaced int the storage replace.
    *
-   * @param $source_storage StorageReplaceDataWrapper
-   * @param $entry array
-   * @param $action_data array
+   * @param \Drupal\config\StorageReplaceDataWrapper $source_storage
+   * @param array $entry
+   * @param array $action_data
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
@@ -511,22 +484,22 @@ class PackagerManager {
   }
 
   /**
-   * Replace uuids in an entry with the ones on the current site
+   * Replace uuids in an entry with the ones on the current site.
    *
-   * @param $action_data array
-   * @param $entry array
+   * @param array $action_data
+   * @param array $entry
    *
    * @return array
    */
   public function matchUUIDS($action_data, $entry) {
     $replace_uuid = [];
     foreach ($action_data as $uuid => $data) {
-      if(in_array($data['entry_action_state'], [ENTRY_NEW_IMPORTED, ENTRY_EXISTING_OVERWRITTEN]) && isset($data['replace_uuid'])) {
+      if (in_array($data['entry_action_state'], [ENTRY_NEW_IMPORTED, ENTRY_EXISTING_OVERWRITTEN]) && isset($data['replace_uuid'])) {
         $replace_uuid[$uuid] = $data['replace_uuid'];
       }
     }
 
-    if(!empty($replace_uuid)) {
+    if (!empty($replace_uuid)) {
       $replaced_entry = str_replace(array_keys($replace_uuid), $replace_uuid, Yaml::encode($entry));
       $entry = Yaml::decode($replaced_entry);
     }
@@ -609,7 +582,8 @@ class PackagerManager {
           }
         }
 
-      } catch (\Throwable $e) {
+      }
+      catch (\Throwable $e) {
         fclose($temp_file);
         \Drupal::messenger()->addError(t('Package %path failed to build. There was a problem exporting the package. %e', [
           '%path' => $filename,
@@ -703,7 +677,8 @@ class PackagerManager {
                       continue;
                     }
                   }
-                } catch (\Exception $e) {
+                }
+                catch (\Exception $e) {
                   continue;
                 }
 

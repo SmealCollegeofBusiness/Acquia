@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion_style_guide;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\cohesion\CohesionListBuilder;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**

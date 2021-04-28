@@ -6,9 +6,8 @@ use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\Plugin\EntityUpdate\_0024EntityUpdate;
 use Drupal\Tests\UnitTestCase;
 
-
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -21,7 +20,8 @@ class _0024MockUpdateEntity extends EntityMockBase implements EntityJsonValuesIn
  */
 class _0024EntityUpdateUnitTest extends UnitTestCase {
 
-  /** @var $unit _0024MockUpdateEntity */
+  /**
+   * @var unit_0024MockUpdateEntity*/
   protected $unit;
 
   private $fixture_layout = '{
@@ -329,7 +329,7 @@ class _0024EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayHasKey('humanId', $layout_array_before['componentForm'][1]['children'][0]);
     $this->assertArrayHasKey('humanId', $layout_array_before['componentForm'][1]['children'][1]['children'][0]);
 
-    // Assign all existing fields a unique machine name
+    // Assign all existing fields a unique machine name.
     $this->assertArrayNotHasKey('machineName', $layout_array_before['model']['65630114-5f4d-4b4a-b64d-ddabf25939d2']['settings']);
     $this->assertArrayNotHasKey('machineName', $layout_array_before['model']['2a833616-6f1c-4d57-9ec5-5ba256e55c8d']['settings']);
     $this->assertArrayNotHasKey('machineName', $layout_array_before['model']['425c503b-d51f-42fb-9363-6a3d6d1a2eec']['settings']);
@@ -348,7 +348,7 @@ class _0024EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayNotHasKey('humanId', $layout_array_after['componentForm'][1]['children'][0]);
     $this->assertArrayNotHasKey('humanId', $layout_array_after['componentForm'][1]['children'][1]['children'][0]);
 
-    // Assign all existing fields a unique machine name
+    // Assign all existing fields a unique machine name.
     $this->assertEquals('text-input', $layout_array_after['model']['65630114-5f4d-4b4a-b64d-ddabf25939d2']['settings']['machineName']);
     $this->assertEquals('text-input2', $layout_array_after['model']['2a833616-6f1c-4d57-9ec5-5ba256e55c8d']['settings']['machineName']);
     $this->assertEquals('text-input3', $layout_array_after['model']['425c503b-d51f-42fb-9363-6a3d6d1a2eec']['settings']['machineName']);

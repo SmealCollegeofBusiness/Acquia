@@ -97,5 +97,3 @@ access form help fields group:
 access form fields fields group:
   title: Site Studio Component builder - Form fields group
   description: 'Grant access to the Site Studio form fields group within the sidebar browser.'
-
-

@@ -27,4 +27,3 @@ cohesion_sync.export_settings:
   base_route: cohesion_sync.export_settings
   title: 'Full export settings'
   weight: 29
-

@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class MenuUsage.
+ * Plugin for menu usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *

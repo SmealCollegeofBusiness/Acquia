@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\cohesion_templates\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion_templates\Plugin\Usage\MasterTemplatesUsage;
 use Drupal\cohesion_templates\Entity\MasterTemplates;
+use Drupal\cohesion_templates\Plugin\Usage\MasterTemplatesUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * @group Cohesion

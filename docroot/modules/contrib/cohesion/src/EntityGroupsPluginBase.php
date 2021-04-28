@@ -3,12 +3,12 @@
 namespace Drupal\cohesion;
 
 use Drupal\Component\Plugin\PluginBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class EntityGroupsPluginBase.
+ * Base class for grouped of entities on the UI.
  *
  * @package Drupal\cohesion
  */

@@ -3,9 +3,9 @@
 namespace Drupal\cohesion\EventSubscriber;
 
 use Drupal\Core\Render\HtmlResponse;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Response subscriber to replace the HtmlResponse with a BigPipeResponse.
@@ -65,7 +65,7 @@ class CohesionHtmlResponseSubscriber implements EventSubscriberInterface {
    */
   public function minifyStyleBlock(&$inline_styles, $inline_css) {
     // make it into one long line
-    $inline_css = str_replace(["\n","\r"],'', $inline_css);
+    $inline_css = str_replace(["\n", "\r"], '', $inline_css);
 
     return $inline_styles[] = $inline_css;
   }

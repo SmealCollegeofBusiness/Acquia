@@ -97,6 +97,9 @@ abstract class ElementCategoryBase extends CohesionConfigEntityBase implements C
     return FALSE;
   }
 
+  /**
+   *
+   */
   public function getApiPluginInstance(){}
 
   /**

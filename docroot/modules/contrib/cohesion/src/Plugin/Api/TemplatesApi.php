@@ -2,16 +2,16 @@
 
 namespace Drupal\cohesion\Plugin\Api;
 
-use Drupal\cohesion_templates\Entity\ContentTemplates;
+use Drupal\cohesion\ApiPluginBase;
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
-use Drupal\Component\Serialization\Json;
-use Drupal\cohesion\ApiPluginBase;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\cohesion_elements\Entity\Component;
+use Drupal\cohesion_templates\Entity\ContentTemplates;
+use Drupal\Component\Serialization\Json;
+use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
- * Class TemplatesApi.
+ * Send site studio template to its API.
  *
  * @package Drupal\cohesion
  *
@@ -22,6 +22,9 @@ use Drupal\cohesion_elements\Entity\Component;
  */
 class TemplatesApi extends ApiPluginBase {
 
+  /**
+   *
+   */
   public function getForms() {
     return [];
   }
@@ -207,10 +210,11 @@ class TemplatesApi extends ApiPluginBase {
 
         foreach ($this->getData() as $response) {
           if (isset($response['template']) && isset($response['themeName'])) {
-            if($response['themeName'] == 'coh-generic-theme') {
-              // If one or more themes are set to generate templates, save a global template for these themes to use
+            if ($response['themeName'] == 'coh-generic-theme') {
+              // If one or more themes are set to generate templates, save a global template for these themes to use.
               $this->saveResponseTemplate($response['template']);
-            }else {
+            }
+            else {
               $this->saveResponseTemplate($response['template'], $response['themeName']);
             }
           }

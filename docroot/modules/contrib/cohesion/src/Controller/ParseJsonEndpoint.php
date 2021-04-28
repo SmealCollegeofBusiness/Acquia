@@ -2,10 +2,10 @@
 
 namespace Drupal\cohesion\Controller;
 
-use GuzzleHttp\Exception\ClientException;
-use Drupal\Core\Controller\ControllerBase;
-use Symfony\Component\HttpFoundation\Request;
 use Drupal\cohesion\CohesionJsonResponse;
+use Drupal\Core\Controller\ControllerBase;
+use GuzzleHttp\Exception\ClientException;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ParseJsonEndpoint.

@@ -3,14 +3,12 @@
 namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
-use Drupal\cohesion\EntityJsonValuesTrait;
 use Drupal\cohesion\Plugin\EntityUpdate\_0027EntityUpdate;
 use Drupal\cohesion_custom_styles\Entity\CustomStyle;
 use Drupal\Tests\UnitTestCase;
 
-
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -22,7 +20,8 @@ class _0027MockUpdateEntity extends EntityMockBase implements EntityJsonValuesIn
  */
 class _0027EntityUpdateUnitTest extends UnitTestCase {
 
-  /** @var $unit _0027MockUpdateEntity  */
+  /**
+   * @var unit_0027MockUpdateEntity*/
   protected $unit;
 
   private $custom_style_mapper_fixture = '{
@@ -183,7 +182,7 @@ class _0027EntityUpdateUnitTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->unit = new _0027EntityUpdate([], null, null);
+    $this->unit = new _0027EntityUpdate([], NULL, NULL);
   }
 
   /**
@@ -197,7 +196,7 @@ class _0027EntityUpdateUnitTest extends UnitTestCase {
       'json_values' => $this->custom_style_model_fixture,
       'json_mapper' => $this->custom_style_mapper_fixture,
       'class_name' => '.coh-parent-class',
-      'parent' => FALSE
+      'parent' => FALSE,
     ], 'cohesion_custom_style');
 
     $decoded_mapper = json_decode($custom_style_entity->getJsonMapper(), TRUE);

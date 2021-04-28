@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\cohesion_custom_styles\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion_custom_styles\Plugin\Usage\CustomStylesUsage;
 use Drupal\cohesion_custom_styles\Entity\CustomStyle;
+use Drupal\cohesion_custom_styles\Plugin\Usage\CustomStylesUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * @group Cohesion

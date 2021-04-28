@@ -374,7 +374,7 @@ class CustomElementsService {
           'schema' => [
             'type' => [
               'string',
-              'number'
+              'number',
             ],
           ],
         ],

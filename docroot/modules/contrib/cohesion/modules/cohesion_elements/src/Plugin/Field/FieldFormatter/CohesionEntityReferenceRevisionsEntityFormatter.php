@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion_elements\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\entity_reference_revisions\Plugin\Field\FieldFormatter\EntityReferenceRevisionsEntityFormatter;
 
 /**
@@ -17,6 +18,15 @@ use Drupal\entity_reference_revisions\Plugin\Field\FieldFormatter\EntityReferenc
  * )
  */
 class CohesionEntityReferenceRevisionsEntityFormatter extends EntityReferenceRevisionsEntityFormatter {
-
+  /**
+   * {@inheritdoc}
+   *
+   * @see ::prepareView()
+   * @see ::getEntitiestoView()
+   */
+  public function view(FieldItemListInterface $items, $langcode = NULL) {
+    $elements = parent::view($items, $langcode);
+    return $elements;
+  }
 
 }

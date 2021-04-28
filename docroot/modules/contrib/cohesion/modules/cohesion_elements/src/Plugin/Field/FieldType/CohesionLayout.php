@@ -8,8 +8,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
- *
- * deprecated
+ * Deprecated.
  *
  * Plugin implementation of the 'cohesion_layout' field type.
  *

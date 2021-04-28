@@ -2,15 +2,16 @@
 
 namespace Drupal\Tests\cohesion\Unit;
 
-use Drupal\Core\Extension\ThemeHandlerInterface;
-use Drupal\Tests\UnitTestCase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\Core\Database\Connection;
-use Drupal\cohesion\UsagePluginInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
 
 /**
- * Class MockUsageEntity
+ * Class MockUsageEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -28,6 +29,7 @@ class MockUsageEntity {
   public function getFileUri() {
     return $this->id;
   }
+
 }
 
 
@@ -39,7 +41,7 @@ class MockUsageEntity {
 abstract class UsagePluginBaseUnitTest extends UnitTestCase {
 
   /**
-   * @var UsagePluginInterface
+   * @var \Drupal\cohesion\UsagePluginInterface
    */
   protected $unit;
 
@@ -60,25 +62,25 @@ abstract class UsagePluginBaseUnitTest extends UnitTestCase {
     $this->plugin_id = 'mockup_plugin_id';
     $this->plugin_definition = [
       'name' => 'Mock',
-      'entity_type' => 'mock_entity'
+      'entity_type' => 'mock_entity',
     ];
 
     // Mock service.
-    $prophecy = $this->prophesize(\Drupal\Core\Entity\EntityStorageInterface::CLASS);
+    $prophecy = $this->prophesize(EntityStorageInterface::CLASS);
     // Mock function call.
-    $prophecy->load(\Prophecy\Argument::type('string'))->will(function ($args) {
+    $prophecy->load(Argument::type('string'))->will(function ($args) {
       // Just return the ID of the entity sent to ->load()
       return new MockUsageEntity($args[0]);
     });
-    $prophecy->loadByProperties(\Prophecy\Argument::type('array'))->will(function ($args) {
+    $prophecy->loadByProperties(Argument::type('array'))->will(function ($args) {
       $key = key($args[0]);
       // Just return the whatever key and value of the entity sent to ->load()
       return [
-        new MockUsageEntity($key . '-' . $args[0][$key])
+        new MockUsageEntity($key . '-' . $args[0][$key]),
       ];
     });
     // Mock function call.
-    $prophecy->getQuery(\Prophecy\Argument::type('string'))->will(function ($args) {
+    $prophecy->getQuery(Argument::type('string'))->will(function ($args) {
       // Just return the ID of the entity sent to ->load()
       return new class {
         protected $entities = [];
@@ -98,12 +100,13 @@ abstract class UsagePluginBaseUnitTest extends UnitTestCase {
         public function execute() {
           return $this->entities;
         }
+
       };
     });
 
     // Mock function call.
-    $prophecy->loadMultiple(\Prophecy\Argument::type('array'))->will(function ($args) {
-      return array_map(function($id) {
+    $prophecy->loadMultiple(Argument::type('array'))->will(function ($args) {
+      return array_map(function ($id) {
         return new MockUsageEntity($id[0]);
       }, $args[0]);
     });
@@ -116,9 +119,9 @@ abstract class UsagePluginBaseUnitTest extends UnitTestCase {
 
     // Mock service.
     $prophecy = $this->prophesize(StreamWrapperManager::CLASS);
-    //$prophecy->generate()->willReturn('0000-0000-0000-0000');
+    // $prophecy->generate()->willReturn('0000-0000-0000-0000');
     $prophecy->getWrappers()->willReturn([]);
-    $prophecy->getViaUri(\Prophecy\Argument::type('string'))->will(function ($args) {
+    $prophecy->getViaUri(Argument::type('string'))->will(function ($args) {
       // Just return the ID of the entity sent to ->load()
       return new class ($args[0]) {
         protected $id;
@@ -130,18 +133,19 @@ abstract class UsagePluginBaseUnitTest extends UnitTestCase {
         public function getDirectoryPath() {
           return 'directory/' . $this->id . '/';
         }
+
       };
     });
     $this->stream_wrapper_manager_mock = $prophecy->reveal();
 
     // Mock service.
     $prophecy = $this->prophesize(Connection::CLASS);
-    //$prophecy->generate()->willReturn('0000-0000-0000-0000');
+    // $prophecy->generate()->willReturn('0000-0000-0000-0000');
     $this->database_connection_mock = $prophecy->reveal();
 
     // Mock service.
     $prophecy = $this->prophesize(ThemeHandlerInterface::CLASS);
-    //$prophecy->generate()->willReturn('0000-0000-0000-0000');
+    // $prophecy->generate()->willReturn('0000-0000-0000-0000');
     $this->theme_handler_mock = $prophecy->reveal();
 
   }
@@ -153,4 +157,5 @@ abstract class UsagePluginBaseUnitTest extends UnitTestCase {
   public function tearDown() {
     unset($this->unit);
   }
+
 }

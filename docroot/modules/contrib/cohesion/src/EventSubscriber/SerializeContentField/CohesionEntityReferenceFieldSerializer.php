@@ -20,7 +20,7 @@ class CohesionEntityReferenceFieldSerializer extends EntityReferenceFieldSeriali
    * @throws \Exception
    */
   public function onSerializeContentField(SerializeCdfEntityFieldEvent $event) {
-    if($event->getField()->getFieldDefinition()->getType() == 'cohesion_entity_reference_revisions') {
+    if ($event->getField()->getFieldDefinition()->getType() == 'cohesion_entity_reference_revisions') {
       $this->fieldTypes[] = 'cohesion_entity_reference_revisions';
       return parent::onSerializeContentField($event);
     }

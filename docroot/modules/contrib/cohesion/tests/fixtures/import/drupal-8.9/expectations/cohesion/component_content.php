@@ -100,13 +100,13 @@ $data = [
   ],
   'parent_type' => [
     'en' => [
-      ['value' => 'component_content']
-    ]
+      ['value' => 'component_content'],
+    ],
   ],
   'parent_field_name' => [
     'en' => [
-      ['value' => 'layout_canvas']
-    ]
+      ['value' => 'layout_canvas'],
+    ],
   ],
   'default_langcode' => [
     'en' => [

@@ -3,7 +3,7 @@
 namespace Drupal\cohesion\Plugin\Usage;
 
 /**
- * Class NodeUsage.
+ * Plugin for node usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *

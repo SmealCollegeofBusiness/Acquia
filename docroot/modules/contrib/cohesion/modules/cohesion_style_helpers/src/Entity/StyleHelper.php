@@ -68,7 +68,7 @@ class StyleHelper extends CohesionConfigEntityBase implements CohesionSettingsIn
 
   const ASSET_GROUP_ID = 'style_helpers';
 
-  const entity_machine_name_prefix = 'style_hlp_';
+  const ENTITY_MACHINE_NAME_PREFIX = 'style_hlp_';
 
   /**
    * The CustomStyleType.

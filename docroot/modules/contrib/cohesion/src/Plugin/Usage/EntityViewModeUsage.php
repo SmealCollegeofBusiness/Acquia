@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class EntityViewModeUsage.
+ * Plugin for entity view mode usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *
@@ -44,7 +44,7 @@ class EntityViewModeUsage extends UsagePluginBase {
       if ($entry['type'] == 'drupal_view_mode') {
         $entities[] = [
           'type' => $this->getEntityType(),
-          'uuid' => $entry['uuid']
+          'uuid' => $entry['uuid'],
         ];
       }
     }

@@ -3,9 +3,9 @@
 namespace Drupal\cohesion_base_styles\Entity;
 
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
+use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\cohesion\EntityHasResourceObjectTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\cohesion\Entity\CohesionSettingsInterface;
 
 /**
  * Defines the Site Studio base styles entity.
@@ -77,7 +77,7 @@ class BaseStyles extends CohesionConfigEntityBase implements CohesionSettingsInt
 
   const ASSET_GROUP_ID = 'base_styles';
 
-  const entity_machine_name_prefix = 'base_';
+  const ENTITY_MACHINE_NAME_PREFIX = 'base_';
 
   /**
    * @inheritDoc

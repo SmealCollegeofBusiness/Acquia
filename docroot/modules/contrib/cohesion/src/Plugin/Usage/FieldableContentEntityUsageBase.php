@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion\Plugin\Usage;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\cohesion\UsagePluginBase;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\field\Entity\FieldConfig;
 
 /**
@@ -71,7 +71,8 @@ abstract class FieldableContentEntityUsageBase extends UsagePluginBase {
                   'decoded' => $cohesion_layout_entity->getDecodedJsonValues(),
                 ];
               }
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
               break;
             }
           }

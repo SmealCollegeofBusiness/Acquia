@@ -24,8 +24,8 @@ class ComponentDeleteForm extends CohesionDeleteForm {
     All content that’s been added to instances of this <em>Component</em> will be removed including <em>Component content</em> and the configuration of your <em>Component</em>.
     This action cannot be undone.'),
         '#prefix' => '<p>',
-        '#suffix' => '</p>'
-      ]
+        '#suffix' => '</p>',
+      ],
     ];
 
     $rows = function ($result = []) {
@@ -45,11 +45,11 @@ class ComponentDeleteForm extends CohesionDeleteForm {
 
     $in_use_entities = \Drupal::service('cohesion_usage.update_manager')->getFormattedInUseEntitiesList($this->entity);
 
-    // Component has in-use
+    // Component has in-use.
     if (!empty($in_use_entities)) {
       // Overall warning.
       $build[] = [
-        '#markup' => t('This <em>Component</em> is in-use on the following entities and may not be safe to delete.')
+        '#markup' => t('This <em>Component</em> is in-use on the following entities and may not be safe to delete.'),
       ];
 
       // Build the list of entity types.
@@ -69,14 +69,14 @@ class ComponentDeleteForm extends CohesionDeleteForm {
     // Component is not in use.
     else {
       $build[] = [
-        '#markup' => t('This <em>Component</em> is not in use and may be safe to delete.')
+        '#markup' => t('This <em>Component</em> is not in use and may be safe to delete.'),
       ];
 
     }
 
     return \Drupal::service('renderer')->render($build);
     /*;
-    */
+     */
   }
 
 }

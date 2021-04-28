@@ -2,8 +2,8 @@
 
 namespace Drupal\cohesion_elements\Entity;
 
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\cohesion\CohesionHtmlRouteProvider;
+use Drupal\Core\Entity\EntityTypeInterface;
 
 /**
  * Provides routes for Site Studio base styles entities.

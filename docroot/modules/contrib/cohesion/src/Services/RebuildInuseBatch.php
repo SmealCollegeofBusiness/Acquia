@@ -9,8 +9,8 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
 
 /**
  * Class RebuildInuseBatch.
@@ -79,7 +79,7 @@ class RebuildInuseBatch {
       $batch['operations'][] = [
         '_resave_entity', [
           'entity' => $entity,
-          'realsave' => TRUE
+          'realsave' => TRUE,
         ],
       ];
     }
@@ -92,7 +92,7 @@ class RebuildInuseBatch {
       foreach ($in_use_list as $uuid => $type) {
         if ($type == 'cohesion_style_guide_manager') {
           $style_guide_manager = $this->entityRepository->loadEntityByUuid('cohesion_style_guide_manager', $uuid);
-          if($style_guide_manager){
+          if ($style_guide_manager) {
             $style_guide = $this->entityRepository->loadEntityByUuid('cohesion_style_guide', $style_guide_manager->get('style_guide_uuid'));
             $in_use_list = array_merge($in_use_list, $this->usageUpdateManager->getInUseEntitiesList($style_guide));
           }
@@ -116,17 +116,18 @@ class RebuildInuseBatch {
             ['entity' => $entity],
           ];
         }
-        elseif($entity instanceof CustomStyle || $entity instanceof BaseStyles) {
+        elseif ($entity instanceof CustomStyle || $entity instanceof BaseStyles) {
           $api_plugin = $entity->getApiPluginInstance();
-          if($api_plugin){
+          if ($api_plugin) {
             $api_plugin->setEntity($entity);
             $forms = array_merge($forms, $api_plugin->getForms());
           }
-        }else{
+        }
+        else {
           $batch['operations'][] = [
             '_resave_entity', [
               'entity' => $entity,
-              'realsave' => FALSE
+              'realsave' => FALSE,
             ],
           ];
         }

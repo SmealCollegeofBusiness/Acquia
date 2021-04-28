@@ -2,9 +2,9 @@
 
 namespace Drupal\cohesion_style_helpers;
 
+use Drupal\cohesion\CohesionListBuilder;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\cohesion\CohesionListBuilder;
 
 /**
  * Class StyleHelpersListBuilder.

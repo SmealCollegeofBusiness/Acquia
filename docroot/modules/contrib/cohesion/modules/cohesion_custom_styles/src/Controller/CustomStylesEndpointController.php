@@ -2,15 +2,15 @@
 
 namespace Drupal\cohesion_custom_styles\Controller;
 
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Controller\ControllerBase;
 use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\cohesion_custom_styles\Entity\CustomStyle;
 use Drupal\cohesion_custom_styles\Entity\CustomStyleType;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
- * Class CustomStylesEndpointController
+ * Class CustomStylesEndpointController.
  *
  * An endpoint to return a list of custom style entities.
  *
@@ -30,7 +30,7 @@ class CustomStylesEndpointController extends ControllerBase {
     $mapped_object->label = $entity->get('label');
     $class_name = $entity->get('class_name');
     $mapped_object->value = ltrim($class_name, '.');
-    // Add custom style group
+    // Add custom style group.
     $type_id = $entity->get('custom_style_type');
     if (($custom_style_type_entity = $this->customStyleTypeEntityById($type_id)) && 'generic' === strtolower($custom_style_type_entity->get('label'))) {
       $mapped_object->group = $custom_style_type_entity->get('label');
@@ -41,7 +41,7 @@ class CustomStylesEndpointController extends ControllerBase {
   /**
    * Get all custom styles.
    *
-   * @param \Drupal\cohesion_custom_styles\Entity\CustomStyleType|NULL $custom_style_type
+   * @param \Drupal\cohesion_custom_styles\Entity\CustomStyleType|null $custom_style_type
    *
    * @return \Drupal\cohesion\CohesionJsonResponse
    */
@@ -65,7 +65,7 @@ class CustomStylesEndpointController extends ControllerBase {
     $mapped_object = new \StdClass();
     $mapped_object->label = $entity->get('label');
     $mapped_object->value = $entity->get('id');
-    // Add custom style group
+    // Add custom style group.
     $type_id = $entity->get('custom_style_type');
     if ($type_id && ($custom_style_type_entity = $this->customStyleTypeEntityById($type_id)) && 'generic' === strtolower($custom_style_type_entity->get('label'))) {
       $mapped_object->group = $custom_style_type_entity->get('label');
@@ -123,11 +123,11 @@ class CustomStylesEndpointController extends ControllerBase {
     try {
       $storage = $this->entityTypeManager()->getStorage('cohesion_custom_style');
 
-      // top level query
+      // Top level query.
       $query = $storage->getQuery()->sort('weight')->notExists('parent');
 
       if ($custom_style_type) {
-        // Add Generic custom style to all custom style list
+        // Add Generic custom style to all custom style list.
         $query->condition('custom_style_type', [$custom_style_type->get('id'), 'generic'], 'IN');
       }
       // Get only enabled custom styles
@@ -142,7 +142,7 @@ class CustomStylesEndpointController extends ControllerBase {
           // Build the object.
           $mapped_object = $this->entityToMapped($entity);
 
-          // Add the parent if it is selectable
+          // Add the parent if it is selectable.
           if ($entity->isSelectable()) {
             $data = array_merge($data, [$mapped_object]);
           }
@@ -159,7 +159,8 @@ class CustomStylesEndpointController extends ControllerBase {
           $data = array_merge($data, $child_objects);
         }
       }
-    } catch (PluginNotFoundException $ex) {
+    }
+    catch (PluginNotFoundException $ex) {
       watchdog_exception('cohesion', $ex);
     }
 
@@ -176,7 +177,8 @@ class CustomStylesEndpointController extends ControllerBase {
   private function customStyleTypeEntityById($id) {
     try {
       return $this->entityTypeManager()->getStorage('custom_style_type')->load($id);
-    } catch (PluginNotFoundException $ex) {
+    }
+    catch (PluginNotFoundException $ex) {
       watchdog_exception('cohesion', $ex);
     }
     return NULL;

@@ -2,16 +2,15 @@
 
 namespace Drupal\cohesion_elements\Controller;
 
+use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
+use Drupal\cohesion_elements\Entity\Component;
 use Drupal\cohesion_elements\Entity\ComponentContent;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
-use Drupal\cohesion\CohesionJsonResponse;
-use Drupal\cohesion_elements\Entity\Component;
 
 /**
  * Class CohesionEndpointController.
@@ -29,6 +28,7 @@ class ComponentContentController extends ControllerBase {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *
    * @return \Drupal\cohesion\CohesionJsonResponse
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\TypedData\Exception\MissingDataException
@@ -52,11 +52,12 @@ class ComponentContentController extends ControllerBase {
     }
 
     $ids = $query->execute();
+    /** @var ComponentContent[ $component_contents */
     $component_contents = $storage->loadMultiple($ids);
     $data = [];
 
     foreach ($component_contents as $component_content) {
-      if($component_content->id() === $exclude_component_content) {
+      if ($component_content->id() === $exclude_component_content) {
         continue;
       }
 
@@ -198,7 +199,7 @@ class ComponentContentController extends ControllerBase {
     if (property_exists($content, 'canvas') && property_exists($content, 'model')) {
       $layout_canvas = new LayoutCanvas($content_raw);
       $elements = $layout_canvas->getCanvasElements();
-      // Make sure the canvas contains only one top level element and this element is a component
+      // Make sure the canvas contains only one top level element and this element is a component.
       if (count($elements) == 1 && $elements[0]->isComponent() && $elements[0]->getModel()) {
         $element = $elements[0];
         if ($componentEntity = Component::load($element->getComponentID())) {
@@ -288,7 +289,7 @@ class ComponentContentController extends ControllerBase {
   public function buildTable(&$build_data, $entityType, $category, $entities = []) {
     $build_data['table'] = [
       '#type' => 'table',
-      '#header' => ($entities) ? $this->buildHeader(): [],
+      '#header' => ($entities) ? $this->buildHeader() : [],
       '#title' => $category->label(),
       '#rows' => [],
       '#empty' => $this->t('There are no available @label that component content can be created from.', ['@label' => mb_strtolower($entityType->getLabel())]),
@@ -347,7 +348,6 @@ class ComponentContentController extends ControllerBase {
 
     return $header;
   }
-
 
   /**
    * {@inheritdoc}

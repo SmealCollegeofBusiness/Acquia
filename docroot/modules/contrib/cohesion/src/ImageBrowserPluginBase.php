@@ -2,14 +2,14 @@
 
 namespace Drupal\cohesion;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Component\Plugin\PluginBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class ImageBrowserPluginBase.
+ * Base plugin for image browser element.
  *
  * @package Drupal\cohesion
  */

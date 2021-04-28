@@ -2,30 +2,30 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
-use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\Plugin\EntityUpdate\_0025EntityUpdate;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
-class _0025MockEntity extends EntityMockBase  {
+class _0025MockEntity extends EntityMockBase {
 
   protected $jsonMapper;
 
   public function __construct($json_values, $isLayoutCanvas = FALSE, $json_mapper = NULL) {
     parent::__construct($json_values, $isLayoutCanvas);
-    if(!is_null($json_mapper)) {
+    if (!is_null($json_mapper)) {
       $this->jsonMapper = $json_mapper;
     }
   }
 
   public function getDecodedJsonMapper($as_array = FALSE) {
-    if($as_array) {
+    if ($as_array) {
       return json_decode($this->jsonMapper, TRUE);
-    }else {
+    }
+    else {
       return json_decode($this->jsonMapper);
     }
   }
@@ -33,7 +33,6 @@ class _0025MockEntity extends EntityMockBase  {
   public function setJsonMapper($json_mapper) {
     $this->jsonMapper = $json_mapper;
   }
-
 
 }
 
@@ -79,7 +78,6 @@ class _0025MockEntityUpdate extends _0025EntityUpdate {
     return $this->uuids[$this->uuid_iterator];
   }
 
-
 }
 
 /**
@@ -87,7 +85,8 @@ class _0025MockEntityUpdate extends _0025EntityUpdate {
  */
 class _0025EntityUpdateUnitTest extends UnitTestCase {
 
-  /** @var $unit \Drupal\cohesion\Plugin\EntityUpdate\_0025EntityUpdate  */
+  /**
+   * @var unit\Drupal\cohesion\Plugin\EntityUpdate\_0025EntityUpdate*/
   protected $unit;
 
   private $fixture_component = '{ "model": { "093be72e-486c-43b0-affe-d66b1e617634": { "settings": { "width": "fluid" } }, "7c43da5f-3243-4721-9d8a-a17d5a4d56c6": { "settings": { "title": "Row for columns", "styles": { "xl": { "bleed": "retain", "targetContainer": "inner", "overflow": "visible", "jsSettings": { "matchHeightRow": { "targetElement": "none" } } } }, "customStyle": [ { "customStyle": "" } ], "targetContainer": "inner" }, "context-visibility": { "contextVisibility": { "condition": "ALL" }, "contextAttributes": [ { "context": "context:amp_theme_active" } ] }, "styles": { "settings": { "element": "row-for-columns" } }, "markup": { "classes": "class" }, "animateonview": { "group": "BouncingExits", "animation": "bounceOut" }, "seo": { "itemTypeValue": "ss", "itemPropValue": "dd" }, "analytics": { "eventAttributes": [ { "trigger": "click", "eventCategory": "ss", "eventAction": "dd" } ], "dataLayerAttributes": [] }, "hideNoData": { "hideEnable": true, "hideData": "qw" } }, "5d7f4bdf-6f67-4a6f-bf06-f8d099ba3b65": { "settings": { "styles": { "xl": { "col": -2, "pull": -1, "push": -1, "offset": -1 } } } }, "75fc200c-5741-49dc-9913-34db49a9acde": { "settings": { "styles": { "xl": { "col": -2, "pull": -1, "push": -1, "offset": -1 } } } }, "c7a6e84d-4f7e-4dae-a9e6-849e569033e8": { "settings": { "element": "h1" } }, "fa90b640-36f8-4842-a69e-7b43321b1b35": { "settings": { "title": "Paragraph", "customStyle": [ { "customStyle": "" } ] }, "context-visibility": { "contextVisibility": { "condition": "ALL" } }, "styles": { "settings": { "element": "p" }, "styles": { "xl": { "font-weight": { "value": "300" } }, "pseudos": [ { "pseudos": [ null, null, { "styles": { "xl": { "clearfix": { "value": false } } } } ] } ] }, "pseudos": [ { "settings": { "element": "", "class": "", "combinator": "", "pseudo": ":active" }, "styles": { "xl": { "min-height": { "value": "11" } } }, "children": [ { "settings": { "element": "ee", "class": "", "combinator": "", "pseudo": "" }, "styles": { "xl": { "font-size": { "value": "[Field 2]" } } }, "children": [], "pseudos": [], "modifiers": [], "prefix": [] } ], "pseudos": [ { "settings": { "element": "", "class": "", "combinator": "", "pseudo": ":before" }, "styles": { "xl": { "margin": { "margin-top": { "value": "33" } } } }, "children": [], "pseudos": [], "modifiers": [], "prefix": [] }, { "settings": { "element": "", "class": "", "combinator": "", "pseudo": ":last-child" }, "styles": { "xl": { "margin": { "margin-top": { "value": "44" } } } }, "children": [], "pseudos": [], "modifiers": [], "prefix": [] }, { "settings": { "element": "", "class": "", "combinator": "", "pseudo": ":as" }, "styles": { "xl": { "clearfix": { "value": false }, "min-height": { "value": "44" }, "max-height": { "value": "[Field 1]" } } }, "children": [], "pseudos": [], "modifiers": [], "prefix": [] } ], "modifiers": [], "prefix": [] } ], "children": [ { "settings": { "element": "sd", "class": "", "combinator": "", "pseudo": "" }, "styles": { "xl": { "min-width": { "value": "22" } } }, "children": [], "pseudos": [], "modifiers": [], "prefix": [] } ] } }, "0228b0a0-d3c4-46fc-9ce4-32cb4b64674d": { "settings": { "title": "Input", "schema": { "type": "string" } } }, "0a7e17d8-6803-42f2-ba2f-bb4c78ad265e": { "settings": { "title": "Input", "schema": { "type": "string" } } } }, "mapper": { "093be72e-486c-43b0-affe-d66b1e617634": {}, "7c43da5f-3243-4721-9d8a-a17d5a4d56c6": { "settings": { "topLevel": { "formDefinition": [ { "formKey": "row-for-columns-settings", "children": [ { "formKey": "row-for-columns-bleed", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "bleed", "active": true }, { "name": "overflow", "active": true } ] }, { "formKey": "row-for-columns-markup-style-target", "breakpoints": [], "activeFields": [ { "name": "targetContainer", "active": true } ] }, { "formKey": "row-for-columns-style", "breakpoints": [], "activeFields": [ { "name": "customStyle", "active": true }, { "name": "customStyle", "active": true } ] } ] }, { "formKey": "row-for-columns-js-settings", "children": [ { "formKey": "row-for-columns-match-height", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "targetElement", "active": true }, { "name": "class", "active": true }, { "name": "targetLevel", "active": true } ] } ] } ], "selectorType": "topLevel", "form": null }, "dropzone": [], "selectorType": "topLevel" }, "markup": { "topLevel": { "formDefinition": [ { "formKey": "tab-markup-classes-and-ids", "children": [ { "formKey": "tab-markup-add-classes", "breakpoints": [], "activeFields": [ { "name": "classes", "active": true } ] } ] } ], "title": "Markup", "selectorType": "topLevel", "form": null }, "dropzone": [], "title": "Markup", "selectorType": "topLevel" }, "animateonview": { "topLevel": { "formDefinition": [ { "formKey": "tab-animateonview-animation", "children": [ { "formKey": "tab-animateonview-animation-attributes", "breakpoints": [], "activeFields": [ { "name": "group", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "animation", "active": true }, { "name": "duration", "active": true }, { "name": "delay", "active": true }, { "name": "offset", "active": true }, { "name": "iteration", "active": true } ] } ] } ], "title": "Animate on view", "selectorType": "topLevel", "form": null }, "dropzone": [], "title": "Animate on view", "selectorType": "topLevel" }, "seo": { "topLevel": { "formDefinition": [ { "formKey": "tab-seo-schema", "children": [ { "formKey": "tab-seo-add-schema", "breakpoints": [], "activeFields": [ { "name": "itemTypeValue", "active": true }, { "name": "itemPropValue", "active": true } ] } ] } ], "title": "SEO", "selectorType": "topLevel", "form": null }, "dropzone": [], "title": "SEO", "selectorType": "topLevel" }, "analytics": { "topLevel": { "formDefinition": [ { "formKey": "tab-analytics-events", "children": [ { "formKey": "tab-analytics-event-attributes", "breakpoints": [], "activeFields": [ { "name": "eventAttributes", "active": true } ] } ] }, { "formKey": "tab-analytics-data-layer", "children": [ { "formKey": "tab-analytics-data-layer-attributes", "breakpoints": [], "activeFields": [ { "name": "dataLayerAttributes", "active": true } ] } ] } ], "title": "Analytics", "selectorType": "topLevel", "form": null }, "dropzone": [], "title": "Analytics", "selectorType": "topLevel" }, "hideNoData": { "topLevel": { "formDefinition": [ { "formKey": "tab-hide-data-settings", "children": [ { "formKey": "tab-hide-data-hide", "breakpoints": [], "activeFields": [ { "name": "hideEnable", "active": true }, { "name": "hideData", "active": true } ] } ] } ], "title": "Hide if no data", "selectorType": "topLevel", "form": null }, "dropzone": [], "title": "Hide if no data", "selectorType": "topLevel" }, "context-visibility": { "topLevel": { "formDefinition": [ { "formKey": "tab-context-visibility-context", "children": [ { "formKey": "tab-context-visibility-add-contexts", "breakpoints": [], "activeFields": [ { "name": "contextAttributes", "active": true } ] }, { "formKey": "tab-context-visibility-pass-condition", "breakpoints": [], "activeFields": [ { "name": "condition", "active": true } ] } ] } ], "title": "Context visibility", "selectorType": "topLevel", "form": null }, "dropzone": [], "title": "Context visibility", "selectorType": "topLevel" } }, "5d7f4bdf-6f67-4a6f-bf06-f8d099ba3b65": {}, "75fc200c-5741-49dc-9913-34db49a9acde": {}, "fa90b640-36f8-4842-a69e-7b43321b1b35": { "settings": { "topLevel": { "formDefinition": [ { "formKey": "paragraph-settings", "children": [ { "formKey": "paragraph-paragraph", "breakpoints": [], "activeFields": [ { "name": "content", "active": true } ] }, { "formKey": "paragraph-style", "breakpoints": [], "activeFields": [ { "name": "customStyle", "active": true }, { "name": "customStyle", "active": true } ] } ] } ], "selectorType": "topLevel", "form": null }, "dropzone": [], "selectorType": "topLevel" }, "styles": { "topLevel": { "formDefinition": [ { "formKey": "font", "children": [ { "formKey": "font-and-color", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "font-family", "active": true }, { "name": "font-weight", "active": true }, { "name": "color", "active": true } ] } ] } ], "selectorType": "topLevel", "form": null }, "dropzone": [ { "title": ":active", "type": "container", "items": [ { "title": ":before", "type": "container", "items": [], "form": null, "selectorType": "pseudo", "oldModelKey": [ "pseudos", 0, "pseudos", 0 ], "prevKey": [ "pseudos", 0, "pseudos", 0 ], "allowedTypes": [ "child", "pseudo" ], "formDefinition": [ { "formKey": "layout", "children": [ { "formKey": "margin", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "margin-equal", "active": false }, { "name": "margin-top", "active": true }, { "name": "margin-bottom", "active": true }, { "name": "margin-left", "active": true }, { "name": "margin-right", "active": true } ] } ] } ] }, { "title": ":last-child", "type": "container", "items": [], "form": null, "selectorType": "pseudo", "oldModelKey": [ "pseudos", 0, "pseudos", 1 ], "prevKey": [ "pseudos", 0, "pseudos", 1 ], "allowedTypes": [ "child", "pseudo" ], "formDefinition": [ { "formKey": "layout", "children": [ { "formKey": "margin", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "margin-equal", "active": false }, { "name": "margin-top", "active": true }, { "name": "margin-bottom", "active": true }, { "name": "margin-left", "active": true }, { "name": "margin-right", "active": true } ] } ] } ] }, { "title": ":as", "type": "container", "items": [], "form": null, "selectorType": "pseudo", "subType": "custom-pseudo", "model": ":as", "oldModelKey": [ "pseudos", 0, "pseudos", 2 ], "prevKey": [ "pseudos", 0, "pseudos", 2 ], "allowedTypes": [ "child", "pseudo" ], "formDefinition": [ { "formKey": "layout", "children": [ { "formKey": "float", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "float", "active": true }, { "name": "clear", "active": true }, { "name": "clearfix", "active": true } ] }, { "formKey": "height", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "min-height", "active": true }, { "name": "max-height", "active": true }, { "name": "height", "active": true } ] } ] } ] }, { "title": "ee", "type": "container", "items": [], "form": null, "selectorType": "child", "model": "ee", "oldModelKey": [ "pseudos", 0, "children", 0 ], "prevKey": [ "pseudos", 0, "children", 0 ], "allowedTypes": [ "child", "pseudo", "modifier" ], "formDefinition": [ { "formKey": "font", "children": [ { "formKey": "font-sizing-and-alignment", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "font-size", "active": true }, { "name": "line-height", "active": true }, { "name": "text-align", "active": true }, { "name": "letter-spacing", "active": true }, { "name": "word-spacing", "active": true }, { "name": "text-indent", "active": true } ] } ] } ] } ], "form": null, "selectorType": "pseudo", "prevKey": [ "pseudos", 0 ], "allowedTypes": [ "child", "pseudo" ], "formDefinition": [ { "formKey": "layout", "children": [ { "formKey": "height", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "min-height", "active": true }, { "name": "max-height", "active": true }, { "name": "height", "active": true } ] } ] } ] }, { "title": "sd", "type": "container", "items": [], "form": null, "selectorType": "child", "model": "sd", "prevKey": [ "children", 0 ], "allowedTypes": [ "child", "pseudo", "modifier" ], "formDefinition": [ { "formKey": "layout", "children": [ { "formKey": "width", "breakpoints": [ { "name": "xl" } ], "activeFields": [ { "name": "min-width", "active": true }, { "name": "max-width", "active": true }, { "name": "width", "active": true } ] } ] } ] } ] } }, "c7a6e84d-4f7e-4dae-a9e6-849e569033e8": {} }, "previewModel": { "7c43da5f-3243-4721-9d8a-a17d5a4d56c6": {}, "fa90b640-36f8-4842-a69e-7b43321b1b35": { "styles": { "pseudos": [ { "pseudos": [ null, null, { "styles": { "xl": { "max-height": { "value": "99" } } } } ], "children": [ { "styles": { "xl": { "font-size": { "value": "45" } } } } ] } ] } } }, "variableFields": { "7c43da5f-3243-4721-9d8a-a17d5a4d56c6": [], "fa90b640-36f8-4842-a69e-7b43321b1b35": [ "styles.pseudos.0.pseudos.2.styles.xl.max-height.value", "styles.pseudos.0.children.0.styles.xl.font-size.value" ] }, "meta": {}, "canvas": [ { "type": "container", "uid": "container", "title": "Container", "status": { "collapsed": false }, "children": [ { "type": "container", "uid": "row-for-columns", "title": "Row for columns", "status": { "collapsed": false }, "children": [ { "type": "container", "uid": "column", "title": "Column", "status": { "collapsed": false }, "children": [ { "type": "container", "uid": "paragraph", "title": "Paragraph", "status": { "collapsed": true }, "children": [], "uuid": "fa90b640-36f8-4842-a69e-7b43321b1b35", "parentUid": "column", "isContainer": true } ], "breakpointClasses": "coh-layout-col-xl coh-layout-column-width", "uuid": "5d7f4bdf-6f67-4a6f-bf06-f8d099ba3b65", "parentUid": "row-for-columns", "isContainer": true }, { "type": "container", "uid": "column", "title": "Column", "status": { "collapsed": false }, "children": [ { "type": "container", "uid": "heading", "title": "Heading", "status": { "collapsed": true }, "children": [], "uuid": "c7a6e84d-4f7e-4dae-a9e6-849e569033e8", "parentUid": "column", "isContainer": true } ], "breakpointClasses": "coh-layout-col-xl coh-layout-column-width", "uuid": "75fc200c-5741-49dc-9913-34db49a9acde", "parentUid": "row-for-columns", "isContainer": true } ], "uuid": "7c43da5f-3243-4721-9d8a-a17d5a4d56c6", "parentUid": "container", "isContainer": true } ], "uuid": "093be72e-486c-43b0-affe-d66b1e617634", "parentUid": "root", "isContainer": true } ], "componentForm": [ { "type": "form-field", "uid": "form-input", "title": "Input", "status": { "collapsed": false }, "uuid": "0228b0a0-d3c4-46fc-9ce4-32cb4b64674d", "parentUid": "root", "isContainer": false }, { "type": "form-field", "uid": "form-input", "title": "Input", "status": { "collapsed": false }, "uuid": "0a7e17d8-6803-42f2-ba2f-bb4c78ad265e", "parentUid": "root", "isContainer": false } ] }';
@@ -99,7 +98,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    $this->unit = new _0025MockEntityUpdate([], null, null);
+    $this->unit = new _0025MockEntityUpdate([], NULL, NULL);
   }
 
   /**
@@ -122,7 +121,6 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->unit->runUpdate($style);
     $this->assertionsStyleAfter($style->getDecodedJsonValues(), $style->getDecodedJsonMapper(TRUE));
 
-
   }
 
   private function assertionsLayoutCanvasBefore($json) {
@@ -144,8 +142,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
 
     $this->assertArrayHasKey('pseudos', $json['model']['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['styles'], 'Pseudos in styles/styles has key');
 
-    // Mapper
-
+    // Mapper.
     $this->assertArrayHasKey('topLevel', $json['mapper']['7c43da5f-3243-4721-9d8a-a17d5a4d56c6']['settings']);
     $this->assertArrayHasKey('topLevel', $json['mapper']['7c43da5f-3243-4721-9d8a-a17d5a4d56c6']['markup']);
     $this->assertArrayHasKey('topLevel', $json['mapper']['7c43da5f-3243-4721-9d8a-a17d5a4d56c6']['animateonview']);
@@ -158,7 +155,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayNotHasKey('formDefinition', $json['mapper']['fa90b640-36f8-4842-a69e-7b43321b1b35']['settings']);
     $this->assertArrayNotHasKey('form', $json['mapper']['fa90b640-36f8-4842-a69e-7b43321b1b35']['settings']);
 
-    // variableFields
+    // variableFields.
     $this->assertEquals('styles.pseudos.0.pseudos.2.styles.xl.max-height.value', $json['variableFields']['fa90b640-36f8-4842-a69e-7b43321b1b35'][0]);
     $this->assertEquals('styles.pseudos.0.children.0.styles.xl.font-size.value', $json['variableFields']['fa90b640-36f8-4842-a69e-7b43321b1b35'][1]);
 
@@ -166,16 +163,16 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
 
   private function assertionsLayoutCanvasAfter($after_json, $before_json) {
 
-    // Make sure the canvas has not been changed
+    // Make sure the canvas has not been changed.
     $this->assertEquals($after_json['canvas'], $before_json['canvas']);
 
-    // Make sure the componentForm has not been changed
+    // Make sure the componentForm has not been changed.
     $this->assertEquals($after_json['componentForm'], $before_json['componentForm']);
 
-    // Assert Model
+    // Assert Model.
     $before_model = $before_json['model'];
     $after_model = $after_json['model'];
-    // Only the paragraph element has styles so most element model should remain the same
+    // Only the paragraph element has styles so most element model should remain the same.
     $this->assertEquals($after_model['093be72e-486c-43b0-affe-d66b1e617634'], $before_model['093be72e-486c-43b0-affe-d66b1e617634']);
     $this->assertEquals($after_model['7c43da5f-3243-4721-9d8a-a17d5a4d56c6'], $before_model['7c43da5f-3243-4721-9d8a-a17d5a4d56c6']);
     $this->assertEquals($after_model['5d7f4bdf-6f67-4a6f-bf06-f8d099ba3b65'], $before_model['5d7f4bdf-6f67-4a6f-bf06-f8d099ba3b65']);
@@ -183,7 +180,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertEquals($after_model['c7a6e84d-4f7e-4dae-a9e6-849e569033e8'], $before_model['c7a6e84d-4f7e-4dae-a9e6-849e569033e8']);
     $this->assertEquals($after_model['0228b0a0-d3c4-46fc-9ce4-32cb4b64674d'], $before_model['0228b0a0-d3c4-46fc-9ce4-32cb4b64674d']);
     $this->assertEquals($after_model['0a7e17d8-6803-42f2-ba2f-bb4c78ad265e'], $before_model['0a7e17d8-6803-42f2-ba2f-bb4c78ad265e']);
-    // Paragraph element
+    // Paragraph element.
     $this->assertEquals($after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['settings'], $before_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['settings']);
     $this->assertEquals($after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['context-visibility'], $before_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['context-visibility']);
 
@@ -191,8 +188,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayNotHasKey('children', $after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles'], 'Children in styles');
 
     // @todo to Jesse ????
-//    $this->assertArrayNotHasKey('pseudos', $after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['styles'], 'Pseudos in styles/styles');
-
+    //   $this->assertArrayNotHasKey('pseudos', $after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['styles'], 'Pseudos in styles/styles');
     $this->assertArrayHasKey('350c43f3-883a-46c1-a0c2-b9840c4850a5', $after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']);
     $this->assertEquals('22', $after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['350c43f3-883a-46c1-a0c2-b9840c4850a5']['styles']['xl']['min-width']['value']);
     $this->assertArrayNotHasKey('children', $after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['350c43f3-883a-46c1-a0c2-b9840c4850a5']);
@@ -225,7 +221,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayHasKey('6d05c31c-7a0a-4464-9dd6-abecbef9f9a1', $after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']);
     $this->assertEquals('11', $after_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['6d05c31c-7a0a-4464-9dd6-abecbef9f9a1']['styles']['xl']['min-height']['value']);
 
-    // Mapper
+    // Mapper.
     $after_mapper = $after_json['mapper'];
     $this->assertArrayNotHasKey('topLevel', $after_mapper['7c43da5f-3243-4721-9d8a-a17d5a4d56c6']['settings']);
     $this->assertArrayNotHasKey('dropzone', $after_mapper['7c43da5f-3243-4721-9d8a-a17d5a4d56c6']['settings']);
@@ -275,7 +271,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayHasKey('selectorType', $after_mapper['7c43da5f-3243-4721-9d8a-a17d5a4d56c6']['context-visibility']);
     $this->assertArrayHasKey('form', $after_mapper['7c43da5f-3243-4721-9d8a-a17d5a4d56c6']['context-visibility']);
 
-    //Mapper Paragraph
+    // Mapper Paragraph.
     $this->assertArrayNotHasKey('topLevel', $after_mapper['fa90b640-36f8-4842-a69e-7b43321b1b35']['settings']);
     $this->assertArrayNotHasKey('dropzone', $after_mapper['fa90b640-36f8-4842-a69e-7b43321b1b35']['settings']);
     $this->assertArrayHasKey('formDefinition', $after_mapper['fa90b640-36f8-4842-a69e-7b43321b1b35']['settings']);
@@ -326,23 +322,23 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayNotHasKey('allowedTypes', $after_mapper['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['items'][0]['items'][3]);
     $this->assertArrayNotHasKey('oldModelKey', $after_mapper['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['items'][0]['items'][3]);
 
-    // previewModel
+    // previewModel.
     $after_preview_model = $after_json['previewModel'];
     $this->assertEquals('45', $after_preview_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['76c5b0c2-3b6b-426a-aacd-401d70e2a08c']['styles']['xl']['font-size']['value']);
     $this->assertEquals(NULL, $after_preview_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['e1a684be-5a94-4a2e-b48b-313f935b0514']);
     $this->assertEquals(NULL, $after_preview_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['576e69b3-7501-45c9-aa8b-914f6967fa0c']);
     $this->assertEquals(99, $after_preview_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['a39a774b-4187-4014-b878-e3f0c8de216b']['styles']['xl']['max-height']['value']);
-    $this->assertArrayHasKey('6d05c31c-7a0a-4464-9dd6-abecbef9f9a1',  $after_preview_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']);
+    $this->assertArrayHasKey('6d05c31c-7a0a-4464-9dd6-abecbef9f9a1', $after_preview_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']);
     $this->assertEquals(TRUE, is_array($after_preview_model['fa90b640-36f8-4842-a69e-7b43321b1b35']['styles']['6d05c31c-7a0a-4464-9dd6-abecbef9f9a1']));
 
-    // variableFields
+    // variableFields.
     $this->assertEquals('styles.a39a774b-4187-4014-b878-e3f0c8de216b.styles.xl.max-height.value', $after_json['variableFields']['fa90b640-36f8-4842-a69e-7b43321b1b35'][0]);
     $this->assertEquals('styles.76c5b0c2-3b6b-426a-aacd-401d70e2a08c.styles.xl.font-size.value', $after_json['variableFields']['fa90b640-36f8-4842-a69e-7b43321b1b35'][1]);
 
   }
 
   private function assertionsStyleBefore($json_values, $json_mapper) {
-    // Model
+    // Model.
     $this->assertArrayHasKey('settings', $json_values['styles']);
     $this->assertArrayHasKey('styles', $json_values['styles']);
     $this->assertArrayHasKey('pseudos', $json_values['styles']);
@@ -379,7 +375,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayHasKey('modifiers', $json_values['styles']['children'][0]);
     $this->assertArrayHasKey('prefix', $json_values['styles']['children'][0]);
 
-    // Mapper
+    // Mapper.
     $this->assertArrayHasKey('topLevel', $json_mapper['styles']);
     $this->assertArrayHasKey('dropzone', $json_mapper['styles']);
 
@@ -435,7 +431,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
   }
 
   private function assertionsStyleAfter($json_values, $json_mapper) {
-    // model
+    // Model.
     $this->assertArrayHasKey('settings', $json_values['styles']);
     $this->assertArrayHasKey('styles', $json_values['styles']);
     $this->assertArrayNotHasKey('pseudos', $json_values['styles']);
@@ -499,7 +495,7 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertArrayNotHasKey('children', $json_values['styles']['a6197f67-2459-4a5a-a6cb-d9e13c321da2']);
     $this->assertArrayNotHasKey('prefix', $json_values['styles']['a6197f67-2459-4a5a-a6cb-d9e13c321da2']);
 
-    // Mapper
+    // Mapper.
     $this->assertArrayNotHasKey('topLevel', $json_mapper['styles']);
     $this->assertArrayNotHasKey('dropzone', $json_mapper['styles']);
     $this->assertArrayHasKey('items', $json_mapper['styles']);
@@ -566,4 +562,5 @@ class _0025EntityUpdateUnitTest extends UnitTestCase {
     $this->assertEquals('2440d1ef-73fe-4c9c-9aac-90e814b6f94a', $json_mapper['styles']['items'][0]['items'][1]['items'][0]['uuid']);
 
   }
+
 }

@@ -3,8 +3,8 @@
 namespace Drupal\cohesion_website_settings\Plugin\EntityGroups;
 
 use Drupal\cohesion\EntityGroupsPluginBase;
-use Drupal\Component\Serialization\Json;
 use Drupal\cohesion_website_settings\Entity\SCSSVariable;
+use Drupal\Component\Serialization\Json;
 
 /**
  * Class SCSSVariableEntityGroups.

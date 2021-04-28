@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion\Plugin\Usage\EntityFormDisplayUsage;
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Plugin\Usage\EntityFormDisplayUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * Mock for the core form display entity.
@@ -13,8 +13,10 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
  * @package Drupal\Tests\cohesion\Unit\Plugin\Usage
  */
 class MockFormDisplay extends CohesionConfigEntityBase implements CohesionSettingsInterface {
-  public function getApiPluginInstance(){
+
+  public function getApiPluginInstance() {
   }
+
 }
 
 /**
@@ -47,8 +49,8 @@ class EntityFormDisplayUsageUnitTest extends UsagePluginBaseUnitTest {
     $fixture = [
       [
         'type' => 'drupal_form_display',
-        'uuid' => '64bc0b1e-5779-48eb-bdc1-ab61f4588271'
-      ]
+        'uuid' => '64bc0b1e-5779-48eb-bdc1-ab61f4588271',
+      ],
     ];
 
     $entities = $this->unit->scanForInstancesOfThisType($fixture, new MockFormDisplay([], 'drupal_form_display'));

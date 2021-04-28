@@ -23,7 +23,7 @@ class CohesionCdfExpectations extends CdfExpectations {
 
     $field_value = parent::getFieldValue($field_name, $langcode);
 
-    if($field_name == 'json_values' && !empty($field_value) && isset($field_value[0]['value'])) {
+    if ($field_name == 'json_values' && !empty($field_value) && isset($field_value[0]['value'])) {
       $layout_canvas = new LayoutCanvas($field_value[0]['value']);
       $field_value[0]['value'] = json_encode($layout_canvas);
     }

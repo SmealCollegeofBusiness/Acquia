@@ -19,6 +19,29 @@ module
 
 For more information about SAML, see: https://en.wikipedia.org/wiki/SAML_2.0
 
+UPGRADING
+------------
+Upgrading from 8.x-2.x to 8.x-3.x is trivial; just make sure your composer
+dependencies are met. The only reason for the major version jump was a major
+version jump in the upstream php-saml dependency that was caused by a security
+issue - plus having no indication that the upstream 2.x version (which only
+supported PHP < 7.2) would stay maintained.
+
+There is no tested upgrade path from 8.x-1.3 to 8.x-3.x. Upgrading has two
+aspects:
+* Configuration: the module should keep working after the module upgrade
+  because the configuration hasn't changed; it has just been added to.
+  Regardless: it is recommended to look through existing configuration to see
+  which new configuration options are beneficial to include/change.
+* Data: the links between SAML login ID and Drupal user are stored differently
+  so after the upgrade, users could (depending on your settings) be unable to
+  log in or potentially even log in as a different user. The data can be
+  migrated with this SQL query (to be modified for database prefixes):
+  ```sql
+  INSERT INTO authmap (uid, authname, provider, data)
+  SELECT uid, value AS authname, 'samlauth' AS provider, 'N;' as data from users_data WHERE module='samlauth' and name='saml_id'
+  ```
+
 INSTALLATION
 ------------
 Install as you would normally install a contributed drupal module. See:
@@ -42,15 +65,19 @@ During configuration,
   configure the other's identity/location. More details are in the respective
   configuration sections.
 
-Optional install: flood_control module. Flood control is applied to failed
-login attempts - which is Drupal Core functionality without a UI. Too
-many failed logins could result  in "Access is blocked because of IP based
-flood prevention." messages, though this is very unlikely to happen. If you
-want to make sure you'll have a UI to look at in those cases, rather than
-going into the 'flood' table, install the flood_control module. If you want to
-see all relevant information in the 'Flood Unblock' view, make sure issue
-https://www.drupal.org/project/flood_control/issues/3191346 is fixed, or apply
-the latest patch from it. (The module works without the patch, though.)
+Optional installs:
+- views module, to see a list of currently registered links (associations)
+  between SAML login data and Drupal users - and be able to delete them from
+  the administrative UI (rather than directly manipulating the 'authmap' table).
+- flood_control module. Flood control is applied to failed login attempts -
+  which is Drupal Core functionality without a UI. Too many failed logins could
+  result  in "Access is blocked because of IP based flood prevention."
+  messages, though this is very unlikely to happen. To have an administrative
+  UI rather than manipulating the 'flood' table directly in those cases,
+  install the flood_control module. To see all relevant information in the
+  'Flood Unblock' view, make sure issue
+  https://www.drupal.org/project/flood_control/issues/3191346 is fixed, or
+  apply the latest patch from it. (The module works without the patch, though.)
 
 CONFIGURATION AND TESTING
 -------------------------
@@ -128,7 +155,7 @@ configuration.)
 
 This value must get sent from the IdP as an 'attribute' in the SAML response,
 along with other attributes containing information like the user name and
-e-mail. (SAML also has the concept of "NameID" to use for this unique value
+email. (SAML also has the concept of "NameID" to use for this unique value
 instead of attributes, but this Drupal module does not support that yet. If
 you need this: check whether the saml_sp module works for your use case.)
 
@@ -138,8 +165,8 @@ this information, you need to inspect the contents of such an assertion while a
 user tries to log in. See the section on Debugging.
 
 If there is absolutely no unique non-changing value to set as Unique ID, you
-can take the username or e-mail attribute - but please note that a new Drupal
-user will be created every time that username/e-mail is changed on the IdP
+can take the username or email attribute - but please note that a new Drupal
+user will be created every time that username/email is changed on the IdP
 side.
 
 Other settings / checkboxes are hopefully self-explanatory.
@@ -211,38 +238,57 @@ A: No. This is something that a separate module like require_login / r4032login
 CONSIDERATIONS REGARDING YOUR DRUPAL USERS
 ------------------------------------------
 
-When users log in for the first time through the SAML IdP, they can get:
-* linked to an existing Drupal user (based on certain attribute values sent
+When users log in for the first time through the SAML IdP, they can:
+* be associated with a Drupal user already, if the login's Unique ID value was
+  pre-filled in the authmap table (which makes this indistinguishable from a
+  from a repeat login, as far as the samlauth module is concerned);
+* be linked to an existing Drupal user (based on certain attribute values sent
   along with the login; the attribute names need to be set up during
   configuration);
-* a new Drupal user created (based on those attribute values);
-* denied - if the options for linking and/or creating a new user were not
+* have a new Drupal user created (based on those attribute values);
+* be denied - if the options for linking and/or creating a new user were not
   enabled in configuration. (Or: if the option for linking was not enabled, and
-  creating a new user would lead to a duplicate username / e-mail.)
+  creating a new user would lead to a duplicate username / email.)
+
+Consider that linking existing Drupal users can constitute a security risk if
+users are able to change the values of any attributes used for matching at the
+IdP side; in this case, they can influence which user they are linked to. Use
+the various 'linking' configuration settings only if you know this is not a
+concern.
 
 If an organization wants to restrict the users who can log in to a new Drupal
-site to a known set, they can keep the "create new users" option turned off,
-turn on the "link existing users" option and pre-create that set of users.
-Either the username or the e-mail of the pre-created user must be known to the
-IdP and sent along with the login.
+site to a known set, they can keep the "create new users" option turned off and
+pre-create that set of users. They can then either turn on a "link existing
+users" option (by name and/or email) or also prepopulate the entries in the
+authmap table. The externalauth module contains a 'migrate destination' class
+that can assist here. (Any known links to documentation that gives an overview
+/ set of steps on how to import users and authmap entries will be added here.
+Using the migrate system to populate data is documented at e.g.
+https://www.drupal.org/node/2574707, but that is not a quick example/overview.)
 
 After users have logged in through the SAML IdP, the link between that
 particular login and the Drupal user gets remembered. From this point on,
-users are treated differently if they do not have the "Use Drupal login,
-bypassing SAML IdP" permission:
+users are treated differently unless they have a role that is explicitly
+"allowed to use Drupal login also when linked to a SAML login" by
+configuration:
 * They cannot log into Drupal directly anymore. Remember that if your Drupal
   site has existing locally (pre-)created users who know their password, this
   means there is an 'invisible' distinction with users who have not logged in
   through the IdP (yet): they can still log in locally.
-* They cannot change their password or e-mail in the user's edit form. The
-  password is hidden and the e-mail field is locked.
+* They cannot change their password or email in the user's edit form. The
+  password is hidden and the email field is locked.
 
 This last thing is slightly arbitrary but is the best thing we know to do for
 a consistent and non-confusing UI. Users who can only log in through the IdP
-don't need their password for anything. They also cannot change their e-mail if
+don't need their password for anything. They also cannot change their email if
 they don't know their current password - and it is unlikely that they do. If
 your use case involves existing Drupal users who know their password, then log
 in through the IdP _and_ should be barred from logging in through Drupal after
-that, but should still be able to change their e-mail... Please either file an
+that, but should still be able to change their email... Please either file an
 issue for a clear use case, or re-override the user edit screen using custom
 code.
+
+Users who have been created by the IdP login process get no password, so they
+can only log in locally after using Drupal's 'password reset email'
+functionality. They only have acces to that if they have a role that is
+"allowed to use Drupal login also when linked to a SAML login"

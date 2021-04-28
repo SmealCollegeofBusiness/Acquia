@@ -5,7 +5,7 @@ namespace Drupal\cohesion;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
- * Interface EntityGroupsPluginInterface.
+ * Interface for grouped entity plugin.
  *
  * @package Drupal\cohesion
  */

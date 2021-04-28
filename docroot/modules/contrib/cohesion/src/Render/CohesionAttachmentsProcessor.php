@@ -76,7 +76,10 @@ class CohesionAttachmentsProcessor extends HtmlResponseAttachmentsProcessor {
         if (!is_string($cohesion_attachment)) {
           throw new \LogicException(sprintf('Site Studio attachment must be of string, %s given', gettype($cohesion_attachment)));
         }
-        $processed_cohesion_attachments[] = Markup::create($cohesion_attachment);
+        $processed_styles = Markup::create($cohesion_attachment);
+        if($processed_styles != '<style></style>') {
+          $processed_cohesion_attachments[] = $processed_styles;
+        }
       }
     }
 

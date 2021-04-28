@@ -2,9 +2,9 @@
 
 namespace Drupal\cohesion_elements\Plugin\Field\FieldType;
 
+use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\entity_reference_revisions\Plugin\Field\FieldType\EntityReferenceRevisionsItem;
-use Drupal\cohesion_elements\Entity\CohesionLayout;
 
 /**
  * Defines the 'cohesion_entity_reference_revisions' entity field type.

@@ -7,7 +7,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Tests\UnitTestCase;
 
 /**
- * Class JsonXssMock
+ * Class JsonXssMock.
  *
  * @package Drupal\Tests\cohesion\Unit\Services
  */
@@ -60,4 +60,5 @@ class JsonXssUnitTest extends UnitTestCase {
     $this->assertArrayNotHasKey('868460cc-c0d6-470b-80cc-0cb7796e3952.settings.url', $url_paths);
     $this->assertArrayNotHasKey('2b4ac74e-6753-49a0-a35b-2316a7c9edb5.settings.url', $url_paths);
   }
+
 }

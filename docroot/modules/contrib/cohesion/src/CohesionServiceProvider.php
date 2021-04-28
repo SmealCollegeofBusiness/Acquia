@@ -2,16 +2,16 @@
 
 namespace Drupal\cohesion;
 
-use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\DependencyInjection\ServiceProviderBase;
-use Symfony\Component\DependencyInjection\Reference;
 use Drupal\cohesion\Controller\CohesionMediaLibraryUiBuilder;
 use Drupal\cohesion\EventSubscriber\DependencyCollector\CohesionEntityReferenceFieldDependencyCollector;
 use Drupal\cohesion\EventSubscriber\SerializeContentField\CohesionEntityReferenceFieldSerializer;
 use Drupal\cohesion\EventSubscriber\UnserializeContentField\CohesionEntityReferenceField;
+use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\Core\DependencyInjection\ServiceProviderBase;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * Site Studio service provider
+ * Site Studio service provider.
  */
 class CohesionServiceProvider extends ServiceProviderBase {
 
@@ -34,7 +34,7 @@ class CohesionServiceProvider extends ServiceProviderBase {
       $container->register('media_library.opener.cohesion', MediaLibraryCohesionOpener::class)
         ->setArguments(
           [
-            new Reference('entity_type.manager')
+            new Reference('entity_type.manager'),
           ]
         );
 
@@ -45,7 +45,7 @@ class CohesionServiceProvider extends ServiceProviderBase {
             new Reference('request_stack'),
             new Reference('views.executable'),
             new Reference('form_builder'),
-            new Reference('media_library.opener_resolver')
+            new Reference('media_library.opener_resolver'),
           ]
         );
     }

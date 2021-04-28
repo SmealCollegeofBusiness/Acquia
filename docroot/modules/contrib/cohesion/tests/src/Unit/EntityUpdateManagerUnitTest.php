@@ -2,13 +2,13 @@
 
 namespace Drupal\Tests\Update\cohesion\Unit;
 
-use Drupal\Tests\UnitTestCase;
-use Drupal\cohesion\EntityUpdateManager;
 use Drupal\cohesion\EntityUpdateInterface;
+use Drupal\cohesion\EntityUpdateManager;
 use Drupal\cohesion\EntityUpdatePluginManager;
+use Drupal\Tests\UnitTestCase;
 
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -38,10 +38,11 @@ class MockUpdateEntity implements EntityUpdateInterface {
   public function isNew() {
     return $this->is_new;
   }
+
 }
 
 /**
- * Class MockPluginInstance
+ * Class MockPluginInstance.
  *
  * @package Drupal\Tests\Update\cohesion\Unit
  */
@@ -50,10 +51,11 @@ class MockPluginInstance {
   public function runUpdate(&$entity) {
     return TRUE;
   }
+
 }
 
 /**
- * Class MockEntityUpdateManager
+ * Class MockEntityUpdateManager.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -62,13 +64,13 @@ class MockEntityUpdateManager extends EntityUpdateManager {
   public function getAllPluginDefinitions() {
     return [
       'entityupdate_0002' => [
-        'id' => 'entityupdate_0002'
+        'id' => 'entityupdate_0002',
       ],
       'entityupdate_0003' => [
-        'id' => 'entityupdate_0003'
+        'id' => 'entityupdate_0003',
       ],
       'entityupdate_0006' => [
-        'id' => 'entityupdate_0006'
+        'id' => 'entityupdate_0006',
       ],
     ];
   }
@@ -76,6 +78,7 @@ class MockEntityUpdateManager extends EntityUpdateManager {
   public function getPluginInstance($plugin_id) {
     return new MockPluginInstance();
   }
+
 }
 
 /**
@@ -83,7 +86,8 @@ class MockEntityUpdateManager extends EntityUpdateManager {
  */
 class EntityUpdateManagerUnitTest extends UnitTestCase {
 
-  /** @var MockEntityUpdateManager */
+  /**
+   * @var MockEntityUpdateManager*/
   protected $mockUnit;
 
   /**
@@ -93,7 +97,7 @@ class EntityUpdateManagerUnitTest extends UnitTestCase {
   public function setUp() {
     // Create a mock of the EntityUpdatePluginManager service.
     $prophecy = $this->prophesize(EntityUpdatePluginManager::CLASS);
-    //$prophecy->generate()->willReturn('0000-0000-0000-0000');
+    // $prophecy->generate()->willReturn('0000-0000-0000-0000');
     $update_update_plugin_manager = $prophecy->reveal();
 
     $this->mockUnit = new MockEntityUpdateManager($update_update_plugin_manager);
@@ -107,10 +111,10 @@ class EntityUpdateManagerUnitTest extends UnitTestCase {
     $plugins = $this->mockUnit->getAllPluginDefinitions();
 
     $this->assertEquals(count($plugins), 3);
-    $this->assertEquals(isset($plugins['entityupdate_0002']), true);
-    $this->assertEquals(isset($plugins['entityupdate_0003']), true);
-    $this->assertEquals(isset($plugins['entityupdate_0006']), true);
-    $this->assertEquals(isset($plugins['entityupdate_0007']), false);
+    $this->assertEquals(isset($plugins['entityupdate_0002']), TRUE);
+    $this->assertEquals(isset($plugins['entityupdate_0003']), TRUE);
+    $this->assertEquals(isset($plugins['entityupdate_0006']), TRUE);
+    $this->assertEquals(isset($plugins['entityupdate_0007']), FALSE);
 
   }
 
@@ -119,8 +123,8 @@ class EntityUpdateManagerUnitTest extends UnitTestCase {
    */
   public function testApply() {
     // For a new entity, just set the update to the latest callback function name.
-    $mock_entity = new MockUpdateEntity(null, TRUE);
-    $this->assertEquals($mock_entity->getLastAppliedUpdate(), null);
+    $mock_entity = new MockUpdateEntity(NULL, TRUE);
+    $this->assertEquals($mock_entity->getLastAppliedUpdate(), NULL);
 
     $applied_callbacks = $this->mockUnit->apply($mock_entity);
 
@@ -168,4 +172,5 @@ class EntityUpdateManagerUnitTest extends UnitTestCase {
   public function tearDown() {
     unset($this->mockUnit);
   }
+
 }

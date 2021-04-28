@@ -13,8 +13,14 @@ samlauth.authentication:
       type: string
     error_throw:
       type: boolean
+    local_login_saml_error:
+      type: boolean
     logout_different_user:
       type: boolean
+    drupal_login_roles:
+      type: sequence
+      sequence:
+        type: string
     sp_entity_id:
       type: string
     sp_name_id_format:
@@ -47,6 +53,14 @@ samlauth.authentication:
       type: string
     map_users:
       type: boolean
+    map_users_name:
+      type: boolean
+    map_users_mail:
+      type: boolean
+    map_users_roles:
+      type: sequence
+      sequence:
+        type: string
     create_users:
       type: boolean
     sync_name:
@@ -73,6 +87,8 @@ samlauth.authentication:
       type: string
     security_messages_sign:
       type: boolean
+    security_assertions_signed:
+      type: boolean
     security_want_name_id:
       type: boolean
     security_request_authn_context:
@@ -92,4 +108,6 @@ samlauth.authentication:
     debug_phpsaml:
       type: boolean
     use_proxy_headers:
+      type: boolean
+    use_base_url:
       type: boolean

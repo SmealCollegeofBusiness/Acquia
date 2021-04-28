@@ -3,7 +3,7 @@
 namespace Drupal\cohesion\Entity;
 
 /**
- * Interface UsagePluginInterface.
+ * Defines the interface for EntityJsonValues entities.
  *
  * @package Drupal\cohesion
  */
@@ -21,6 +21,7 @@ interface EntityJsonValuesInterface {
    * Return the decoded JSON values data.
    *
    * @param bool $as_object
+   *   To get JSON as object.
    *
    * @return mixed
    */
@@ -86,14 +87,14 @@ interface EntityJsonValuesInterface {
   public function getLayoutCanvasInstance();
 
   /**
-   * Return the API plugin instance for this entity
+   * Return the API plugin instance for this entity.
    *
    * @return \Drupal\cohesion\ApiPluginInterface
    */
   public function getApiPluginInstance();
 
   /**
-   * Process values to be sent to the API
+   * Process values to be sent to the API.
    *
    * @return bool
    */

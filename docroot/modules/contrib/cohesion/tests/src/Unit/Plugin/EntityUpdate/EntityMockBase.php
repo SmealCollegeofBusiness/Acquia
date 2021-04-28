@@ -4,10 +4,9 @@ namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\EntityJsonValuesTrait;
-use Drupal\Component\Serialization\Json;
 
 /**
- * Class MockUpdateEntity
+ * Class MockUpdateEntity.
  *
  * @package Drupal\Tests\cohesion\Unit
  */
@@ -46,11 +45,9 @@ class EntityMockBase implements EntityJsonValuesInterface {
   public function jsonValuesErrors() {
   }
 
-
   public function isLayoutCanvas() {
     return $this->isLayoutCanvas;
   }
-
 
   public function getApiPluginInstance() {
   }

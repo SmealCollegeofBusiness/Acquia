@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class ContextUsage.
+ * Plugin for context usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *

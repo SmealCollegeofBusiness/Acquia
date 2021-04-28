@@ -2,13 +2,12 @@
 
 namespace Drupal\cohesion\Controller;
 
-use Drupal\cohesion_elements\Entity\Component;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\node\Entity\Node;
+use Drupal\Core\Entity\ContentEntityType;
+use Drupal\Core\Url;
 use Drupal\system\SystemManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Drupal\Core\Url;
 
 /**
  * Class AdministrationController.

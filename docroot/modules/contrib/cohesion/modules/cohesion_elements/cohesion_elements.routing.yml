@@ -13,6 +13,7 @@ cohesion_elements.endpoints.component_contents:
   defaults:
     _controller: '\Drupal\cohesion_elements\Controller\ComponentContentController::getComponentContents'
     _title: "List of custom block global components"
+    componentPath: ''
   methods:  [GET]
   requirements:
     _permission: 'access component content'

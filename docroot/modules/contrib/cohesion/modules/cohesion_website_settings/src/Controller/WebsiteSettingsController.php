@@ -2,17 +2,17 @@
 
 namespace Drupal\cohesion_website_settings\Controller;
 
+use Drupal\cohesion\CohesionJsonResponse;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Drupal\Component\Serialization\Json;
-use Symfony\Component\HttpFoundation\Response;
-use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class WebsiteSettingsController.
@@ -503,13 +503,13 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
     ];
 
     $entity_update_manager = \Drupal::service('cohesion.entity_update_manager');
-    // The number of entities processed by batch operation
+    // The number of entities processed by batch operation.
     $entity_to_process = Settings::get('rebuild_max_entity', 10);
 
-    // A list of entity ids that can be processed at once
+    // A list of entity ids that can be processed at once.
     foreach ($style_configs as $style_config_type) {
       if (isset($configs[$style_config_type])) {
-        // Get entity ids needing an Site Studio update
+        // Get entity ids needing an Site Studio update.
         $entity_ids_needs_udpdate = \Drupal::entityTypeManager()
           ->getStorage($style_config_type)->getQuery()
           ->condition('status', TRUE)
@@ -588,15 +588,15 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
     // Move temp to live.
     $batch['operations'][] = [
       'entity_rebuild_temp_to_live', [
-        'verbose' => $verbose
-      ]
+        'verbose' => $verbose,
+      ],
     ];
 
     if(!$no_cache_clear) {
       $batch['operations'][] = [
         'batch_drupal_flush_all_caches', [
-          'verbose' => $verbose
-        ]
+        'verbose' => $verbose,
+      ],
       ];
     }
 

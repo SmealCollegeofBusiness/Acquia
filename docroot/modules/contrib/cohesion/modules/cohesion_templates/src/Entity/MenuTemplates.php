@@ -67,7 +67,7 @@ class MenuTemplates extends CohesionTemplateBase implements CohesionSettingsInte
 
   const ASSET_GROUP_ID = 'menu_template';
 
-  const entity_machine_name_prefix = 'menu_tpl_';
+  const ENTITY_MACHINE_NAME_PREFIX = 'menu_tpl_';
 
   /**
    * {@inheritdoc}

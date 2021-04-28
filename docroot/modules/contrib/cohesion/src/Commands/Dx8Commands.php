@@ -2,14 +2,14 @@
 
 namespace Drupal\cohesion\Commands;
 
-use Drupal\cohesion\Drush\DX8CommandHelpers;
-use Drush\Commands\DrushCommands;
-use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Consolidation\AnnotatedCommand\CommandResult;
+use Drupal\cohesion\Drush\DX8CommandHelpers;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
+use Drush\Commands\DrushCommands;
 
 /**
- * Class Dx8Commands.
+ * Drush command for import and rebuild.
  *
  * @package Drupal\cohesion\Commands
  */

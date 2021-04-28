@@ -2,11 +2,11 @@
 
 namespace Drupal\cohesion\Drush;
 
-use Drupal\cohesion_website_settings\Controller\WebsiteSettingsController;
 use Drupal\cohesion\Controller\AdministrationController;
+use Drupal\cohesion_website_settings\Controller\WebsiteSettingsController;
 
 /**
- * Class DX8CommandHelpers.
+ * Helper class for import/rebuild.
  *
  * @package Drupal\cohesion\Drush
  */
@@ -58,6 +58,7 @@ final class DX8CommandHelpers {
    * @param array $options
    *
    * @return mixed
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */

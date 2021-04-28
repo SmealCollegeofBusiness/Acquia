@@ -103,12 +103,8 @@ class CohesionSyncCommands extends DrushCommands {
       if ($overwrite_all || $keep_all) {
         $operations = $this->commandHelpers->import($overwrite_all == 1, $keep_all == 1, $path, $force == 1, $no_rebuild, $no_maintenance == 1);
 
-        $operations[] = [
-          '\Drupal\cohesion_sync\Controller\BatchImportController::batchDrushFinishedCallback',
-          [$path]
-        ];
         $batch = [
-          'title' => t('Importing configuration.'),
+          'title' => t('Validating configuration.'),
           'operations' => $operations,
           'progressive' => FALSE,
         ];

@@ -24,7 +24,7 @@ class SyncConfigImportSubscriber extends ConfigImportSubscriber {
       'theme' => array_keys($core_extension['theme']),
     ];
 
-    if(!$config_importer instanceof SyncConfigImporter) {
+    if (!$config_importer instanceof SyncConfigImporter) {
       $existing_dependencies['config'] = $config_importer->getStorageComparer()->getSourceStorage()->listAll();
     }
 
@@ -72,9 +72,10 @@ class SyncConfigImportSubscriber extends ConfigImportSubscriber {
       // Configuration entities can be identified by having 'dependencies' and
       // 'uuid' keys.
       if (isset($data['dependencies']) && isset($data['uuid'])) {
-        if(!$config_importer instanceof SyncConfigImporter) {
+        if (!$config_importer instanceof SyncConfigImporter) {
           $dependencies = ['module', 'theme', 'config'];
-        } else {
+        }
+        else {
           $dependencies = ['module', 'theme'];
         }
         $dependencies_to_check = array_intersect_key($data['dependencies'], array_flip($dependencies));

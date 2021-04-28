@@ -8,7 +8,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\File\FileSystemInterface;
 
 /**
- * Class StyleApi
+ * Class StyleApi.
  *
  * @package Drupal\cohesion
  *
@@ -26,10 +26,16 @@ class StylesApi extends ApiPluginBase {
    */
   private $forms = [];
 
+  /**
+   *
+   */
   public function getForms() {
     return $this->forms;
   }
 
+  /**
+   *
+   */
   public function setForms($forms) {
     $this->forms = $forms;
   }
@@ -40,7 +46,7 @@ class StylesApi extends ApiPluginBase {
   public function prepareData($attach_css = TRUE) {
     parent::prepareData($attach_css);
 
-    // Reorder custom style styles
+    // Reorder custom style styles.
     $custom_styles = CustomStyle::loadParentChildrenOrdered();
     $style_order = [];
     if ($custom_styles) {
@@ -72,11 +78,10 @@ class StylesApi extends ApiPluginBase {
       if (isset($styles['css']) && $styles['themeName']) {
 
         $data = $styles['css'];
-        $theme_id = $styles['themeName'];
         $running_dx8_batch = &drupal_static('running_dx8_batch');
 
         // Check to see if there are actually some stylesheets to process.
-        if (isset($data['base']) && !empty($data['base']) && isset($data['theme']) && !empty($data['theme']) && isset($data['master']) && !empty($data['master'])) {
+        if (isset($data['master']) && !empty($data['master'])) {
 
           // Create admin icon library and website settings stylesheet for admin.
           $master = Json::decode($data['master']);
@@ -90,7 +95,8 @@ class StylesApi extends ApiPluginBase {
               if (!$running_dx8_batch) {
                 \Drupal::logger('cohesion')->notice(t(':name stylesheet has been updated', [':name' => 'icon library']));
               }
-            } catch (\Throwable $e) {
+            }
+            catch (\Throwable $e) {
               \Drupal::messenger()->addError(t('The file could not be created.'));
             }
           }

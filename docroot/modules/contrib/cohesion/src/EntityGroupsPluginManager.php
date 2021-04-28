@@ -2,10 +2,10 @@
 
 namespace Drupal\cohesion;
 
-use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\cohesion\Annotation\EntityGroups;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\cohesion\Annotation\EntityGroups;
+use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  *

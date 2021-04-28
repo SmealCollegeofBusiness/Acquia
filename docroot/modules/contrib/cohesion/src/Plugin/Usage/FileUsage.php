@@ -3,14 +3,14 @@
 namespace Drupal\cohesion\Plugin\Usage;
 
 use Drupal\cohesion\UsagePluginBase;
-use Drupal\Core\StreamWrapper\StreamWrapperManager;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Database\Connection;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
 
 /**
- * Class FileUsage.
+ * Plugin for file usage.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *
@@ -82,7 +82,7 @@ class FileUsage extends UsagePluginBase {
   }
 
   /**
-   * {@inheritdoc}jso
+   * {@inheritdoc}jso.
    */
   public function getScannableData(EntityInterface $entity) {
     return FALSE;
@@ -151,7 +151,7 @@ class FileUsage extends UsagePluginBase {
    */
   private function registerCoreFileUsage($files, EntityInterface $entity) {
 
-    if($entity->id() && strlen($entity->id()) < 32) {
+    if ($entity->id() && strlen($entity->id()) < 32) {
       // Remove 'cohesion' registered usage of all files for scanned entity.
       try {
         $this->connection->delete('file_usage')
@@ -159,7 +159,8 @@ class FileUsage extends UsagePluginBase {
           ->condition('type', $entity->getEntityTypeId())
           ->condition('id', $entity->id())
           ->execute();
-      } catch (\Throwable $e) {
+      }
+      catch (\Throwable $e) {
         return;
       }
 

@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\cohesion_templates\Unit\Plugin\Usage;
 
-use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion_templates\Plugin\Usage\MenuTemplatesUsage;
 use Drupal\cohesion_templates\Entity\MenuTemplates;
+use Drupal\cohesion_templates\Plugin\Usage\MenuTemplatesUsage;
+use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
 
 /**
  * @group Cohesion

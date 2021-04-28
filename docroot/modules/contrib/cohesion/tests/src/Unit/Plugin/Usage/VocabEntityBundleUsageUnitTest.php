@@ -2,13 +2,12 @@
 
 namespace Drupal\Tests\cohesion\Unit\Plugin\Usage;
 
+use Drupal\cohesion\Entity\CohesionConfigEntityBase;
+use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\cohesion\Plugin\Usage\VocabEntityBundleUsage;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
-use Drupal\cohesion\Entity\CohesionConfigEntityBase;
-use Drupal\cohesion\Entity\CohesionSettingsInterface;
-
 
 /**
  * Mock for the core taxonomy vocabulary entity.
@@ -16,8 +15,10 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
  * @package Drupal\Tests\cohesion\Unit\Plugin\Usage
  */
 class TaxonomyVocabMock extends CohesionConfigEntityBase implements CohesionSettingsInterface {
-  public function getApiPluginInstance(){
+
+  public function getApiPluginInstance() {
   }
+
 }
 
 class VocabEntityBundleUsageUnitTestMock extends VocabEntityBundleUsage {
@@ -33,12 +34,14 @@ class VocabEntityBundleUsageUnitTestMock extends VocabEntityBundleUsage {
   public function drupalFieldLoad($entry_uuid) {
     return new FieldConfig($this->fixture_drupal_field, 'field_config');
   }
+
 }
 
 /**
  * @group Cohesion
  */
 class VocabEntityBundleUsageUnitTest extends UsagePluginBaseUnitTest {
+
   /**
    * {@inheritdoc}
    */
@@ -64,8 +67,8 @@ class VocabEntityBundleUsageUnitTest extends UsagePluginBaseUnitTest {
     $fixture = [
       [
         'type' => 'drupal_field',
-        'uuid' => 'de8a6765-cff0-4ef0-a7a7-db5b3df279588'
-      ]
+        'uuid' => 'de8a6765-cff0-4ef0-a7a7-db5b3df279588',
+      ],
     ];
 
     $entities = $this->unit->scanForInstancesOfThisType($fixture, new TaxonomyVocabMock([], 'taxonomy_vocabulary'));
