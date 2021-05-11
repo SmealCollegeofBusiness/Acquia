@@ -1,0 +1,5 @@
+services:
+  acquia_contenthub_s3_test.ch_settings_override:
+    class: Drupal\acquia_contenthub_s3_test\EventSubscriber\GetSettings\OverwriteContentHubAdminSettings
+    tags:
+      - { name: event_subscriber }

@@ -1,0 +1,12 @@
+name: Acquia ContentHub Unsubscribe
+description: Allows for individual entities to be disconnected from pushed updates.
+package: Acquia ContentHub (Experimental)
+type: module
+core_version_requirement: ^8.8 || ^9
+dependencies:
+  - acquia_contenthub_subscriber
+
+# Information added by Drupal.org packaging script on 2021-04-09
+version: '8.x-2.22'
+project: 'acquia_contenthub'
+datestamp: 1617999954

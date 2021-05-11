@@ -1,0 +1,25 @@
+{
+    "name": "drupal/acquia_contenthub",
+    "type": "drupal-module",
+    "description": "Module allowing Drupal sites to connect to Acquia Content Hub.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "acquia/content-hub-php": "^2.0.3",
+        "acquia/contenthub-console": "^1.3.0",
+        "drupal/depcalc": "^1.6",
+        "laminas/laminas-diactoros": "^1.8 || ^2.2",
+        "symfony/psr-http-message-bridge": "^1.1.2 || ^2.0"
+    },
+    "require-dev": {
+        "dms/phpunit-arraysubset-asserts": "^0.1.0",
+        "drupal/paragraphs": "^1.5"
+    },
+    "suggest": {
+        "dms/phpunit-arraysubset-asserts": "Used for PHPUnit 8.0+ tests (Drupal 9)"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-8.x-2.x": "2.x-dev"
+        }
+    }
+}

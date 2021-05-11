@@ -1,0 +1,10 @@
+{
+    "name": "drupal/acquia_contenthub_s3",
+    "type": "drupal-module",
+    "description": "Provides integration of s3fs module",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": "^8.8 || ^9",
+        "drupal/s3fs": "3.0-alpha16"
+    }
+}

@@ -1,0 +1,42 @@
+services:
+  s3_file_entity.cdf.handler:
+    class: Drupal\acquia_contenthub_s3\EventSubscriber\Cdf\S3FileEntityHandler
+    arguments:
+      - '@acquia_contenthub_s3.file_mapper'
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub_s3.file_storage:
+    class: Drupal\Core\Entity\EntityStorageInterface
+    factory: entity_type.manager:getStorage
+    arguments: ['file']
+
+  acquia_contenthub_s3.file_map:
+    class: Drupal\acquia_contenthub_s3\S3FileMap
+    arguments: ['@database']
+
+  acquia_contenthub_s3.file_mapper:
+    class: Drupal\acquia_contenthub_s3\S3FileMapper
+    arguments:
+      - '@config.factory'
+      - '@file_system'
+      - '@acquia_contenthub_s3.file_map'
+      - '@stream_wrapper_manager'
+
+  acquia_contenthub_s3.origin_locator:
+    class: Drupal\acquia_contenthub_s3\S3FileOriginLocator
+    arguments:
+      - '@acquia_contenthub_s3.file_map'
+      - '@acquia_contenthub_s3.file_storage'
+      - '@acquia_contenthub_common_actions'
+      - '@acquia_contenthub.config'
+
+  acquia_contenthub_s3.s3fs_stream.decorator:
+    class: Drupal\acquia_contenthub_s3\S3fsStreamDecorator
+    decorates: stream_wrapper.s3fs
+
+  acquia_contenthub.s3_file.dependency_collector:
+    class: Drupal\acquia_contenthub_s3\EventSubscriber\DependencyCollector\S3StorageHandlerModuleDependencyCollector
+    tags:
+      - { name: event_subscriber }
+    arguments: ['@module_handler']

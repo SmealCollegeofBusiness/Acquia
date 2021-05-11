@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Drupal Module: Acquia Content Hub - Metatag.
+ *
+ * Provides metatag controls and tools for Acquia ContentHub.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function acquia_contenthub_metatag_form_metatag_defaults_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  $form['advanced']['canonical_url']['#description'] = _acquia_contenthub_metatag_get_metatag_canonical_url_description();
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function acquia_contenthub_metatag_field_widget_form_alter(&$element, FormStateInterface $form_state, $context) {
+  $field_definition = $context['items']->getFieldDefinition();
+
+  if ($field_definition->getType() == 'metatag') {
+    $element['advanced']['canonical_url']['#description'] = _acquia_contenthub_metatag_get_metatag_canonical_url_description();
+  }
+}
+
+/**
+ * Returns the custom description for the canonical URL field.
+ *
+ * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+ *   Message.
+ */
+function _acquia_contenthub_metatag_get_metatag_canonical_url_description(): TranslatableMarkup {
+  return t('Content Hub will automatically transform [node:url] to the publishing website\'s node url when syndicating this entity. To opt-out of this behavior, please run "drush cset acquia_contenthub_metatag.settings ach_metatag_node_url_do_not_transform 1" or change this value in your settings.php');
+}

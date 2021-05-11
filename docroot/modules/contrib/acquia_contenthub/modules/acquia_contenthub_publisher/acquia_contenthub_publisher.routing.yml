@@ -1,0 +1,84 @@
+acquia_contenthub.subscription_settings:
+  path: '/admin/config/services/acquia-contenthub/subscription'
+  defaults:
+    _controller: '\Drupal\acquia_contenthub_publisher\Controller\SubscriptionManagerController::subscriptionSettingsPage'
+    _title: 'Subscription Settings'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+acquia_contenthub_publisher.export_queue:
+  path: '/admin/config/services/acquia-contenthub/export-queue'
+  defaults:
+    _form: '\Drupal\acquia_contenthub_publisher\Form\ContentHubExportQueueForm'
+    _title: 'Export Queue'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+
+acquia_contenthub_publisher.add_webhook:
+  path: '/admin/config/services/acquia-contenthub/subscription/webhook/add'
+  defaults:
+    _form: '\Drupal\acquia_contenthub_publisher\Form\Webhook\WebhookAddForm'
+    _title: 'Add Webhook'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+
+acquia_contenthub_publisher.edit_webhook:
+  path: '/admin/config/services/acquia-contenthub/subscription/webhook/{uuid}/edit'
+  defaults:
+    _form: '\Drupal\acquia_contenthub_publisher\Form\Webhook\WebhookEditForm'
+    _title: 'Edit Webhook'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+    uuid: '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+
+acquia_contenthub_publisher.delete_webhook:
+  path: '/admin/config/services/acquia-contenthub/subscription/webhook/{uuid}/delete'
+  defaults:
+    _form: '\Drupal\acquia_contenthub_publisher\Form\Webhook\WebhookDeleteConfirmForm'
+    _title: 'Confirm Webhook Deletion'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+    uuid: '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+
+acquia_contenthub_publisher.enable_webhook:
+  path: '/admin/config/services/acquia-contenthub/subscription/webhook/{uuid}/enable'
+  defaults:
+    _form: '\Drupal\acquia_contenthub_publisher\Form\Webhook\WebhookEnableForm'
+    _title: 'Enable Webhook'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+    uuid: '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+
+acquia_contenthub_publisher.delete_client:
+  path: '/admin/config/services/acquia-contenthub/subscription/client/{uuid}/delete'
+  defaults:
+    _form: '\Drupal\acquia_contenthub_publisher\Form\Client\ClientDeleteConfirmForm'
+    _title: 'Confirm Client Deletion'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+    uuid: '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+
+acquia_contenthub_publisher.edit_client:
+  path: '/admin/config/services/acquia-contenthub/subscription/client/{uuid}/edit'
+  defaults:
+    _form: '\Drupal\acquia_contenthub_publisher\Form\Client\ClientEditForm'
+    _title: 'Edit Client'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+    uuid: '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+
+acquia_contenthub_publisher.status_report:
+  path: '/admin/config/services/acquia-contenthub/status-report'
+  defaults:
+    _controller: '\Drupal\acquia_contenthub_publisher\Controller\StatusReportController::statusReportPage'
+    _title: 'Status Report'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+
+acquia_contenthub_publisher.single_status:
+  path: '/admin/config/services/acquia-contenthub/status-report/{uuid}'
+  defaults:
+    _controller: '\Drupal\acquia_contenthub_publisher\Controller\StatusReportDetailsController::getWebhookDetails'
+    _title: 'Status Details'
+  requirements:
+    _contenthub_ui_access: 'TRUE'
+    uuid: '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'

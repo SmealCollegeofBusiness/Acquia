@@ -1,0 +1,141 @@
+	{
+    "uuid": "ff201120-3e98-475e-9460-4fef82172c29",
+    "type": "drupal8_content_entity",
+    "created": "2020-02-10T13:59:11+01:00",
+    "modified": "2020-02-10T13:59:11+01:00",
+    "origin": "56ec46a8-a665-4c58-7695-574f24b84668",
+    "attributes": {
+        "ach_s3_bucket": {
+            "type": "string",
+            "value": {
+                "und": "bucket"
+            }
+        },
+        "ach_s3_source": {
+            "type": "string",
+            "value": {
+                "und": "root_folder"
+            }
+        },
+        "base_url": {
+            "type": "string",
+            "value": {
+                "und": "http://example.com/"
+            }
+        },
+        "bundle": {
+            "type": "keyword",
+            "value": {
+                "und": "file"
+            }
+        },
+        "channels": {
+            "type": "array<reference>",
+            "value": {
+                "und": []
+            }
+        },
+        "entity_type": {
+            "type": "keyword",
+            "value": {
+                "und": "file"
+            }
+        },
+        "entity_type_label": {
+            "type": "string",
+            "value": {
+                "und": "File"
+            }
+        },
+        "file_location": {
+            "type": "string",
+            "value": {
+                "und": "https://bucket.s3.eu-central-1.amazonaws.com/root_folder/example.png"
+            }
+        },
+        "file_scheme": {
+            "type": "string",
+            "value": {
+                "und": "s3"
+            }
+        },
+        "file_uri": {
+            "type": "string",
+            "value": {
+                "und": "s3://example.png"
+            }
+        },
+        "hash": {
+            "type": "string",
+            "value": {
+                "und": "b6711533090f2f8d279ee852ecf006cfbe0eb9e4"
+            }
+        },
+        "label": {
+            "type": "array<string>",
+            "value": {
+                "en": "example.png",
+                "und": "example.png"
+            }
+        }
+    },
+    "metadata": {
+        "data": "eyJ1dWlkIjp7InZhbHVlIjp7ImVuIjp7InZhbHVlIjoiZmYyMDExMjAtM2U5OC00NzVlLTk0NjAtNGZlZjgyMTcyYzI5In19fSwidWlkIjp7InZhbHVlIjp7ImVuIjpbIjgyODcxNGIyLTg1OGYtNDEzZi1hMWU0LThiNzRhMzE1MWIwZSJdfX0sImZpbGVuYW1lIjp7InZhbHVlIjp7ImVuIjoiZXhhbXBsZS5wbmcifX0sInVyaSI6eyJ2YWx1ZSI6eyJlbiI6eyJ2YWx1ZSI6InMzOlwvXC9leGFtcGxlLnBuZyJ9fX0sImZpbGVtaW1lIjp7InZhbHVlIjp7ImVuIjoiaW1hZ2VcL3BuZyJ9fSwiZmlsZXNpemUiOnsidmFsdWUiOnsiZW4iOiI1Mzg3In19LCJzdGF0dXMiOnsidmFsdWUiOnsiZW4iOiIxIn19LCJjcmVhdGVkIjp7InZhbHVlIjp7ImVuIjp7InZhbHVlIjoiMTU4MTMzODQzOCJ9fX0sImNoYW5nZWQiOnsidmFsdWUiOnsiZW4iOnsidmFsdWUiOiIxNTgxMzM4NDQ1In19fX0K",
+        "default_language": "en",
+        "dependencies": {
+            "entity": {
+                "3b49b209-d946-4f50-963d-832f48923040": "a2ae00511d3fbe6da060d46461d95954eb7a1b77",
+                "5bb8b642-30ae-4e05-9a3d-24e1f0d77cad": "778c54102652edddd95bfc784f8f92e2aa44a4f5",
+                "6e084aa1-5888-43ea-9621-2e695248fea8": "7fabeb99482ec37b48a80fe9fee8b05b3e3f68e6",
+                "723d11f0-6077-482c-a09f-436a96395cc5": "ed8ff177a0a308e048f725116e4583723cc43924",
+                "828714b2-858f-413f-a1e4-8b74a3151b0e": "c5d0d7872535f918d108f5583be6e2bef57d0d98",
+                "d628a0d2-8476-47a1-bc1b-0274c2ff5781": "07b99edddbadc2d1d9b4c9d0cb65d20e10c96f63",
+                "e22393fc-9cbe-4e35-b317-de9dc28b65e0": "ca7764f00f0b07ea7433a0cf8ec2fc2a95555293",
+                "eefc76d9-fcc9-4526-8638-3c15bb73c9cd": "113a8014b5782625a67e2f7ca42538a4c2a7197b",
+                "f15e404c-3289-4181-87c8-4b1eda4fcba8": "99a6b41198c98edcaacd859aa5d05f6c26ebc033"
+            },
+            "module": [
+                "user",
+                "file",
+                "image"
+            ]
+        },
+        "field": {
+            "changed": {
+                "type": "changed"
+            },
+            "created": {
+                "type": "created"
+            },
+            "filemime": {
+                "type": "string"
+            },
+            "filename": {
+                "type": "string"
+            },
+            "filesize": {
+                "type": "integer"
+            },
+            "langcode": {
+                "type": "language"
+            },
+            "status": {
+                "type": "boolean"
+            },
+            "uid": {
+                "target": "user",
+                "type": "entity_reference"
+            },
+            "uri": {
+                "type": "file_uri"
+            },
+            "uuid": {
+                "type": "uuid"
+            }
+        },
+        "languages": [
+            "en"
+        ],
+        "version": 2
+    }
+}

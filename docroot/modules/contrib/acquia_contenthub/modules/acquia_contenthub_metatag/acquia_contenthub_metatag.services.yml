@@ -1,0 +1,6 @@
+services:
+
+  acquia_contenthub.metatags.serializer:
+    class: Drupal\acquia_contenthub_metatag\EventSubscriber\SerializeContentField\EntityMetatagsSerializer
+    tags:
+      - { name: event_subscriber }

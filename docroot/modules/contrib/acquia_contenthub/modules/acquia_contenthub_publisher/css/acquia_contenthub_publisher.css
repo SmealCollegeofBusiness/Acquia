@@ -1,0 +1,34 @@
+.pager .pager__items {
+  margin: 1.5em 0;
+}
+
+span.current {
+  color: #cccccc;
+  margin: 0 5px;
+  text-transform: uppercase;
+  font-size: 11px;
+  cursor: default;
+}
+
+span.percent {
+  display: block;
+}
+
+#single_details_page {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#subscriber_chart,
+#publisher_chart {
+  width: 500px;
+  height: 400px;
+}
+
+#single_details {
+  display: inline-block;
+}
+
+#single_details p {
+  margin: 0.5em 0 0;
+}

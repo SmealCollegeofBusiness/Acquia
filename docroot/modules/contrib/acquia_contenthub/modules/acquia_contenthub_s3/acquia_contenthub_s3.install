@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Acquia Content Hub S3 integration.
+ *
+ * Installs acquia_contenthub_s3 file amp table for tracking files originated
+ * from s3.
+ */
+
+use Drupal\acquia_contenthub_s3\S3FileMap;
+
+/**
+ * Implements hook_schema().
+ */
+function acquia_contenthub_s3_schema() {
+  $schema[S3FileMap::TABLE_NAME] = S3FileMap::schema();
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function acquia_contenthub_s3_install() {
+  $database = \Drupal::database();
+  $files = $database->select('file_managed', 'fm')
+    ->fields('fm', ['uuid'])
+    ->condition('fm.uri', 's3://%', 'LIKE')
+    ->execute()
+    ->fetchAll(PDO::FETCH_ASSOC);
+
+  $file_map = \Drupal::getContainer()->get('acquia_contenthub_s3.file_map');
+  $config_factory = \Drupal::configFactory();
+  $s3fs_config = $config_factory->get('s3fs.settings');
+  $ch_config = $config_factory->get('acquia_contenthub.admin_settings');
+
+  foreach ($files as $file) {
+    $file_map->record(
+      $file['uuid'],
+      $s3fs_config->get('bucket'),
+      $s3fs_config->get('root_folder'),
+      $ch_config->get('origin')
+    );
+  }
+}

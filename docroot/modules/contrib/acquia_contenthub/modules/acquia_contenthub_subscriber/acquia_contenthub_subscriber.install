@@ -1,0 +1,184 @@
+<?php
+
+/**
+ * @file
+ * Acquia Content Hub - Subscriber module install file.
+ */
+
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_schema().
+ */
+function acquia_contenthub_subscriber_schema() {
+  $schema = [];
+  $schema['acquia_contenthub_subscriber_import_tracking'] = [
+    'description' => 'Table for tracking which entities have been imported from contenthub.',
+    'fields' => [
+      'entity_uuid' => [
+        'type' => 'char',
+        'length' => 36,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+      'entity_type' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'default' => '',
+      ],
+      'entity_id' => [
+        'type' => 'varchar_ascii',
+        'length' => 255,
+        'default' => '',
+      ],
+      'status' => [
+        'description' => 'The status of an imported entity.',
+        'type' => 'varchar',
+        'default' => '',
+        'not null' => TRUE,
+        'length' => 36,
+      ],
+      'first_imported' => [
+        'description' => 'The first imported date.',
+        'type' => 'varchar',
+        'default' => '',
+        'not null' => TRUE,
+        'length' => 36,
+      ],
+      'last_imported' => [
+        'description' => 'The last imported date.',
+        'type' => 'varchar',
+        'default' => '',
+        'not null' => TRUE,
+        'length' => 36,
+      ],
+      'hash' => [
+        'type' => 'char',
+        'length' => 40,
+        'default' => '',
+      ],
+      'queue_id' => [
+        'type' => 'varchar',
+        'description' => "Queue item to track queue record",
+        'length' => 32,
+        'not null' => FALSE,
+      ],
+    ],
+    'unique keys' => [
+      'entity_uuid' => ['entity_uuid'],
+    ],
+  ];
+  return $schema;
+}
+
+/**
+ * @defgroup updates-8.6.x-contenthub-subscriber-filters
+ * @{
+ * Update function to delete content hub filter resource.
+ */
+
+function acquia_contenthub_subscriber_update_82001() {
+  // Make sure schema has been installed.
+  if (!\Drupal::database()->schema()->tableExists('acquia_contenthub_subscriber_import_tracking')) {
+    drupal_install_schema('acquia_contenthub_subscriber');
+  }
+  \Drupal::configFactory()->getEditable('rest.resource.contenthub_filter')->delete();
+}
+
+/**
+ * Removes dependency on REST and collects legacy Content Hub Filters.
+ */
+function acquia_contenthub_subscriber_update_82002() {
+  $config_factory = \Drupal::configFactory();
+  $filters = [];
+  foreach ($config_factory->listAll('acquia_contenthub_subscriber.contenthub_filter') as $contenthub_filter_name) {
+    $contenthub_filter = $config_factory->getEditable($contenthub_filter_name);
+    $filters[] = $contenthub_filter->getRawData();
+    $contenthub_filter->delete();
+  }
+  // Saving content hub filters data in a state variable.
+  if (!empty($filters)) {
+    \Drupal::state()
+      ->set('acquia_contenthub_subscriber_82002_acquia_contenthub_filters', $filters);
+  }
+}
+
+/**
+ * @} End of "addtogroup updates-8.6.x-contenthub-subscriber-filters".
+ */
+
+/**
+ * Converts 1.x import queues to 2.x import queues.
+ */
+function acquia_contenthub_subscriber_update_82003() {
+  $database = \Drupal::database();
+  $queue_items = $database->select('queue', 'q')
+    ->fields('q', ['data', 'item_id'])
+    ->condition('name', 'acquia_contenthub_import_queue')
+    ->execute()
+    ->fetchAll();
+
+  if (!$queue_items) {
+    return;
+  }
+
+  $exp_queue = \Drupal::queue('acquia_contenthub_subscriber_import');
+  $uuids = '';
+  foreach ($queue_items as $item) {
+    $data = unserialize($item->data);
+    foreach ($data->data as $entity_data) {
+      $uuid = _acquia_contenthub_subscriber_get_entity_uuid($entity_data);
+      $uuids = empty($uuids) ? $uuid : $uuids . ", $uuid";
+    }
+  }
+
+  if (empty($uuids)) {
+    return;
+  }
+
+  $new = new \stdClass();
+  $new->uuids = $uuids;
+  $exp_queue->createItem($new);
+
+  $database
+    ->delete('queue')
+    ->condition('name', 'acquia_contenthub_import_queue')
+    ->execute();
+}
+
+/**
+ * Get entity uuid from incomplete class.
+ *
+ * During queue item data unserialization we get a php incomplete class because
+ * the describer class exist only in 1.x.
+ *
+ * @param $object
+ *   Incomplete class
+ *
+ * @return string
+ *   Entity uuid.
+ */
+function _acquia_contenthub_subscriber_get_entity_uuid(object $object) {
+  $matches = [];
+  preg_match('/(uuid\")[\s\w;:=>\"-]*\"/', serialize($object), $matches);
+  preg_match('/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/', current($matches), $matches);
+
+  return current($matches);
+}
+
+/**
+ * Add the new database column.
+ */
+function acquia_contenthub_subscriber_update_82004() {
+  $queue_id_column = [
+    'type' => 'varchar',
+    'description' => "Queue item to track queue record",
+    'length' => 32,
+    'not null' => FALSE,
+  ];
+  $schema = \Drupal::database()->schema();
+  if ($schema->fieldExists('acquia_contenthub_subscriber_import_tracking', 'queue_id')) {
+    return;
+  }
+  $schema->addField('acquia_contenthub_subscriber_import_tracking', 'queue_id', $queue_id_column);
+}

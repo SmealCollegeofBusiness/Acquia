@@ -1,0 +1,7 @@
+acquia_contenthub_metatag.settings:
+  type: config_object
+  label: 'Acquia ContentHub Metatag Settings'
+  mapping:
+    ach_metatag_node_url_do_not_transform:
+      type: boolean
+      label: 'Tranform metatag canonical url'

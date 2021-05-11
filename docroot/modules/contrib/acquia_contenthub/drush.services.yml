@@ -1,0 +1,60 @@
+services:
+
+  acquia_contenthub.commands.cdf:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubCDFCommands
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.entity:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubEntityCommands
+    arguments: ['@entity.dependency.calculator', '@entity.cdf.serializer', '@acquia_contenthub.client.factory']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.filters:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubFiltersCommands
+    arguments: ['@acquia_contenthub.client.factory']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.list:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubListCommands
+    arguments: ['@acquia_contenthub.client.factory']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.mapping:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubMappingCommands
+    arguments: ['@acquia_contenthub.client.factory']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.purge:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubPurgeCommands
+    arguments: ['@acquia_contenthub.client.factory', '@extension.list.module']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.secret:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubSecretCommands
+    arguments: ['@config.factory', '@acquia_contenthub.client.factory']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.site:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubSiteCommands
+    arguments: ['@acquia_contenthub.client.factory']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.webhook:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubWebhookCommands
+    arguments: ['@acquia_contenthub.client.factory']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.webhook.interests:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubWebhookInterestCommands
+    arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.connection_manager']
+    tags:
+      - { name: drush.command }

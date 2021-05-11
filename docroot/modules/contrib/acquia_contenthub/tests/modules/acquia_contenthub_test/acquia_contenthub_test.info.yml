@@ -1,0 +1,16 @@
+name: Acquia ContentHub Testing
+description: Support module for acquia_contenthub module testing.
+package: Acquia ContentHub
+
+type: module
+core_version_requirement: ^8.8 || ^9
+
+dependencies:
+  - depcalc
+  - drupal:system (>= 8.5)
+  - paragraphs
+
+# Information added by Drupal.org packaging script on 2021-04-09
+version: '8.x-2.22'
+project: 'acquia_contenthub'
+datestamp: 1617999954
