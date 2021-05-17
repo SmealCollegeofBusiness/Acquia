@@ -7,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
- * Class WebsiteSettingsForm.
+ * Website settings form.
  *
  * @package Drupal\cohesion_website_settings\Form
  */

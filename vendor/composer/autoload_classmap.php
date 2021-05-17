@@ -888,6 +888,7 @@ return array(
     'Doctrine\\Common\\Annotations\\IndexedReader' => $vendorDir . '/doctrine/annotations/lib/Doctrine/Common/Annotations/IndexedReader.php',
     'Doctrine\\Common\\Annotations\\NamedArgumentConstructorAnnotation' => $vendorDir . '/doctrine/annotations/lib/Doctrine/Common/Annotations/NamedArgumentConstructorAnnotation.php',
     'Doctrine\\Common\\Annotations\\PhpParser' => $vendorDir . '/doctrine/annotations/lib/Doctrine/Common/Annotations/PhpParser.php',
+    'Doctrine\\Common\\Annotations\\PsrCachedReader' => $vendorDir . '/doctrine/annotations/lib/Doctrine/Common/Annotations/PsrCachedReader.php',
     'Doctrine\\Common\\Annotations\\Reader' => $vendorDir . '/doctrine/annotations/lib/Doctrine/Common/Annotations/Reader.php',
     'Doctrine\\Common\\Annotations\\SimpleAnnotationReader' => $vendorDir . '/doctrine/annotations/lib/Doctrine/Common/Annotations/SimpleAnnotationReader.php',
     'Doctrine\\Common\\Annotations\\TokenParser' => $vendorDir . '/doctrine/annotations/lib/Doctrine/Common/Annotations/TokenParser.php',

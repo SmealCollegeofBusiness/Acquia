@@ -3,7 +3,7 @@
 namespace Drupal\cohesion_elements\Plugin\Usage;
 
 /**
- * Class ComponentUsage.
+ * Component usage plugin.
  *
  * @package Drupal\cohesion_elements\Plugin\Usage
  *

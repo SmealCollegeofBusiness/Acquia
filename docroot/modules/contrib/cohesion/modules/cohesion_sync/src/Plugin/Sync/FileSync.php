@@ -11,7 +11,7 @@ use Drupal\file\Entity\File;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class FileSync.
+ * File sync plugin.
  *
  * @package Drupal\cohesion_sync
  *

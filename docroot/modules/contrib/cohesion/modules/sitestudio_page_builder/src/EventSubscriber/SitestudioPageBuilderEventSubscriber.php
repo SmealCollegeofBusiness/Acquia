@@ -7,6 +7,7 @@ use Drupal\cohesion\Services\CohesionUtils;
 use Drupal\cohesion_elements\Event\CohesionLayoutViewBuilderEvent;
 use Drupal\cohesion\Event\FrontendUrlsEvent;
 use Drupal\Core\Asset\LibraryDiscoveryInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -17,6 +18,10 @@ use Drupal\sitestudio_page_builder\Services\SitestudioPageBuilderManagerInterfac
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+/**
+ * Event subscriber for the visual page builder.
+ *
+ */
 class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
 
   use StringTranslationTrait;
@@ -85,6 +90,14 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
   protected $cohesionApiClient;
 
   /**
+   * The entity repository service
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+
+  protected $entityRepository;
+
+  /**
    * SitestudioPageBuilderEventSubscriber constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -106,11 +119,15 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
    * @param \Drupal\cohesion\CohesionApiClient
    * The cohesion api client service
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $user,
-                               RouteMatchInterface $current_route_match, RequestStack $request_stack,
-                              LibraryDiscoveryInterface $library_discovery, SitestudioPageBuilderManagerInterface $page_builder_manager,
-                              ModuleHandlerInterface $module_handler, CohesionUtils $cohesion_utils,
-                              CohesionApiClient $cohesion_api_client
+  public function __construct(EntityTypeManagerInterface $entity_type_manager,
+ AccountInterface $user,
+                               RouteMatchInterface $current_route_match,
+ RequestStack $request_stack,
+                              LibraryDiscoveryInterface $library_discovery,
+ SitestudioPageBuilderManagerInterface $page_builder_manager,
+                              ModuleHandlerInterface $module_handler,
+ CohesionUtils $cohesion_utils,
+                              CohesionApiClient $cohesion_api_client, EntityRepositoryInterface $entity_repository
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->user = $user;
@@ -121,6 +138,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
     $this->moduleHandler = $module_handler;
     $this->cohesionUtils = $cohesion_utils;
     $this->cohesionApiClient = $cohesion_api_client;
+    $this->entityRepository = $entity_repository;
   }
 
   /**
@@ -151,7 +169,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
       ];
       $params += $query_param;
       $event->addFrontEndUrl('sitestudio-page-builder.layout_canvas.build', [
-        'url' => Url::fromRoute("entity.{$entity->getEntityTypeId()}.sitestudio_build", $params  )->toString(),
+        'url' => Url::fromRoute("entity.{$entity->getEntityTypeId()}.sitestudio_build", $params)->toString(),
         'method' => 'POST'
       ]);
     }
@@ -163,7 +181,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
     ]);
 
     // Get the react app library asset
-    $lib = $this->libraryDiscovery->getLibraryByName('sitestudio_page_builder','cohesion-frontend-edit-scripts');
+    $lib = $this->libraryDiscovery->getLibraryByName('sitestudio_page_builder', 'cohesion-frontend-edit-scripts');
     if(isset($lib['js'][0]['data'])) {
       $event->addFrontEndUrl('frontend-builder-js', [
         'url' => file_url_transform_relative(file_create_url($lib['js'][0]['data'])),
@@ -172,7 +190,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
     }
 
     // Get the react app library asset
-    $lib = $this->libraryDiscovery->getLibraryByName('cohesion','global_libraries.visual_page_builder_element_js_loader');
+    $lib = $this->libraryDiscovery->getLibraryByName('cohesion', 'global_libraries.visual_page_builder_element_js_loader');
     if(isset($lib['js'][0]['data'])) {
       $urls = [];
       foreach ($lib['js'] as $js) {
@@ -199,7 +217,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    *   Thrown if the storage handler couldn't be loaded.
    */
-  public function alterViewBuilder(CohesionLayoutViewBuilderEvent $event){
+  public function alterViewBuilder(CohesionLayoutViewBuilderEvent $event) {
     $build = $event->getBuild();
     $entity = $event->getEntity();
     $host = $entity->getParentEntity();
@@ -207,14 +225,8 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
 
     if($route_entity && $host && $host->getEntityTypeId() == $route_entity->getEntityTypeId() && $host->id() == $route_entity->id() && $host->access('update')) {
       // Get the latest layout canvas and pass it to drupalSettings
-      $latest_entity = $entity;
-      if(!$entity->isLatestRevision()) {
-        /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
-        $storage = $this->entityTypeManager->getStorage($entity->getEntityTypeId());
-        $latest_revision_id = $storage->getLatestTranslationAffectedRevisionId($entity->id(), $entity->language()->getId());
-        $latest_entity = $storage->loadRevision($latest_revision_id);
-        $latest_entity = $latest_entity->getTranslation($entity->language()->getId());
-      }
+      $latest_entity = $this->entityRepository->getActive($entity->getEntityTypeId(), $entity->id());
+
       $json_values = json_decode($latest_entity->getJsonValues());
       if($payload = $this->cohesionUtils->getPayloadForLayoutCanvasDataMerge($latest_entity)) {
         $response = $this->cohesionApiClient->layoutCanvasDataMerge($payload);
@@ -229,13 +241,8 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
       $build['#attached']['drupalSettings']['cohesion']['cohCanvases']['cohcanvas-' . $entity->id()] = $json_values;
 
       // Get the latest host and pass the next states it can transition into to drupalSettings
-      $latest_host = $host;
-      if(!$host->isLatestRevision()) {
-        /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
-        $storage = $this->entityTypeManager->getStorage($host->getEntityTypeId());
-        $latest_revision_id = $storage->getLatestTranslationAffectedRevisionId($host->id(), $host->language()->getId());
-        $latest_host = $storage->loadRevision($latest_revision_id);
-        $latest_host = $latest_host->getTranslation($host->language()->getId());
+      $latest_host = $this->entityRepository->getActive($host->getEntityTypeId(), $host->id());
+      if($latest_host->getRevisionId() != $host->getRevisionId()) {
         $build['#attached']['drupalSettings']['cohesion']['isLatest'] = FALSE;
       }
 
@@ -287,7 +294,6 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
 
       $build['#attached']['drupalSettings']['cohesion']['moderationStates'] = array_values($transition_labels);
     }
-
 
     $event->setBuild($build);
   }

@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion_templates\TwigExtension;
 
+use Drupal\block\Entity\Block;
 use Drupal\cohesion\Services\CohesionUtils;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\cohesion_elements\Entity\ComponentContent;
@@ -26,14 +27,13 @@ use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\Core\Template\TwigEnvironment;
 use Drupal\Core\Theme\Registry;
 use Drupal\Core\Theme\ThemeManagerInterface;
-use Drupal\Core\Url;
 use Drupal\Core\Utility\Token;
 use Drupal\image\Entity\ImageStyle;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use Twig\Markup as TwigMarkup;
 
 /**
- * Class TwigExtension.
+ * Site studio twig extensions.
  *
  * @package Drupal\cohesion_templates\TwigExtension
  */
@@ -655,9 +655,9 @@ class TwigExtension extends \Twig_Extension {
     if($this->isFrontendEditor() && !isset($_context['component_content']) && !isset($_context['hideContextualLinks']) && !isset($_context['isPreview']) && $this->hasDrupalPermission(["access contextual links", "access components"])) {
       return [
         '#type' => 'container',
-        '#attributes' => array(
-          'data-coh-dropzone-' . $stratStop => array($element_uuid),
-        ),
+        '#attributes' => [
+          'data-coh-dropzone-' . $stratStop => [$element_uuid],
+        ],
       ];
     }
 
@@ -670,13 +670,6 @@ class TwigExtension extends \Twig_Extension {
    * @return bool
    */
   public function isFrontendEditor() {
-    // We have some default content in acquia_cms_starter module
-    // which create a content of page type for home page
-    // here we have used layout canvas filed and during enablement
-    // of starter module we noticed this function is being called
-    // which is causing error, hence we have added some additional
-    // check for route object to be preset, then only getOption
-    // function should be called else simply return false.
     if (\Drupal::routeMatch()->getRouteObject()) {
       return \Drupal::routeMatch()->getRouteObject()->getOption('sitestudio_build') == 'TRUE';
     }
@@ -755,14 +748,31 @@ class TwigExtension extends \Twig_Extension {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function drupalBlock($id) {
+    $build = [];
+
     if (is_object($id) && $id instanceof \Twig_Markup) {
       $id = $id->__toString();
     }
 
     $block = $this->entityTypeManager->getStorage('block')->load($id);
-    if ($block && $block->access('view')) {
-      return $this->entityTypeManager->getViewBuilder('block')->view($block);
+    if ($block instanceof Block) {
+      if ($block->access('view')) {
+        $build = $this->entityTypeManager->getViewBuilder('block')->view($block);
+      }
+      else {
+        $build = [
+          $id => [
+            "#cache" => [
+              "contexts" => $block->getCacheContexts(),
+              "tags" => $block->getCacheTags(),
+              "max-age" => $block->getCacheMaxAge(),
+            ],
+          ],
+        ];
+      }
     }
+
+    return $build;
   }
 
   /**

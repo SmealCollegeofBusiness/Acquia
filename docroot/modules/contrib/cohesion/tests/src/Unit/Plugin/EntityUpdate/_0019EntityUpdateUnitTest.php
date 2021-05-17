@@ -3,7 +3,6 @@
 namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Plugin\EntityUpdate\_0019EntityUpdate;
-use Drupal\Tests\UnitTestCase;
 
 class _0019EntityUpdateMock extends _0019EntityUpdate {
 
@@ -18,7 +17,7 @@ class _0019EntityUpdateMock extends _0019EntityUpdate {
 /**
  * @group Cohesion
  */
-class _0019EntityUpdateUnitTest extends UnitTestCase {
+class _0019EntityUpdateUnitTest extends EntityUpdateUnitTestCase {
 
   /**
    * @var unit\Drupal\cohesion\Plugin\EntityUpdate\_0019EntityUpdate*/

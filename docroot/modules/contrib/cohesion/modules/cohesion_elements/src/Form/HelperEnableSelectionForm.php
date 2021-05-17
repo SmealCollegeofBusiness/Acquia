@@ -5,7 +5,7 @@ namespace Drupal\cohesion_elements\Form;
 use Drupal\cohesion\Form\CohesionEnableSelectionForm;
 
 /**
- * Class HelperEnableSelectionForm.
+ * Helper enable selection form.
  *
  * @package Drupal\cohesion_elements\Form
  */

@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class StyleGuideForm.
+ * Style guide form.
  *
  * @package Drupal\cohesion_style_guide\Form
  */

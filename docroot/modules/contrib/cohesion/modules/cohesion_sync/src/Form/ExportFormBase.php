@@ -12,7 +12,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class ExportFormBase.
+ * Sync Export form base.
  *
  * @package Drupal\cohesion_sync\Form
  */

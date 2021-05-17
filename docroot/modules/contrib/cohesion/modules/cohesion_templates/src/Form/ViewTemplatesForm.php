@@ -5,7 +5,7 @@ namespace Drupal\cohesion_templates\Form;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class ViewTemplatesForm.
+ * View templates form.
  *
  * @package Drupal\cohesion_templates\Form
  */

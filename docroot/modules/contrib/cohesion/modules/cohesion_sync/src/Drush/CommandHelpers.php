@@ -13,7 +13,7 @@ use Drupal\Core\Site\Settings;
 use Drupal\Core\State\StateInterface;
 
 /**
- * Class CommandHelpers.
+ * Command helpers.
  *
  * @package Drupal\cohesion_sync\Drush
  */
@@ -52,7 +52,7 @@ final class CommandHelpers {
   /**
    * The file system.
    *
-  * @var \Drupal\Core\File\FileSystemInterface
+   * @var \Drupal\Core\File\FileSystemInterface
    */
   protected $fileSystem;
 
@@ -250,17 +250,19 @@ final class CommandHelpers {
     }
 
     $batch_operations = [];
-    $store_key = 'drush_sync_validation' . $this->uuidGenerator->generate() ;
+    $store_key = 'drush_sync_validation' . $this->uuidGenerator->generate();
 
     // Import each file in the paths list.
     foreach ($paths as $path) {
-      $batch_operations = $this->packagerManager->validatePackageBatch($path, $store_key);
+      $batch_operations = array_merge($batch_operations, $this->packagerManager->validatePackageBatch($path, $store_key));
     }
 
-    $batch_operations[] = [
-      '\Drupal\cohesion_sync\Controller\BatchImportController::setImportBatch',
-      [$path, $store_key, $overwrite, $keep, $force, $no_rebuild, $no_maintenance],
-    ];
+    foreach ($paths as $path) {
+      $batch_operations[] = [
+        '\Drupal\cohesion_sync\Controller\BatchImportController::setImportBatch',
+        [$path, $store_key, $overwrite, $keep, $force, $no_rebuild, $no_maintenance],
+      ];
+    }
 
     $operations[] = [
       '\Drupal\cohesion_sync\Controller\BatchImportController::batchDrushValidationFinishedCallback',

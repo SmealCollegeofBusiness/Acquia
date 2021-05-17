@@ -124,7 +124,7 @@ class UnserializationTest extends EntityKernelTestBase {
         $this->container->get('acquia_contenthub_common_actions'),
         $this->container->get('acquia_contenthub.client.factory'),
         $this->container->get('acquia_contenthub_subscriber.tracker'),
-        $this->container->get('acquia_contenthub.logger_channel'),
+        $this->container->get('logger.factory'),
         [],
         NULL,
         NULL,

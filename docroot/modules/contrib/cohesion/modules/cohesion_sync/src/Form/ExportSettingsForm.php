@@ -5,7 +5,7 @@ namespace Drupal\cohesion_sync\Form;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class ExportSettingsForm.
+ * Export settings form.
  *
  * @package Drupal\cohesion_sync\Form
  */

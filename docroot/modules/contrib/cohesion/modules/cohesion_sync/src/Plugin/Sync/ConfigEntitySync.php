@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Class ConfigEntitySync.
+ * Config entity sync plugin.
  *
  * @package Drupal\cohesion_sync
  *

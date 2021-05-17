@@ -7,12 +7,15 @@ use Drupal\cohesion_elements\Entity\Component;
 use Drupal\cohesion\Event\FrontendUrlsEvent;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * Event subscriber for the cohesion element module, registering frontend urls
+ *
+ */
 class CohesionElementsEventSubscriber implements EventSubscriberInterface {
 
   /**
@@ -78,7 +81,7 @@ class CohesionElementsEventSubscriber implements EventSubscriberInterface {
    *
    * @param $event
    */
-  private function  addComponentListUrl($event) {
+  private function addComponentListUrl($event) {
     $route_params = [
       'entity_type' => 'cohesion_component'
     ];

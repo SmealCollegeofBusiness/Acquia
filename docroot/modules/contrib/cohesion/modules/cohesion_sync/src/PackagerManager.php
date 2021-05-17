@@ -285,7 +285,7 @@ class PackagerManager {
     // Set a limit for the batch process or use a configured override of X.
     $batch_limit = Settings::get('sync_max_entity', 10);
 
-    for ($i=0; $i < count($entity_uuids_to_validate); $i += $batch_limit) {
+    for ($i = 0; $i < count($entity_uuids_to_validate); $i += $batch_limit) {
       $ids = array_slice($entity_uuids_to_validate, $i, $batch_limit);
       $operations[] = [
         '\Drupal\cohesion_sync\Controller\BatchImportController::batchValidateEntry',
@@ -373,7 +373,7 @@ class PackagerManager {
     $batch_limit = Settings::get('sync_max_entity', 10);
 
     $uuids_batch = [];
-    for ($i=0; $i < count($uuids); $i += $batch_limit) {
+    for ($i = 0; $i < count($uuids); $i += $batch_limit) {
       $uuids_batch[] = array_slice($uuids, $i, $batch_limit);
     }
 
@@ -404,6 +404,11 @@ class PackagerManager {
           ];
         }
       }
+
+      $operations[] = [
+        '\Drupal\cohesion_sync\Controller\BatchImportController::inUseRebuild',
+        [],
+      ];
     }
 
     // Apllies only if there has been some imports
@@ -624,8 +629,6 @@ class PackagerManager {
    */
   public function buildPackageEntityList($entities, $excluded_entity_type_ids = [], &$list = [], $recurse = TRUE) {
     foreach ($entities as $entity) {
-      // Re-calculate the usage for this entity.
-      $this->usageUpdateManager->buildRequires($entity);
 
       // Get the Sync plugin for this entity.
       if ($plugin = $this->getPluginInstanceFromType($entity->getEntityType())) {
@@ -634,7 +637,6 @@ class PackagerManager {
         if (!isset($list[$dependency_name]) && !in_array($entity->getEntityTypeId(), $excluded_entity_type_ids)) {
           // Add this entity to the list so we don't yield something already sent.
           $list[$entity->getConfigDependencyName()] = TRUE;
-
           // And yield it.
           yield [
             'dependency_name' => $entity->getConfigDependencyName(),
@@ -642,50 +644,31 @@ class PackagerManager {
             'entity' => $entity,
           ];
 
-          // Loop through it's dependencies.
-          /** @var SyncPluginInterface $plugin */
-          foreach ($plugin->getDependencies($entity) as $key => $items) {
-            foreach ($items as $item) {
-              if (is_array($item)) {
-                $id = NULL;
-                $uuid = NULL;
-                $type = NULL;
+          $dependencies = $plugin->getDependencies($entity);
 
-                if ($key == 'config') {
-                  $type = $item['type'];
-                  $id = $item['id'];
-                }
-                else {
-                  if ($key == 'content') {
-                    $type = $item['type'];
-                    $uuid = $item['uuid'];
-                  }
-                }
+          // Group uuids to be processed by entity type
+          // to use loadMultiple instead of loading by UUID one by one
+          // for better performance
+          $typed_uuids = [];
+          foreach ($dependencies as $items) {
+            foreach ($items as $dependency) {
+              if(is_array($dependency)){
+                $typed_uuids[$dependency['type']][] = $dependency['uuid'];
+              }
+            }
+          }
 
-                // Try and load the entity.
-                try {
-                  // Config entity by id.
-                  $tentity = NULL;
-                  if ($id) {
-                    $tentity = $this->entityTypeManager->getStorage($type)
-                      ->load($id);
-                  }
+          // Loop through the results and add them to the dependencies.
+          foreach ($typed_uuids as $type => $uuids) {
+            $entity_type = $this->entityTypeManager->getDefinition($type);
+            $ids = $this->entityTypeManager->getStorage($type)->getQuery()->condition($entity_type->getKey('uuid'), $uuids, 'IN')->execute();
 
-                  if (!$tentity) {
-                    // Content entity id uuid.
-                    if (!$tentity = $this->entityRepository->loadEntityByUuid($type, $uuid)) {
-                      continue;
-                    }
-                  }
-                }
-                catch (\Exception $e) {
-                  continue;
-                }
+            $entities = $this->entityTypeManager->getStorage($type)->loadMultiple($ids);
 
-                if ($recurse) {
-                  // Don't recurse te next entry if exporting a package entity.
-                  yield from $this->buildPackageEntityList([$tentity], $excluded_entity_type_ids, $list, $entity instanceof Package ? FALSE : $recurse);
-                }
+            foreach ($entities as $dependency_entity) {
+              if ($recurse) {
+                // Don't recurse te next entry if exporting a package entity.
+                yield from $this->buildPackageEntityList([$dependency_entity], $excluded_entity_type_ids, $list, $entity instanceof Package ? FALSE : $recurse);
               }
             }
           }

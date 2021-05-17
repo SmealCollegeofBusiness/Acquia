@@ -8,7 +8,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Class SyncPluginManager.
+ * Sync plugin manager.
  *
  * @package Drupal\cohesion_sync
  */

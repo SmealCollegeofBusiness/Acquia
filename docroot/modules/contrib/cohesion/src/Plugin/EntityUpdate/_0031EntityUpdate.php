@@ -50,7 +50,7 @@ class _0031EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
 
     }
 
-    return FALSE;
+    return TRUE;
   }
 
 }

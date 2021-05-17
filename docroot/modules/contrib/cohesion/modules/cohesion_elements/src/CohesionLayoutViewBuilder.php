@@ -19,7 +19,7 @@ class CohesionLayoutViewBuilder extends EntityViewBuilder {
    * {@inheritdoc}
    */
   public function view(EntityInterface $entity, $view_mode = 'full', $langcode = NULL) {
-    /** @var EntityInterface $host */
+    /** @var \Drupal\Core\Entity\EntityInterface $host */
     $host = $entity->getParentEntity();
     $entities = [];
     $cache_tags = [];

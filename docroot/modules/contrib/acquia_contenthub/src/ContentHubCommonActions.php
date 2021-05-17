@@ -120,16 +120,20 @@ class ContentHubCommonActions {
    *   (optional) The array of collected DependentEntityWrappers.
    * @param bool $return_minimal
    *   Whether to dispatch the PUBLISH_ENTITIES event subscribers.
+   * @param bool $calculate_dependencies
+   *   Whether to calculate dependencies on the entity.
    *
    * @return \Acquia\ContentHubClient\CDF\CDFObject[]
    *   An array of CDFObjects.
    *
    * @throws \Exception
    */
-  public function getEntityCdf(EntityInterface $entity, array &$entities = [], bool $return_minimal = TRUE) {
+  public function getEntityCdf(EntityInterface $entity, array &$entities = [], bool $return_minimal = TRUE, bool $calculate_dependencies = TRUE) {
     $wrapper = new DependentEntityWrapper($entity);
     $stack = new DependencyStack();
-    $this->calculator->calculateDependencies($wrapper, $stack);
+    if ($calculate_dependencies) {
+      $this->calculator->calculateDependencies($wrapper, $stack);
+    }
     /** @var \Drupal\depcalc\DependentEntityWrapper[] $entities */
     $entities = NestedArray::mergeDeep([$wrapper->getUuid() => $wrapper], $stack->getDependenciesByUuid(array_keys($wrapper->getDependencies())));
     if ($return_minimal) {

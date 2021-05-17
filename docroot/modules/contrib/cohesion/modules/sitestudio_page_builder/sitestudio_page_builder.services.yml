@@ -11,6 +11,7 @@ services:
       - '@module_handler'
       - '@cohesion.utils'
       - '@cohesion.api_client'
+      - '@entity.repository'
     tags:
       - { name: 'event_subscriber' }
 

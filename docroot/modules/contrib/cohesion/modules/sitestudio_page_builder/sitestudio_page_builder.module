@@ -1,9 +1,11 @@
 <?php
 
 /**
+ * @file
  * Implements hook_page_attachments().
  */
 
+use Drupal\entity_reference_revisions\EntityReferenceRevisionsFieldItemList;
 use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
@@ -18,6 +20,12 @@ function sitestudio_page_builder_page_attachments_alter(array &$attachments) {
   if (!\Drupal::service('router.admin_context')->isAdminRoute($route) && \Drupal::currentUser()->hasPermission('access contextual links') && \Drupal::currentUser()->hasPermission('access visual page builder') && $route_name != 'cohesion_elements.component.preview') {
     $attachments['#attached']['library'][] = 'sitestudio_page_builder/editor-loader';
   }
+
+  // Attach add urls for sidebar browser.
+  $attachments['#attached']['drupalSettings']['cohesion']['urls']['component-add'] = \Drupal::entityTypeManager()->getDefinition('cohesion_component')->getLinkTemplate('add-form');
+  $attachments['#attached']['drupalSettings']['cohesion']['urls']['helper-add'] = \Drupal::entityTypeManager()->getDefinition('cohesion_helper')->getLinkTemplate('add-form');
+  $attachments['#attached']['drupalSettings']['cohesion']['urls']['component-content-add'] = \Drupal::entityTypeManager()->getDefinition('component_content')->getLinkTemplate('collection');
+  $attachments['#attached']['drupalSettings']['cohesion']['permissions'] = \Drupal::service('settings.endpoint.utils')->dx8PermissionsList();
 }
 
 /**
@@ -90,9 +98,9 @@ function sitestudio_page_builder_entity_display_build_alter(&$build, $context) {
     /** @var \Drupal\sitestudio_page_builder\Services\SitestudioPageBuilderManagerInterface $page_builder_manager */
     $page_builder_manager = Drupal::service('sitestudio_page_builder.manager');
     foreach ($build as &$element) {
-      if(isset($element['#field_type']) && $element['#field_type'] == 'cohesion_entity_reference_revisions' && $element['#items'] instanceof \Drupal\entity_reference_revisions\EntityReferenceRevisionsFieldItemList) {
+      if(isset($element['#field_type']) && $element['#field_type'] == 'cohesion_entity_reference_revisions' && $element['#items'] instanceof EntityReferenceRevisionsFieldItemList) {
         foreach ($element['#items'] as &$item) {
-          /** @var $item \Drupal\cohesion_elements\Plugin\Field\FieldType\CohesionEntityReferenceRevisionsItem */
+          /** @var \Drupal\cohesion_elements\Plugin\Field\FieldType\CohesionEntityReferenceRevisionsItem $item */
           // Page builder is allowed only on page containing components only
           if ($item->getFieldDefinition()->getSetting('access_elements') !== 1 && $page_builder_manager->shouldEnablePageBuilder()) {
             $element['#attributes']['data-coh-canvas'] = 'cohcanvas-' . $item->getValue()['target_id'];

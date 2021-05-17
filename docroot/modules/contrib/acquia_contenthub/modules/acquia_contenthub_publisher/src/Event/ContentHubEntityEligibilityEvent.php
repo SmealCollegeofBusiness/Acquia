@@ -40,6 +40,13 @@ class ContentHubEntityEligibilityEvent extends Event {
   protected $eligibility = TRUE;
 
   /**
+   * Whether the entity should go through a full dependency calculation.
+   *
+   * @var bool
+   */
+  protected $calculateDependencies = TRUE;
+
+  /**
    * ContentHubEntityEligibilityEvent constructor.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -78,7 +85,7 @@ class ContentHubEntityEligibilityEvent extends Event {
    * @return bool
    *   TRUE if eligible; FALSE otherwise.
    */
-  public function getEligibility() {
+  public function getEligibility(): bool {
     return $this->eligibility;
   }
 
@@ -95,6 +102,31 @@ class ContentHubEntityEligibilityEvent extends Event {
       throw new \Exception("Eligibility must be a boolean value.");
     }
     $this->eligibility = $eligible;
+  }
+
+  /**
+   * Whether the entity should go through a full dependency calculation.
+   *
+   * @return bool
+   *   TRUE if full dependency calculation should be performed; FALSE otherwise.
+   */
+  public function getCalculateDependencies(): bool {
+    return $this->calculateDependencies;
+  }
+
+  /**
+   * Set whether the entity should go through a full dependency calculation.
+   *
+   * @param bool $calculate_dependencies
+   *   TRUE if full dependency calculation should be performed; FALSE otherwise.
+   *
+   * @throws \Exception
+   */
+  public function setCalculateDependencies($calculate_dependencies) {
+    if (!is_bool($calculate_dependencies)) {
+      throw new \Exception("calculateDependencies must be a boolean value.");
+    }
+    $this->calculateDependencies = $calculate_dependencies;
   }
 
 }

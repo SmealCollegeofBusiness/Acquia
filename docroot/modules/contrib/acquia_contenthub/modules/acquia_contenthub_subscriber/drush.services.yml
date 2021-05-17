@@ -4,3 +4,8 @@ services:
     arguments: ['@database', '@config.factory', '@acquia_contenthub.client.factory', '@logger.factory', '@state', '@module_handler']
     tags:
       - { name: drush.command }
+  acquia_contenthub_subscriber.audit_commands:
+    class: Drupal\acquia_contenthub_subscriber\Commands\AcquiaContentHubSubscriberAuditCommands
+    arguments: ['@acquia_contenthub_subscriber.tracker', '@queue']
+    tags:
+      - { name: drush.command }

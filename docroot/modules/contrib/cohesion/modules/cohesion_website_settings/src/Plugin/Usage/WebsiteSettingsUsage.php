@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class WebsiteSettingsUsage.
+ * Website settings usage plugin.
  *
  * @package Drupal\cohesion_website_settings\Plugin\Usage
  *

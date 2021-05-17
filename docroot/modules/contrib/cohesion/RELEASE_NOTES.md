@@ -1,5 +1,258 @@
 # Release notes
 
+## 6.5.1
+
+### Media library modal not always closing upon creating new media
+
+#### What is is?
+
+Fixes a bug where when creating a new piece of image media through the media library modal in Site Studio the modal failed to close when attempting to insert.
+
+#### What impact will there be?
+
+Media can be created through the media library modal and it closes as expected when clicking insert.
+
+#### What actions do i need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Unable to import multiple files from the site_studio_sync folder
+
+#### What is is?
+
+Fixes an error where the drush sync:import command would not import all packages in the site_studio_sync folder but only one
+
+#### What impact will there be?
+
+All packages will be imported from the site_studio_sync folder
+
+#### What actions do i need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Error being thrown in the console when accessing Base and Custom styles.
+
+#### What is it?
+
+Some Site Studio assets were being loaded from `/site/default/files` when this directory may not exist.
+
+#### What impact will there be?
+
+The horizontal and vertical rulers in Base and Custom styles have now been removed from the style preview.
+
+#### What actions do i need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.  
+
+### When using a Field repeater the default minimum number of fields not working as expected
+
+#### What is it?
+
+When setting the minimum number of repeatable fields this was not being set as a default when first using the form.
+
+#### What impact will there be?
+
+When setting a minimum number of repeatable fields this will now be used as the default number of fields shown.
+
+#### What actions do i need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Error when enabling custom module containing default_content and Site Studio components
+
+#### What is is?
+
+Fixes an error thrown when installing a custom module that includes Site Studio components exported with the default_content module.
+
+#### What impact will there be?
+
+The custom module will install successfully.
+
+#### What actions do i need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Default colors are no longer included by default on new installs
+
+#### What is it?
+
+Removes the default gray, white and black colors from the color palette on a clean install of Site Studio.
+
+#### What impact will there be?
+
+When installing Site Studio on a site there will be no colors in the color palette. Existing sites won't be effected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Default component and helper categories no longer included by default on new installs
+
+#### What is it?
+
+Removes the default component and helper categories on a clean install of Site Studio.
+
+#### What impact will there be?
+
+When installing Site Studio on a site there will be no helper or component categories by default. Existing sites won't be effected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Using newly created media in Site Studio Media library not always selecting correct media item
+
+#### What is it?
+
+Fixes a bug where selecting newly created media in Site Studio media library was not always selecting the media item the user selected.
+
+#### What impact will there be?
+
+When selecting newly created media the correct item is now selected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Accordion tab items are not linkable
+
+#### What is it?
+
+Fixes a bug when creating a Hash URL for an Accordion item the page would not scroll to the open Accordion.
+
+#### What impact will there be?
+
+When creating a Hash URL for an Accordion item the page will automatically scroll to the open Accordion when the page first loads.
+
+#### What actions do I need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Untrusted callback exception on Drupal 9 sites
+
+#### What is it?
+
+Fixes a bug where viewing content in the view mode "search result" resulted in an untrusted callback exception on Drupal 9.
+
+``Drupal\Core\Security\UntrustedCallbackException: Render #post_render callbacks must be methods of a class that implements \Drupal\Core\Security\TrustedCallbackInterface or be an anonymous function. The callback was _cohesion_entity_clean_css. See https://www.drupal.org/node/2966725 in Drupal\Core\Render\Renderer->doTrustedCallback()``
+
+#### What impact will there be?
+
+This error should no longer occur.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Fatal error when clicking "translate" on a content template
+
+#### What is it?
+
+Fixes a bug where if you have the Configuration translation module enabled and clicked the "translate" link a fatal error occurred.
+
+#### What impact will there be?
+
+The fatal error should no longer happen.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+The fatal error has been resolved, but further research is required to make Site Studio and Configuration translation modules fully compatible.
+
+### Improving speed building package from the UI
+
+#### What is it?
+
+When building a package from manage package, it would take a significant amount of time to return the list of entities. This has now been improved.
+
+#### What impact will there be?
+None.
+
+#### What actions do I need to take?
+None.
+
+#### Are there any risks I should be aware of?
+None.
+
+### Drupal preview on existing nodes looses unsaved changes
+
+#### What is it?
+
+Fixes a bug when adding new components to a node layout canvas, then using the preview and going back to the node edit the most recent changes/additions were lost.
+
+#### What impact will there be?
+
+When using the Drupal preview on a node unsaved changes to the layout canvas are no longer lost.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Drupal block cache issue in Site Studio
+
+#### What is it?
+
+Fixes a bug when a non-accessible version of Drupal block used via Site Studio Block Element would be cached and cache would not refresh if block settings were updated making it accessible.
+
+#### What impact will there be?
+
+When updating block visibility settings, Block Element in Site Studio will have identical caching behaviour to a regular Drupal block.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
 ## 6.5.0
 
 ### Site Studio Visual Page Builder Module
@@ -24,12 +277,12 @@ There are no known risks.
 
 #### What is it?
 
-Fixes a bug where a sync package contains entities that then have their dependencies updated, but the sync package contained both the original and new dependency. 
+Fixes a bug where a sync package contains entities that then have their dependencies updated, but the sync package contained both the original and new dependency.
 For example your component exists in a package, you then update that components default image, both images files were included in the sync package rather than the latest one.
 
 #### What impact will there be?
 
-Old entity dependencies should no longer appear in your sync package. Sync package files may also be smaller in size if there were multiple "old" dependencies. 
+Old entity dependencies should no longer appear in your sync package. Sync package files may also be smaller in size if there were multiple "old" dependencies.
 
 #### What actions do I need to take?
 
@@ -193,7 +446,7 @@ None
 
 #### What actions do I need to take?
 
-Re-save component using custom elements. It can also be done as part of a `cohesion:rebuild` 
+Re-save component using custom elements. It can also be done as part of a `cohesion:rebuild`
 
 #### Are there any risks I should be aware of?
 

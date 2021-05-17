@@ -5,7 +5,7 @@ namespace Drupal\cohesion_elements\Plugin\Api;
 use Drupal\cohesion\ApiPluginBase;
 
 /**
- * Class ElementsApi.
+ * Elements Api plugin.
  *
  * @package Drupal\cohesion_elements
  *

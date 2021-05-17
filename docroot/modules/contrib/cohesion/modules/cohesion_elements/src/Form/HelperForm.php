@@ -5,7 +5,7 @@ namespace Drupal\cohesion_elements\Form;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class HelperForm.
+ * Helper form.
  *
  * @package Drupal\cohesion_elements\Form
  */

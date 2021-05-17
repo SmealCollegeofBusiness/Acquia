@@ -91,7 +91,7 @@ class ImportFileForm extends FormBase {
    * @param \Drupal\Core\TempStore\SharedTempStoreFactory $temp_shared_store_factory
    * @param \Drupal\Component\Uuid\UuidInterface $uuid
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, PackagerManager $packager_manager, SharedTempStoreFactory $temp_shared_store_factory, UuidInterface $uuid ) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, PackagerManager $packager_manager, SharedTempStoreFactory $temp_shared_store_factory, UuidInterface $uuid) {
     $this->entityTypeManager = $entity_type_manager;
     $this->packagerManager = $packager_manager;
     $this->sitestudioTempSharedStore = $temp_shared_store_factory->get('sitestudio');
@@ -126,7 +126,7 @@ class ImportFileForm extends FormBase {
     ];
 
     // Set a unique identifier for this form
-    $this->store_key = $this->store_key?:'sync_validation_' . $this->uuidGenerator->generate();
+    $this->store_key = $this->store_key ?: 'sync_validation_' . $this->uuidGenerator->generate();
 
     $form['store_key'] = [
       '#type' => 'hidden',
@@ -178,12 +178,15 @@ class ImportFileForm extends FormBase {
             // If the entry requires user input.
             $action_form[$uuid] = $this->buildActionForm($action_data_entry);
             break;
+
           case ENTRY_NEW_IMPORTED:
             $new_form[$uuid] = $this->buildNonActionForm($action_data_entry);
             break;
+
           case ENTRY_EXISTING_LOCKED:
             $locked_form[$uuid] = $this->buildNonActionForm($action_data_entry);
             break;
+
           case ENTRY_EXISTING_NO_CHANGES:
             $no_change_form[$uuid] = $this->buildNonActionForm($action_data_entry);
             break;
@@ -193,7 +196,7 @@ class ImportFileForm extends FormBase {
       // Actions are required before importing
       if(!empty($action_form)) {
         $message = $this->t('There are differences between your local entities and the entities you are trying to import. Action is required.');
-        $form['entry_actions'] = $this->buildAccordionActionForm($action_form, $this->t('Action needed. Difference between local entities and package.') , $message, TRUE);
+        $form['entry_actions'] = $this->buildAccordionActionForm($action_form, $this->t('Action needed. Difference between local entities and package.'), $message, TRUE);
         $form['entry_actions']['entries']['indexes']['#header'][] = ['data' => $this->t('Action')];
 
         if (!empty($this->broken_entities)) {
@@ -203,7 +206,7 @@ class ImportFileForm extends FormBase {
       }
 
       if(!empty($new_form)) {
-        $message = $this->t('These entities don\'t currently exist on your website. They will be imported from the package. No action is required');
+        $message = $this->t("These entities don't currently exist on your website. They will be imported from the package. No action is required");
         $form['entry_new'] = $this->buildAccordionActionForm($new_form, $this->t('New entities'), $message);
       }
 
@@ -244,7 +247,7 @@ class ImportFileForm extends FormBase {
         ->load(trim($file_id))) {
         $this->file_uri = $file_entity->getFileUri();
       }else {
-        $form_state->setErrorByName('package_yaml', $this->t('The uploaded file can\'t be retrieved please try again'));
+        $form_state->setErrorByName('package_yaml', $this->t("The uploaded file can't be retrieved please try again"));
         return FALSE;
       }
     }

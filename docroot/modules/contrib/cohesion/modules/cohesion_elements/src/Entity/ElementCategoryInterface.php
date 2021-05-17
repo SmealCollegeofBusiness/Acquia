@@ -3,7 +3,7 @@
 namespace Drupal\cohesion_elements\Entity;
 
 /**
- * Interface ElementCategoryInterface.
+ * Element category interface.
  */
 interface ElementCategoryInterface {
 

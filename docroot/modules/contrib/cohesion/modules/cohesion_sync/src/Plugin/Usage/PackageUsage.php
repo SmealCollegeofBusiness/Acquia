@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class PackageUsage.
+ * Sync package usage plugin.
  *
  * @package Drupal\cohesion\Plugin\Usage
  *

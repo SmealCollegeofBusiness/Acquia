@@ -2,8 +2,10 @@
 
 namespace Drupal\sitestudio_page_builder\Services;
 
-use Drupal\Core\Entity\ContentEntityInterface;
-
+/**
+ * Interface for visual page builder manager.
+ *
+ */
 interface SitestudioPageBuilderManagerInterface {
 
   /**

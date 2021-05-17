@@ -29,7 +29,7 @@ class Routes implements ContainerInjectionInterface {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container){
+  public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager')
     );
@@ -38,7 +38,7 @@ class Routes implements ContainerInjectionInterface {
   /**
    * Returns an array of route objects.
    *
-   * @return RouteCollection
+   * @return \Symfony\Component\Routing\RouteCollection
    *   An array of route objects.
    */
   public function routes() {
@@ -55,7 +55,8 @@ class Routes implements ContainerInjectionInterface {
         $route->setRequirement('_user_is_logged_in', "TRUE");
         $route->setRequirement('_permission', "access visual page builder");
         $route->setOption('no_cache', 'TRUE');
-        $route->setOption('sitestudio_build', 'TRUE'); // Tag the route
+// Tag the route
+        $route->setOption('sitestudio_build', 'TRUE');
         $route->setDefault('_controller', '\Drupal\sitestudio_page_builder\Controller\SitestudioPageBuilderController::buildLayoutCanvas');
         $route->setOption('parameters', [$entity_type->id() => ['type' => 'entity:' . $entity_type->id()]]);
         $routes->add("entity.{$entity_type->id()}.sitestudio_build", $route);

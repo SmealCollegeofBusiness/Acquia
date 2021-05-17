@@ -7,7 +7,7 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 
 /**
- * Class ContentTemplatesForm.
+ * Content Templates Form.
  *
  * @package Drupal\cohesion_templates\Form
  */

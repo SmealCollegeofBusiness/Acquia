@@ -5,7 +5,7 @@ namespace Drupal\cohesion_base_styles\Plugin\Api;
 use Drupal\cohesion\StylesApiPluginBase;
 
 /**
- * Class BaseStylesApi.
+ * Base styles api plugin.
  *
  * @package Drupal\cohesion_base_styles\Plugin\Usage
  *

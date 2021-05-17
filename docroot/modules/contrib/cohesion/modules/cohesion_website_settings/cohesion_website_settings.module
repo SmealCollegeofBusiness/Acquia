@@ -276,64 +276,88 @@ function _resave_content_entity($entity, &$context) {
  */
 function _resave_cohesion_layout_entity($ids, $verbose = FALSE, &$context = []) {
   if (!isset($context['results']['error'])) {
-    $time_start = microtime(TRUE);
 
-  $running_dx8_batch = &drupal_static('running_dx8_batch');
-  // Initial state.
-  $running_dx8_batch = TRUE;
-  // Save the entity.
-  $context['message'] = t('Rebuilding content entities.');
-  $entity_data = \Drupal::service('entity_type.manager')->getStorage('cohesion_layout');
+    $running_dx8_batch = &drupal_static('running_dx8_batch');
+    // Initial state.
+    $running_dx8_batch = TRUE;
+    // Save the entity.
+    $context['message'] = t('Rebuilding content entities.');
+    $entity_data = \Drupal::service('entity_type.manager')->getStorage('cohesion_layout');
 
     if ($entity_data && ($entities = $entity_data->loadMultiple($ids))) {
       /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $entity */
       foreach ($entities as $entity) {
-        if (!isset($context['results']['error'])) {
-          // Rebuild the Usage.
-          $parent_entity_type_id = 'unknown';
-          $parent_entity_label = 'unknown';
-          $parent_entity_id = 'unknown';
+        _process_cohesion_layout_entity($entity, $context, $verbose);
 
-          if ($parent_entity = $entity->getParentEntity()) {
-            $parent_entity_type_id = $parent_entity->getEntityTypeId();
-            $parent_entity_label = $parent_entity->label();
-            $parent_entity_id = $parent_entity->id();
-            \Drupal::service('cohesion_usage.update_manager')->buildRequires($entity);
-          }
-
-          // Re-save the entity.
-          if ($entity instanceof RevisionableInterface && $entity->getRevisionId()) {
-            $entity->setNewRevision(FALSE);
-          }
-          $entity->save();
-          $cohesion_error = &drupal_static('entity_cohesion_error');
-          if ($cohesion_error) {
-            $context['results']['error'] = $cohesion_error;
-          }
-
-          // Batch message.
-          if ($verbose) {
-            $context['message'] = t('Building @entity_type_id - @label - @entity_id (@time seconds, @memory MB (total) @memory_peak MB (peak))', [
-              '@entity_type_id' => $parent_entity_type_id,
-              '@label' => $parent_entity_label,
-              '@entity_id' => $parent_entity_id,
-              '@time' => number_format((float) microtime(TRUE) - $time_start, 2, '.', ''),
-              '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ','),
-              '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ',')
-            ]);
-          }
-          else {
-            $context['message'] = t('Building @entity_type_id - @label - @entity_id', [
-              '@entity_type_id' => $parent_entity_type_id,
-              '@label' => $parent_entity_label,
-              '@entity_id' => $parent_entity_id
-            ]);
+        // Rebuild all translations of this entity
+        if($entity->isTranslatable()) {
+          $languages = \Drupal::languageManager()->getLanguages();
+          $lang_codes = array();
+          foreach ($languages as $language) {
+            if ($language->getId() !== $entity->language()->getId() && $entity->hasTranslation($language->getId()) ) {
+              $translation_entity = $entity->getTranslation($language->getId());
+              _process_cohesion_layout_entity($translation_entity, $context, $verbose);
+            }
           }
         }
       }
     }
   }
+}
 
+function _process_cohesion_layout_entity($entity, &$context, $verbose) {
+  if (!isset($context['results']['error'])) {
+    $time_start = microtime(TRUE);
+    // Rebuild the Usage.
+    $parent_entity_type_id = 'unknown';
+    $parent_entity_label = 'unknown';
+    $parent_entity_id = 'unknown';
+
+    if ($parent_entity = $entity->getParentEntity()) {
+      $parent_entity_type_id = $parent_entity->getEntityTypeId();
+      $parent_entity_label = $parent_entity->label();
+      $parent_entity_id = $parent_entity->id();
+      \Drupal::service('cohesion_usage.update_manager')->buildRequires($entity);
+    }
+
+    // Re-save the entity.
+    if ($entity instanceof RevisionableInterface && $entity->getRevisionId()) {
+      $entity->setNewRevision(FALSE);
+    }
+    $entity->save();
+    $cohesion_error = &drupal_static('entity_cohesion_error');
+    if ($cohesion_error) {
+      $context['results']['error'] = $cohesion_error;
+    }
+
+    // Batch message.
+    if ($verbose) {
+      $context['message'] = t('Building @entity_type_id - @label - @entity_id (@time seconds, @memory MB (total) @memory_peak MB (peak))', [
+        '@entity_type_id' => $parent_entity_type_id,
+        '@label' => $parent_entity_label,
+        '@entity_id' => $parent_entity_id,
+        '@time' => number_format((float) microtime(TRUE) - $time_start, 2, '.', ''),
+        '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ','),
+        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ',')
+      ]);
+    }
+    else {
+      $context['message'] = t('Building @entity_type_id - @label - @entity_id', [
+        '@entity_type_id' => $parent_entity_type_id,
+        '@label' => $parent_entity_label,
+        '@entity_id' => $parent_entity_id
+      ]);
+    }
+  }
+
+  // Process latest revisions as well as it can differ from the default revision (ex: published = default vs draft = latest)
+  if(!$entity->isLatestRevision()) {
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
+    $storage = \Drupal::service('entity_type.manager')->getStorage('cohesion_layout');
+    $latest_revision_id = $storage->getLatestRevisionId($entity->id());
+    $latest_entity = $storage->loadRevision($latest_revision_id)->getTranslation($entity->language()->getId());
+    _process_cohesion_layout_entity($latest_entity, $context, $verbose);
+  }
 }
 
 /**

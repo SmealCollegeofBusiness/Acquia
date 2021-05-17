@@ -7,6 +7,10 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Service for visual page builder.
+ *
+ */
 class SitestudioPageBuilderManager implements SitestudioPageBuilderManagerInterface, ContainerInjectionInterface {
 
   /**
@@ -50,7 +54,6 @@ class SitestudioPageBuilderManager implements SitestudioPageBuilderManagerInterf
         return $entity;
       }
     }
-
 
     return FALSE;
   }

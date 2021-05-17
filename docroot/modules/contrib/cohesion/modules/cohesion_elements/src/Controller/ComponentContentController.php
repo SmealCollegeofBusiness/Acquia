@@ -52,7 +52,7 @@ class ComponentContentController extends ControllerBase {
     }
 
     $ids = $query->execute();
-    /** @var ComponentContent[ $component_contents */
+    /** @var \Drupal\cohesion_elements\Entity\ComponentContent[ $component_contents */
     $component_contents = $storage->loadMultiple($ids);
     $data = [];
 

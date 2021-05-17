@@ -3,7 +3,7 @@
 namespace Drupal\cohesion_templates\Plugin;
 
 /**
- * Class CacheContexts.
+ * Cache contexts plugin.
  *
  * @package Drupal\cohesion_templates\Plugin
  */

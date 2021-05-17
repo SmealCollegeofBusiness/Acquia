@@ -32,19 +32,19 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '7b449441eba6fac644b5092d3aec711f5f75dbb0',
+    'reference' => 'ca8a1f78087fa92c2cfaa07f5cf4578c60cbb063',
     'name' => 'acquia/sf_acms',
   ),
   'versions' => 
   array (
     'acquia/acquia_cms' => 
     array (
-      'pretty_version' => '1.2.1',
-      'version' => '1.2.1.0',
+      'pretty_version' => '1.2.2',
+      'version' => '1.2.2.0',
       'aliases' => 
       array (
       ),
-      'reference' => '99704605ce96c9f2576e01356ca94bc92c3c962e',
+      'reference' => 'a0576c8577b9d985b198673156fdaf9b11a56a23',
     ),
     'acquia/acsf-contenthub-console' => 
     array (
@@ -84,21 +84,21 @@ private static $installed = array (
     ),
     'acquia/cohesion' => 
     array (
-      'pretty_version' => '6.5.0',
-      'version' => '6.5.0.0',
+      'pretty_version' => '6.5.1',
+      'version' => '6.5.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'c257aec0f0b0c8ff162151fcf687aa210d708f4b',
+      'reference' => '7e9a7be653309dcd43a8726164b0cc00a70d80d6',
     ),
     'acquia/cohesion-theme' => 
     array (
-      'pretty_version' => '6.5.0',
-      'version' => '6.5.0.0',
+      'pretty_version' => '6.5.1',
+      'version' => '6.5.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => '21ac548e9ada843aebc6e52c4d7a114c924c0c08',
+      'reference' => '9dd42c1b00df7f5c45d8807bff9661d2cfd0167e',
     ),
     'acquia/content-hub-php' => 
     array (
@@ -168,7 +168,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '7b449441eba6fac644b5092d3aec711f5f75dbb0',
+      'reference' => 'ca8a1f78087fa92c2cfaa07f5cf4578c60cbb063',
     ),
     'asm89/stack-cors' => 
     array (
@@ -208,12 +208,12 @@ private static $installed = array (
     ),
     'commerceguys/addressing' => 
     array (
-      'pretty_version' => 'v1.2.0',
-      'version' => '1.2.0.0',
+      'pretty_version' => 'v1.2.1',
+      'version' => '1.2.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => '00c263fa945e7f78524bbb6b99d331f3b493be2a',
+      'reference' => '311040bd78ea2ea82105dd1f17205c449ac8de47',
     ),
     'composer/installers' => 
     array (
@@ -368,12 +368,12 @@ private static $installed = array (
     ),
     'doctrine/annotations' => 
     array (
-      'pretty_version' => '1.12.1',
-      'version' => '1.12.1.0',
+      'pretty_version' => '1.13.1',
+      'version' => '1.13.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'b17c5014ef81d212ac539f07a1001832df1b6d3b',
+      'reference' => 'e6e7b7d5b45a2f2abc5460cc6396480b2b1d321f',
     ),
     'doctrine/collections' => 
     array (
@@ -422,12 +422,12 @@ private static $installed = array (
     ),
     'drupal/acquia_contenthub' => 
     array (
-      'pretty_version' => '2.22.0',
-      'version' => '2.22.0.0',
+      'pretty_version' => '2.24.0',
+      'version' => '2.24.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => '8.x-2.22',
+      'reference' => '8.x-2.24',
     ),
     'drupal/acquia_lift' => 
     array (
@@ -449,12 +449,12 @@ private static $installed = array (
     ),
     'drupal/acquia_search' => 
     array (
-      'pretty_version' => '3.0.1',
-      'version' => '3.0.1.0',
+      'pretty_version' => '3.0.2',
+      'version' => '3.0.2.0',
       'aliases' => 
       array (
       ),
-      'reference' => '3.0.1',
+      'reference' => '3.0.2',
     ),
     'drupal/acquia_telemetry-acquia_telemetry' => 
     array (
@@ -931,12 +931,12 @@ private static $installed = array (
     ),
     'drupal/ctools' => 
     array (
-      'pretty_version' => '3.5.0',
-      'version' => '3.5.0.0',
+      'pretty_version' => '3.6.0',
+      'version' => '3.6.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => '8.x-3.5',
+      'reference' => '8.x-3.6',
     ),
     'drupal/datetime' => 
     array (
@@ -1036,12 +1036,12 @@ private static $installed = array (
     ),
     'drupal/facets' => 
     array (
-      'pretty_version' => '1.7.0',
-      'version' => '1.7.0.0',
+      'pretty_version' => '1.8.0',
+      'version' => '1.8.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => '8.x-1.7',
+      'reference' => '8.x-1.8',
     ),
     'drupal/facets_pretty_paths' => 
     array (
@@ -2209,12 +2209,12 @@ private static $installed = array (
     ),
     'nesbot/carbon' => 
     array (
-      'pretty_version' => '2.47.0',
-      'version' => '2.47.0.0',
+      'pretty_version' => '2.48.0',
+      'version' => '2.48.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => '606262fd8888b75317ba9461825a24fc34001e1e',
+      'reference' => 'd3c447f21072766cddec3522f9468a5849a76147',
     ),
     'nikic/php-parser' => 
     array (
@@ -2895,12 +2895,12 @@ private static $installed = array (
     ),
     'symfony/cache' => 
     array (
-      'pretty_version' => 'v5.2.7',
-      'version' => '5.2.7.0',
+      'pretty_version' => 'v5.2.8',
+      'version' => '5.2.8.0',
       'aliases' => 
       array (
       ),
-      'reference' => '1d801d1dc5e3840e832568db6b35a954cfb435a8',
+      'reference' => 'c13bfc6682a669e6ba592ba3305139ebf946a811',
     ),
     'symfony/cache-contracts' => 
     array (
@@ -2920,21 +2920,21 @@ private static $installed = array (
     ),
     'symfony/config' => 
     array (
-      'pretty_version' => 'v4.4.22',
-      'version' => '4.4.22.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'f6d8318c14e4be81525ae47b30e618f0bed4c7b3',
+      'reference' => 'be9e601f17fc684ddfd6c675fdfcd04bb51fa928',
     ),
     'symfony/console' => 
     array (
-      'pretty_version' => 'v4.4.22',
-      'version' => '4.4.22.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => '36bbd079b69b94bcc9c9c9e1e37ca3b1e7971625',
+      'reference' => '1ab187ac21d41d7d34a4f529091a1f5d0bb2924f',
     ),
     'symfony/debug' => 
     array (
@@ -2947,12 +2947,12 @@ private static $installed = array (
     ),
     'symfony/dependency-injection' => 
     array (
-      'pretty_version' => 'v4.4.22',
-      'version' => '4.4.22.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => '778b140b3e8f6890f43dc2c978e58e69f188909a',
+      'reference' => 'c1d4b65852f22e19131dea626e236a8e07d64479',
     ),
     'symfony/deprecation-contracts' => 
     array (
@@ -2974,12 +2974,12 @@ private static $installed = array (
     ),
     'symfony/error-handler' => 
     array (
-      'pretty_version' => 'v4.4.22',
-      'version' => '4.4.22.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => '76603a8df8e001436df80758eb03a8baa5324175',
+      'reference' => '21d75bfbdfdd3581a7f97080deb98926987f14a7',
     ),
     'symfony/event-dispatcher' => 
     array (
@@ -3017,21 +3017,21 @@ private static $installed = array (
     ),
     'symfony/finder' => 
     array (
-      'pretty_version' => 'v4.4.20',
-      'version' => '4.4.20.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => '2543795ab1570df588b9bbd31e1a2bd7037b94f6',
+      'reference' => '67b77716f517e3f864759232e1201e7aa2ab0e82',
     ),
     'symfony/http-client' => 
     array (
-      'pretty_version' => 'v4.4.22',
-      'version' => '4.4.22.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'ad1e2d512ec080e78ebd65c01ab92bd78057d007',
+      'reference' => '7bac9c0c2d1a293a67c5e1d4b9eb7a9044579013',
     ),
     'symfony/http-client-contracts' => 
     array (
@@ -3051,21 +3051,21 @@ private static $installed = array (
     ),
     'symfony/http-foundation' => 
     array (
-      'pretty_version' => 'v4.4.22',
-      'version' => '4.4.22.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => '1a6f87ef99d05b1bf5c865b4ef7992263e1cb081',
+      'reference' => '2ffb43bd6c589a274ee1e93a5fd6b7ef1577b9c5',
     ),
     'symfony/http-kernel' => 
     array (
-      'pretty_version' => 'v4.4.22',
-      'version' => '4.4.22.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'cd2e325fc34a4a5bbec91eecf69dda8ee8c5ea4f',
+      'reference' => '95bb42312503a212f4467529bac8735f01226ff9',
     ),
     'symfony/mime' => 
     array (
@@ -3202,12 +3202,12 @@ private static $installed = array (
     ),
     'symfony/translation' => 
     array (
-      'pretty_version' => 'v4.4.21',
-      'version' => '4.4.21.0',
+      'pretty_version' => 'v4.4.23',
+      'version' => '4.4.23.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'eb8f5428cc3b40d6dffe303b195b084f1c5fbd14',
+      'reference' => 'ff6e63c7b5de874464642969968f61f8dc649ac3',
     ),
     'symfony/translation-contracts' => 
     array (
@@ -3245,21 +3245,21 @@ private static $installed = array (
     ),
     'symfony/var-dumper' => 
     array (
-      'pretty_version' => 'v5.2.7',
-      'version' => '5.2.7.0',
+      'pretty_version' => 'v5.2.8',
+      'version' => '5.2.8.0',
       'aliases' => 
       array (
       ),
-      'reference' => '27cb9f7cfa3853c736425c7233a8f68814b19636',
+      'reference' => 'd693200a73fae179d27f8f1b16b4faf3e8569eba',
     ),
     'symfony/var-exporter' => 
     array (
-      'pretty_version' => 'v5.2.7',
-      'version' => '5.2.7.0',
+      'pretty_version' => 'v5.2.8',
+      'version' => '5.2.8.0',
       'aliases' => 
       array (
       ),
-      'reference' => '01184a5ab95eb9500b9b0ef3e525979e003d9c81',
+      'reference' => 'd26db2d2b2d7eb2c1adb8545179f8803998b8237',
     ),
     'symfony/yaml' => 
     array (
@@ -3281,12 +3281,12 @@ private static $installed = array (
     ),
     'twig/twig' => 
     array (
-      'pretty_version' => 'v2.14.4',
-      'version' => '2.14.4.0',
+      'pretty_version' => 'v2.14.6',
+      'version' => '2.14.6.0',
       'aliases' => 
       array (
       ),
-      'reference' => '0b4ba691fb99ec7952d25deb36c0a83061b93bbf',
+      'reference' => '27e5cf2b05e3744accf39d4c68a3235d9966d260',
     ),
     'typhonius/acquia-php-sdk-v2' => 
     array (

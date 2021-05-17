@@ -28,7 +28,7 @@ class _0019EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
    * {@inheritdoc}
    */
   public function runUpdate(&$entity) {
-    if (\Drupal::service('module_handler')->moduleExists('cohesion_style_guide') && $entity instanceof StyleGuideManager) {
+    if ($entity && \Drupal::service('module_handler')->moduleExists('cohesion_style_guide') && $entity instanceof StyleGuideManager) {
       /** @var \Drupal\cohesion_style_guide\Entity\StyleGuideManager $entity */
 
       if ($entity->get('style_guide_uuid')) {

@@ -11,7 +11,7 @@ dependencies:
   - drupal:system (>= 8.5)
   - paragraphs
 
-# Information added by Drupal.org packaging script on 2021-04-09
-version: '8.x-2.22'
+# Information added by Drupal.org packaging script on 2021-05-13
+version: '8.x-2.24'
 project: 'acquia_contenthub'
-datestamp: 1617999954
+datestamp: 1620917647

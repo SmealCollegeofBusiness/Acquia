@@ -179,7 +179,6 @@ abstract class WebsiteSettingsGroupFormBase extends ConfigFormBase {
         // Drupal\cohesion\Element\CohesionField.
         '#type' => 'cohesionfield',
         '#json_values' => empty($form_state->getUserInput()) ? $this->getEntityGroupsPlugin()->getGroupJsonValues() : $form_state->getUserInput()['json_values'],
-      // $jsonMapper,
         '#json_mapper' => '{}',
         '#entity' => NULL,
         '#classes' => [

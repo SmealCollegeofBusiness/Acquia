@@ -84,6 +84,9 @@ function _acquia_contenthub_publisher_enqueue_entity(EntityInterface $entity, $o
   $item = new \stdClass();
   $item->type = $entity->getEntityTypeId();
   $item->uuid = $entity->uuid();
+  if ($event->getCalculateDependencies() === FALSE) {
+    $item->calculate_dependencies = FALSE;
+  }
   $queue_id = $queue->createItem($item);
   /** @var \Drupal\acquia_contenthub_publisher\PublisherTracker $tracker */
   $tracker = \Drupal::service('acquia_contenthub_publisher.tracker');

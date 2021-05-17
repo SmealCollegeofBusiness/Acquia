@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class CategoriesListBuilder.
+ * Categories list builder.
  *
  * @package Drupal\cohesion_elements
  */

@@ -6,7 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 
 /**
- * Class CohesionLayoutModalController.
+ * Modal controller.
  *
  * @package Drupal\cohesion_elements\Controller
  */

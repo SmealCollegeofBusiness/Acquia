@@ -9,7 +9,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\File\FileSystemInterface;
 
 /**
- * Class WebsiteSettingsApi.
+ * Website settings api plugin.
  *
  * @package Drupal\cohesion_website_settings
  *

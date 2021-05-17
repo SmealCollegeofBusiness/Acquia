@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class SCSSVariableUsage.
+ * SCSS variable usage plugin.
  *
  * @package Drupal\cohesion_website_settings\Plugin\Usage
  *

@@ -6,6 +6,7 @@ use Drupal\cohesion\ImageBrowserPluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\media_library\MediaLibraryState;
+use Drupal\views\Views;
 
 /**
  * Plugin for media library image browser element.
@@ -85,6 +86,10 @@ class MediaLibraryImageBrowser extends ImageBrowserPluginBase {
    */
   public function sharedPageAttachments($type, &$attachments) {
     if ($image_browser_object = $this->config->get('image_browser')) {
+
+      // clear media library view caches.
+      $view = Views::getView('media_library');
+      $view->storage->invalidateCaches();
 
       $allowed_types = array_filter($image_browser_object[$type]['cohesion_media_lib_types']);
       $selected_type = array_shift($image_browser_object[$type]['cohesion_media_lib_types']);

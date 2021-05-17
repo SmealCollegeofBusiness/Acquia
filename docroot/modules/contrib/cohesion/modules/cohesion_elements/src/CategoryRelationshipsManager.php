@@ -48,7 +48,7 @@ class CategoryRelationshipsManager {
     $element_storage = $this->entityTypeManager->getStorage($element_entity_type);
 
     // Is the category missing?
-    if (empty($category_storage->load($category_id)) && !empty($category_storage->loadMultiple())) {
+    if (empty($category_storage->load($category_id)) && !empty($category_storage->loadMultiple()) || empty($category_storage->loadMultiple())) {
 
       // Is this category in use anywhere?
       $query = $element_storage->getQuery()->condition('category', $category_id, '=');

@@ -3,7 +3,7 @@
 namespace Drupal\cohesion_website_settings\Entity;
 
 /**
- * Trait WebsiteSettingsSourceTrait.
+ * Website settings source trait.
  *
  * @package Drupal\cohesion_website_settings\Entity
  */

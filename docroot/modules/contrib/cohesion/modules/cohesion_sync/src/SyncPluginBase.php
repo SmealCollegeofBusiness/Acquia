@@ -12,7 +12,7 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class SyncPluginBase.
+ * Sync plugin base.
  *
  * @package Drupal\cohesion_sync
  */

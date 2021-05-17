@@ -6,6 +6,10 @@ use Drupal\cohesion\Event\FrontendUrlsEvent;
 use Drupal\Core\Url;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ *  Visual page builder event subscriber for frontend app.
+ *
+ */
 class CohesionFrontendUrlSubscriber implements EventSubscriberInterface {
 
   /**
@@ -59,4 +63,5 @@ class CohesionFrontendUrlSubscriber implements EventSubscriberInterface {
       'method' => 'POST'
     ]);
   }
+
 }

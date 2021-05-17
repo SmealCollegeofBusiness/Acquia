@@ -14,17 +14,26 @@ class CohesionLayoutViewBuilderEvent extends Event {
 
   /**
    * The build array
+   *
+   * @var array
    */
   protected $build;
 
   /**
    * The entity to render.
+   *
+   * @var Drupal\cohesion_elements\Entity\CohesionLayout
    */
 
   protected $entity;
 
   /**
    * Constructs the object.
+   *
+   * @param $build
+   *  The build array
+   * @param \Drupal\cohesion_elements\Entity\CohesionLayout $entity
+   *  The CohesionLayout entity
    *
    */
   public function __construct($build, CohesionLayout $entity) {
@@ -44,7 +53,7 @@ class CohesionLayoutViewBuilderEvent extends Event {
   /**
    * Get the entity to render
    *
-   * @return CohesionLayout
+   * @return \Drupal\cohesion_elements\Entity\CohesionLayout
    */
   public function getEntity() {
     return $this->entity;
@@ -60,4 +69,3 @@ class CohesionLayoutViewBuilderEvent extends Event {
   }
 
 }
-

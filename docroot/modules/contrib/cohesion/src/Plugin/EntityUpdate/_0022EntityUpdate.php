@@ -33,7 +33,7 @@ class _0022EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
       $this->updateLibrary($entity);
     }
 
-    return FALSE;
+    return TRUE;
 
   }
 

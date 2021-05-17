@@ -6,7 +6,7 @@ use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
 
 /**
- * Class ElementCategoryBase.
+ * Element category base.
  *
  * @package Drupal\cohesion_elements\Entity
  */

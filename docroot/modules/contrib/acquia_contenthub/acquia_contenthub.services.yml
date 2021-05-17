@@ -431,3 +431,7 @@ services:
     arguments: [ '@module_handler' ]
     tags:
       - { name: event_subscriber }
+
+  acquia_contenthub.audit_track_entities:
+    class: Drupal\acquia_contenthub\AuditTrackEntities
+    arguments: []

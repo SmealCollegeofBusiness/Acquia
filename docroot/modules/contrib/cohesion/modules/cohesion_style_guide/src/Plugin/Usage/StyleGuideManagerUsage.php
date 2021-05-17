@@ -12,7 +12,7 @@ use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class StyleGuideManagerUsage.
+ * Style guide manager usage plugin.
  *
  * @package Drupal\cohesion_style_guide\Plugin\Usage
  *

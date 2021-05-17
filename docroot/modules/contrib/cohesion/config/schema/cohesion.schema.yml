@@ -9,13 +9,13 @@ cohesion_config_entity:
       type: string
       label: 'Machine-readable name'
     json_values:
-      type: text
+      type: string
       label: 'Values Data'
     json_mapper:
-      type: text
+      type: string
       label: 'Mapper'
     last_entity_update:
-      type: text
+      type: string
       label: 'Last entity update'
     locked:
       type: boolean

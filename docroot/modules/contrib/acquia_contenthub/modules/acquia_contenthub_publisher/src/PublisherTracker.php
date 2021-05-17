@@ -229,4 +229,28 @@ class PublisherTracker {
     $query->execute();
   }
 
+  /**
+   * Obtains a list of entities.
+   *
+   * @param string $status
+   *   The status of the entities to track.
+   * @param string $entity_type_id
+   *   The Entity type.
+   *
+   * @return array
+   *   An array of Tracked Entities set to reindex.
+   */
+  public function listTrackedEntities(string $status, $entity_type_id = ''): array {
+    $query = $this->database
+      ->select(self::EXPORT_TRACKING_TABLE, 'ci')
+      ->fields('ci')
+      ->condition('status', $status);
+
+    if (!empty($entity_type_id)) {
+      $query = $query->condition('entity_type', $entity_type_id);
+    }
+
+    return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
+  }
+
 }

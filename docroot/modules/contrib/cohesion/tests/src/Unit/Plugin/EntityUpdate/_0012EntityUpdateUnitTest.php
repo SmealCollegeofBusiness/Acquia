@@ -4,7 +4,6 @@ namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\Plugin\EntityUpdate\_0012EntityUpdate;
-use Drupal\Tests\UnitTestCase;
 
 /**
  * Class MockUpdateEntity.
@@ -18,7 +17,7 @@ class _0012MockUpdateEntity extends EntityMockBase implements EntityJsonValuesIn
 /**
  * @group Cohesion
  */
-class _0012EntityUpdateUnitTest extends UnitTestCase {
+class _0012EntityUpdateUnitTest extends EntityUpdateUnitTestCase {
 
   /**
    * @var unit_0012MockUpdateEntity*/

@@ -9,7 +9,7 @@ use Drupal\Core\Ajax\CommandWithAttachedAssetsTrait;
 /**
  * Provides an AJAX command for site studio page builder
  */
-class SitestudioPageBuilderCommand implements CommandInterface, CommandWithAttachedAssetsInterface{
+class SitestudioPageBuilderCommand implements CommandInterface, CommandWithAttachedAssetsInterface {
 
   use CommandWithAttachedAssetsTrait;
 

@@ -6,7 +6,7 @@ use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
 
 /**
- * Class ElementsController.
+ * Elements controller.
  *
  * @package Drupal\cohesion_elements\Controller
  */

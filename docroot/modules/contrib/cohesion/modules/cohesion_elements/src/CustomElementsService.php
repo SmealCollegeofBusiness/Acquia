@@ -6,7 +6,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
- * Class CustomElementsService.
+ * Custom elements service.
  *
  * @package Drupal\cohesion_elements
  */

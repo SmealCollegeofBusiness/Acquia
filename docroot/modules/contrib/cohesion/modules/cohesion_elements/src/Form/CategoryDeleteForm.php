@@ -6,7 +6,7 @@ use Drupal\cohesion\Form\CohesionDeleteForm;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class CategoryDeleteForm.
+ * Category delete form.
  *
  * @package Drupal\cohesion_elements\Form
  */

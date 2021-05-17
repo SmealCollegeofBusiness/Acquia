@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class CustomStylesUsage.
+ * Custom style usage plugin.
  *
  * @package Drupal\cohesion_custom_styles\Plugin\Usage
  *

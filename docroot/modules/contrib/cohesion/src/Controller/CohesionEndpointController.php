@@ -387,7 +387,7 @@ class CohesionEndpointController extends ControllerBase {
         return new CohesionJsonResponse([
           'status' => 'success',
           'data' => [
-            'layoutCanvas' => $helper->getDecodedJsonValues()
+            'layoutCanvas' => $helper->getDecodedJsonValues(TRUE)
           ],
         ]);
       }

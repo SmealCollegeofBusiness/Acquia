@@ -15,7 +15,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class CustomStylesListBuilder.
+ * Custom styles list builder.
  *
  * @package Drupal\cohesion_custom_styles
  */

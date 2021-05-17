@@ -3,6 +3,7 @@
 namespace Drupal\cohesion_elements\Plugin\Field\FieldWidget;
 
 use Drupal\cohesion\Services\JsonXss;
+use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\cohesion_elements\Entity\ComponentContent;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\ContentEntityInterface;
@@ -88,17 +89,23 @@ class CohesionLayoutBuilderWidget extends WidgetBase implements ContainerFactory
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $layout_entity = NULL;
+
     $values = $items->getValue();
     $target_type = $this->getFieldSetting('target_type');
     $entity_storage = $this->entityTypeManager->getStorage($target_type);
-
     /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $layout_entity */
     if (empty($values[$delta]['target_id'])) {
       $layout_entity = $entity_storage->create();
     }
     else {
-      $layout_entity = $entity_storage->loadRevision($values[$delta]['target_revision_id']);
+      // If the form loads after node preview, there is already an entity attached with potentially modified values.
+      // Use that if possible, so we don't lose work in progress.
+      if (isset($values[$delta]['entity']) && $values[$delta]['entity'] instanceof CohesionLayout) {
+        $layout_entity = $values[$delta]['entity'];
+      }
+      else {
+        $layout_entity = $entity_storage->loadRevision($values[$delta]['target_revision_id']);
+      }
     }
 
     $storage = $form_state->getStorage();

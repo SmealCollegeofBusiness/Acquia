@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class PackageForm.
+ * Sync package form.
  *
  * @package Drupal\cohesion_sync\Form
  */

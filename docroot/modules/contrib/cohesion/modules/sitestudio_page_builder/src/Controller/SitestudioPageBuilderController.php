@@ -6,17 +6,19 @@ use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\InsertCommand;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\jsonapi\Exception\UnprocessableHttpEntityException;
 use Drupal\sitestudio_page_builder\Ajax\SitestudioPageBuilderCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Controller for endpoint for the visual page builder.
+ *
+ */
 class SitestudioPageBuilderController extends ControllerBase {
 
   /**
@@ -113,7 +115,7 @@ class SitestudioPageBuilderController extends ControllerBase {
     $entity = NULL;
     foreach ($data->canvases as $canvas_name => $canvas_data) {
       $layout_canvas_id = str_replace('cohcanvas-', '', $canvas_name);
-      /** @var CohesionLayout $layout_canvas */
+      /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $layout_canvas */
       // Load the layout canvas and set the new json values to be saved
       $layout_canvas = CohesionLayout::load($layout_canvas_id);
       if(!$layout_canvas) {
@@ -204,7 +206,7 @@ class SitestudioPageBuilderController extends ControllerBase {
         return new CohesionJsonResponse([
           'data' => 'Forbidden, you do not have the necessary permissions to edit this content'
         ], 403);
-      } else if (count($violations)) {
+      } elseif (count($violations)) {
         $errors_msg = [];
         foreach ($violations as $violation) {
           $errors_msg[] = $violation->getMessage();
@@ -259,7 +261,6 @@ class SitestudioPageBuilderController extends ControllerBase {
       ], 400);
     }
 
-
     return new CohesionJsonResponse([
       'data' => [
         'moderationStates' => array_values($transition_labels),
@@ -280,7 +281,7 @@ class SitestudioPageBuilderController extends ControllerBase {
       if(isset($layoutId[1])) {
         $layout_canvas = $request->request->get('layout_canvas');
         if($layout = CohesionLayout::load($layoutId[1])) {
-          if(!$layout->getParentEntity() || !$layout->getParentEntity()->access('update') ) {
+          if(!$layout->getParentEntity() || !$layout->getParentEntity()->access('update')) {
             return new CohesionJsonResponse([
               'data' => 'Forbidden, you do not have the necessary permissions to edit this content'
             ], 403);
@@ -295,7 +296,7 @@ class SitestudioPageBuilderController extends ControllerBase {
 
           $view_builder = \Drupal::entityTypeManager()->getViewBuilder('cohesion_layout');
           $build = $view_builder->view($layout);
-          $content  = [
+          $content = [
             '#theme' => "sitestudio_build",
             '#build' => $build,
           ];
@@ -304,7 +305,7 @@ class SitestudioPageBuilderController extends ControllerBase {
           return $response;
         }else {
           return new CohesionJsonResponse([
-            'data' => $this->t('The LayoutCanvas entity with id @id can\'t be found', ['@id' => $layoutId[1]])
+            'data' => $this->t("The LayoutCanvas entity with id @id can't be found", ['@id' => $layoutId[1]])
           ], 400);
         }
       }

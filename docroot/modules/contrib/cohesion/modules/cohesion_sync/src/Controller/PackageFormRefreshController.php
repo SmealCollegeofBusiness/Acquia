@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class PackageFormRefreshController.
+ * Sync package form refresh controller.
  *
  * @package Drupal\cohesion_sync\Controller
  */
@@ -127,11 +127,28 @@ class PackageFormRefreshController extends ControllerBase {
     $excluded_entity_type_ids = array_keys($settings['excludedSettings']);
     $package_contents_form = [];
 
-    foreach ($settings['packageSettings'] as $uuid => $meta) {
-      $source_entity_uuid = $uuid;
-      $source_entity_type = $meta['type'];
+    // Group uuids to be processed by entity type
+    // to use loadMultiple instead of loading by UUID one by one
+    // for better performance
+    $typed_uuids = [];
 
-      if ($source_entity = $this->entityRepository->loadEntityByUuid($source_entity_type, $source_entity_uuid)) {
+    foreach ($settings['packageSettings'] as $uuid => $meta) {
+      $typed_uuids[$meta['type']][] = $uuid;
+    }
+
+    foreach ($typed_uuids as $type => $uuids) {
+      $entity_type = $this->entityTypeManager->getDefinition($type);
+      // Get the ids for all uuids and load the entities
+      $ids = $this->entityTypeManager->getStorage($type)
+        ->getQuery()
+        ->condition($entity_type->getKey('uuid'), $uuids, 'IN')
+        ->execute();
+
+      $entities = $this->entityTypeManager->getStorage($type)
+        ->loadMultiple($ids);
+
+      // Loop through the results and add them to the dependencies.
+      foreach ($entities as $source_entity) {
         // Get details about the source entity type.
         $source_entity_type_id = $source_entity->getEntityTypeID();
         $source_entity_type_label = ucfirst($this->entityTypeManager->getDefinition($source_entity_type_id)->getPluralLabel()->__toString());
@@ -178,6 +195,7 @@ class PackageFormRefreshController extends ControllerBase {
         ];
       }
     }
+
     ksort($package_contents_form);
 
     /**

@@ -37,10 +37,10 @@ class CohesionUtils {
   protected $entityTypeManager;
 
   /**
-  * The language manager service.
-  *
-  * @var \Drupal\Core\Language\LanguageManagerInterface
-  */
+   * The language manager service.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
   protected $languageManager;
 
   /**
@@ -508,4 +508,5 @@ class CohesionUtils {
 
     return FALSE;
   }
+
 }

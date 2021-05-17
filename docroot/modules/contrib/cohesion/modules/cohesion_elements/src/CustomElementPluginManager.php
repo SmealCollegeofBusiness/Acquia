@@ -8,7 +8,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Class CustomElementPluginManager.
+ * Custom element plugin manager.
  *
  * @package Drupal\cohesion_elements
  */

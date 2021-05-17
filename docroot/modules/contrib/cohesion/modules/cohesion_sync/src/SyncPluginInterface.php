@@ -5,7 +5,7 @@ namespace Drupal\cohesion_sync;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
- * Interface SyncPluginInterface.
+ * Sync plugin interface.
  *
  * @package Drupal\cohesion_sync
  */

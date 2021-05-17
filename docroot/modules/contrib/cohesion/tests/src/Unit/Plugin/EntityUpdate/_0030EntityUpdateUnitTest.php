@@ -5,7 +5,6 @@ namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\Plugin\EntityUpdate\_0030EntityUpdate;
 use Drupal\Core\Entity\EntityTypeManager;
-use Drupal\Tests\UnitTestCase;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\node\Entity\Node;
@@ -53,7 +52,7 @@ class _0030EntityUpdateMock extends _0030EntityUpdate {
 /**
  * @group Cohesion
  */
-class _0030EntityUpdateUnitTest extends UnitTestCase {
+class _0030EntityUpdateUnitTest extends EntityUpdateUnitTestCase {
 
   /**
    * Entity Update.

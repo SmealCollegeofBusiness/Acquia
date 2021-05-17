@@ -18,6 +18,7 @@ use Drupal\entity_reference_revisions\Plugin\Field\FieldFormatter\EntityReferenc
  * )
  */
 class CohesionEntityReferenceRevisionsEntityFormatter extends EntityReferenceRevisionsEntityFormatter {
+
   /**
    * {@inheritdoc}
    *

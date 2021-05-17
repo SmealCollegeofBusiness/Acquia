@@ -30,34 +30,37 @@ class _0027EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
   public function runUpdate(&$entity) {
 
     // Is an layout entity.
-    if (!$entity->isLayoutCanvas()) {
-      $json_values = $entity->getDecodedJsonValues(TRUE);
-      $this->walkStyleMapper($entity->getDecodedJsonMapper(), function ($uuid) use (&$json_values) {
+    if($entity instanceof EntityJsonValuesInterface) {
 
-        if (isset($json_values->styles->{$uuid}->settings->class) && $json_values->styles->{$uuid}->settings->class[0] !== '.') {
-          $json_values->styles->{$uuid}->settings->class = '.' . $json_values->styles->{$uuid}->settings->class;
-        }
-      });
-      $entity->setJsonValue(json_encode($json_values));
-    }
-    elseif ($entity instanceof EntityJsonValuesInterface) {
-      $json_values = $entity->getDecodedJsonValues(TRUE);
+      if (!$entity->isLayoutCanvas()) {
+        $json_values = $entity->getDecodedJsonValues(TRUE);
+        $this->walkStyleMapper($entity->getDecodedJsonMapper(), function ($uuid) use (&$json_values) {
 
-      // Loop over each element in the canvas.
-      if ($json_values->mapper) {
-        foreach ($json_values->mapper as $element_uuid => $mapper) {
-          // This element has styles.
-          if (is_object($mapper) && property_exists($mapper, 'styles')) {
-            $this->walkStyleMapper($mapper, function ($uuid) use ($element_uuid, &$json_values) {
-              if (isset($json_values->model->$element_uuid->styles->$uuid->settings->class) && $json_values->model->$element_uuid->styles->$uuid->settings->class[0] !== '.') {
-                $json_values->model->$element_uuid->styles->$uuid->settings->class = '.' . $json_values->model->$element_uuid->styles->$uuid->settings->class;
-              }
-            });
+          if (isset($json_values->styles->{$uuid}->settings->class) && $json_values->styles->{$uuid}->settings->class[0] !== '.') {
+            $json_values->styles->{$uuid}->settings->class = '.' . $json_values->styles->{$uuid}->settings->class;
+          }
+        });
+        $entity->setJsonValue(json_encode($json_values));
+      }
+      else {
+        $json_values = $entity->getDecodedJsonValues(TRUE);
+
+        // Loop over each element in the canvas.
+        if ($json_values->mapper) {
+          foreach ($json_values->mapper as $element_uuid => $mapper) {
+            // This element has styles.
+            if (is_object($mapper) && property_exists($mapper, 'styles')) {
+              $this->walkStyleMapper($mapper, function ($uuid) use ($element_uuid, &$json_values) {
+                if (isset($json_values->model->$element_uuid->styles->$uuid->settings->class) && $json_values->model->$element_uuid->styles->$uuid->settings->class[0] !== '.') {
+                  $json_values->model->$element_uuid->styles->$uuid->settings->class = '.' . $json_values->model->$element_uuid->styles->$uuid->settings->class;
+                }
+              });
+            }
           }
         }
-      }
 
-      $entity->setJsonValue(json_encode($json_values));
+        $entity->setJsonValue(json_encode($json_values));
+      }
     }
 
     return TRUE;

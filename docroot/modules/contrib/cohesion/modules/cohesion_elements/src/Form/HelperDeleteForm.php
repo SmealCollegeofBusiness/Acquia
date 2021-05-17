@@ -5,7 +5,7 @@ namespace Drupal\cohesion_elements\Form;
 use Drupal\cohesion\Form\CohesionDeleteForm;
 
 /**
- * Class HelperDeleteForm.
+ * Helper delete form.
  *
  * @package Drupal\cohesion_elements\Form
  */

@@ -6,7 +6,7 @@ use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class ComponentForm.
+ * Component form.
  *
  * @package Drupal\cohesion_elements\Form
  */

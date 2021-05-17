@@ -5,7 +5,7 @@ namespace Drupal\cohesion_templates\Form;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class MenuTemplatesForm.
+ * Menu templates form.
  *
  * @package Drupal\cohesion_templates\Form
  */

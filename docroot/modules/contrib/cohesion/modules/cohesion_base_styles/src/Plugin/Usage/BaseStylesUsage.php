@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class BaseStylesUsage.
+ * Base styles usage plugin.
  *
  * @package Drupal\cohesion_base_styles\Plugin\Usage
  *

@@ -672,3 +672,10 @@ function cohesion_templates_has_cohesion_template_selector_field(EntityInterface
   }
   return FALSE;
 }
+
+/**
+ * Implements hook_config_translation_info_alter().
+ */
+function cohesion_templates_config_translation_info_alter(&$info) {
+  $info['cohesion_content_templates']['class'] = 'Drupal\cohesion_templates\ConfigTranslation\CohesionTemplatesMapper';
+}

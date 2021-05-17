@@ -10,7 +10,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 
 /**
- * Class StyleGuideManagerHandler.
+ * The style guide manager handler service.
  *
  * @package Drupal\cohesion_style_guide
  */

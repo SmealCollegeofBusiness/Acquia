@@ -7,7 +7,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class ComponentContentUsage.
+ * Component content usage plugin.
  *
  * @package Drupal\cohesion_elements\Plugin\Usage
  *

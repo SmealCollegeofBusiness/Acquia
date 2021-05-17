@@ -3,7 +3,7 @@
 namespace Drupal\cohesion_sync\Entity;
 
 /**
- * Interface PackageSettingsInterface.
+ * Sync package settings interface.
  *
  * @package Drupal\cohesion_sync\Entity
  */

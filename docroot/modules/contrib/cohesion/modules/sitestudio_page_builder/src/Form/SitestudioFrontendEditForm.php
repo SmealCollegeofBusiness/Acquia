@@ -2,12 +2,11 @@
 
 namespace Drupal\sitestudio_page_builder\Form;
 
-use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class SitestudioFrontendEditForm.
+ * Sitestudio frontend edit form.
  *
  * @package Drupal\sitestudio_page_builder\Form
  */
@@ -45,9 +44,11 @@ class SitestudioFrontendEditForm extends FormBase {
   }
 
   /**
+   * This is use only to display the form
    * @inheritDoc
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     return;
   }
+
 }

@@ -11,7 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 
 /**
- * Class CohesionLayoutForm.
+ * Cohesion layout form.
  *
  * @package Drupal\cohesion_elements\Form
  */

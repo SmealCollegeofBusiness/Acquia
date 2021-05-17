@@ -3,7 +3,6 @@
 namespace Drupal\cohesion\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\ContentEntityType;
 use Drupal\Core\Url;
 use Drupal\system\SystemManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;

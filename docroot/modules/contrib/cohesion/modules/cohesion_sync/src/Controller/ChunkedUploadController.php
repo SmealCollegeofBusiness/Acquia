@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class ChunkedUploadController.
+ * Chunked upload controller.
  *
  * @package Drupal\cohesion_sync\Controller
  */

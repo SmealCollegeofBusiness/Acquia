@@ -149,7 +149,7 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
    */
   public function processItem($data) {
     if (!$ach_client = $this->factory->getClient()) {
-      $this->achLoggerChannel->error('ACH client cannot be initialized because connection settings are empty.');
+      $this->achLoggerChannel->error('Acquia Content Hub client cannot be initialized because connection settings are empty.');
       return FALSE;
     }
 
@@ -171,7 +171,8 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
 
     $entity = reset($entity);
     $entities = [];
-    $output = $this->common->getEntityCdf($entity, $entities);
+    $calculate_dependencies = $data->calculate_dependencies ?? TRUE;
+    $output = $this->common->getEntityCdf($entity, $entities, TRUE, $calculate_dependencies);
     $config = $this->configFactory->get('acquia_contenthub.admin_settings');
     $document = new CDFDocument(...$output);
 

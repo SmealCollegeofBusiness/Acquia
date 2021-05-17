@@ -8,7 +8,7 @@ use Drupal\Core\Config\ConfigImporterEvent;
 use Drupal\Core\Config\ConfigImporterException;
 
 /**
- * Class SyncConfigImporter.
+ * Sync config importer.
  *
  * @package Drupal\cohesion_sync
  */

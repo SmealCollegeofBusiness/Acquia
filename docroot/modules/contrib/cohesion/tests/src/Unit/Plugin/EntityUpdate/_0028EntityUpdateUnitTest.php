@@ -4,12 +4,11 @@ namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Plugin\EntityUpdate\_0028EntityUpdate;
 use Drupal\cohesion_base_styles\Entity\BaseStyles;
-use Drupal\Tests\UnitTestCase;
 
 /**
  * @group Cohesion
  */
-class _0028EntityUpdateUnitTest extends UnitTestCase {
+class _0028EntityUpdateUnitTest extends EntityUpdateUnitTestCase {
 
   /**
    * @var unit_0027MockUpdateEntity*/

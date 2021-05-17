@@ -7,7 +7,7 @@ use Drupal\cohesion\StylesApiPluginBase;
 use Drupal\cohesion_custom_styles\Entity\CustomStyle;
 
 /**
- * Class CustomStylesApi.
+ * Style guide API plugin.
  *
  * @package Drupal\cohesion_custom_styles
  *

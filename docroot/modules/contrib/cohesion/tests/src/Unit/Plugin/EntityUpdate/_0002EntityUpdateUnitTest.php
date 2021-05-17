@@ -4,7 +4,6 @@ namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Plugin\EntityUpdate\_0002EntityUpdate;
 use Drupal\cohesion_custom_styles\Entity\CustomStyle;
-use Drupal\Tests\UnitTestCase;
 
 /**
  * Class _0002EntityUpdateMock.
@@ -23,7 +22,7 @@ class _0002EntityUpdateMock extends _0002EntityUpdate {
 /**
  * @group Cohesion
  */
-class _0002EntityUpdateUnitTest extends UnitTestCase {
+class _0002EntityUpdateUnitTest extends EntityUpdateUnitTestCase {
 
   protected $unit;
 

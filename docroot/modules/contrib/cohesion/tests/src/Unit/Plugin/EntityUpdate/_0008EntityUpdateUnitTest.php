@@ -4,7 +4,6 @@ namespace Drupal\Tests\cohesion\Unit\Plugin\EntityUpdate;
 
 use Drupal\cohesion\Plugin\EntityUpdate\_0008EntityUpdate;
 use Drupal\cohesion_elements\Entity\CohesionElementEntityBase;
-use Drupal\Tests\UnitTestCase;
 
 /**
  * Class MockUpdateEntity.
@@ -41,7 +40,7 @@ class MockHelperCategoryUpdateEntity extends MockCategoryUpdateEntity {
 /**
  * @group Cohesion
  */
-class _0008EntityUpdateUnitTest extends UnitTestCase {
+class _0008EntityUpdateUnitTest extends EntityUpdateUnitTestCase {
 
   protected $unit;
 

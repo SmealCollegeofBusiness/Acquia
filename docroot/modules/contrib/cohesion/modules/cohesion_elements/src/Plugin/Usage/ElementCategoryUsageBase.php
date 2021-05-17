@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class ElementCategoryUsageBase.
+ * Element category usage base plugin.
  *
  * @package Drupal\cohesion_elements\Plugin\Usage
  */

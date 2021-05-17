@@ -5,6 +5,10 @@ namespace Drupal\cohesion\Routing;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\CurrentRouteMatch;
 
+/**
+ * Services that extends the currrent route match drupal services.
+ *
+ */
 class CohesionCurrentRouteMatch extends CurrentRouteMatch implements CohesionRouteMatchInterface {
 
   /**
@@ -22,4 +26,3 @@ class CohesionCurrentRouteMatch extends CurrentRouteMatch implements CohesionRou
   }
 
 }
-

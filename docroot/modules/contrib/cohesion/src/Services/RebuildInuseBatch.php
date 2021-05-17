@@ -6,11 +6,15 @@ use Drupal\cohesion\UsageUpdateManager;
 use Drupal\cohesion_base_styles\Entity\BaseStyles;
 use Drupal\cohesion_custom_styles\Entity\CustomStyle;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Class RebuildInuseBatch.
@@ -38,15 +42,23 @@ class RebuildInuseBatch {
   protected $entityRepository;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * RebuildInuseBatch constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    */
-  public function __construct(ModuleHandlerInterface $module_handler, UsageUpdateManager $usage_update_manager, EntityRepositoryInterface $entity_repository, TranslationInterface $stringTranslation) {
+  public function __construct(ModuleHandlerInterface $module_handler, UsageUpdateManager $usage_update_manager, EntityRepositoryInterface $entity_repository, TranslationInterface $stringTranslation, EntityTypeManagerInterface $entityTypeManager) {
     $this->moduleHandler = $module_handler;
     $this->usageUpdateManager = $usage_update_manager;
     $this->entityRepository = $entity_repository;
     $this->stringTranslation = $stringTranslation;
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**
@@ -60,6 +72,10 @@ class RebuildInuseBatch {
    * @return void
    */
   public function run($in_use_list, $changed_entities = []) {
+    $operations = $this->getOperations($in_use_list, $changed_entities);
+    if(empty($operations)) {
+      return;
+    }
 
     // Setup the batch.
     $batch = [
@@ -73,10 +89,36 @@ class RebuildInuseBatch {
       [],
     ];
 
+    $batch['operations'] = array_merge($batch['operations'], $operations);
+
+    $batch['operations'][] = ['cohesion_templates_secure_directory', []];
+
+    // Clear the render cache.
+    $batch['operations'][] = [
+      '\Drupal\cohesion\Services\RebuildInuseBatch::clearRenderCache',
+      [],
+    ];
+
+    // Setup and run the batch.
+    return batch_set($batch);
+  }
+
+  /**
+   * @param $in_use_list
+   * @param $changed_entities
+   *
+   * @return array
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function getOperations($in_use_list, $changed_entities = []) {
+    $operations = [];
+
     // Save the entities that have changed.
     foreach ($changed_entities as $entity) {
       // Only rebuild entities that have been activated.
-      $batch['operations'][] = [
+      $operations[] = [
         '_resave_entity', [
           'entity' => $entity,
           'realsave' => TRUE,
@@ -101,57 +143,65 @@ class RebuildInuseBatch {
       }
     }
 
-    $forms = [];
-
-    // Save entities that use these entities.
+    // Reverse in use list so entities can be processed by type
+    // and set each set of uuids to the rebuild_max_entity
+    $entity_to_process = Settings::get('rebuild_max_entity', 10);
+    $in_use_by_type = [];
     foreach ($in_use_list as $uuid => $type) {
-
-      try {
-        $entity = $this->entityRepository->loadEntityByUuid($type, $uuid);
-
-        if ($entity instanceof ContentEntityInterface) {
-          // Batch process the content entities.
-          $batch['operations'][] = [
-            '_resave_content_entity',
-            ['entity' => $entity],
-          ];
-        }
-        elseif ($entity instanceof CustomStyle || $entity instanceof BaseStyles) {
-          $api_plugin = $entity->getApiPluginInstance();
-          if ($api_plugin) {
-            $api_plugin->setEntity($entity);
-            $forms = array_merge($forms, $api_plugin->getForms());
-          }
-        }
-        else {
-          $batch['operations'][] = [
-            '_resave_entity', [
-              'entity' => $entity,
-              'realsave' => FALSE,
-            ],
-          ];
-        }
-
+      // Add a new entry on the entity type array if number of entity exceeds
+      // rebuild_max_entity
+      if(!isset($in_use_by_type[$type]) || count(end($in_use_by_type[$type])) >= $entity_to_process) {
+        $in_use_by_type[$type][][] = $uuid;
       }
-      catch (\Exception $e) {
+      else {
+        $in_use_by_type[$type][array_key_last($in_use_by_type[$type])][] = $uuid;
       }
     }
 
-    $batch['operations'][] = [
-      '_cohesion_style_save',
-      ['forms' => $forms],
-    ];
+    // Save entities that use these entities.
+    foreach ($in_use_by_type as $entity_type_id => $uuids_list) {
 
-    $operations[] = ['cohesion_templates_secure_directory', []];
+      $entity_type_storage = $this->entityTypeManager->getStorage($entity_type_id);
+      $entity_type = $entity_type_storage->getEntityType();
+      if($entity_type instanceof ConfigEntityTypeInterface) {
+        foreach ($uuids_list as $uuids) {
 
-    // Clear the render cache.
-    $batch['operations'][] = [
-      '\Drupal\cohesion\Services\RebuildInuseBatch::clearRenderCache',
-      [],
-    ];
+          $ids = $entity_type_storage->getQuery()
+            ->condition('status', TRUE)
+            ->condition('modified', TRUE)
+            ->condition('uuid', $uuids, 'IN')
+            ->execute();
 
-    // Setup and run the batch.
-    return batch_set($batch);
+          if(!empty($ids)) {
+            $operations[] = [
+              '_resave_config_entity',
+              ['ids' => $ids, 'entity_type' => $entity_type_id],
+            ];
+          }
+        }
+      }elseif ($entity_type instanceof ContentEntityTypeInterface) {
+        foreach ($uuids_list as $uuids) {
+
+          $content_ids = $entity_type_storage->getQuery()
+            ->condition('uuid', $uuids, 'IN')
+            ->execute();
+
+          $ids = $this->entityTypeManager->getStorage('cohesion_layout')->getQuery()
+            ->condition('parent_type', $entity_type_id)
+            ->condition('parent_id', $content_ids, 'IN')
+            ->execute();
+
+          if(!empty($ids)) {
+            $operations[] = [
+              '_resave_cohesion_layout_entity',
+              ['ids' => $ids],
+            ];
+          }
+        }
+      }
+    }
+
+    return $operations;
   }
 
   /**

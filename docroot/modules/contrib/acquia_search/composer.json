@@ -9,8 +9,8 @@
         "php-http/guzzle6-adapter": "^2.0"
     },
     "conflict": {
-        "drupal/search_api_solr_multilingual": "<3",
-        "drupal/acquia_connector": "<3"
+        "drupal/acquia_connector": "<3",
+        "drupal/search_api_solr_multilingual": "<3"
     },
     "require-dev": {
         "drush/drush": "^10.0"

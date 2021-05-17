@@ -27,7 +27,7 @@ env:
   global:
     - ORCA_SUT_NAME=drupal/acquia_contenthub
     - ORCA_SUT_BRANCH=8.x-2.x
-    - ORCA_VERSION=^3
+    - ORCA_VERSION=3.6.0
     - ORCA_TELEMETRY_ENABLE=TRUE
 
 jobs:

@@ -83,11 +83,6 @@ class CreateStubs implements EventSubscriberInterface {
     // Process content entities and create stubs where necessary.
     foreach ($unprocessed as $key => $uuid) {
       $cdf = $event->getCdf()->getCdfEntity($uuid);
-      // This only works on content entities.
-      if ($cdf->getType() !== 'drupal8_content_entity') {
-        $cdfs[] = $cdf;
-        continue;
-      }
       $load_event = new LoadLocalEntityEvent($cdf, $event->getStack());
       $dispatcher->dispatch(AcquiaContentHubEvents::LOAD_LOCAL_ENTITY, $load_event);
       $entity = $load_event->getEntity();

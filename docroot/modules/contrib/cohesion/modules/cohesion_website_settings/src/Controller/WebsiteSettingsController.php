@@ -229,10 +229,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
         $content = \Drupal::service('settings.endpoint.utils')->getColorsList($item);
 
         $content = $item ? array_pop($content) : array_values($content);
-        if (!$content) {
-          $status = 404;
-          $error = TRUE;
-        }
+
         break;
 
       default:

@@ -23,7 +23,7 @@ function acquia_search_post_update_move_search_modules() {
   $config_factory = \Drupal::configFactory();
   \Drupal::service('config.installer')->installDefaultConfig('module', 'acquia_search');
 
-  // Remove exposed block if its still around
+  // Remove exposed block if its still around.
   if ($config = $config_factory->getEditable('block.block.exposedformacquia_searchpage')) {
     $config->delete();
   }
@@ -40,7 +40,7 @@ function acquia_search_post_update_move_search_modules() {
   $storage = new Storage();
   if (isset($subscription)) {
     $storage->setApiHost(\Drupal::config('acquia_search_solr.settings')
-        ->get('api_host') ?? 'https://api.sr-prod02.acquia.com');
+      ->get('api_host') ?? 'https://api.sr-prod02.acquia.com');
     $storage->setApiKey(\Drupal::state()->get('acquia_connector.key'));
     $storage->setIdentifier(\Drupal::state()
       ->get('acquia_connector.identifier'));

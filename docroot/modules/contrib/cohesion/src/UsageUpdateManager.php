@@ -364,8 +364,12 @@ class UsageUpdateManager {
    */
   public function buildConfigEntityDependencies(ConfigEntityBase $entity) {
     $list = [];
+    // Request storage to hold dependencies already processed
+    // to avoid processing the same entities multiple times
+    $dep_list = &drupal_static(__FUNCTION__, []);
 
     if ($entity instanceof ConfigEntityBase) {
+
       // Get the dependencies from the Usage table (left to right lookup).
       try {
         $dependencies = $this->connection->select('coh_usage', 'c1')
@@ -379,21 +383,41 @@ class UsageUpdateManager {
         return $list;
       }
 
-      // Loop through the results and add them to the dependencies.
+      // Group uuids to be processed by entity type
+      // to use loadMultiple instead of loading by UUID one by one
+      // for more performance
+      $typed_uuids = [];
       foreach ($dependencies as $uuid => $type) {
-        try {
-          /** @var \Drupal\Core\Entity\EntityInterface $dependency_entity */
-          if ($dependency_entity = $this->entityRepository->loadEntityByUuid($type, $uuid)) {
-            $list[] = [
-              'key' => $dependency_entity->getConfigDependencyKey(),
-              'type' => $dependency_entity->getEntityTypeId(),
-              'id' => $dependency_entity->id(),
-              'uuid' => $dependency_entity->uuid(),
-            ];
-          }
-
+        // If the entity has already been processed by another
+        // dependency calculation add to the list and skip
+        if(isset($dep_list[$uuid])) {
+          $list[] = $dep_list[$uuid];
+          continue;
         }
-        catch (\Exception $e) {
+        $typed_uuids[$type][] = $uuid;
+      }
+
+      // Loop through the results and add them to the dependencies.
+      foreach ($typed_uuids as $type => $uuids) {
+
+        $entity_type = $this->entityTypeManager->getDefinition($type);
+        $ids = $this->entityTypeManager->getStorage($type)->getQuery()->condition($entity_type->getKey('uuid'), $uuids, 'IN')->execute();
+
+        $entities = $this->entityTypeManager->getStorage($type)->loadMultiple($ids);
+
+        foreach ($entities as $dependency_entity) {
+
+          $item = [
+            'key' => $dependency_entity->getConfigDependencyKey(),
+            'dependency_name' => $dependency_entity->getConfigDependencyName(),
+            'type' => $dependency_entity->getEntityTypeId(),
+            'id' => $dependency_entity->id(),
+            'uuid' => $dependency_entity->uuid(),
+          ];
+          $list[] = $item;
+          // Add to the processed list of entities so we don't do it again
+          // if it's a dependency of another entity
+          $dep_list[$dependency_entity->uuid()] = $item;
         }
       }
 

@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class ImportReportController.
+ * Import report controller.
  *
  * @package Drupal\cohesion_sync\Controller
  */

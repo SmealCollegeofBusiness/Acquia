@@ -10,7 +10,7 @@ use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 
 /**
- * Class ElementBaseForm.
+ * Element base form.
  *
  * @package Drupal\cohesion_elements\Form
  */

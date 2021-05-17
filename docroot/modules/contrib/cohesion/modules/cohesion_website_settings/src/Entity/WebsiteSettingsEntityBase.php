@@ -7,7 +7,7 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
- * Class WebsiteSettingsEntityBase.
+ * Website settings entity base.
  *
  * @package Drupal\cohesion_website_settings\Entity
  */

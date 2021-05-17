@@ -17,11 +17,16 @@ class FrontendUrlsEvent extends Event {
 
   /**
    * The registered frontend urls
+   *
+   * @var array
+   *
    */
   protected $frontend_collection = [];
 
   /**
    * The registered admin urls
+   *
+   * @var array
    */
   protected $admin_collection = [];
 
@@ -57,12 +62,13 @@ class FrontendUrlsEvent extends Event {
     switch($type) {
       case self::ALL_TYPE:
         return array_merge($this->admin_collection, $this->frontend_collection);
+
       case self::FRONTEND_TYPE:
         return $this->frontend_collection;
+
       case self::ADMIN_TYPE:
         return $this->admin_collection;
     }
   }
 
 }
-

@@ -6,7 +6,7 @@ use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
-use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -51,11 +51,11 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
   protected $tracker;
 
   /**
-   * The logger channel.
+   * The logger channel factory.
    *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
    */
-  protected $loggerChannel;
+  protected $achLoggerChannel;
 
   /**
    * ContentHubExportQueueWorker constructor.
@@ -68,7 +68,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    *   The client factory.
    * @param \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker
    *   The Subscriber Tracker.
-   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger factory.
    * @param array $configuration
    *   The plugin configuration.
@@ -79,7 +79,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    *
    * @throws \Exception
    */
-  public function __construct(EventDispatcherInterface $dispatcher, ContentHubCommonActions $common, ClientFactory $factory, SubscriberTracker $tracker, LoggerChannelInterface $logger_channel, array $configuration, $plugin_id, $plugin_definition) {
+  public function __construct(EventDispatcherInterface $dispatcher, ContentHubCommonActions $common, ClientFactory $factory, SubscriberTracker $tracker, LoggerChannelFactoryInterface $logger_factory, array $configuration, $plugin_id, $plugin_definition) {
 
     $this->common = $common;
     if (!empty($this->common->getUpdateDbStatus())) {
@@ -88,7 +88,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
     $this->dispatcher = $dispatcher;
     $this->factory = $factory;
     $this->tracker = $tracker;
-    $this->loggerChannel = $logger_channel;
+    $this->achLoggerChannel = $logger_factory->get('acquia_contenthub_subscriber');
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -101,7 +101,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
       $container->get('acquia_contenthub_common_actions'),
       $container->get('acquia_contenthub.client.factory'),
       $container->get('acquia_contenthub_subscriber.tracker'),
-      $container->get('acquia_contenthub.logger_channel'),
+      $container->get('logger.factory'),
       $configuration,
       $plugin_id,
       $plugin_definition
@@ -116,25 +116,47 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    *
    * @throws \Exception
    */
-  public function processItem($data) {
+  public function processItem($data): void {
+    if (!$ach_client = $this->factory->getClient()) {
+      $this->achLoggerChannel->error('Acquia Content Hub client cannot be initialized because connection settings are empty.');
+      return;
+    }
+
     $settings = $this->factory->getSettings();
     $webhook = $settings->getWebhook('uuid');
-    $contentHubClient = $this->factory->getClient();
 
-    $interests = $contentHubClient->getInterestsByWebhook($webhook);
-    $processItems = explode(', ', $data->uuids);
+    try {
+      $interests = $ach_client->getInterestsByWebhook($webhook);
+    }
+    catch (\Exception $exception) {
+      $this->achLoggerChannel->error(
+        sprintf(
+          'Following error occurred while we were trying to get the interest list: %s',
+          $exception->getMessage()
+        )
+      );
+
+      return;
+    }
+
+    $process_items = explode(', ', $data->uuids);
 
     // Get rid of items potentially deleted from the interest list.
-    $uuids = array_intersect($processItems, $interests);
-    if (count($uuids) !== count($processItems)) {
+    $uuids = array_intersect($process_items, $interests);
+    if (count($uuids) !== count($process_items)) {
       // Log the uuids no longer on the interest list for this webhook.
-      $missing_uuids = array_diff($processItems, $uuids);
+      $missing_uuids = array_diff($process_items, $uuids);
       $this
-        ->loggerChannel
-        ->info(sprintf('Skipped importing the following missing entities: %s. This occurs when entities are deleted at the Publisher before importing.', implode(', ', $missing_uuids)));
+        ->achLoggerChannel->info(
+          sprintf(
+            'Skipped importing the following missing entities: %s. This occurs when entities are deleted at the Publisher before importing.',
+            implode(', ', $missing_uuids))
+
+        );
     }
 
     if (!$uuids) {
+      $this->achLoggerChannel->info('There are no matching entities in the queues and the site interest list.');
       return;
     }
 
@@ -153,14 +175,23 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
             try {
               if (!$this->tracker->getEntityByRemoteIdAndHash($uuid)) {
                 // If we cannot load, delete interest and tracking record.
-                $contentHubClient->deleteInterest($uuid, $webhook);
+                $ach_client->deleteInterest($uuid, $webhook);
                 $this->tracker->delete($uuid);
+                $this->achLoggerChannel->info(
+                  sprintf(
+                    'The following entity was deleted from interest list and tracking table: %s',
+                    $uuid
+                  )
+                );
               }
             }
             catch (\Exception $ex) {
               $this
-                ->loggerChannel
-                ->error(sprintf('Message: %s.', $ex->getMessage()));
+                ->achLoggerChannel
+                ->error(sprintf(
+                  'Entity deletion from tracking table and interest list failed. Entity: %s. Message: %s',
+                  $uuid,
+                  $ex->getMessage()));
             }
             return;
           }
@@ -169,7 +200,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
       else {
         // There are import problems but probably on dependent entities.
         $this
-          ->loggerChannel
+          ->achLoggerChannel
           ->error(sprintf('Import failed: %s.', $e->getMessage()));
         throw $e;
       }
@@ -177,16 +208,25 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
 
     if ($webhook) {
       try {
-        $contentHubClient->addEntitiesToInterestList($webhook, array_keys($stack->getDependencies()));
+        $ach_client->addEntitiesToInterestList($webhook, array_keys($stack->getDependencies()));
 
-        $this
-          ->loggerChannel
-          ->info('Imported entities added to Interest List on Plexus');
+        $this->achLoggerChannel->info(
+          sprintf(
+            'The following imported entities have been added to the interest list on Content Hub for webhook "%s": [%s].',
+            $webhook,
+            implode(', ', $uuids)
+          )
+        );
       }
       catch (\Exception $e) {
-        $this
-          ->loggerChannel
-          ->error(sprintf('Message: %s.', $e->getMessage()));
+        $this->achLoggerChannel->error(
+          sprintf(
+            'Error adding the following entities to the interest list for webhook "%s": [%s]. Error message: "%s".',
+            $webhook,
+            implode(', ', $uuids),
+            $e->getMessage()
+          )
+        );
       }
     }
   }

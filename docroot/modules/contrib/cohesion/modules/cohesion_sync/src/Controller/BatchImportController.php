@@ -2,12 +2,13 @@
 
 namespace Drupal\cohesion_sync\Controller;
 
+use Drupal\cohesion_style_guide\Entity\StyleGuideManager;
 use Drupal\config\StorageReplaceDataWrapper;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Class BatchImportController.
+ * Sync batch import controller.
  *
  * @package Drupal\cohesion_sync\Controller
  */
@@ -23,10 +24,74 @@ class BatchImportController extends ControllerBase {
       return;
     }
     // Apply the entities to the site.
-    $entries = $entry = \Drupal::service('cohesion_sync.packager')->getExportsByUUID($uri, $uuids);
+    $entries = \Drupal::service('cohesion_sync.packager')->getExportsByUUID($uri, $uuids);
     foreach ($entries as $entry) {
       \Drupal::service('cohesion_sync.packager')->applyPackageEntry($entry);
       $context['message'] = t('Pre processing:  @type - @uuid', ['@type' => $entry['type'], '@uuid' => $entry['export']['uuid']]);
+    }
+  }
+
+  /**
+   * Set a batch for entities that needs to be rebuilt if style guide or style guide manager
+   * as been imported
+   *
+   * @param $context
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public static function inUseRebuild(&$context) {
+    if(!\Drupal::moduleHandler()->moduleExists('cohesion_style_guide')) {
+      return;
+    }
+    $style_guide_managers = [];
+    $style_guides_uuids = [];
+    // extract all style guide manager and style guide that have been
+    // processed during import
+    foreach ($context['results'] as $result) {
+      $result_entity = explode(':', $result);
+      // $result[1] == entity uuid - $result_entity[0] == entity type.
+      if(is_array($result_entity) && count($result_entity) == 2 && isset($result_entity[0])) {
+        if($result_entity[0] == 'cohesion_style_guide_manager') {
+          $style_guide_managers[] = $result_entity[1];
+        }elseif ($result_entity[0] == 'cohesion_style_guide') {
+          $style_guides_uuids[] = $result_entity[1];
+        }
+      }
+    }
+
+    // Extract each style guide for each style guide manager
+    $style_guide_managers_ids = \Drupal::entityTypeManager()->getStorage('cohesion_style_guide_manager')->getQuery()
+      ->condition('status', TRUE)
+      ->condition('uuid', $style_guide_managers, 'IN')
+      ->execute();
+
+    /** @var StyleGuideManager[] $style_guide_managers */
+    $style_guide_managers = StyleGuideManager::loadMultiple($style_guide_managers_ids);
+    foreach ($style_guide_managers as $style_guide_manager) {
+      $decoded_json = $style_guide_manager->getDecodedJsonValues(TRUE);
+      if (property_exists($decoded_json, 'model') && is_object($decoded_json->model)) {
+        foreach ($decoded_json->model as $style_guide_uuid => $style_guide_values) {
+          $style_guides_uuids[] = $style_guide_uuid;
+        }
+      }
+    }
+
+    if(!empty($style_guides_uuids)) {
+      $in_use_list = \Drupal::database()->select('coh_usage', 'c1')
+        ->fields('c1', ['source_uuid', 'source_type'])
+        ->condition('c1.requires_uuid', $style_guides_uuids, 'IN')
+        ->execute()
+        ->fetchAllKeyed();
+
+      // remove any entity that would already have been resaved by the import
+      foreach ($in_use_list as $uuid => $entity_type) {
+        if(in_array("{$entity_type}:{$uuid}", $context['results'])) {
+          unset($in_use_list[$uuid]);
+        }
+      }
+
+      \Drupal::service('cohesion.rebuild_inuse_batch')->run($in_use_list);
     }
   }
 
@@ -288,7 +353,6 @@ class BatchImportController extends ControllerBase {
           }
         }
       }
-
 
       /** @var \Drupal\cohesion_sync\PackagerManager $package_manager */
       $package_manager = \Drupal::service('cohesion_sync.packager');

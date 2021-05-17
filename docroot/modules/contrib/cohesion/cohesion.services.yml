@@ -125,7 +125,7 @@ services:
 
   cohesion.rebuild_inuse_batch:
     class: Drupal\cohesion\Services\RebuildInuseBatch
-    arguments: ['@module_handler', '@cohesion_usage.update_manager', '@entity.repository', '@string_translation']
+    arguments: ['@module_handler', '@cohesion_usage.update_manager', '@entity.repository', '@string_translation', '@entity_type.manager']
 
   cohesion.event_subscriber:
     class: '\Drupal\cohesion\EventSubscriber\CohesionEventSubscriber'

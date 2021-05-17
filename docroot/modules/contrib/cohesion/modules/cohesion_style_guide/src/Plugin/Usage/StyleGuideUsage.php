@@ -6,7 +6,7 @@ use Drupal\cohesion\UsagePluginBase;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Class StyleGuideUsage.
+ * Style guide usage plugin.
  *
  * @package Drupal\cohesion_style_guide\Plugin\Usage
  *
