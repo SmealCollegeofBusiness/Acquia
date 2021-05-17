@@ -12,3 +12,7 @@
 // Configure your hash salt here.
 // $settings['hash_salt'] = '';.
 require DRUPAL_ROOT . '/../vendor/acquia/blt/settings/blt.settings.php';
+
+// Temporary workaround to override the default MySQL wait_timeout setting.
+global $conf, $databases;
+$conf['acquia_hosting_settings_autoconnect'] = FALSE;
