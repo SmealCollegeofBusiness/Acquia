@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitedb3288f0de7bb0bc26f86e918b331f6
+class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -6487,7 +6487,13 @@ class ComposerStaticInitedb3288f0de7bb0bc26f86e918b331f6
         'Shaper\\DataAdaptor\\ReversibleTransformationInterface' => __DIR__ . '/..' . '/e0ipso/shaper/src/DataAdaptor/ReversibleTransformationInterface.php',
         'Shaper\\DataAdaptor\\ReversibleTransformationValidationInterface' => __DIR__ . '/..' . '/e0ipso/shaper/src/DataAdaptor/ReversibleTransformationValidationInterface.php',
         'Shaper\\Tests\\DataAdaptor\\DataAdaptorBaseTest' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/DataAdaptor/DataAdaptorBaseTest.php',
+        'Shaper\\Tests\\DataAdaptor\\DataAdaptorFake' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/DataAdaptor/DataAdaptorFake.php',
+        'Shaper\\Tests\\DataAdaptor\\DataAdaptorFake2' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/DataAdaptor/DataAdaptorFake2.php',
+        'Shaper\\Tests\\DataAdaptor\\DataAdaptorFake3' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/DataAdaptor/DataAdaptorFake3.php',
+        'Shaper\\Tests\\DataAdaptor\\DataAdaptorFake4' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/DataAdaptor/DataAdaptorFake4.php',
         'Shaper\\Tests\\Transformation\\TransformationBaseTest' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/Transformation/TransformationBaseTest.php',
+        'Shaper\\Tests\\Transformation\\TransformationFail' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/Transformation/TransformationFail.php',
+        'Shaper\\Tests\\Transformation\\TransformationFake' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/Transformation/TransformationFake.php',
         'Shaper\\Tests\\Transformation\\TransformationsQueueTest' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/Transformation/TransformationsQueueTest.php',
         'Shaper\\Tests\\Validator\\AcceptValidatorTest' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/Validator/AcceptValidatorTest.php',
         'Shaper\\Tests\\Validator\\CollectionOfValidatorsTest' => __DIR__ . '/..' . '/e0ipso/shaper/tests/src/Validator/CollectionOfValidatorsTest.php',
@@ -8958,11 +8964,11 @@ class ComposerStaticInitedb3288f0de7bb0bc26f86e918b331f6
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitedb3288f0de7bb0bc26f86e918b331f6::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitedb3288f0de7bb0bc26f86e918b331f6::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitedb3288f0de7bb0bc26f86e918b331f6::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitedb3288f0de7bb0bc26f86e918b331f6::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitedb3288f0de7bb0bc26f86e918b331f6::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$classMap;
 
         }, null, ClassLoader::class);
     }
