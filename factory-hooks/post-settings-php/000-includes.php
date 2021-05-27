@@ -16,8 +16,8 @@ $settings['config_sync_directory'] = '../config/default';
 
 // Temporary workaround to override the default MySQL wait_timeout setting.
 $databases['default']['default']['init_commands'] = array(
-  'wait_timeout' => "SET SESSION wait_timeout=1200",
+  'wait_timeout' => "SET SESSION wait_timeout=3600",
 );
 if (function_exists('acquia_hosting_db_choose_active')) {
-acquia_hosting_db_choose_active();
+acquia_hosting_db_choose_active($conf['acquia_hosting_site_info']['db'], 'default', $databases, $conf);
 }
