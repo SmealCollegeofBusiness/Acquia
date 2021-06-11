@@ -13,6 +13,7 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Url;
 use Drupal\externalauth\Authmap;
 use Drupal\externalauth\ExternalAuth;
+use Drupal\key\KeyRepositoryInterface;
 use Drupal\samlauth\Event\SamlauthEvents;
 use Drupal\samlauth\Event\SamlauthUserLinkEvent;
 use Drupal\samlauth\Event\SamlauthUserSyncEvent;
@@ -40,9 +41,9 @@ class SamlService {
   use StringTranslationTrait;
 
   /**
-   * An Auth object representing the current request state.
+   * Auth objects (usually 0 or 1) representing the current request state.
    *
-   * @var \OneLogin\Saml2\Auth
+   * @var \OneLogin\Saml2\Auth[]
    */
   protected $samlAuth;
 
@@ -124,6 +125,17 @@ class SamlService {
   protected $messenger;
 
   /**
+   * The Key repository service.
+   *
+   * This is set when the key module is installed. (Not when the key_asymmetric
+   * module is installed. The latter is necessary for entering public/private
+   * keys but reading them will work fine without it, it seems.)
+   *
+   * @var \Drupal\key\KeyRepositoryInterface
+   */
+  protected $keyRepository;
+
+  /**
    * Constructs a new SamlService.
    *
    * @param \Drupal\externalauth\ExternalAuth $external_auth
@@ -178,6 +190,19 @@ class SamlService {
   }
 
   /**
+   * Set the Key repository service.
+   *
+   * This has a separate setter (unlike all other dependent objects mentioned
+   * in the constructor) because it's an optional dependency.
+   *
+   * @param \Drupal\key\KeyRepositoryInterface $key_repository
+   *   the Key repository service.
+   */
+  public function setKeyRepository(KeyRepositoryInterface $key_repository) {
+    $this->keyRepository = $key_repository;
+  }
+
+  /**
    * Show metadata about the local sp. Use this to configure your saml2 IdP.
    *
    * @param int|null $validity
@@ -195,7 +220,10 @@ class SamlService {
    *   If the metatdad is invalid.
    */
   public function getMetadata($validity = NULL, $cache_duration = NULL) {
-    $settings = $this->getSamlAuth()->getSettings();
+    // It's actually strange how we need to instantiate an Auth object when
+    // we only need the Settings object. We may refactor that when refactoring
+    // getSamlAuth().
+    $settings = $this->getSamlAuth('metadata')->getSettings();
     $metadata = $settings->getSPMetadata(FALSE, $validity, $cache_duration);
     $errors = $settings->validateMetadata($metadata);
 
@@ -222,9 +250,9 @@ class SamlService {
    */
   public function login($return_to = NULL, array $parameters = []) {
     $config = $this->configFactory->get('samlauth.authentication');
-    $url = $this->getSamlAuth()->login($return_to, $parameters, FALSE, FALSE, TRUE, $config->get('request_set_name_id_policy') ?? TRUE);
+    $url = $this->getSamlAuth('login')->login($return_to, $parameters, FALSE, FALSE, TRUE, $config->get('request_set_name_id_policy') ?? TRUE);
     if ($config->get('debug_log_saml_out')) {
-      $this->logger->debug('Sending SAML authentication request: <pre>@message</pre>', ['@message' => $this->getSamlAuth()->getLastRequestXML()]);
+      $this->logger->debug('Sending SAML authentication request: <pre>@message</pre>', ['@message' => $this->getSamlAuth('login')->getLastRequestXML()]);
     }
     return $url;
   }
@@ -336,11 +364,12 @@ class SamlService {
     $this->doLogin($unique_id, $account);
 
     // Remember SAML session values that may be necessary for logout.
+    $auth = $this->getSamlAuth('acs');
     $values = [
-      'session_index' => $this->samlAuth->getSessionIndex(),
-      'session_expiration' => $this->samlAuth->getSessionExpiration(),
-      'name_id' => $this->samlAuth->getNameId(),
-      'name_id_format' => $this->samlAuth->getNameIdFormat(),
+      'session_index' => $auth->getSessionIndex(),
+      'session_expiration' => $auth->getSessionExpiration(),
+      'name_id' => $auth->getNameId(),
+      'name_id_format' => $auth->getNameIdFormat(),
     ];
     foreach ($values as $key => $value) {
       if (isset($value)) {
@@ -367,7 +396,7 @@ class SamlService {
    */
   protected function processLoginResponse() {
     $config = $this->configFactory->get('samlauth.authentication');
-    $auth = $this->getSamlAuth();
+    $auth = $this->getSamlAuth('acs');
     // This call can throw various kinds of exceptions if the 'SAMLResponse'
     // request parameter is not present or cannot be decoded into a valid SAML
     // (XML) message, and can also set error conditions instead - if the XML
@@ -415,7 +444,10 @@ class SamlService {
         $this->eventDispatcher->dispatch(SamlauthEvents::USER_LINK, $event);
         $account = $event->getLinkedAccount();
         if ($account) {
-          $this->logger->info('Existing user @name (@uid) was newly matched to SAML login attributes; linking user and logging in.', ['@name' => $account->getAccountName(), '@uid' => $account->id()]);
+          $this->logger->info('Existing user @name (@uid) was newly matched to SAML login attributes; linking user and logging in.', [
+            '@name' => $account->getAccountName(),
+            '@uid' => $account->id(),
+          ]);
         }
       }
       // Linking by name / email: we also select accounts if they are blocked
@@ -428,14 +460,20 @@ class SamlService {
         if ($name && $account_search = $this->entityTypeManager->getStorage('user')->loadByProperties(['name' => $name])) {
           $account = current($account_search);
           if ($config->get('map_users_name')) {
-            $this->logger->info('SAML login for name @name (as provided in a SAML attribute) matches existing Drupal account @uid; linking account and logging in.', ['@name' => $name, '@uid' => $account->id()]);
+            $this->logger->info('SAML login for name @name (as provided in a SAML attribute) matches existing Drupal account @uid; linking account and logging in.', [
+              '@name' => $name,
+              '@uid' => $account->id(),
+            ]);
           }
           else {
             // We're not configured to link the account by name, but we still
             // looked it up by name so we can give a better error message than
             // the one caused by trying to save a new account with a duplicate
             // name, later.
-            $this->logger->warning('Denying login: SAML login for unique ID @saml_id matches existing Drupal account name @name and we are not configured to automatically link accounts.', ['@saml_id' => $unique_id, '@name' => $account->getAccountName()]);
+            $this->logger->warning('Denying login: SAML login for unique ID @saml_id matches existing Drupal account name @name and we are not configured to automatically link accounts.', [
+              '@saml_id' => $unique_id,
+              '@name' => $account->getAccountName(),
+            ]);
             throw new UserVisibleException('A local user account with your login name already exists, and we are disallowed from linking it.');
           }
         }
@@ -445,11 +483,17 @@ class SamlService {
         if ($mail && $account_search = $this->entityTypeManager->getStorage('user')->loadByProperties(['mail' => $mail])) {
           $account = current($account_search);
           if ($config->get('map_users_mail')) {
-            $this->logger->info('SAML login for email @mail (as provided in a SAML attribute) matches existing Drupal account @uid; linking account and logging in.', ['@mail' => $mail, '@uid' => $account->id()]);
+            $this->logger->info('SAML login for email @mail (as provided in a SAML attribute) matches existing Drupal account @uid; linking account and logging in.', [
+              '@mail' => $mail,
+              '@uid' => $account->id(),
+            ]);
           }
           else {
             // Treat duplicate email same as duplicate name above.
-            $this->logger->warning('Denying login: SAML login for unique ID @saml_id matches existing Drupal account email @mail and we are not configured to automatically link the account.', ['@saml_id' => $unique_id, '@mail' => $account->getEmail()]);
+            $this->logger->warning('Denying login: SAML login for unique ID @saml_id matches existing Drupal account email @mail and we are not configured to automatically link the account.', [
+              '@saml_id' => $unique_id,
+              '@mail' => $account->getEmail(),
+            ]);
             throw new UserVisibleException('A local user account with your login email address name already exists, and we are disallowed from linking it.');
           }
         }
@@ -586,7 +630,7 @@ class SamlService {
     //   session index? Is it better to not redirect, and throw an error on
     //   our side?)
     // @todo include nameId(SP)NameQualifier?
-    $url = $this->getSamlAuth()->logout(
+    $url = $this->getSamlAuth('logout')->logout(
       $return_to,
       $parameters,
       $saml_session_data['name_id'] ?? NULL,
@@ -595,7 +639,7 @@ class SamlService {
       $saml_session_data['name_id_format'] ?? NULL
     );
     if ($this->configFactory->get('samlauth.authentication')->get('debug_log_saml_out')) {
-      $this->logger->debug('Sending SAML logout request: <pre>@message</pre>', ['@message' => $this->getSamlAuth()->getLastRequestXML()]);
+      $this->logger->debug('Sending SAML logout request: <pre>@message</pre>', ['@message' => $this->getSamlAuth('logout')->getLastRequestXML()]);
     }
     return $url;
   }
@@ -640,6 +684,10 @@ class SamlService {
       throw new TooManyRequestsHttpException(NULL, 'Access is blocked because of IP based flood prevention.');
     }
     try {
+      // This line means we're extracting logic previously encapsulated inside
+      // the Auth class. That's slightly unfortunate but doesn't compare to all
+      // other considerations still needing to be made re. refactoring logic.
+      $purpose = isset($_GET['SAMLResponse']) ? 'sls-response' : 'sls-request';
       // Unlike the 'logout()' route, we only log the user out if we have a
       // valid request/response, so first have the SAML Toolkit check things.
       // Don't have it do any session actions, because nothing is needed
@@ -650,7 +698,7 @@ class SamlService {
       //   LogoutRequest we sent earlier? Seems to be not absolutely required on
       //   top of the validity / signature checks which the library already does
       //   - but every extra check is good. Maybe make it optional.
-      $url = $this->getSamlAuth()->processSLO(TRUE, NULL, (bool) $config->get('security_logout_reuse_sigs'), NULL, TRUE);
+      $url = $this->getSamlAuth($purpose)->processSLO(TRUE, NULL, (bool) $config->get('security_logout_reuse_sigs'), NULL, TRUE);
     }
     catch (\Exception $e) {
       $this->flood->register('samlauth.failed_logout_ip', $flood_config->get('ip_window'));
@@ -661,18 +709,18 @@ class SamlService {
       // There should be no way we can get here if neither GET parameter is set;
       // if nothing gets logged, that's a bug.
       if (isset($_GET['SAMLResponse'])) {
-        $this->logger->debug('SLS received SAML response: <pre>@message</pre>', ['@message' => $this->getSamlAuth()->getLastResponseXML()]);
+        $this->logger->debug('SLS received SAML response: <pre>@message</pre>', ['@message' => $this->getSamlAuth($purpose)->getLastResponseXML()]);
       }
       elseif (isset($_GET['SAMLRequest'])) {
-        $this->logger->debug('SLS received SAML request: <pre>@message</pre>', ['@message' => $this->getSamlAuth()->getLastRequestXML()]);
+        $this->logger->debug('SLS received SAML request: <pre>@message</pre>', ['@message' => $this->getSamlAuth($purpose)->getLastRequestXML()]);
       }
     }
     // Now look if there were any errors and also throw.
-    $errors = $this->getSamlAuth()->getErrors();
+    $errors = $this->getSamlAuth($purpose)->getErrors();
     if (!empty($errors)) {
       // We have one or multiple error types / short descriptions, and one
       // 'reason' for the last error.
-      throw new \RuntimeException('Error(s) encountered during processing of SLS response. Type(s): ' . implode(', ', array_unique($errors)) . '; reason given for last error: ' . $this->getSamlAuth()->getLastErrorReason());
+      throw new \RuntimeException('Error(s) encountered during processing of SLS response. Type(s): ' . implode(', ', array_unique($errors)) . '; reason given for last error: ' . $this->getSamlAuth($purpose)->getLastErrorReason());
     }
 
     // Remove SAML session data, log the user out of Drupal, and return a
@@ -718,8 +766,8 @@ class SamlService {
    *   An array with all returned SAML attributes..
    */
   public function getAttributes() {
-    $attributes = $this->getSamlAuth()->getAttributes();
-    $friendly_attributes = $this->getSamlAuth()->getAttributesWithFriendlyName();
+    $attributes = $this->getSamlAuth('acs')->getAttributes();
+    $friendly_attributes = $this->getSamlAuth('acs')->getAttributesWithFriendlyName();
 
     return $attributes + $friendly_attributes;
   }
@@ -741,12 +789,12 @@ class SamlService {
   public function getAttributeByConfig($config_key) {
     $attribute_name = $this->configFactory->get('samlauth.authentication')->get($config_key);
     if ($attribute_name) {
-      $attribute = $this->getSamlAuth()->getAttribute($attribute_name);
+      $attribute = $this->getSamlAuth('acs')->getAttribute($attribute_name);
       if (!empty($attribute[0])) {
         return $attribute[0];
       }
 
-      $friendly_attribute = $this->getSamlAuth()->getAttributeWithFriendlyName($attribute_name);
+      $friendly_attribute = $this->getSamlAuth('acs')->getAttributeWithFriendlyName($attribute_name);
       if (!empty($friendly_attribute[0])) {
         return $friendly_attribute[0];
       }
@@ -755,9 +803,17 @@ class SamlService {
 
   /**
    * Returns an initialized Auth class from the SAML Toolkit.
+   *
+   * @param string $purpose
+   *   (Optional) purpose for the config: 'metadata' / 'login' / 'acs' /
+   *   'logout' / 'sls-request' / 'sls-response'. Empty string means 'any', but
+   *   likely shouldn't be used anywhere. (The way many callers hardcode this
+   *   argument may seem strange, until you realize that _these callers_ only
+   *   have one possible purpose too, in practice. This is almost sure to be
+   *   refactored away in a future version.)
    */
-  protected function getSamlAuth() {
-    if (!isset($this->samlAuth)) {
+  protected function getSamlAuth($purpose = '') {
+    if (!isset($this->samlAuth[$purpose])) {
       $base_url = '';
       $config = $this->configFactory->get('samlauth.authentication');
       if ($config->get('use_base_url')) {
@@ -767,10 +823,10 @@ class SamlService {
         // can try to extract it from e.g. Utils::getSelfRoutedURLNoQuery().)
         $base_url = $request->getSchemeAndHttpHost() . $request->getBaseUrl() . '/saml';
       }
-      $this->samlAuth = new Auth(static::reformatConfig($config, $base_url));
+      $this->samlAuth[$purpose] = new Auth(static::reformatConfig($config, $base_url, $purpose, $this->keyRepository));
     }
 
-    return $this->samlAuth;
+    return $this->samlAuth[$purpose];
   }
 
   /**
@@ -823,48 +879,36 @@ class SamlService {
   /**
    * Returns a configuration array as used by the external library.
    *
+   * Some of these arguments are just added because the method is static (which
+   * will change in v4.x).
+   *
    * @param \Drupal\Core\Config\ImmutableConfig $config
    *   The module configuration.
    * @param string $base_url
    *   (Optional) base URL to set.
+   * @param string $purpose
+   *   (Optional) purpose for the config: 'metadata' / 'login' / 'acs' /
+   *   'logout' / 'sls-request' / 'sls-response'.
+   * @param \Drupal\key\KeyRepositoryInterface $key_repository
+   *   (Optional) the service's Key repository.
    *
    * @return array
    *   The library configuration array.
    */
-  protected static function reformatConfig(ImmutableConfig $config, $base_url = '') {
-    // Check if we want to load the certificates from a folder. Either folder or
-    // cert+key settings should be defined. If both are defined, "folder" is the
-    // preferred method and we ignore cert/path values; we don't do more
-    // complicated validation like checking whether the cert/key files exist.
-    $sp_cert = '';
-    $sp_key = '';
-    $cert_folder = $config->get('sp_cert_folder');
-    if ($cert_folder) {
-      // Set the folder so the SAML toolkit knows where to look.
-      if (!defined('ONELOGIN_CUSTOMPATH')) {
-        define('ONELOGIN_CUSTOMPATH', "$cert_folder/");
-      }
-    }
-    else {
-      $sp_cert = $config->get('sp_x509_certificate');
-      $sp_key = $config->get('sp_private_key');
-    }
-
+  protected static function reformatConfig(ImmutableConfig $config, $base_url = '', $purpose = '', KeyRepositoryInterface $key_repository = NULL) {
     $library_config = [
       'debug' => (bool) $config->get('debug_phpsaml'),
       'sp' => [
         'entityId' => $config->get('sp_entity_id'),
         'assertionConsumerService' => [
-          // Try SamlController::createRedirectResponse() if curious for
-          // details on why the long chained call is necessary.
+          // See ExecuteInRenderContextTrait if curious why the long chained
+          // call is necessary.
           'url' => Url::fromRoute('samlauth.saml_controller_acs', [], ['absolute' => TRUE])->toString(TRUE)->getGeneratedUrl(),
         ],
         'singleLogoutService' => [
           'url' => Url::fromRoute('samlauth.saml_controller_sls', [], ['absolute' => TRUE])->toString(TRUE)->getGeneratedUrl(),
         ],
         'NameIDFormat' => $config->get('sp_name_id_format') ?: NULL,
-        'x509cert' => $sp_cert,
-        'privateKey' => $sp_key,
       ],
       'idp' => [
         'entityId' => $config->get('idp_entity_id'),
@@ -874,23 +918,45 @@ class SamlService {
         'singleLogoutService' => [
           'url' => $config->get('idp_single_log_out_service'),
         ],
-        'x509cert' => $config->get('idp_x509_certificate'),
       ],
       'security' => [
+        // Used for metadata (adds a whole signature section):
+        'signMetadata' => (bool) $config->get('security_metadata_sign'),
+        // Used for metadata (value goes into attribute
+        // AuthnRequestsSigned="true/false" of SPSSODescriptor) / login(*):
         'authnRequestsSigned' => (bool) $config->get('security_authn_requests_sign'),
+        // Used for logout(*):
         'logoutRequestSigned' => (bool) $config->get('security_logout_requests_sign'),
+        // Used for SLO response, sent after processing incoming SLO request(*):
         'logoutResponseSigned' => (bool) $config->get('security_logout_responses_sign'),
-        'wantAssertionsEncrypted' => (bool) $config->get('security_assertions_encrypt'),
-        'wantAssertionsSigned' => (bool) $config->get('security_assertions_signed'),
-        'wantMessagesSigned' => (bool) $config->get('security_messages_sign'),
-        'requestedAuthnContext' => (bool) $config->get('security_request_authn_context'),
-        'lowercaseUrlencoding' => (bool) $config->get('security_lowercase_url_encoding'),
-        // This is the first setting that is TRUE by default AND must be TRUE
-        // on existing installations that didn't have the setting before, so
-        // it's the first one to get a default value. (If we didn't have the
-        // (bool) operator, we wouldn't necessarily need the default - but
-        // leaving it out would just invite a bug later on.)
+        // Used for logout; also influences Settings:__construct() checks for
+        // presence of IDP cert:
+        'nameIdEncrypted' => (bool) $config->get('security_nameid_encrypt'),
+        // Used for acs:
+        // TRUE by default AND must be TRUE on existing installations that
+        // didn't have the setting before, so it's the first one to get a
+        // default value. (If we didn't have the (bool) operator, we wouldn't
+        // necessarily need the default - but leaving it out would just invite
+        // a bug later on.)
         'wantNameId' => (bool) ($config->get('security_want_name_id') ?? TRUE),
+        // Used for login / acs(*); indirectly influences metadata(**):
+        'wantNameIdEncrypted' => (bool) $config->get('security_nameid_encrypted'),
+        // Used for acs(*); indirectly influences metadata(**):
+        'wantAssertionsEncrypted' => (bool) $config->get('security_assertions_encrypt'),
+        // Used for metadata (value goes into attribute
+        // WantAssertionsSigned="true/false" of SPSSODescriptor) / acs(*):
+        'wantAssertionsSigned' => (bool) $config->get('security_assertions_signed'),
+        // Used for acs / sls (processing incoming SLO responses and requests):
+        'wantMessagesSigned' => (bool) $config->get('security_messages_sign'),
+        // Used for login:
+        'requestedAuthnContext' => (bool) $config->get('security_request_authn_context'),
+        // Used for login / logout / SLO response, sent after processing
+        // incoming SLO request; should be deprecated:
+        'lowercaseUrlencoding' => (bool) $config->get('security_lowercase_url_encoding'),
+        // (*): also influences Settings:__construct() checks for SP cert+key.
+        // (**): if either of these properties is true, an extra 'encryption'
+        // certificate is always included in the metadata. (With the same value
+        // as the 'signing' certificate; we don't support different ones.)
       ],
       'strict' => (bool) $config->get('strict'),
     ];
@@ -898,32 +964,327 @@ class SamlService {
     if ($sig_alg) {
       $library_config['security']['signatureAlgorithm'] = $sig_alg;
     }
+    $enc_alg = $config->get('security_encryption_algorithm');
+    if ($enc_alg) {
+      // Not a typo; this is snake_case in the library too.
+      $library_config['security']['encryption_algorithm'] = $enc_alg;
+    }
     if ($base_url) {
       $library_config['baseurl'] = $base_url;
     }
 
-    // Check for the presence of a multi cert situation.
-    $multi = $config->get('idp_cert_type');
-    switch ($multi) {
-      case "signing":
-        $library_config['idp']['x509certMulti'] = [
-          'signing' => [
-            $config->get('idp_x509_certificate'),
-            $config->get('idp_x509_certificate_multi'),
-          ],
-        ];
+    // We want to read cert/key values from whereever they are stored, only
+    // when we actually need them. This may lead to us creating a custom
+    // \OneLogin\Saml2\Settings child class that contains the logic of 'just in
+    // time' reading key/cert values from storage. However (leaving aside the
+    // fact that we can't do that in v3.x because it will break compatibility),
+    // - the Auth class cannot use Settings subclasses: its constructor only
+    //   accepts an array and its $_settings variable is private (so we cannot
+    //   get around this by subclassing Auth).
+    // - while the design of Settings supports 'just in time reading', (and the
+    //   Settings class even does it, in some cases), its setup _in principle_
+    //   isn't well suited for handling that. So if we end up doing this, we'll
+    //   need to add good comments about e.g. getSPData() not returning
+    //   complete data, format*() not working, ... (Basically, my conclusion is
+    //   like my conclusion elsewhere about the Auth object: from the design of
+    //   the Settings object it isn't clear whether it wants to be a value
+    //   object or whether it wants to contain the logic of how to read the
+    //   key/cert values. It would be nice if the code was... clearer.)
+    // So for now, we are adding logic to this method that 'knows' when the key
+    // / certs are used.
+    $add_key = $add_cert = $add_idp_cert = TRUE;
+    $add_new_cert = in_array($purpose, ['metadata', '']);
+    $add_idp_encryption_cert = FALSE;
+    switch ($purpose) {
+      case 'metadata':
+        // signMetadata / wantNameIdEncrypted are not implemented yet but that
+        // doesn't mean we can't already use them here: they potentially
+        // influence metadata but then we can't turn off $add_key.
+        $add_key = !empty($library_config['security']['signMetadata'])
+          || !empty($library_config['security']['wantNameIdEncrypted'])
+          || !empty($library_config['security']['wantAssertionsEncrypted']);
+        // We cannot prevent Settings::checkIdPSettings() from being called
+        // while using the standard Auth class, so cannot do this:
+        // $add_idp_cert = FALSE;.
+        // @todo this is a good enough reason for opening a PR to amend
+        //   Auth::construct() (to accept a Settings that was constructed with
+        //   (, TRUE)), regardless of considerations outlined in AuthVolatile.
         break;
 
-      case "encryption":
-        $library_config['idp']['x509certMulti'] = [
-          'signing' => [
-            $config->get('idp_x509_certificate'),
-          ],
-          'encryption' => [
-            $config->get('idp_x509_certificate_multi'),
-          ],
-        ];
+      case 'login':
+        // We don't need a cert for operation; we just need to set it to a
+        // value if certain security settings are set (which need the private
+        // key), or otherwise checkSPCerts() will freak out.
+        $add_cert = !empty($library_config['security']['authnRequestsSigned'])
+          || !empty($library_config['security']['wantNameIdEncrypted'])
+          ? 'FAKE' : FALSE;
+        // We cannot prevent Settings::checkIdPSettings() from being called
+        // while using the standard Auth class, so cannot do this:
+        // $add_idp_cert = FALSE;.
         break;
+
+      case 'logout':
+        // We don't need a cert for operation; we just need to set it to a
+        // value if certain security settings are set (which need the private
+        // key), or otherwise checkSPCerts() will freak out.
+        $add_cert = !empty($library_config['security']['logoutRequestSigned'])
+          ? 'FAKE' : FALSE;
+        // We cannot prevent Settings::checkIdPSettings() from being called
+        // while using the standard Auth class, so cannot do this:
+        // $add_idp_cert=!empty($library_config['security']['nameIdEncrypted']);
+        // ^ This would also need the 2nd parameter to Settings::__construct()
+        // to be !$add_idp_cert.
+        // That just means we should generally add at least 1 IdP cert, though.
+        // We don't need to add the encryption cert specifically - only if:
+        $add_idp_encryption_cert = !empty($library_config['security']['nameIdEncrypted']);
+        break;
+
+      case 'acs':
+        // $add_key depends on the presence of any EncryptedAssertion elements,
+        // which is too bothersome for us to check (and which is a reason to
+        // have the key reading inside a child Settings object instead) so
+        // we'll assume it's TRUE. Same with $add_idp_cert which depends on
+        // the presence of various signed elements.
+        $add_cert = !empty($library_config['security']['wantAssertionsEncrypted'])
+          || !empty($library_config['security']['wantAssertionsSigned'])
+          || !empty($library_config['security']['wantNameIdEncrypted'])
+          ? 'FAKE' : FALSE;
+        break;
+
+      case 'sls-request':
+        // We need to both interpret the incoming request and probably create a
+        // new outgoing one, so we need key and cert.
+        // We cannot prevent Settings::checkIdPSettings() from being called
+        // while using the standard Auth class, so cannot do this:
+        // $add_idp_cert = isset($_GET['Signature']); // This would also need
+        // the 2nd parameter to Settings::__construct() to be !$add_idp_cert.
+        break;
+
+      case 'sls-response':
+        $add_key = $add_cert = FALSE;
+        // We cannot prevent Settings::checkIdPSettings() from being called
+        // while using the standard Auth class, so cannot do this:
+        // $add_idp_cert = isset($_GET['Signature']); // This would also need
+        // the 2nd parameter to Settings::__construct() to be !$add_idp_cert.
+    }
+    if (!$add_key || !$add_cert) {
+      // If these are set, checkSPCerts() will get called, which requires key +
+      // cert presence. Neither of these two variables are (should have been)
+      // set to FALSE if any of these security settings is both true and
+      // relevant for our $purpose. (The full logic including the switch{}
+      // implies the library default is FALSE for all these security settings.)
+      unset($library_config['security']['authnRequestsSigned']);
+      unset($library_config['security']['logoutRequestSigned']);
+      unset($library_config['security']['logoutResponseSigned']);
+      unset($library_config['security']['wantAssertionsEncrypted']);
+      unset($library_config['security']['wantNameIdEncrypted']);
+    }
+    if (!$add_idp_cert) {
+      // Same for IdP cert.
+      unset($library_config['security']['nameIdEncrypted']);
+    }
+
+    // Check if we want to load the certificates from a folder. Either folder
+    // or cert+key settings should be defined. If both are defined, "folder" is
+    // the preferred method and we ignore cert/path values; we don't do more
+    // complicated validation like checking whether the cert/key files exist.
+    // Initializing cert/key properties to '' (rather than not setting them at
+    // all) should be fine, because the standard Settings also does that.
+    $cert_folder = $config->get('sp_cert_folder');
+    if ($cert_folder) {
+      // Set the folder so the SAML toolkit knows where to look. This is the
+      // old method which only reads key/cert when we actually need it, because
+      // the logic for it is inside the Settings class. We're phasing it out in
+      // favor of the hardcoded above $add_* logic and reading the key/cert
+      // files inside this function, because this old method relies on a
+      // specific hardcoded folder name / file names in the Settings class.
+      // @todo remove in 4.x: not applicable after samlauth_update_8304().
+      if (!defined('ONELOGIN_CUSTOMPATH')) {
+        define('ONELOGIN_CUSTOMPATH', "$cert_folder/");
+      }
+    }
+    else {
+      if ($add_key) {
+        $key = $config->get('sp_private_key');
+        if (isset($key) && !is_string($key)) {
+          throw new SamlError('SP private key setting is not a string.', SamlError::SETTINGS_INVALID);
+        }
+        $type = strstr($key, ':', TRUE);
+        if ($type === 'key') {
+          if ($key_repository) {
+            $key = substr($key, 4);
+            $key_entity = $key_repository->getKey($key);
+            if (!$key_entity) {
+              throw new SamlError("SP private key '$key' not found.", SamlError::SETTINGS_INVALID);
+            }
+            $key = $key_entity->getKeyValue();
+          }
+          else {
+            throw new SamlError('SP private key setting is of type "key" but the Key module is not installed.', SamlError::SETTINGS_INVALID);
+          }
+        }
+        elseif ($type === 'file') {
+          $key = file_get_contents(substr($key, 5));
+          if ($key === FALSE) {
+            throw new SamlError('SP private key not found.', SamlError::PRIVATE_KEY_FILE_NOT_FOUND);
+          }
+        }
+        $library_config['sp']['privateKey'] = $key;
+      }
+      if ($add_cert) {
+        $cert = $add_cert === 'FAKE' ? 'dummy-value-to-subvert-validation' : $config->get('sp_x509_certificate');
+        if (isset($cert) && !is_string($cert)) {
+          throw new SamlError('SP public cert setting is not a string.', SamlError::SETTINGS_INVALID);
+        }
+        if ($cert) {
+          $type = strstr($cert, ':', TRUE);
+          if ($type === 'key') {
+            if ($key_repository) {
+              $cert = substr($cert, 4);
+              $key_entity = $key_repository->getKey($cert);
+              if (!$key_entity) {
+                throw new SamlError("SP public cert '$cert' not found.", SamlError::SETTINGS_INVALID);
+              }
+              $cert = $key_entity->getKeyValue();
+            }
+            else {
+              throw new SamlError('SP public cert setting is of type "key" but the Key module is not installed.', SamlError::SETTINGS_INVALID);
+            }
+          }
+          elseif ($type === 'file') {
+            $cert = file_get_contents(substr($cert, 5));
+            if ($cert === FALSE) {
+              throw new SamlError('SP public cert not found.', SamlError::PUBLIC_CERT_FILE_NOT_FOUND);
+            }
+          }
+          $library_config['sp']['x509cert'] = $cert;
+        }
+      }
+      if ($add_new_cert) {
+        $cert = $config->get('sp_new_certificate');
+        if (isset($cert) && !is_string($cert)) {
+          throw new SamlError('SP new public cert setting is not a string.', SamlError::SETTINGS_INVALID);
+        }
+        if ($cert) {
+          $type = strstr($cert, ':', TRUE);
+          if ($type === 'key') {
+            if ($key_repository) {
+              $cert = substr($cert, 4);
+              $key_entity = $key_repository->getKey($cert);
+              if (!$key_entity) {
+                throw new SamlError("SP new public cert '$cert' not found.", SamlError::SETTINGS_INVALID);
+              }
+              $cert = $key_entity->getKeyValue();
+            }
+            else {
+              throw new SamlError('SP new public cert setting is of type "key" but the Key module is not installed.', SamlError::SETTINGS_INVALID);
+            }
+          }
+          elseif ($type === 'file') {
+            $cert = file_get_contents(substr($cert, 5));
+            if ($cert === FALSE) {
+              throw new SamlError('SP new public cert not found.', SamlError::PUBLIC_CERT_FILE_NOT_FOUND);
+            }
+          }
+          $library_config['sp']['x509certNew'] = $cert;
+        }
+      }
+    }
+
+    $encryption_cert = '';
+    $certs = [];
+    if ($add_idp_encryption_cert) {
+      $encryption_cert = $config->get('idp_cert_encryption');
+      if (isset($encryption_cert) && !is_string($encryption_cert)) {
+        throw new SamlError('IdP encryption cert setting is not a string.', SamlError::SETTINGS_INVALID);
+      }
+      $type = strstr($encryption_cert, ':', TRUE);
+      if ($type === 'key') {
+        if ($key_repository) {
+          $encryption_cert = substr($encryption_cert, 4);
+          $key_entity = $key_repository->getKey($encryption_cert);
+          if (!$key_entity) {
+            throw new SamlError("IdP encryption cert '$encryption_cert' not found.", SamlError::SETTINGS_INVALID);
+          }
+          $encryption_cert = $key_entity->getKeyValue();
+        }
+        else {
+          throw new SamlError('IdP encryption cert setting is of type "key" but the Key module is not installed.', SamlError::SETTINGS_INVALID);
+        }
+      }
+      elseif ($type === 'file') {
+        $encryption_cert = file_get_contents(substr($encryption_cert, 5));
+        if ($encryption_cert === FALSE) {
+          throw new SamlError('IdP encryption cert not found.', SamlError::PRIVATE_KEY_FILE_NOT_FOUND);
+        }
+      }
+    }
+    if ($add_idp_cert || ($add_idp_encryption_cert && !$encryption_cert)) {
+      $certs = $config->get('idp_certs');
+      foreach ($certs as $i => $cert) {
+        if (isset($certs[$i]) && !is_string($certs[$i])) {
+          $nr = ($i ? " $i" : '');
+          throw new SamlError("IdP cert setting$nr is not a string.", SamlError::SETTINGS_INVALID);
+        }
+        $type = strstr($cert, ':', TRUE);
+        if ($type === 'key') {
+          if ($key_repository) {
+            $cert = substr($cert, 4);
+            $key_entity = $key_repository->getKey($cert);
+            if (!$key_entity) {
+              throw new SamlError("IdP cert '$cert' not found.", SamlError::SETTINGS_INVALID);
+            }
+            $certs[$i] = $key_entity->getKeyValue();
+          }
+          else {
+            throw new SamlError('IdP cert setting is of type "key" but the Key module is not installed.', SamlError::SETTINGS_INVALID);
+          }
+        }
+        elseif ($type === 'file') {
+          $certs[$i] = file_get_contents(substr($cert, 5));
+          if ($certs[$i] === FALSE) {
+            $nr = ($i ? " $i" : '');
+            throw new SamlError("IdP cert$nr not found.", SamlError::PRIVATE_KEY_FILE_NOT_FOUND);
+          }
+        }
+      }
+    }
+    // @todo remove in 4.x: not applicable after samlauth_update_8304().
+    if (!$certs && !$encryption_cert) {
+      $old_cert = $config->get('idp_x509_certificate');
+      $old_cert_multi = $config->get('idp_x509_certificate_multi');
+      if ($old_cert || $old_cert_multi) {
+        $certs = $old_cert ? [$old_cert] : [];
+        if ($old_cert_multi) {
+          if ($config->get('idp_cert_type') === 'encryption') {
+            $encryption_cert = $old_cert_multi;
+          }
+          else {
+            $certs[] = $old_cert_multi;
+          }
+        }
+      }
+    }
+    // If we don't set a separate 'x509certMulti > encryption' cert, the
+    // 'main' cert (not 'x509certMulti > signing') is used for encryption so
+    // it must be set. If we have a single 'main/signing' cert, we can set it
+    // in either 'x509certMulti > signing' or as the main cert - both is not
+    // necessary. This can be encoded in several arbitrary ways, e.g.:
+    if ($encryption_cert) {
+      $library_config['idp']['x509certMulti'] = [
+        // This is an array, but the library never uses anything but the
+        // first value.
+        'encryption' => [$encryption_cert],
+        'signing' => $certs,
+      ];
+    }
+    elseif ($certs) {
+      if (count($certs) == 1 || $add_idp_encryption_cert) {
+        $library_config['idp']['x509cert'] = reset($certs);
+      }
+      if (count($certs) > 1) {
+        $library_config['idp']['x509certMulti']['signing'] = $certs;
+      }
     }
 
     return $library_config;

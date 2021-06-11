@@ -71,13 +71,16 @@ class DependencyCalculator {
       }
     }
     catch (\Exception $exception) {
-      if ($exception->getMessage() !== sprintf("Missing Dependency requested: %s.", $wrapper->getUuid())) {
-        throw $exception;
+      $msg = $exception->getMessage();
+      if ($msg !== sprintf("Missing Dependency requested: %s.", $wrapper->getUuid())) {
+        $missing_dep_msg = sprintf("Dependency calculation failed for entity (%s, %s) as one of the dependency is missing from the cache. Please resave/reenqueue this entity." . PHP_EOL, $wrapper->getEntityTypeId(), $wrapper->getUuid());
+        throw new \Exception($missing_dep_msg . $msg);
       }
     }
 
-    // We add the dependency to the stack because we need it there but the dependency data
-    // is WRONG, so don't make it permanent in case something breaks before we get to
+    // We add the dependency to the stack because we
+    // need it there but the dependency data is WRONG,
+    // so don't make it permanent in case something breaks before we get to
     // resave it later when all dependencies are correctly calculated.
     $stack->addDependency($wrapper, FALSE);
     $event = new CalculateEntityDependenciesEvent($wrapper, $stack);

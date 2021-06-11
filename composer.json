@@ -79,11 +79,6 @@
         "assets": {
             "type": "composer",
             "url": "https://asset-packagist.org"
-        },
-        "acquia_cms": {
-            "type": "vcs",
-            "url": "https://github.com/acquia/acquia_cms",
-            "no-api": true
         }
     },
     "minimum-stability": "dev",

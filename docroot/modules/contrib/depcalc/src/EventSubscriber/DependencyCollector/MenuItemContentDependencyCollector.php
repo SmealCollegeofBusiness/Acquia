@@ -22,7 +22,7 @@ class MenuItemContentDependencyCollector extends BaseDependencyCollector {
     if ($entity->getEntityTypeId() !== 'menu_link_content') {
       return;
     }
-    $event->getWrapper()->addModuleDependencies(['menu', 'menu_link_content']);
+    $event->getWrapper()->addModuleDependencies(['menu_link_content']);
     $menu = $entity->get('menu_name')->first()->getValue()['value'];
     $menu = \Drupal::entityTypeManager()->getStorage('menu')->load($menu);
     if ($menu && !$event->getStack()->hasDependency($menu->uuid())) {

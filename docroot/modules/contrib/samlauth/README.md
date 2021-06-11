@@ -56,16 +56,36 @@ installed the module using Composer.
 
 During configuration,
 
-- We need an SSL public/private key pair. Without going into detail: the most
-  common way of creating keys is the following openssl command:
+- You need an SSL public/private key pair - or, more precisely: a private key
+  and a related public X.509 certificate. You may have opinions and/or
+  procedures around creating safe key pairs, and we won't discuss this here
+  besides giving the most common command for creating keys if it you have none:
   ```
   openssl req -new -x509 -days 3652 -nodes -out sp.crt -keyout sp.key
   ```
-- We need to exchange information with the IdP, because both parties need to
+  For the rest, the internet has more information about this topic.
+- You need to decide where to store the keys. This module can:
+  - Store them in a file on the webserver's file system. (Always keep the
+    private key in a safe location outside the webserver's document root.)
+  - Store them in configuration values. This is generally less secure than a
+    file, but may be useful for test environments, depending on your setup.
+  - Use the [Key](https://www.drupal.org/project/key) module, which has options
+    for safer retrieval of keys, e.g. from an environment variable or various
+    external key management solutions. In order to use this solution, before
+    configuring samlauth:
+    - Install [Asymmetric Keys](https://www.drupal.org/project/key_asymmetric),
+      plus its dependencies (the Key module and phpseclib/phpseclib:~3.0.7).
+    - Install the appropriate add-on module if you want to use an external key
+      provider.
+    - Visit admin/config/system/keys and add 'Key' for your private key, using
+      your preferred key provider. Also optionally, create a 'key' for the
+      related X.509 certificate. (This is optional because the certificate is
+      not a secret, but it may be beneficial to keep both in the same list.)
+- You need to exchange information with the IdP, because both parties need to
   configure the other's identity/location. More details are in the respective
   configuration sections.
 
-Optional installs:
+Other optional installs:
 - views module, to see a list of currently registered links (associations)
   between SAML login data and Drupal users - and be able to delete them from
   the administrative UI (rather than directly manipulating the 'authmap' table).
@@ -97,17 +117,15 @@ process is /saml/login.
 
 ### Service Provider:
 
-Unless you want to store the keys in the database: create a folder in a
-'private' location (accessible by Drupal but not accessible over the web),
-named "certs". Place the files sp.key and sp.crt inside them. (These specific
-folder / file names are mandatory.) Configure the folder name in the
-"Certificate Folder" element.
-
 The Entity ID can be any value, used to identify this particular SP / Drupal
 application to the IdP - as long as it is unique among all SPs known by the
 IdP. (Many SPs make it equal to the URL for the application or metadata, but
 that's just a convention. Choose anything you like - unless the organisation
 operating the IdP is already mandating a specific value.)
+
+If your SSL certificate / private key is stored safely as discussed above,
+reference them in this sectin. Alternatively (less safe) select "Configuration"
+for 'Type of storage', and paste the contents into this screen.
 
 After saving this configuration, the metadata URL should contain all
 information (as an XML file) necessary for the IdP to configure our information
@@ -120,9 +138,8 @@ can provide information to the (people administering the) IdP:
 - go to admin/people/permissions#module-samlauth to enable permission to view
   the metadata, and pass on the metadata URL
 - or: save the XML file from the metadata URL (/saml/metadata) and pass it on
-- or: just give them the Entity ID, the public certificate (the file sp.crt)
-  and the URLs displayed in the "Service Provider" section of the configuration
-  screen.
+- or: just give them the Entity ID, the public certificate and the URLs
+  displayed in the "Service Provider" section of the configuration screen.
 
 ### Identity Provider:
 
@@ -169,7 +186,7 @@ user tries to log in. See the section on Debugging.
 If there is absolutely no unique non-changing value to set as Unique ID, you
 can take the username or email attribute. However, please note that each time
 that username/email is changed on the IdP side, a new user gets created. Or
-depending on your configuratoin, the SAML user has the ability to log in as
+depending on your configuration, the SAML user has the ability to log in as
 a different existing Drupal user, which poses a security risk.
 
 Other settings / checkboxes are hopefully self-explanatory.
@@ -193,8 +210,7 @@ in detail; hopefully the setting descriptions give a clue. Just some hints:
   supply the Unique ID value. (I didn't want to turn them off by default
   until some further module work was done, though.)
 
-DEBUGGING
----------
+### Debugging options
 
 Hopefully the 'Debugging' options in the configuration screen are of enough
 support to be able to get SAML login working. In particular, turn on "Log
@@ -203,6 +219,35 @@ for the names of attributes containing data that needs to be written into
 Drupal user accounts. (After trying to log in through the IdP, Drupal's "Recent
 log messages" should contain the XML message that contains the assertion /
 attributes.)
+
+### SAMLtest.id Identity Provider for testing
+
+SAMLtest is a SAML 2.0 IdP and SP testing service. It is useful to test this
+module.
+Configure the module with the "Identity Provider" information:
+- Entity ID: https://samltest.id/saml/idp
+- Single Sign On Service: https://samltest.id/idp/profile/SAML2/Redirect/SSO
+- Primary x509 Certificate: get it from https://samltest.id/download/#SAMLtest%E2%80%99s_IdP
+
+For the "User Info and Syncing" section:
+- Unique ID attribute: uid
+- Check "Create users from SAML data"
+- "User name attribute": uid
+- "User email attribute": mail
+
+Save the information so you can see the "Metadata URL": https://example.com/saml/metadata.
+
+Edit anonymous role permissions to enable the "View service provider metadata"
+permission in /admin/people/permissions/anonymous#module-samlauth.
+Go to https://samltest.id/upload.php and fetch the "Metadata URL".
+
+You can also enable the "log in" / "log out" menu item and disable the original
+one in /admin/structure/menu/manage/account and then use it to login.
+
+Now go to /saml/login and follow the instructions. If you check "Don't Remember
+Login" you will be able to try multiple users accounts.
+
+### Further debugging
 
 If needed, you can use third party tools to help debug your SSO flow with SAML.
 The following are browser extensions that can be used on Linux, macOS and
@@ -229,6 +274,17 @@ https://www.samltool.com/saml_tools.php.
 
 OCCASIONALLY ASKED QUESTIONS
 ----------------------------
+
+Q: How to I redirect users to a specific path after they logged in?
+
+A: A specific login URL can do this: /saml/login?destination=drupal/path. To
+   instead have all users redirect to a specific destination, regardless of
+   which URL they used, there is a configuration setting "Login redirect URL".
+   (This configured URL can at the moment also contain tokens even though this
+   is not documented anywhere. Frankly I've never been sure whether it should;
+   it was just added in a contributed patch when the module wasn't very stable
+   yet. To make sure that the usage of this token does not disappear in a next
+   version of this module: notify me about how you are using this.)
 
 Q: Does this module have an option to redirect all not-logged-in users to the
    IdP login screen?

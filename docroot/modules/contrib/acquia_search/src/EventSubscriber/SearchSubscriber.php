@@ -7,11 +7,12 @@ use Drupal\acquia_search\Helper\Flood;
 use Drupal\acquia_search\Helper\Runtime;
 use Drupal\acquia_search\Helper\Storage;
 use Drupal\Component\Utility\Crypt;
-use Drupal\search_api_solr\Solarium\EventDispatcher\EventProxy;
 use Solarium\Core\Client\Adapter\AdapterHelper;
 use Solarium\Core\Client\Client;
 use Solarium\Core\Client\Response;
 use Solarium\Core\Event\Events;
+use Solarium\Core\Event\PostExecuteRequest;
+use Solarium\Core\Event\PreExecuteRequest;
 use Solarium\Core\Plugin\AbstractPlugin;
 use Solarium\Exception\HttpException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -66,10 +67,10 @@ class SearchSubscriber extends AbstractPlugin implements EventSubscriberInterfac
   /**
    * Build Acquia Search Solr Authenticator.
    *
-   * @param \Drupal\search_api_solr\Solarium\EventDispatcher\EventProxy $event
+   * @param \Solarium\Core\Event\PreExecuteRequest $event
    *   PreExecuteRequest event.
    */
-  public function preExecuteRequest(EventProxy $event) {
+  public function preExecuteRequest(PreExecuteRequest $event) {
 
     /** @var \Solarium\Core\Client\Request $request */
     $request = $event->getRequest();
@@ -126,12 +127,12 @@ class SearchSubscriber extends AbstractPlugin implements EventSubscriberInterfac
   /**
    * Validate response.
    *
-   * @param \Drupal\search_api_solr\Solarium\EventDispatcher\EventProxy $event
+   * @param \Solarium\Core\Event\PostExecuteRequest $event
    *   postExecuteRequest event.
    *
    * @throws \Solarium\Exception\HttpException
    */
-  public function postExecuteRequest(EventProxy $event) {
+  public function postExecuteRequest(PostExecuteRequest $event) {
     if (!($this->client instanceof Client)) {
       return;
     }

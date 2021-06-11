@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
+class ComposerStaticInit0fcc0ca5e8619ec5fd730fde5ef6dda4
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -16,6 +16,7 @@ class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
+        '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '7e9bd612cc444b3eed788ebbe46263a0' => __DIR__ . '/..' . '/laminas/laminas-zendframework-bridge/src/autoload.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
@@ -94,6 +95,7 @@ class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
         ),
         'S' => 
         array (
+            'Symfony\\Polyfill\\Php81\\' => 23,
             'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Php73\\' => 23,
             'Symfony\\Polyfill\\Php72\\' => 23,
@@ -335,6 +337,10 @@ class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
         'TYPO3\\PharStreamWrapper\\' => 
         array (
             0 => __DIR__ . '/..' . '/typo3/phar-stream-wrapper/src',
+        ),
+        'Symfony\\Polyfill\\Php81\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php81',
         ),
         'Symfony\\Polyfill\\Php80\\' => 
         array (
@@ -2431,6 +2437,7 @@ class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
         'Drupal\\Core\\Cache\\MemoryCache\\MemoryCache' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Cache/MemoryCache/MemoryCache.php',
         'Drupal\\Core\\Cache\\MemoryCache\\MemoryCacheInterface' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Cache/MemoryCache/MemoryCacheInterface.php',
         'Drupal\\Core\\Cache\\MemoryCounterBackend' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Cache/MemoryCounterBackend.php',
+        'Drupal\\Core\\Cache\\MemoryCounterBackendFactory' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Cache/MemoryCounterBackendFactory.php',
         'Drupal\\Core\\Cache\\NullBackend' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Cache/NullBackend.php',
         'Drupal\\Core\\Cache\\NullBackendFactory' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Cache/NullBackendFactory.php',
         'Drupal\\Core\\Cache\\PhpBackend' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Cache/PhpBackend.php',
@@ -6099,6 +6106,7 @@ class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
         'ReCaptcha\\RequestMethod\\SocketPost' => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha/RequestMethod/SocketPost.php',
         'ReCaptcha\\RequestParameters' => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha/RequestParameters.php',
         'ReCaptcha\\Response' => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha/Response.php',
+        'ReturnTypeWillChange' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
         'RobRichards\\XMLSecLibs\\Utils\\XPath' => __DIR__ . '/..' . '/robrichards/xmlseclibs/src/Utils/XPath.php',
         'RobRichards\\XMLSecLibs\\XMLSecEnc' => __DIR__ . '/..' . '/robrichards/xmlseclibs/src/XMLSecEnc.php',
         'RobRichards\\XMLSecLibs\\XMLSecurityDSig' => __DIR__ . '/..' . '/robrichards/xmlseclibs/src/XMLSecurityDSig.php',
@@ -8352,6 +8360,7 @@ class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
         'Symfony\\Polyfill\\Php72\\Php72' => __DIR__ . '/..' . '/symfony/polyfill-php72/Php72.php',
         'Symfony\\Polyfill\\Php73\\Php73' => __DIR__ . '/..' . '/symfony/polyfill-php73/Php73.php',
         'Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
+        'Symfony\\Polyfill\\Php81\\Php81' => __DIR__ . '/..' . '/symfony/polyfill-php81/Php81.php',
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
         'TYPO3\\PharStreamWrapper\\Assertable' => __DIR__ . '/..' . '/typo3/phar-stream-wrapper/src/Assertable.php',
         'TYPO3\\PharStreamWrapper\\Behavior' => __DIR__ . '/..' . '/typo3/phar-stream-wrapper/src/Behavior.php',
@@ -8964,11 +8973,11 @@ class ComposerStaticInit75311ca466ddf3def2b3064aa90767a3
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit75311ca466ddf3def2b3064aa90767a3::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit0fcc0ca5e8619ec5fd730fde5ef6dda4::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit0fcc0ca5e8619ec5fd730fde5ef6dda4::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit0fcc0ca5e8619ec5fd730fde5ef6dda4::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit0fcc0ca5e8619ec5fd730fde5ef6dda4::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit0fcc0ca5e8619ec5fd730fde5ef6dda4::$classMap;
 
         }, null, ClassLoader::class);
     }

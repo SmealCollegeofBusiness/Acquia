@@ -6,7 +6,7 @@ type: module
 core_version_requirement: ^8.7.7 || ^9
 hidden: true
 
-# Information added by Drupal.org packaging script on 2021-04-30
-version: '8.x-1.7'
+# Information added by Drupal.org packaging script on 2021-06-07
+version: '8.x-1.8'
 project: 'depcalc'
-datestamp: 1619803735
+datestamp: 1623093589

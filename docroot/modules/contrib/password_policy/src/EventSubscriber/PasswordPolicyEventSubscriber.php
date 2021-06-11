@@ -2,6 +2,8 @@
 
 namespace Drupal\password_policy\EventSubscriber;
 
+use Drupal\Core\Config\ConfigEvents;
+use Drupal\Core\Config\ConfigImporterEvent;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -12,6 +14,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 
 /**
  * Enforces password reset functionality.
@@ -69,6 +72,35 @@ class PasswordPolicyEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
+   * Updates password reset value for all users.
+   *
+   * @param \Drupal\Core\Config\ConfigImporterEvent $event
+   *   The config importer event.
+   */
+  public function onConfigImport(ConfigImporterEvent $event) {
+    $modules = $event->getConfigImporter()->getExtensionChangelist('module', 'install');
+
+    if (!in_array('password_policy', $modules)) {
+      return;
+    }
+    $timestamp = gmdate(DateTimeItemInterface::DATETIME_STORAGE_FORMAT, \Drupal::time()->getRequestTime());
+
+    /** @var \Drupal\user\UserInterface[] $users */
+    $users = $this->userStorage->loadMultiple();
+
+    // @todo Get rid of updating all users.
+    foreach ($users as $user) {
+      if ($user->getAccountName() == NULL) {
+        continue;
+      }
+      $user
+        ->set('field_last_password_reset', $timestamp)
+        ->set('field_password_expiration', '0')
+        ->save();
+    }
+  }
+
+  /**
    * Event callback to look for users expired password.
    */
   public function checkForUserPasswordExpiration(GetResponseEvent $event) {
@@ -112,6 +144,7 @@ class PasswordPolicyEventSubscriber implements EventSubscriberInterface {
   public static function getSubscribedEvents() {
     // TODO - Evaluate if there is a better place to add this check.
     $events[KernelEvents::REQUEST][] = ['checkForUserPasswordExpiration'];
+    $events[ConfigEvents::IMPORT][] = ['onConfigImport'];
     return $events;
   }
 
