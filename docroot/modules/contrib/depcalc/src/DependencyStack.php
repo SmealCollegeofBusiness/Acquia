@@ -56,12 +56,15 @@ class DependencyStack {
    *
    * @param \Drupal\depcalc\DependentEntityWrapperInterface $dependency
    *   The dependency to add to the stack.
-   * @param bool $permanent
-   *   TRUE if permanently added (Default), FALSE otherwise.
+   * @param bool $cache
+   *   TRUE if to add to cache (Default), FALSE otherwise.
    */
-  public function addDependency(DependentEntityWrapperInterface $dependency, $permanent = true) {
-    $type = $permanent ? Cache::PERMANENT : REQUEST_TIME - 1;
-    \Drupal::cache('depcalc')->set($dependency->getUuid(), $dependency, $type, array_keys($dependency->getDependencies()));
+  public function addDependency(DependentEntityWrapperInterface $dependency, $cache = true) {
+
+    if ($cache) {
+      \Drupal::cache('depcalc')->set($dependency->getUuid(), $dependency, Cache::PERMANENT, array_keys($dependency->getDependencies()));
+    }
+
     $this->dependencies[$dependency->getRemoteUuid()] = $dependency;
     if ($dependency->needsAdditionalProcessing()) {
       $this->additional_processing[$dependency->getRemoteUuid()] = '';
@@ -77,10 +80,8 @@ class DependencyStack {
    * @param string $uuid
    *   The uuid of the dependency to retrieve.
    *
-   * @return \Drupal\depcalc\DependentEntityWrapperInterface
+   * @return \Drupal\depcalc\DependentEntityWrapperInterface|null
    *   The dependent entity wrapper.
-   *
-   * @throws \Exception
    */
   public function getDependency($uuid) {
     if (!empty($this->dependencies[$uuid])) {
@@ -94,7 +95,7 @@ class DependencyStack {
         return $this->dependencies[$uuid];
       }
     }
-    throw new \Exception(sprintf("Missing Dependency requested: %s.", $uuid));
+    return NULL;
   }
 
   /**
@@ -139,11 +140,19 @@ class DependencyStack {
    *
    * @return \Drupal\depcalc\DependentEntityWrapperInterface[]
    *   The dependencies.
+   *
+   * @throws \Exception
    */
   public function getDependenciesByUuid(array $dependencies) {
     $results = [];
     foreach ($dependencies as $uuid) {
-      $results[$uuid] = $this->getDependency($uuid);
+      $dependency = $this->getDependency($uuid);
+
+      if(!$dependency) {
+        throw new \Exception(sprintf("Missing Dependency requested: %s.", $uuid));
+      }
+
+      $results[$uuid] = $dependency;
     }
     return $results;
   }

@@ -74,7 +74,7 @@ services:
 
   cohesion.local_files_manager:
     class: Drupal\cohesion\Services\LocalFilesManager
-    arguments: ['@string_translation', '@config.factory', '@keyvalue', '@tempstore.shared', '@cohesion.utils']
+    arguments: ['@string_translation', '@config.factory', '@keyvalue', '@tempstore.shared', '@cohesion.utils', '@session']
     tags:
       - { name: cohesion.local_files_manager, scheme: cohesion }
 

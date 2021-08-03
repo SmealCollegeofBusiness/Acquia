@@ -163,6 +163,7 @@ class ExportTest extends EntityKernelTestBase {
     $configFactory = $this->container->get('config.factory');
     $config = $configFactory->getEditable('acquia_contenthub.admin_settings');
     $config->set('origin', $origin_uuid);
+    $config->set('send_contenthub_updates', TRUE);
     $config->save();
 
     // Acquia ContentHub export queue service.
@@ -218,6 +219,7 @@ class ExportTest extends EntityKernelTestBase {
         $this->container->get('entity.dependency.calculator'),
         $this->container->get('acquia_contenthub.client.factory'),
         $this->container->get('logger.factory'),
+        $this->container->get('config.factory'),
       ])
       ->setMethods(['getUpdateDbStatus'])
       ->getMock();

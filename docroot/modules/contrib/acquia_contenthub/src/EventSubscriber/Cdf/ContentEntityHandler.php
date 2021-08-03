@@ -14,6 +14,7 @@ use Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\depcalc\DependencyCalculator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -117,12 +118,12 @@ class ContentEntityHandler implements EventSubscriberInterface {
 
     $fields = [];
     foreach ($entity as $field_name => $field) {
-      $fieldEvent = new SerializeCdfEntityFieldEvent($entity, $field_name, $field, $cdf);
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD, $fieldEvent);
-      if ($fieldEvent->isExcluded()) {
+      $field_event = new SerializeCdfEntityFieldEvent($entity, $field_name, $field, $cdf);
+      $this->dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD, $field_event);
+      if ($field_event->isExcluded()) {
         continue;
       }
-      $fields[$field_name] = $fieldEvent->getFieldData();
+      $fields[$field_name] = $field_event->getFieldData();
     }
     $metadata = $cdf->getMetadata();
     $metadata['data'] = base64_encode(json_encode($fields));
@@ -212,7 +213,18 @@ class ContentEntityHandler implements EventSubscriberInterface {
       }
 
       if (!$entity->hasTranslation($langcode)) {
-        $entity->addTranslation($langcode, $values);
+        try {
+          $entity->addTranslation($langcode, $values);
+        }
+        catch (\InvalidArgumentException $ex) {
+          // Still fail but provide information to locate the failing entity.
+          throw new \Exception(sprintf("Cannot add translation '%s' for Entity (%s, %s): %s.",
+            $langcode,
+            $entity->getEntityTypeId(),
+            $entity->uuid(),
+            $ex->getMessage()
+          ));
+        }
       }
       else {
         /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
@@ -238,7 +250,7 @@ class ContentEntityHandler implements EventSubscriberInterface {
    * @return \Drupal\Core\Entity\EntityTypeManagerInterface
    *   Entity type manager service.
    */
-  protected function getEntityTypeManager() {
+  protected function getEntityTypeManager(): EntityTypeManagerInterface {
     return \Drupal::entityTypeManager();
   }
 
@@ -251,7 +263,7 @@ class ContentEntityHandler implements EventSubscriberInterface {
    * @return null|string|string[]
    *   The new langcode.
    */
-  protected function removeChannelId($langcode) {
+  protected function removeChannelId(string $langcode) {
     $pattern = '/(\w+)_(\d+)/i';
     $replacement = '${1}';
     return preg_replace($pattern, $replacement, $langcode);

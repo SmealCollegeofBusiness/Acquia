@@ -25,3 +25,5 @@ acquia_contenthub.admin_settings:
           type: string
     is_suppressed:
       type: boolean
+    send_contenthub_updates:
+      type: boolean

@@ -62,7 +62,7 @@ function acquia_contenthub_publisher_entity_delete(EntityInterface $entity) {
  *
  * @throws \Exception
  */
-function _acquia_contenthub_publisher_enqueue_entity(EntityInterface $entity, $op) {
+function _acquia_contenthub_publisher_enqueue_entity(EntityInterface $entity, string $op) {
   $uuid = $entity->uuid();
   \Drupal::logger('acquia_contenthub')
     ->info("Attempting to add entity with UUID $uuid to the export queue 
@@ -92,7 +92,7 @@ function _acquia_contenthub_publisher_enqueue_entity(EntityInterface $entity, $o
   $tracker = \Drupal::service('acquia_contenthub_publisher.tracker');
   $tracker->queue($entity);
   $tracker->setQueueItemByUuid($item->uuid, $queue_id);
-  /* @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
+  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
   $factory = \Drupal::service('acquia_contenthub.client.factory');
   // Reinitialize client cdf metrics data.
   $factory->getClient();
@@ -217,7 +217,10 @@ function _acquia_contenthub_dispatch_not_confirmed_entities_event() {
   $query->orderBy('modified');
 
   $items = $query->execute()->fetchAllAssoc('entity_uuid');
-  $items = array_filter($items, function($item) { return $item->overdue >= 0; });
+  $items = array_filter($items, function ($item) {
+    return $item->overdue >= 0;
+  });
+
   if (!$items) {
     return;
   }

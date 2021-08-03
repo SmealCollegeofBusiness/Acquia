@@ -44,7 +44,7 @@ class BlockFormMessagesTest extends WebDriverTestBase {
    */
   public function testValidationMessage() {
     // @todo Work out why this fixes random fails in this test.
-    //    https://www.drupal.org/project/drupal/issues/3055982
+    //   https://www.drupal.org/project/drupal/issues/3055982
     $this->getSession()->resizeWindow(800, 1000);
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
@@ -102,7 +102,7 @@ class BlockFormMessagesTest extends WebDriverTestBase {
     /** @var \Behat\Mink\Element\NodeElement[] $top_form_elements */
     $top_form_elements = $page->findAll('css', '#drupal-off-canvas form > *');
     // Ensure the messages are the first top level element of the form.
-    $this->assertStringContainsString('Title field is required.', $top_form_elements[0]->getText());
+    $this->assertStringContainsStringIgnoringCase('Title field is required.', $top_form_elements[0]->getText());
     $this->assertGreaterThan(4, count($top_form_elements));
   }
 

@@ -13,6 +13,11 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 
+/**
+ * Base class for testing serialization.
+ *
+ * @package Drupal\Tests\acquia_contenthub\Kernel
+ */
 abstract class AcquiaContentHubSerializerTestBase extends KernelTestBase {
 
   /**
@@ -70,8 +75,10 @@ abstract class AcquiaContentHubSerializerTestBase extends KernelTestBase {
     'filter',
     'depcalc',
     'acquia_contenthub',
+    'acquia_contenthub_server_test',
     'system',
     'user',
+    'acquia_contenthub_server_test',
     'node',
   ];
 
@@ -80,7 +87,6 @@ abstract class AcquiaContentHubSerializerTestBase extends KernelTestBase {
    */
   public function setUp(): void {
     parent::setup();
-
     $this->installEntitySchema('user');
     $this->installSchema('node', 'node_access');
     $this->installEntitySchema('node');
@@ -106,9 +112,9 @@ abstract class AcquiaContentHubSerializerTestBase extends KernelTestBase {
     return $admin_settings
       ->set('client_name', 'test-client')
       ->set('origin', '00000000-0000-0001-0000-123456789123')
-      ->set('api_key', 'HqkhciruZhJxg6b844wc')
-      ->set('secret_key', 'u8Pk4dTaeBWpRxA9pBvPJfru8BFSenKZi79CBKkk')
-      ->set('hostname', 'https://dev-use1.content-hub-dev.acquia.com')
+      ->set('api_key', '12312321312321')
+      ->set('secret_key', '12312321312321')
+      ->set('hostname', 'https://example.com')
       ->set('shared_secret', '12312321312321')
       ->save();
   }

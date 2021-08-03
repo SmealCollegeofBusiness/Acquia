@@ -82,3 +82,11 @@ acquia_contenthub_publisher.single_status:
   requirements:
     _contenthub_ui_access: 'TRUE'
     uuid: '[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+
+acquia_contenthub_publisher.exclude_settings:
+  path: '/admin/config/services/acquia-contenthub/exclude-settings'
+  defaults:
+    _form: '\Drupal\acquia_contenthub_publisher\Form\ExcludeSettingsForm'
+    _title: 'Exclude entity types or bundles from export queue'
+  requirements:
+    _contenthub_ui_access: 'TRUE'

@@ -4,6 +4,7 @@ namespace Drupal\cohesion_elements\Entity;
 
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\TemplateStorage\TemplateStorageBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\file\Entity\File;
 
@@ -250,7 +251,7 @@ abstract class CohesionElementEntityBase extends CohesionConfigEntityBase implem
     }
 
     // Get the twig filename.
-    $filename_prefix = 'component--cohesion-';
+    $filename_prefix = 'component' . TemplateStorageBase::TEMPLATE_PREFIX;
     $filename = $filename_prefix . str_replace('_', '-', str_replace('cohesion-helper-', '', $this->get('id')));
     $this->set('twig_template', $filename);
   }

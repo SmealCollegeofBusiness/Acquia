@@ -411,19 +411,8 @@ function cohesion_elements_form_component_content_edit_form_alter(&$form, FormSt
  */
 function cohesion_elements_preprocess_image_widget(&$variables) {
   $element = $variables['element'];
-  $required_classes = ['image-widget', 'js-form-managed-file', 'form-managed-file', 'clearfix'];
-  foreach ($required_classes as $class) {
-    if (!in_array($class, $variables['attributes']['class'])) {
-      $variables['attributes']['class'][] = $class;
-    }
-  }
-  if (isset($element['preview']['indicator']['#attributes']['data-selector'])) {
-    if (strpos($element['preview']['indicator']['#attributes']['data-selector'], "focal-point") === 0) {
-      $focal_point = TRUE;
-    }
-  }
 
-  if (!empty($element['fids']['#value']) && !isset($focal_point)) {
+  if (isset($element['#preview_image_style']) && $element['#preview_image_style'] == 'dx8_component_preview' && !empty($element['fids']['#value'])) {
     $file = reset($element['#files']);
     $element['file_' . $file->id()]['filename']['#suffix'] = ' <span class="file-size">(' . format_size($file->getSize()) . ')</span> ';
     $file_variables = [

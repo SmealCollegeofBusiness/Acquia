@@ -15,6 +15,8 @@ use Drupal\acquia_contenthub\Event\PreEntitySaveEvent;
 use Drupal\acquia_contenthub\Event\PruneCdfEntitiesEvent;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\SynchronizableInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\depcalc\DependencyCalculator;
 use Drupal\depcalc\DependencyStack;
@@ -143,64 +145,19 @@ class EntityCdfSerializer {
     if (!$cdf->hasEntities()) {
       throw new \Exception("Missing CDF Entities entry. Not a valid CDF.");
     }
-    $event = new PruneCdfEntitiesEvent($cdf);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::PRUNE_CDF, $event);
-    $cdf = $event->getCdf();
-    // Allows entity data to be manipulated before unserialization.
-    $event = new EntityDataTamperEvent($cdf, $stack);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::ENTITY_DATA_TAMPER, $event);
-    $cdf = $event->getCdf();
+
+    $cdf = $this->preprocessCdf($cdf, $stack);
+
     // Install required modules.
     $this->handleModules($cdf, $stack);
+
     // Organize the entities into a dependency chain.
     // Use a while loop to prevent memory expansion due to recursion.
     while (!$stack->hasDependencies(array_keys($cdf->getEntities()))) {
       // @todo add tracking to break out of the while loop when dependencies cannot be further processed.
       $count = count($stack->getDependencies());
-      foreach ($this->getUnprocessedDependencies($cdf, $stack) as $entity_data) {
-        if ($this->entityIsProcessable($entity_data, $stack)) {
-          $uuid = $entity_data->getUuid();
-          $event = new LoadLocalEntityEvent($entity_data, $stack);
-          $this->dispatcher->dispatch(AcquiaContentHubEvents::LOAD_LOCAL_ENTITY, $event);
-          $event = new ParseCdfEntityEvent($entity_data, $stack, $event->getEntity());
-          $this->dispatcher->dispatch(AcquiaContentHubEvents::PARSE_CDF, $event);
-          $entity = $event->getEntity();
-          if ($entity) {
-            $pre_entity_save_event = new PreEntitySaveEvent($entity, $stack, $entity_data);
-            $this->dispatcher->dispatch(AcquiaContentHubEvents::PRE_ENTITY_SAVE, $pre_entity_save_event);
-            $entity = $pre_entity_save_event->getEntity();
-            $entity->save();
-            $wrapper = new DependentEntityWrapper($entity);
-            // Config uuids can be more fluid since they can match on id.
-            if ($wrapper->getUuid() != $uuid) {
-              $wrapper->setRemoteUuid($uuid);
-            }
-            $stack->addDependency($wrapper);
-            if ($entity->isNew()) {
-              $event_name = AcquiaContentHubEvents::ENTITY_IMPORT_NEW;
-              $event = new EntityImportEvent($entity, $entity_data);
-            }
-            else {
-              $event_name = AcquiaContentHubEvents::ENTITY_IMPORT_UPDATE;
-              $event = new EntityImportEvent($entity, $entity_data);
-            }
-            $this->dispatcher->dispatch($event_name, $event);
-          }
-          else {
-            // Remove CDF Entities that were processable but didn't resolve into
-            // an entity.
-            $cdf->removeCdfEntity($uuid);
-          }
-        }
-      }
-      if ($count === count($stack->getDependencies()) && $count < count($cdf->getEntities())) {
-        // @todo get import failure logging and tracking working.
-        $event = new FailedImportEvent($cdf, $stack, $count, $this);
-        $this->dispatcher->dispatch(AcquiaContentHubEvents::IMPORT_FAILURE, $event);
-        if ($event->hasException()) {
-          throw $event->getException();
-        }
-      }
+      $this->processCdf($cdf, $stack);
+      $this->handleImportFailure($count, $cdf, $stack);
     }
     $this->tracker->cleanUp();
   }
@@ -332,6 +289,154 @@ class EntityCdfSerializer {
       },
       array_diff(array_keys($cdf->getEntities()), array_keys($stack->getProcessedDependencies()))
     );
+  }
+
+  /**
+   * Dispatches events to prune and tamper data from incoming CDF document.
+   *
+   * @param \Acquia\ContentHubClient\CDFDocument $cdf
+   *   The CDF document.
+   * @param \Drupal\depcalc\DependencyStack $stack
+   *   The dependency stack.
+   *
+   * @return \Acquia\ContentHubClient\CDFDocument
+   *   The preprocessed CDF document.
+   */
+  protected function preprocessCdf(CDFDocument $cdf, DependencyStack $stack): CDFDocument {
+    $prune_cdf_event = new PruneCdfEntitiesEvent($cdf);
+    $this->dispatcher->dispatch(AcquiaContentHubEvents::PRUNE_CDF, $prune_cdf_event);
+    $cdf = $prune_cdf_event->getCdf();
+
+    // Allows entity data to be manipulated before unserialization.
+    $entity_data_tamper_event = new EntityDataTamperEvent($cdf, $stack);
+    $this->dispatcher->dispatch(AcquiaContentHubEvents::ENTITY_DATA_TAMPER, $entity_data_tamper_event);
+    return $entity_data_tamper_event->getCdf();
+  }
+
+  /**
+   * Processes incoming CDF.
+   *
+   * @param \Acquia\ContentHubClient\CDFDocument $cdf
+   *   The CDF document.
+   * @param \Drupal\depcalc\DependencyStack $stack
+   *   The dependency stack.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function processCdf(CDFDocument $cdf, DependencyStack $stack) {
+    foreach ($this->getUnprocessedDependencies($cdf, $stack) as $entity_data) {
+      if (!$this->entityIsProcessable($entity_data, $stack)) {
+        continue;
+      }
+
+      $uuid = $entity_data->getUuid();
+      $entity = $this->getEntityFromCdf($entity_data, $stack);
+      if (!$entity) {
+        // Remove CDF Entities that were processable but didn't resolve into
+        // an entity.
+        $cdf->removeCdfEntity($uuid);
+        continue;
+      }
+
+      $pre_entity_save_event = new PreEntitySaveEvent($entity, $stack, $entity_data);
+      $this->dispatcher->dispatch(AcquiaContentHubEvents::PRE_ENTITY_SAVE, $pre_entity_save_event);
+      $entity = $pre_entity_save_event->getEntity();
+      // Added to avoid creating new revisions with stubbed data.
+      // See \Drupal\content_moderation\Entity\Handler\ModerationHandler.
+      if ($entity instanceof SynchronizableInterface) {
+        $entity->setSyncing(TRUE);
+      }
+      $entity->save();
+
+      $this->addToStack($entity, $uuid, $stack);
+
+      $this->dispatchImportEvent($entity, $entity_data);
+    }
+  }
+
+  /**
+   * Dispatches events to get entity from CDF object.
+   *
+   * @param \Acquia\ContentHubClient\CDF\CDFObject $entity_data
+   *   The CDF object.
+   * @param \Drupal\depcalc\DependencyStack $stack
+   *   The dependency stack.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   Then entity from the CDF.
+   */
+  protected function getEntityFromCdf(CDFObject $entity_data, DependencyStack $stack): ?EntityInterface {
+    $load_local_entity_event = new LoadLocalEntityEvent($entity_data, $stack);
+    $this->dispatcher->dispatch(AcquiaContentHubEvents::LOAD_LOCAL_ENTITY, $load_local_entity_event);
+
+    $parse_cdf_event = new ParseCdfEntityEvent($entity_data, $stack, $load_local_entity_event->getEntity());
+    $this->dispatcher->dispatch(AcquiaContentHubEvents::PARSE_CDF, $parse_cdf_event);
+
+    return $parse_cdf_event->getEntity() ?? NULL;
+  }
+
+  /**
+   * Dispatches entity import event.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity being imported.
+   * @param \Acquia\ContentHubClient\CDF\CDFObject $entity_data
+   *   The CDF object.
+   */
+  protected function dispatchImportEvent(EntityInterface $entity, CDFObject $entity_data) {
+    if ($entity->isNew()) {
+      $event_name = AcquiaContentHubEvents::ENTITY_IMPORT_NEW;
+      $entity_import_event = new EntityImportEvent($entity, $entity_data);
+    }
+    else {
+      $event_name = AcquiaContentHubEvents::ENTITY_IMPORT_UPDATE;
+      $entity_import_event = new EntityImportEvent($entity, $entity_data);
+    }
+    $this->dispatcher->dispatch($event_name, $entity_import_event);
+  }
+
+  /**
+   * Adds imported entity to stack.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity being imported.
+   * @param string $uuid
+   *   The remote UUID.
+   * @param \Drupal\depcalc\DependencyStack $stack
+   *   The dependency stack.
+   *
+   * @throws \Exception
+   */
+  protected function addToStack(EntityInterface $entity, string $uuid, DependencyStack $stack) {
+    $wrapper = new DependentEntityWrapper($entity);
+    // Config uuids can be more fluid since they can match on id.
+    if ($wrapper->getUuid() != $uuid) {
+      $wrapper->setRemoteUuid($uuid);
+    }
+    $stack->addDependency($wrapper);
+  }
+
+  /**
+   * Handles import failure.
+   *
+   * @param int $count
+   *   The previous count from the dependency stack.
+   * @param \Acquia\ContentHubClient\CDFDocument $cdf
+   *   The CDF document.
+   * @param \Drupal\depcalc\DependencyStack $stack
+   *   The dependency stack.
+   *
+   * @throws \Exception
+   */
+  protected function handleImportFailure(int $count, CDFDocument $cdf, DependencyStack $stack) {
+    if ($count === count($stack->getDependencies()) && $count < count($cdf->getEntities())) {
+      // @todo get import failure logging and tracking working.
+      $failed_import_event = new FailedImportEvent($cdf, $stack, $count, $this);
+      $this->dispatcher->dispatch(AcquiaContentHubEvents::IMPORT_FAILURE, $failed_import_event);
+      if ($failed_import_event->hasException()) {
+        throw $failed_import_event->getException();
+      }
+    }
   }
 
 }

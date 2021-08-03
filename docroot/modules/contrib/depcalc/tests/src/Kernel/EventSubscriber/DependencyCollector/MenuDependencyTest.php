@@ -133,7 +133,6 @@ class MenuDependencyTest extends KernelTestBase {
         ],
         ['38584be3-605a-47b1-8881-838e1424d0f9'],
         [
-          'menu',
           'menu_link_content',
           'system',
         ]
@@ -166,7 +165,6 @@ class MenuDependencyTest extends KernelTestBase {
           '6e452034-9a51-42c4-8c51-eda1be63d048',
         ],
         [
-          'menu',
           'menu_link_content',
           'system',
         ]

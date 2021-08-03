@@ -5,10 +5,10 @@
         "The type is not drupal-database-driver, because drivers that override (have the same name as) a core one don't need to be in the drivers directory so long as they're in the autoloader."
     ],
     "type": "library",
-    "description": "MySQL 5.6 Driver for Drupal 9.0.",
+    "description": "MySQL 5.6 Driver for Drupal 9.",
     "license": "GPL-2.0-or-later",
     "require": {
-        "drupal/core": "~9.0.0-beta3 || 9.1.*"
+        "drupal/core": "~9.0.0-beta3 || 9.1.* || 9.2.*"
     },
     "extra": {
         "installer-name": "mysql"

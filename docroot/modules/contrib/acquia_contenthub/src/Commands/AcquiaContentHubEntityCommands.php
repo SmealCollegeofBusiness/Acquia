@@ -3,13 +3,9 @@
 namespace Drupal\acquia_contenthub\Commands;
 
 use Acquia\ContentHubClient\CDF\CDFObjectInterface;
-use Drupal\acquia_contenthub\Client\ClientFactory;
-use Drupal\acquia_contenthub\EntityCDFSerializer;
-use Drupal\Component\Utility\NestedArray;
+use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\depcalc\DependencyCalculator;
-use Drupal\depcalc\DependencyStack;
-use Drupal\depcalc\DependentEntityWrapper;
 use Drush\Commands\DrushCommands;
 
 /**
@@ -20,13 +16,6 @@ use Drush\Commands\DrushCommands;
 class AcquiaContentHubEntityCommands extends DrushCommands {
 
   /**
-   * The client factory.
-   *
-   * @var \Drupal\acquia_contenthub\Client\ClientFactory
-   */
-  protected $clientFactory;
-
-  /**
    * The dependency calculator.
    *
    * @var \Drupal\depcalc\DependencyCalculator
@@ -34,26 +23,23 @@ class AcquiaContentHubEntityCommands extends DrushCommands {
   protected $calculator;
 
   /**
-   * The CDF Serializer.
+   * The Content Hub Common Actions.
    *
-   * @var \Drupal\acquia_contenthub\EntityCDFSerializer
+   * @var \Drupal\acquia_contenthub\ContentHubCommonActions
    */
-  protected $serializer;
+  protected $commonActions;
 
   /**
    * AcquiaContentHubEntityCommands constructor.
    *
    * @param \Drupal\depcalc\DependencyCalculator $calculator
    *   The dependency calculator.
-   * @param \Drupal\acquia_contenthub\EntityCDFSerializer $serializer
-   *   The dependency calculator.
-   * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
-   *   The client factory.
+   * @param \Drupal\acquia_contenthub\ContentHubCommonActions $common_actions
+   *   The Content Hub Common Actions service.
    */
-  public function __construct(DependencyCalculator $calculator, EntityCDFSerializer $serializer, ClientFactory $client_factory) {
-    $this->clientFactory = $client_factory;
+  public function __construct(DependencyCalculator $calculator, ContentHubCommonActions $common_actions) {
     $this->calculator = $calculator;
-    $this->serializer = $serializer;
+    $this->commonActions = $common_actions;
   }
 
   /**
@@ -79,8 +65,6 @@ class AcquiaContentHubEntityCommands extends DrushCommands {
    * @throws \Exception
    */
   public function contenthubEntity($op, $uuid, $entity_type = NULL, array $options = ['decode' => NULL]) {
-    $client = $this->clientFactory->getClient();
-
     if (empty($uuid)) {
       throw new \Exception("Please supply the uuid of the entity you want to retrieve.");
     }
@@ -93,14 +77,8 @@ class AcquiaContentHubEntityCommands extends DrushCommands {
         $repository = \Drupal::service('entity.repository');
         $entity = $repository->loadEntityByUuid($entity_type, $uuid);
 
-        $wrapper = new DependentEntityWrapper($entity);
-        $stack = new DependencyStack();
-        $this->calculator->calculateDependencies($wrapper, $stack);
-        $entities = NestedArray::mergeDeep(
-          [$wrapper->getEntity()->uuid() => $wrapper],
-          $stack->getDependenciesByUuid(array_keys($wrapper->getDependencies()))
-        );
-        $objects = $this->serializer->serializeEntities(...array_values($entities));
+        $entities = [];
+        $objects = $this->commonActions->getEntityCdf($entity, $entities, FALSE, TRUE);
         $data = [];
         foreach ($objects as $object) {
           $data[$object->getUuid()] = $object->toArray();
@@ -117,7 +95,7 @@ class AcquiaContentHubEntityCommands extends DrushCommands {
         break;
 
       case 'remote':
-        $entity = $client->getEntity($uuid);
+        $entity = $this->commonActions->getRemoteEntity($uuid);
         $entity_array = $entity->toArray();
         // Decode the base64 'data' element in 'metadata'.
         if ($options['decode']) {
@@ -236,9 +214,7 @@ class AcquiaContentHubEntityCommands extends DrushCommands {
       return;
     }
 
-    /** @var \Drupal\acquia_contenthub\ContentHubCommonActions $common */
-    $common = \Drupal::service('acquia_contenthub_common_actions');
-    if ($common->deleteRemoteEntity($uuid)) {
+    if ($this->commonActions->deleteRemoteEntity($uuid)) {
       $this->output()->writeln(dt('Entity with UUID = @uuid has been successfully deleted from the Content Hub Service.', [
         '@uuid' => $uuid,
       ]));

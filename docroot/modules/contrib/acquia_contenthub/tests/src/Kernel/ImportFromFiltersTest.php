@@ -31,6 +31,7 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
     'acquia_contenthub',
     'acquia_contenthub_subscriber',
     'acquia_contenthub_test',
+    'acquia_contenthub_server_test',
   ];
 
   /**

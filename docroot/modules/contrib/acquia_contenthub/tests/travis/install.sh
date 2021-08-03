@@ -79,7 +79,8 @@ if [[ "$DRUPAL_CORE" == "9" ]]; then
     drupal/paragraphs \
     drupal/focal_point \
     drupal/redirect \
-    drupal/metatag
+    drupal/metatag \
+    drupal/entityqueue
   # Determining PHPUnit version.
   PHPUNIT_VERSION=`phpunit --version | cut -d ' ' -f 2`
   if [[ $PHPUNIT_VERSION  =~ ^[8] ]]; then
@@ -97,5 +98,6 @@ else
     drupal/focal_point \
     drupal/redirect \
     drupal/metatag \
+    drupal/entityqueue \
     drupal/s3fs:^3
 fi

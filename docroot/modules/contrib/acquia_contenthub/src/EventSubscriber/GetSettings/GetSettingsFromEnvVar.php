@@ -152,6 +152,9 @@ class GetSettingsFromEnvVar implements EventSubscriberInterface {
       $this
         ->messenger
         ->addWarning($this->t('Environment variables set for registering ACH, but something went wrong. Error: @error', ['@error' => $error]));
+      $this
+        ->logger
+        ->error($this->t('Environment variables set for registering ACH, but something went wrong. Error: @error', ['@error' => $error]));
     }
 
     return empty($errors);

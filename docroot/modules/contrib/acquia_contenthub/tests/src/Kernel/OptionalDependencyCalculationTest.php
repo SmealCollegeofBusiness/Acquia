@@ -11,6 +11,8 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
 /**
  * Tests Optional Dependency Calculation for given entity.
  *
+ * @group acquia_contenthub
+ *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class OptionalDependencyCalculationTest extends KernelTestBase {

@@ -35,3 +35,6 @@ acquia_contenthub.admin_settings:
     is_suppressed:
       type: boolean
       label: 'Webhook supression status'
+    send_contenthub_updates:
+      type: boolean
+      label: 'Send Updates to Content Hub Service'

@@ -32,6 +32,7 @@ class ImportTrackingTest extends EntityKernelTestBase {
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_subscriber',
+    'acquia_contenthub_server_test',
   ];
 
   /**

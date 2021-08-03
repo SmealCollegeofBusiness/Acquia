@@ -6,6 +6,7 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\cohesion\Entity\ContentIntegrityInterface;
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\LayoutCanvas\ElementModel;
+use Drupal\cohesion\TemplateStorage\TemplateStorageBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\field\Entity\FieldConfig;
@@ -101,7 +102,7 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
     parent::preSave($storage);
 
     // Get the twig filename.
-    $filename_prefix = 'component--cohesion-';
+    $filename_prefix = 'component' . TemplateStorageBase::TEMPLATE_PREFIX;
     $filename = $filename_prefix . str_replace('_', '-', str_replace('cohesion-helper-', '', $this->get('id')));
     $this->set('twig_template', $filename);
 

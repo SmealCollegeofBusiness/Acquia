@@ -4,32 +4,32 @@ namespace Drupal\acquia_contenthub\EventSubscriber\PreEntitySave;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\PreEntitySaveEvent;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\acquia_contenthub\StubTracker;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Prepares the eneity for a new revision if it is configured to do so.
+ * Prepares the entity for a new revision if it is configured to do so.
  *
  * @package Drupal\acquia_contenthub\EventSubscriber\PreEntitySave
  */
 class CreateNewRevision implements EventSubscriberInterface {
 
   /**
-   * The Entity Type Manager Service.
+   * The stub tracker.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * @var \Drupal\acquia_contenthub\StubTracker
    */
-  protected $entityTypeManager;
+  protected $stubTracker;
 
   /**
    * CreateNewRevision constructor.
    *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The Entity Type Manager Service.
+   * @param \Drupal\acquia_contenthub\StubTracker $stub_tracker
+   *   The stub tracker.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
-    $this->entityTypeManager = $entity_type_manager;
+  public function __construct(StubTracker $stub_tracker) {
+    $this->stubTracker = $stub_tracker;
   }
 
   /**
@@ -53,12 +53,13 @@ class CreateNewRevision implements EventSubscriberInterface {
   public function onPreEntitySave(PreEntitySaveEvent $event) {
     $entity = $event->getEntity();
     // Check whether the entity is configured to create a new revision
-    // every time it is saved.
+    // every time it is saved or if we're saving an entity that
+    // has been stubbed.
     $bundle_entity_type = $entity->getEntityType()->getBundleEntityType();
-    if (!$bundle_entity_type) {
+    if (!$bundle_entity_type || $this->stubTracker->hasStub($entity->getEntityTypeId(), $entity->id())) {
       return;
     }
-    $bundle = $this->entityTypeManager->getStorage($bundle_entity_type)->load($entity->bundle());
+    $bundle = \Drupal::entityTypeManager()->getStorage($bundle_entity_type)->load($entity->bundle());
     $should_create_new_revision = $bundle instanceof RevisionableEntityBundleInterface && $bundle->shouldCreateNewRevision();
     if ($entity->getEntityType()->isRevisionable() && $should_create_new_revision) {
       $entity->setNewRevision(TRUE);

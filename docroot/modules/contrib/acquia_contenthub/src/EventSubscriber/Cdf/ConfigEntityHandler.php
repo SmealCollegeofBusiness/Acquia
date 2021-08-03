@@ -178,7 +178,7 @@ class ConfigEntityHandler implements EventSubscriberInterface {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getEntityWithValues(string $entity_type_id, array $default_values) {
+  protected function getEntityWithValues(string $entity_type_id, array $default_values): ConfigEntityInterface {
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->createFromStorageRecord($default_values);
     if ($old_entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity->id())) {
       // @todo check if this entity was previously imported. (Multiple entities of the same ID from different publishers)
@@ -200,7 +200,7 @@ class ConfigEntityHandler implements EventSubscriberInterface {
    * @return string|string[]|null
    *   Langcode without id.
    */
-  protected function removeChannelId($langcode) {
+  protected function removeChannelId(string $langcode) {
     $pattern = '/(\w+)_(\d+)/i';
     $replacement = '${1}';
     return preg_replace($pattern, $replacement, $langcode);

@@ -5,6 +5,7 @@ namespace Drupal\Tests\depcalc\Kernel;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\depcalc\DependencyStack;
 use Drupal\depcalc\DependentEntityWrapper;
+use Drupal\depcalc\DependentEntityWrapperInterface;
 
 trait DependencyHelperTrait {
 
@@ -55,12 +56,12 @@ trait DependencyHelperTrait {
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object.
    *
-   * @return \Drupal\depcalc\DependentEntityWrapper
+   * @return \Drupal\depcalc\DependentEntityWrapperInterface|null
    *   The DependentEntityWrapper object.
    *
    * @throws \Exception
    */
-  protected function getDependentEntityWrapper(EntityInterface $entity): DependentEntityWrapper {
+  protected function getDependentEntityWrapper(EntityInterface $entity): ?DependentEntityWrapperInterface {
     $dependentEntityWrapper = new DependentEntityWrapper($entity);
     $stack = new DependencyStack();
     $this->calculator->calculateDependencies($dependentEntityWrapper, $stack);

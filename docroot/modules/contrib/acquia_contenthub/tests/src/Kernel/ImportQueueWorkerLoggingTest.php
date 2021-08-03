@@ -6,6 +6,13 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Database\Database;
 use Prophecy\Argument;
 
+/**
+ * Tests logging for import queue.
+ *
+ * @group acquia_contenthub
+ *
+ * @package Drupal\Tests\acquia_contenthub\Kernel
+ */
 class ImportQueueWorkerLoggingTest extends UnserializationTest {
 
   /**

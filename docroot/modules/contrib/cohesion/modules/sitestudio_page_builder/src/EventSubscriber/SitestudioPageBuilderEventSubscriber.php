@@ -94,7 +94,6 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
    *
    * @var \Drupal\Core\Entity\EntityRepositoryInterface
    */
-
   protected $entityRepository;
 
   /**
@@ -115,19 +114,23 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *  The module handler service
    * @param \Drupal\cohesion\Services\CohesionUtils $cohesion_utils
-   * The cohesion utils service
-   * @param \Drupal\cohesion\CohesionApiClient
-   * The cohesion api client service
+   *  The cohesion utils service
+   * @param \Drupal\cohesion\CohesionApiClient $cohesion_api_client
+   *  The cohesion api client service
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *  Entity repository service
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager,
- AccountInterface $user,
-                               RouteMatchInterface $current_route_match,
- RequestStack $request_stack,
-                              LibraryDiscoveryInterface $library_discovery,
- SitestudioPageBuilderManagerInterface $page_builder_manager,
-                              ModuleHandlerInterface $module_handler,
- CohesionUtils $cohesion_utils,
-                              CohesionApiClient $cohesion_api_client, EntityRepositoryInterface $entity_repository
+  public function __construct(
+    EntityTypeManagerInterface $entity_type_manager,
+    AccountInterface $user,
+    RouteMatchInterface $current_route_match,
+    RequestStack $request_stack,
+    LibraryDiscoveryInterface $library_discovery,
+    SitestudioPageBuilderManagerInterface $page_builder_manager,
+    ModuleHandlerInterface $module_handler,
+    CohesionUtils $cohesion_utils,
+    CohesionApiClient $cohesion_api_client,
+    EntityRepositoryInterface $entity_repository
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->user = $user;

@@ -2,7 +2,7 @@ services:
 
   acquia_contenthub_common_actions:
     class: Drupal\acquia_contenthub\ContentHubCommonActions
-    arguments: ['@event_dispatcher', '@entity.cdf.serializer', '@entity.dependency.calculator', '@acquia_contenthub.client.factory', '@logger.factory']
+    arguments: ['@event_dispatcher', '@entity.cdf.serializer', '@entity.dependency.calculator', '@acquia_contenthub.client.factory', '@logger.factory', '@config.factory']
 
   acquia_contenthub.stub.tracker:
     class: Drupal\acquia_contenthub\StubTracker
@@ -28,7 +28,7 @@ services:
 
   acquia_contenthub.client.factory:
     class: Drupal\acquia_contenthub\Client\ClientFactory
-    arguments: ['@event_dispatcher', '@logger.factory', '@extension.list.module']
+    arguments: ['@event_dispatcher', '@logger.factory', '@extension.list.module', '@config.factory']
 
   acquia_contenthub.file_scheme_handler.manager:
     class: Drupal\acquia_contenthub\Plugin\FileSchemeHandler\FileSchemeHandlerManager
@@ -106,7 +106,12 @@ services:
 
   create_new_revision.pre_entity_save:
     class: Drupal\acquia_contenthub\EventSubscriber\PreEntitySave\CreateNewRevision
-    arguments: ['@entity_type.manager']
+    arguments: ['@acquia_contenthub.stub.tracker']
+    tags:
+      - { name: event_subscriber }
+
+  redirect_source.pre_entity_save:
+    class: Drupal\acquia_contenthub\EventSubscriber\PreEntitySave\RedirectSource
     tags:
       - { name: event_subscriber }
 
@@ -138,6 +143,18 @@ services:
 
   version.cdf.attribute:
     class: Drupal\acquia_contenthub\EventSubscriber\CdfAttributes\CdfVersionAttribute
+    tags:
+      - { name: event_subscriber }
+
+  core_version.client_cdf.attribute:
+    class: Drupal\acquia_contenthub\EventSubscriber\CdfAttributes\CoreVersionAttribute
+    arguments: ['@acquia_contenthub.project_version_client']
+    tags:
+      - { name: event_subscriber }
+
+  ach_version.client_cdf.attribute:
+    class: Drupal\acquia_contenthub\EventSubscriber\CdfAttributes\AchVersionAttribute
+    arguments: ['@extension.list.module', '@acquia_contenthub.project_version_client']
     tags:
       - { name: event_subscriber }
 
@@ -179,6 +196,11 @@ services:
 
   entity_id_and_revision.field.cdf.serializer:
     class: Drupal\acquia_contenthub\EventSubscriber\SerializeContentField\RemoveIdAndRevisionFieldSerialization
+    tags:
+      - { name: event_subscriber }
+
+  entity_subqueue_revision.field.cdf.serializer:
+    class: Drupal\acquia_contenthub\EventSubscriber\SerializeContentField\RemoveEntitySubqueueRevisionFieldSerialization
     tags:
       - { name: event_subscriber }
 
@@ -281,6 +303,12 @@ services:
     tags:
       - { name: event_subscriber }
 
+  layout_builder.cleanup_stubs:
+    class: Drupal\acquia_contenthub\EventSubscriber\CleanupStubs\LayoutBuilderInlineBlockStubCleanup
+    arguments: ['@database', '@entity_type.manager']
+    tags:
+      - { name: event_subscriber }
+
   layout_builder.field.cdf.unserializer:
     class: Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField\LayoutBuilderFieldUnserializer
     arguments: ['@entity_type.manager']
@@ -294,11 +322,6 @@ services:
 
   fallback.field.cdf.unserializer:
     class: Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField\FallbackFieldUnserializer
-    tags:
-      - { name: event_subscriber }
-
-  default_language.data.tamper:
-    class: Drupal\acquia_contenthub\EventSubscriber\EntityDataTamper\DefaultLanguage
     tags:
       - { name: event_subscriber }
 
@@ -346,6 +369,18 @@ services:
     tags:
       - { name: event_subscriber }
 
+  acquia_contenthub.unregister.orphaned_filters:
+    class: Drupal\acquia_contenthub\EventSubscriber\Unregister\OrphanedFilterHandler
+    arguments: [ '@acquia_contenthub.client.factory' ]
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub.unregister.orphaned_entities:
+    class: Drupal\acquia_contenthub\EventSubscriber\Unregister\OrphanedEntitiesHandler
+    arguments: [ '@acquia_contenthub.client.factory' ]
+    tags:
+      - { name: event_subscriber }
+
   acquia_contenthub.handle_webhook.report:
     class: Drupal\acquia_contenthub\EventSubscriber\HandleWebhook\Report
     arguments: ['@acquia_contenthub_common_actions', '@extension.list.module']
@@ -388,11 +423,6 @@ services:
     factory: acquia_contenthub.client.factory:getSettings
     public: false
 
-  acquia_contenthub.client:
-    class: Acquia\ContentHubClient\ContentHubClient
-    factory: acquia_contenthub.client.factory:getClient
-    public: false
-
   acquia_contenthub.logger_channel:
     class: Drupal\Core\Logger\LoggerChannel
     factory: logger.factory:get
@@ -405,9 +435,7 @@ services:
 
   acquia_contenthub.connection_manager:
     class: Drupal\acquia_contenthub\ContentHubConnectionManager
-    calls:
-      - [setClient, ['@acquia_contenthub.client']]
-    arguments: ['@config.factory', '@acquia_contenthub.logger_channel', '@acquia_contenthub.settings']
+    arguments: ['@config.factory', '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@acquia_contenthub.settings']
 
   acquia_contenthub.prune_cdf.handle_channel_languages:
     class: Drupal\acquia_contenthub\EventSubscriber\PruneCdf\HandleChannelLanguages
@@ -435,3 +463,7 @@ services:
   acquia_contenthub.audit_track_entities:
     class: Drupal\acquia_contenthub\AuditTrackEntities
     arguments: []
+
+  acquia_contenthub.project_version_client:
+    class: Drupal\acquia_contenthub\Client\ProjectVersionClient
+    arguments: ['@http_client', '@acquia_contenthub.logger_channel']

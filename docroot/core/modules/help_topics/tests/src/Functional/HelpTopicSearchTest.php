@@ -60,10 +60,12 @@ class HelpTopicSearchTest extends HelpTopicTranslatedTestBase {
     // here.
     $this->rebuildContainer();
 
-    // Before running cron, verify that a search returns no results.
+    // Before running cron, verify that a search returns no results and shows
+    // warning.
     $this->drupalGet('search/help');
     $this->submitForm(['keys' => 'notawordenglish'], 'Search');
     $this->assertSearchResultsCount(0);
+    $this->assertSession()->pageTextContains('is not fully indexed');
 
     // Run cron until the topics are fully indexed, with a limit of 100 runs
     // to avoid infinite loops.
@@ -79,6 +81,11 @@ class HelpTopicSearchTest extends HelpTopicTranslatedTestBase {
     // Visit the Search settings page and verify it says 100% indexed.
     $this->drupalGet('admin/config/search/pages');
     $this->assertSession()->pageTextContains('100% of the site has been indexed');
+    // Search and verify there is no warning.
+    $this->drupalGet('search/help');
+    $this->submitForm(['keys' => 'notawordenglish'], 'Search');
+    $this->assertSearchResultsCount(1);
+    $this->assertSession()->pageTextNotContains('is not fully indexed');
   }
 
   /**
@@ -254,6 +261,28 @@ class HelpTopicSearchTest extends HelpTopicTranslatedTestBase {
     $this->assertSession()->pageTextContains('The selected modules have been uninstalled.');
     $this->drupalGet('admin/help');
     $this->assertSession()->statusCodeEquals(200);
+  }
+
+  /**
+   * Tests uninstalling the search module.
+   */
+  public function testUninstallSearch() {
+    // Ensure we can uninstall search and use the help system without
+    // breaking.
+    $this->drupalLogin($this->rootUser);
+    $edit = [];
+    $edit['uninstall[search]'] = TRUE;
+    $this->drupalGet('admin/modules/uninstall');
+    $this->submitForm($edit, 'Uninstall');
+    $this->submitForm([], 'Uninstall');
+    $this->assertSession()->pageTextContains('The selected modules have been uninstalled.');
+    $this->drupalGet('admin/help');
+    $this->assertSession()->statusCodeEquals(200);
+
+    // Rebuild the container to reflect the latest changes.
+    $this->rebuildContainer();
+    $this->assertTrue(\Drupal::moduleHandler()->moduleExists('help_topics'), 'The help_topics module is still installed.');
+    $this->assertFalse(\Drupal::moduleHandler()->moduleExists('search'), 'The search module is uninstalled.');
   }
 
   /**

@@ -54,7 +54,6 @@
 
                 chart.draw(data, options);
             }
-
         }
     };
 })(jQuery, Drupal, drupalSettings);

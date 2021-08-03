@@ -292,9 +292,9 @@ function _resave_cohesion_layout_entity($ids, $verbose = FALSE, &$context = []) 
         // Rebuild all translations of this entity
         if($entity->isTranslatable()) {
           $languages = \Drupal::languageManager()->getLanguages();
-          $lang_codes = array();
+          $lang_codes = [];
           foreach ($languages as $language) {
-            if ($language->getId() !== $entity->language()->getId() && $entity->hasTranslation($language->getId()) ) {
+            if ($language->getId() !== $entity->language()->getId() && $entity->hasTranslation($language->getId())) {
               $translation_entity = $entity->getTranslation($language->getId());
               _process_cohesion_layout_entity($translation_entity, $context, $verbose);
             }

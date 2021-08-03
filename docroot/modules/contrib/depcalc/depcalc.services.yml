@@ -1,7 +1,7 @@
 services:
   entity.dependency.calculator:
     class: Drupal\depcalc\DependencyCalculator
-    arguments: ['@event_dispatcher']
+    arguments: ['@event_dispatcher', '@depcalc.logger_channel']
 
   cache.depcalc:
     class: Drupal\Core\Cache\CacheBackendInterface
@@ -89,6 +89,11 @@ services:
     tags:
       - { name: event_subscriber }
 
+  drupal_media_embed.embed.calculator:
+    class: Drupal\depcalc\EventSubscriber\DependencyCollector\DrupalMediaEmbedCollector
+    tags:
+    - { name: event_subscriber }
+
   inline_block.layout_builder_dependency_calculator:
     class: Drupal\depcalc\EventSubscriber\LayoutBuilderComponentDepencyCollector\InlineBlockDependencyCollector
     arguments: ['@entity_type.manager']
@@ -126,3 +131,8 @@ services:
     class: Drupal\depcalc\EventSubscriber\DependencyCollector\MenuItemContentDependencyCollector
     tags:
       - { name: event_subscriber }
+
+  depcalc.logger_channel:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: ['depcalc']

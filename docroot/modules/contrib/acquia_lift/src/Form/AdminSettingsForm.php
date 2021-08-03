@@ -418,6 +418,12 @@ class AdminSettingsForm extends ConfigFormBase {
         2 => $this->t('Version 2')
       ],
     ];
+    $form['content_origins'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Origin Site UUIDs'),
+      '#description' =>  $this->t('Please leave this blank! This is an optional field and should be empty unless recommended otherwise by Acquia. Origins or Sources entered in this field will only be utilized during Personalization configuration & execution. Enter one origin site UUID per line.'),
+      '#default_value' => $advanced_settings['content_origins'],
+    ];
 
     return $form;
   }
@@ -505,7 +511,7 @@ class AdminSettingsForm extends ConfigFormBase {
     if (!empty($values['decision_api_url'])) {
       $standardized_decision_api_url = 'https://' . $this->cleanUrl($values['decision_api_url']);
       $settings->set('credential.decision_api_url', $standardized_decision_api_url);
-      $this->checkConnection('Decision API', $standardized_decision_api_url, '/admin/ping', 403);
+      $this->checkConnection('Decision API', $standardized_decision_api_url, '/admin/ping');
     }
   }
 
@@ -651,6 +657,7 @@ class AdminSettingsForm extends ConfigFormBase {
     $settings->set('advanced.bootstrap_mode', $values['bootstrap_mode']);
     $settings->set('advanced.content_replacement_mode', $values['content_replacement_mode']);
     $settings->set('advanced.cdf_version', $values['cdf_version']);
+    $settings->set('advanced.content_origins', $values['content_origins']);
   }
 
   /**

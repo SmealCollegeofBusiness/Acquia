@@ -5,6 +5,7 @@ namespace Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -22,13 +23,23 @@ class DeleteAssets implements EventSubscriberInterface {
   protected $tracker;
 
   /**
+   * Acquia ContentHub Admin Settings Config.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
    * DeleteAssets constructor.
    *
    * @param \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker
    *   The subscription tracker.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The Config Factory.
    */
-  public function __construct(SubscriberTracker $tracker) {
+  public function __construct(SubscriberTracker $tracker, ConfigFactoryInterface $config_factory) {
     $this->tracker = $tracker;
+    $this->config = $config_factory->getEditable('acquia_contenthub.admin_settings');
   }
 
   /**
@@ -58,6 +69,7 @@ class DeleteAssets implements EventSubscriberInterface {
       return;
     }
 
+    $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
     foreach ($assets as $asset) {
       if (!$this->isSupportedType($asset['type'])) {
         continue;
@@ -68,7 +80,7 @@ class DeleteAssets implements EventSubscriberInterface {
         $this->tracker->delete($asset['uuid']);
 
         // Clean up the interest list. The entity was deleted before import.
-        if ($settings) {
+        if ($settings && $send_update) {
           $webhook_uuid = $settings->getWebhook('uuid');
           $client->deleteInterest($asset['uuid'], $webhook_uuid);
         }

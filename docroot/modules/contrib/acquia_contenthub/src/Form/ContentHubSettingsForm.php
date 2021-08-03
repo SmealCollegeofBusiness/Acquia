@@ -175,6 +175,16 @@ class ContentHubSettingsForm extends ConfigFormBase {
       '#access' => $provider !== 'environment_variable',
     ];
 
+    $form['settings']['send_contenthub_updates'] = [
+      '#type' => 'checkbox',
+      '#title' => 'Send updates to Content Hub Service.',
+      '#description' => 'Disable this flag with drush in case of Service degradation.',
+      '#disabled' => TRUE,
+      '#default_value' => $this
+        ->config('acquia_contenthub.admin_settings')
+        ->get('send_contenthub_updates') ?? TRUE,
+    ];
+
     $form['settings']['hostname'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Acquia Content Hub Hostname'),
@@ -270,12 +280,21 @@ class ContentHubSettingsForm extends ConfigFormBase {
     ];
 
     $form['actions']['unregister'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Unregister Site'),
-      '#button_type' => 'secondary',
+      '#type' => 'link',
+      '#title' => $this->t('Unregister Site'),
+      '#url' => Url::fromRoute('acquia_contenthub.delete_client_confirm'),
       '#weight' => 999,
       '#limit_validation_errors' => [],
-      '#submit' => [[$this, 'unregister']],
+      '#attributes' => [
+        'class' => [
+          'use-ajax',
+          'button',
+        ],
+        'data-dialog-type' => 'modal',
+        'data-dialog-options' => json_encode([
+          'width' => '50%',
+        ]),
+      ],
       // No validation at all is required in the equivocate case, so
       // we include this here to make it skip the form-level validator.
       '#validate' => [],
@@ -420,28 +439,6 @@ class ContentHubSettingsForm extends ConfigFormBase {
       return;
     }
     $this->messenger()->addMessage($this->t('Successfully Updated Public URL.'));
-  }
-
-  /**
-   * Unregistration submit form handler.
-   *
-   * @param array $form
-   *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The form state.
-   */
-  public function unregister(array &$form, FormStateInterface $form_state) {
-    $client_name = $this->config('acquia_contenthub.admin_settings')
-      ->get('client_name');
-    try {
-      $this->chConnectionManager->unregister();
-    }
-    catch (\Exception $e) {
-      $this->messenger()->addError($this->t('Error during unregistration: @error_message', ['@error_message' => $e->getMessage()]));
-      return;
-    }
-
-    $this->messenger()->addMessage($this->t('Successfully disconnected site %site from Content Hub.', ['%site' => $client_name]));
   }
 
   /**

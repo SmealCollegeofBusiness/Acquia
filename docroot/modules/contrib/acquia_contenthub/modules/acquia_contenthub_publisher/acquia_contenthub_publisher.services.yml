@@ -63,6 +63,12 @@ services:
     tags:
       - { name: event_subscriber }
 
+  entity_type_or_bundle_exclude.enqueue:
+    class: Drupal\acquia_contenthub_publisher\EventSubscriber\EnqueueEligibility\EntityTypeOrBundleExclude
+    arguments: ['@acquia_contenthub_publisher.exclude_settings.config']
+    tags:
+      - { name: event_subscriber }
+
   requeue_dependency_changes.cache_invalidation:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\InvalidateDependencies\RePublishDependencyChanges
     tags:
@@ -118,3 +124,8 @@ services:
     arguments: ['@acquia_contenthub_publisher.tracker']
     tags:
       - { name: event_subscriber }
+
+  acquia_contenthub_publisher.exclude_settings.config:
+    class: Drupal\Core\Config\Config
+    factory: config.factory:get
+    arguments: ['acquia_contenthub_publisher.exclude_settings']

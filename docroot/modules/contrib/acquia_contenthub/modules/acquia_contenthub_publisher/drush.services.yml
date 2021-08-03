@@ -10,3 +10,15 @@ services:
       arguments: ['@acquia_contenthub_publisher.tracker', '@queue']
       tags:
         - { name: drush.command }
+
+  acquia_contenthub_publisher_audit_entity.commands:
+    class: Drupal\acquia_contenthub_publisher\Commands\AcquiaContentHubPublisherAuditEntityCommands
+    arguments: ['@acquia_contenthub_publisher.tracker', '@queue', '@entity.dependency.calculator', '@acquia_contenthub_common_actions', '@acquia_contenthub.client.factory']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub_enqueue_entities.commands:
+    class: Drupal\acquia_contenthub_publisher\Commands\AcquiaContentHubEnqueueEntitiesCommands
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@database', '@acquia_contenthub_publisher.tracker', '@cache.depcalc']
+    tags:
+      - { name: drush.command }

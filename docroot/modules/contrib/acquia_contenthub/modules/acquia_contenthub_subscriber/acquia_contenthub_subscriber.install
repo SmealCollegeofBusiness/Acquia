@@ -5,8 +5,6 @@
  * Acquia Content Hub - Subscriber module install file.
  */
 
-use Drupal\Core\Database\Database;
-
 /**
  * Implements hook_schema().
  */
@@ -76,7 +74,6 @@ function acquia_contenthub_subscriber_schema() {
  * @{
  * Update function to delete content hub filter resource.
  */
-
 function acquia_contenthub_subscriber_update_82001() {
   // Make sure schema has been installed.
   if (!\Drupal::database()->schema()->tableExists('acquia_contenthub_subscriber_import_tracking')) {
@@ -152,8 +149,8 @@ function acquia_contenthub_subscriber_update_82003() {
  * During queue item data unserialization we get a php incomplete class because
  * the describer class exist only in 1.x.
  *
- * @param $object
- *   Incomplete class
+ * @param object $object
+ *   Incomplete class.
  *
  * @return string
  *   Entity uuid.

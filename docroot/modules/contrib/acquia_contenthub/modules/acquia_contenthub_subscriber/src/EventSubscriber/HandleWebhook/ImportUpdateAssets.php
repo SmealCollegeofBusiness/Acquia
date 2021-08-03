@@ -7,6 +7,7 @@ use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\BuildClientCdfEvent;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -48,6 +49,20 @@ class ImportUpdateAssets implements EventSubscriberInterface {
   protected $channel;
 
   /**
+   * Acquia ContentHub Admin Settings Config.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
+   * Client CDF object.
+   *
+   * @var \Acquia\ContentHubClient\CDF\ClientCDFObject
+   */
+  protected $clientCDFObject;
+
+  /**
    * ImportUpdateAssets constructor.
    *
    * @param \Drupal\Core\Queue\QueueFactory $queue
@@ -58,16 +73,20 @@ class ImportUpdateAssets implements EventSubscriberInterface {
    *   The subscription tracker.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger channel factory.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The configuration factory.
    */
   public function __construct(
     QueueFactory $queue,
     EventDispatcherInterface $dispatcher,
     SubscriberTracker $tracker,
-    LoggerChannelFactoryInterface $logger_factory) {
+    LoggerChannelFactoryInterface $logger_factory,
+    ConfigFactoryInterface $config_factory) {
     $this->queue = $queue->get('acquia_contenthub_subscriber_import');
     $this->dispatcher = $dispatcher;
     $this->tracker = $tracker;
     $this->channel = $logger_factory->get('acquia_contenthub');
+    $this->config = $config_factory->get('acquia_contenthub.admin_settings');
   }
 
   /**
@@ -99,7 +118,7 @@ class ImportUpdateAssets implements EventSubscriberInterface {
 
     if ($payload['status'] !== 'successful' || !isset($payload['assets']) || !count($payload['assets'])) {
       $this->channel
-        ->info("Payload will not be processed because it is not successful or it does not have assets. 
+        ->info("Payload will not be processed because it is not successful or it does not have assets.
         Payload data: " . print_r($payload, TRUE));
       return;
     }
@@ -108,7 +127,7 @@ class ImportUpdateAssets implements EventSubscriberInterface {
       // Only log if we're trying to update something other than client objects.
       if ($payload['assets'][0]['type'] !== 'client') {
         $this->channel
-          ->info("Payload will not be processed because its initiator is the existing client. 
+          ->info("Payload will not be processed because its initiator is the existing client.
         Payload data: " . print_r($payload, TRUE));
       }
 
@@ -142,7 +161,6 @@ class ImportUpdateAssets implements EventSubscriberInterface {
 
     }
     if ($uuids) {
-      $client->addEntitiesToInterestList($client->getSettings()->getWebhook('uuid'), $uuids);
       $item = new \stdClass();
       $item->uuids = implode(', ', $uuids);
       $queue_id = $this->queue->createItem($item);
@@ -150,12 +168,18 @@ class ImportUpdateAssets implements EventSubscriberInterface {
         return;
       }
       $this->tracker->setQueueItemByUuids($uuids, $queue_id);
-
       $this->channel
         ->info('Entities with UUIDs @uuids added to the import queue and to the tracking table.',
           ['@uuids' => print_r($uuids, TRUE)]);
+      if (!($this->config->get('send_contenthub_updates') ?? TRUE)) {
+        return;
+      }
+      // Add entities to interest list.
+      $client->addEntitiesToInterestList($client->getSettings()->getWebhook('uuid'), $uuids);
 
-      $event = new BuildClientCdfEvent(ClientCDFObject::create($client->getSettings()->getUuid(), ['settings' => $client->getSettings()->toArray()]));
+      // Update Client CDF metrics.
+      $settings = $client->getSettings();
+      $event = new BuildClientCdfEvent(ClientCDFObject::create($settings->getUuid(), ['settings' => $settings->toArray()]));
       $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
       $this->clientCDFObject = $event->getCdf();
       $client->putEntities($this->clientCDFObject);

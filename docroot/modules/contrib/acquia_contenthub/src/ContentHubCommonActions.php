@@ -11,6 +11,7 @@ use Drupal\acquia_contenthub\Event\DeleteRemoteEntityEvent;
 use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Uuid\Uuid;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
@@ -62,6 +63,13 @@ class ContentHubCommonActions {
   protected $channel;
 
   /**
+   * Acquia ContentHub Admin Settings Config.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
    * ContentHubCommonActions constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -74,13 +82,16 @@ class ContentHubCommonActions {
    *   The ContentHub client factory.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger channel factory.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The Config Factory.
    */
-  public function __construct(EventDispatcherInterface $dispatcher, EntityCdfSerializer $serializer, DependencyCalculator $calculator, ClientFactory $factory, LoggerChannelFactoryInterface $logger_factory) {
+  public function __construct(EventDispatcherInterface $dispatcher, EntityCdfSerializer $serializer, DependencyCalculator $calculator, ClientFactory $factory, LoggerChannelFactoryInterface $logger_factory, ConfigFactoryInterface $config_factory) {
     $this->dispatcher = $dispatcher;
     $this->serializer = $serializer;
     $this->calculator = $calculator;
     $this->factory = $factory;
     $this->channel = $logger_factory->get('acquia_contenthub');
+    $this->config = $config_factory->getEditable('acquia_contenthub.admin_settings');
   }
 
   /**
@@ -342,7 +353,8 @@ class ContentHubCommonActions {
 
     // Clean up the interest list.
     $webhook_uuid = $settings->getWebhook('uuid');
-    if (Uuid::isValid($webhook_uuid)) {
+    $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
+    if ($send_update && Uuid::isValid($webhook_uuid)) {
       $client->deleteInterest($uuid, $webhook_uuid);
       $this->channel
         ->info(sprintf("Deleted entity with UUID = \"%s\" from webhook's interest list.", $uuid));

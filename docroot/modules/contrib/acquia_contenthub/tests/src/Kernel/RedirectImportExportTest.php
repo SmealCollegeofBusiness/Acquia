@@ -66,16 +66,46 @@ class RedirectImportExportTest extends ImportExportTestBase {
   /**
    * Tests "redirect" Drupal entity.
    *
-   * @param mixed $args
-   *   Arguments. @see ImportExportTestBase::contentEntityImportExport() for the
-   *   details.
+   * @param int $delta
+   *   Fixture delta.
+   * @param array $validate_data
+   *   Data.
+   * @param string $export_type
+   *   Exported entity type.
+   * @param string $export_uuid
+   *   Entity UUID.
    *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    *
    * @dataProvider redirectImportExportDataProvider
    */
-  public function testRedirectImportExport(...$args) {
-    parent::contentEntityImportExport(...$args);
+  public function testRedirectImportExport(int $delta, array $validate_data, $export_type, $export_uuid) {
+    parent::contentEntityImportExport($delta, $validate_data, $export_type, $export_uuid);
+
+    if ($export_type === 'node') {
+      $this->assertNodeRevisionCount($export_uuid);
+    }
+
+  }
+
+  /**
+   * Check if nodes with circular dependencies have no stub revisions created.
+   *
+   * @param string $uuid
+   *   The node UUID to check.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function assertNodeRevisionCount(string $uuid) {
+    /** @var \Drupal\Node\NodeStorageInterface $node_storage */
+    $node_storage = $this->entityTypeManager->getStorage('node');
+    /** @var \Drupal\node\Entity\Node $node */
+    $node = current($node_storage->loadByProperties(['uuid' => $uuid]));
+    $vids = $node_storage->revisionIds($node);
+    $this->assertEqual(count($vids), 1, "No revisions were created from stubs.");
   }
 
   /**

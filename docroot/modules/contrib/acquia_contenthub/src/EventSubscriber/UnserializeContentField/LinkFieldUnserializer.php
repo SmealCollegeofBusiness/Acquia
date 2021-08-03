@@ -71,7 +71,12 @@ class LinkFieldUnserializer implements EventSubscriberInterface {
 
             // Construct the internal link.
             // Format: internal:/<ENT_TYPE>/<ENT_ID>.
-            $internal_link = "internal:/{$uri_entity->getEntityTypeId()}/{$uri_entity->id()}";
+            if ($uri_entity->getEntityType()->hasLinkTemplate('canonical') && $uri_entity->toUrl('canonical')->isRouted()) {
+              $internal_link = "internal:/" . $uri_entity->toUrl('canonical')->getInternalPath();
+            }
+            else {
+              $internal_link = "internal:/{$uri_entity->getEntityTypeId()}/{$uri_entity->id()}";
+            }
             $value['uri'] = $internal_link;
           }
           if (!empty($internal_type)) {

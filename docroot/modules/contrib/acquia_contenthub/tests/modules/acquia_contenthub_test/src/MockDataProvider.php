@@ -37,6 +37,20 @@ class MockDataProvider {
   }
 
   /**
+   * Provide list entities mock data.
+   *
+   * @return array
+   *   The entities.
+   */
+  public static function mockListEntities(): array {
+    return [
+      'success' => TRUE,
+      'total' => 1,
+      'data' => [],
+    ];
+  }
+
+  /**
    * Generates random uuid.
    *
    * @return string

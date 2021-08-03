@@ -9,6 +9,7 @@ use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -47,6 +48,13 @@ class CreateModeratedForwardRevision implements EventSubscriberInterface {
   protected $moderationInfo;
 
   /**
+   * The acquia_contenthub_moderation logger channel.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $channel;
+
+  /**
    * CreateModeratedForwardRevision constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -55,11 +63,14 @@ class CreateModeratedForwardRevision implements EventSubscriberInterface {
    *   The Config Factory.
    * @param \Drupal\content_moderation\ModerationInformationInterface $moderation_info
    *   The Content Moderation Information Service.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   *   The logger factory.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactory $config_factory, ModerationInformationInterface $moderation_info) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactory $config_factory, ModerationInformationInterface $moderation_info, LoggerChannelFactoryInterface $logger_factory) {
     $this->entityTypeManager = $entity_type_manager;
     $this->config = $config_factory->get('acquia_contenthub_moderation.settings');
     $this->moderationInfo = $moderation_info;
+    $this->channel = $logger_factory->get('acquia_contenthub_moderation');
   }
 
   /**
@@ -105,10 +116,15 @@ class CreateModeratedForwardRevision implements EventSubscriberInterface {
     }
     $import_moderation_state = $this->config->get("workflows.{$workflow->id()}.moderation_state");
 
+    if (empty($import_moderation_state)) {
+      $this->channel->error("Acquia Content Hub moderation config doesn't have a default moderation state.");
+      return;
+    }
+    // Use configured moderation state.
+    $entity->set($this->fieldName, $import_moderation_state);
+
     // Check whether the entity is configured to create a new revision.
-    if ($entity instanceof RevisionableInterface && $entity->isNewRevision() && !empty($import_moderation_state)) {
-      // Use configured moderation state.
-      $entity->set($this->fieldName, $import_moderation_state);
+    if ($entity instanceof RevisionableInterface && $entity->isNewRevision()) {
       // Make it a forward revision if import moderation state is
       // not a "published" state.
       $published_state = $workflow->getTypePlugin()->getState($import_moderation_state)->isPublishedState();

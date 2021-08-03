@@ -27,14 +27,20 @@ class RemoveIdAndRevisionFieldSerialization implements EventSubscriberInterface 
    *   The content entity field serialization event.
    */
   public function onSerializeContentField(SerializeCdfEntityFieldEvent $event) {
-    $entity = $event->getEntity();
-    $entityType = $entity->getEntityType();
-    $entityTypes = [
-      $entityType->getKey('id'),
-      $entityType->getKey('revision'),
+    // This is necessary because this is a low priority event subscriber
+    // and it will always run for "id" field irrespective of
+    // the entity type id.
+    if ($event->getEntity()->getEntityTypeId() === 'entity_subqueue') {
+      return;
+    }
+
+    $entity_type = $event->getEntity()->getEntityType();
+    $entity_types = [
+      $entity_type->getKey('id'),
+      $entity_type->getKey('revision'),
     ];
 
-    if (in_array($event->getFieldName(), $entityTypes)) {
+    if (in_array($event->getFieldName(), $entity_types)) {
       $event->setExcluded();
       $event->stopPropagation();
     }

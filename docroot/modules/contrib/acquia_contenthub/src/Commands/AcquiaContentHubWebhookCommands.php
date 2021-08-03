@@ -2,11 +2,14 @@
 
 namespace Drupal\acquia_contenthub\Commands;
 
+use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Client\ClientFactory;
+use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
 use Drupal\Core\Url;
 use Drush\Commands\DrushCommands;
 use Drush\Log\LogLevel;
 use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Drush commands for interacting with Acquia Content Hub webhooks.
@@ -23,13 +26,23 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
   protected $clientFactory;
 
   /**
+   * The event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
    * AcquiaContentHubWebhookCommands constructor.
    *
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
-   *   The client factory.
+   *   ACH client factory.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
+   *   Symfony event dispatcher.
    */
-  public function __construct(ClientFactory $client_factory) {
+  public function __construct(ClientFactory $client_factory, EventDispatcherInterface $dispatcher) {
     $this->clientFactory = $client_factory;
+    $this->eventDispatcher = $dispatcher;
   }
 
   /**
@@ -104,21 +117,57 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
         break;
 
       case 'unregister':
-        // @todo Complete Webhook Unregistration.
         $webhooks = $client->getWebHooks();
         if (empty($webhooks)) {
           $this->logger->log(LogLevel::CANCEL, dt('You have no webhooks.'));
           return;
         }
 
+        /** @var \Acquia\ContentHubClient\Webhook $webhook */
         $webhook = $client->getWebHook($webhook_url);
         if (empty($webhook)) {
           $this->logger->log(LogLevel::CANCEL, dt('Webhook @url not found', ['@url' => $webhook_url]));
           return;
         }
+
+        $event = new AcquiaContentHubUnregisterEvent($webhook->getUuid(), '', TRUE);
+        $this->eventDispatcher->dispatch(AcquiaContentHubEvents::ACH_UNREGISTER, $event);
+
+        $io = $this->io();
+        $orphaned_filters = $event->getOrphanedFilters();
+        if (!empty($orphaned_filters)) {
+          $rows = [];
+
+          foreach ($orphaned_filters as $name => $uuid) {
+            $rows[] = [$name, $uuid];
+          }
+
+          $io->table(['Filter name', 'Filter UUID'], $rows);
+          $answer = $io->choice(
+            'What would you like to do with the filters? These can also be modified using the Discovery Interface',
+            [
+              'both' => 'Delete webhook and filters',
+              'webhook' => 'Delete webhook only',
+            ]
+          );
+        }
+
+        $success = FALSE;
         /** @var \Drupal\acquia_contenthub\ContentHubConnectionManager $connection_manager */
         $connection_manager = \Drupal::service('acquia_contenthub.connection_manager');
-        $success = $connection_manager->unregisterWebhook();
+
+        // This runs if user picks "delete webhook only" or
+        // there are no orphaned filters.
+        if (!isset($answer) || $answer === 'webhook') {
+          $success = $connection_manager->unregisterWebhook($event);
+        }
+
+        // This runs only if user picked "delete webhooks and filters" and
+        // there are orphaned filters which should be deleted.
+        if (isset($answer) && $answer === 'both') {
+          $success = $connection_manager->unregisterWebhook($event, TRUE);
+        }
+
         if (!$success) {
           $this->logger->log(LogLevel::CANCEL, dt('There was an error unregistering the URL: @url', ['@url' => $webhook_url]));
           return;
@@ -139,12 +188,13 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
             $index + 1,
             $webhook->getUrl(),
             $webhook->getUuid(),
+            !empty($webhook->getSuppressedUntil()) ? 'Suppressed until ' . date('m/d/Y H:i:s', $webhook->getSuppressedUntil()) : 'NO',
           ];
         };
         $rows = array_map($rows_mapper, $webhooks, array_keys($webhooks));
 
         (new Table($this->output()))
-          ->setHeaders(['#', 'URL', 'UUID'])
+          ->setHeaders(['#', 'URL', 'UUID', 'Suppressed'])
           ->setRows($rows)
           ->render();
         break;

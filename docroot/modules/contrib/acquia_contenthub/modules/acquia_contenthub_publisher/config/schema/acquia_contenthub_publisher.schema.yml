@@ -1,0 +1,16 @@
+acquia_contenthub_publisher.exclude_settings:
+  type: config_object
+  label: 'Acquia ContentHub entity type or bundle exclude settings'
+  mapping:
+    exclude_entity_types:
+      type: sequence
+      label: 'Entity types to exclude'
+      sequence:
+        type: string
+        label: 'Entity type'
+    exclude_bundles:
+      type: sequence
+      label: 'Bundles to exclude'
+      sequence:
+        type: string
+        label: 'Bundle'

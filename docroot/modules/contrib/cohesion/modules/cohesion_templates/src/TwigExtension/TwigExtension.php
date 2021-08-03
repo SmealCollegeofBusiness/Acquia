@@ -11,7 +11,9 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\Utility\Xss;
+use Drupal\Component\Uuid\Uuid;
 use Drupal\Component\Uuid\UuidInterface;
+use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -28,9 +30,9 @@ use Drupal\Core\Template\TwigEnvironment;
 use Drupal\Core\Theme\Registry;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Utility\Token;
-use Drupal\image\Entity\ImageStyle;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use Twig\Markup as TwigMarkup;
+use Drupal\Core\Cache\CacheableMetadata;
 
 /**
  * Site studio twig extensions.
@@ -660,8 +662,6 @@ class TwigExtension extends \Twig_Extension {
         ],
       ];
     }
-
-    return;
   }
 
   /**
@@ -756,20 +756,22 @@ class TwigExtension extends \Twig_Extension {
 
     $block = $this->entityTypeManager->getStorage('block')->load($id);
     if ($block instanceof Block) {
-      if ($block->access('view')) {
+      $access = $block->access('view', NULL, TRUE);
+      $cache_metadata = CacheableMetadata::createFromObject($access);
+      if ($access instanceof AccessResultAllowed) {
         $build = $this->entityTypeManager->getViewBuilder('block')->view($block);
       }
       else {
         $build = [
-          $id => [
-            "#cache" => [
-              "contexts" => $block->getCacheContexts(),
-              "tags" => $block->getCacheTags(),
-              "max-age" => $block->getCacheMaxAge(),
-            ],
+          "#cache" => [
+            "contexts" => $block->getCacheContexts(),
+            "tags" => $block->getCacheTags(),
+            "max-age" => $block->getCacheMaxAge(),
           ],
         ];
       }
+      $build['#cache']['contexts'] = array_merge($build['#cache']['contexts'], $cache_metadata->getCacheContexts());
+      $build['#cache']['tags'] = array_merge($build['#cache']['tags'], $cache_metadata->getCacheTags());
     }
 
     return $build;
@@ -982,7 +984,7 @@ class TwigExtension extends \Twig_Extension {
     // Try and load the given image style.
     try {
       if ($image_style != '') {
-        if ($is = ImageStyle::load($image_style)) {
+        if ($is = $this->entityTypeManager->getStorage('image_style')->load($image_style)) {
           $url = $is->buildUrl($file_uri);
           $url = parse_url($url);
           $decoded = $url['path'];
@@ -1025,7 +1027,7 @@ class TwigExtension extends \Twig_Extension {
     $extension = pathinfo($file_uri, PATHINFO_EXTENSION);
     $fake_path = 'dx8_image.' . $extension;
     if ($image_style != '') {
-      if ($image_style_entity = ImageStyle::load($image_style)) {
+      if ($image_style_entity = $this->entityTypeManager->getStorage('image_style')->load($image_style)) {
         $fake_path = 'dx8_image.' . $image_style_entity->getDerivativeExtension($extension);
       }
     }
@@ -1523,8 +1525,21 @@ class TwigExtension extends \Twig_Extension {
       }
 
       if (!empty($entity_type) && !empty($view_mode) && !empty($entity_id)) {
-        $results = $this->entityTypeManager->getStorage($entity_type)->loadByProperties(['uuid' => $entity_id]);
-        $entity = reset($results);
+        $entity = NULL;
+        // Check if a valid UUID, fallback to ID to account for IDs being used in tokens.
+        if (Uuid::isValid($entity_id)) {
+          // UUID given. Load entity by UUID.
+          $results = $this->entityTypeManager
+            ->getStorage($entity_type)
+            ->loadByProperties(['uuid' => $entity_id]);
+          $entity = reset($results);
+        }
+        else {
+          // Entity ID given. Load entity as usual.
+          $entity = $this->entityTypeManager
+            ->getStorage($entity_type)
+            ->load($entity_id);
+        }
 
         if ($entity) {
           $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
@@ -1574,19 +1589,22 @@ class TwigExtension extends \Twig_Extension {
       $keys = array_merge($keys, explode(',', $sub_key_path));
     }
 
+    $value = FALSE;
+
     // If within the context of a field repeater check if the key exists
     // otherwise check in the component field values
-    if (isset($context['coh_repeater_val']['#' . $key])) {
-      $value = $context['coh_repeater_val']['#' . $key];
+    if (isset($context['coh_repeater_val'])) {
+      if (isset($context['coh_repeater_val']['#' . $key])) {
+        $value = $context['coh_repeater_val']['#' . $key];
+      }
     }
     elseif (isset($context['componentFieldsValues'][$key])) {
       $value = $context['componentFieldsValues'][$key];
     }
-    else {
+    else{
       // Try to find the key in all componentFieldsValues
       // If this is a field inside a field repeater but used outside a pattern repeater
       // use case: Hide if no data
-
       foreach ($context['componentFieldsValues'] as $cpt_key => $cpt_value) {
         if(is_array($cpt_value)) {
           foreach ($cpt_value as $repeater_value) {

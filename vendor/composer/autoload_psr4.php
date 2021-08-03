@@ -146,6 +146,7 @@ return array(
     'Clue\\StreamFilter\\' => array($vendorDir . '/clue/stream-filter/src'),
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
     'Asm89\\Stack\\' => array($vendorDir . '/asm89/stack-cors/src/Asm89/Stack'),
+    'Acquia\\Utility\\' => array($baseDir . '/docroot/profiles/contrib/acquia_cms/src/Utility'),
     'Acquia\\Hmac\\' => array($vendorDir . '/acquia/http-hmac-php/src'),
     'Acquia\\DrupalEnvironmentDetector\\Tests\\' => array($vendorDir . '/acquia/drupal-environment-detector/tests'),
     'Acquia\\DrupalEnvironmentDetector\\' => array($vendorDir . '/acquia/drupal-environment-detector/src'),

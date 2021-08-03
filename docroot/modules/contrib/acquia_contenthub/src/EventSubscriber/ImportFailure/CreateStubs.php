@@ -7,6 +7,10 @@ use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\FailedImportEvent;
 use Drupal\acquia_contenthub\Event\LoadLocalEntityEvent;
 use Drupal\acquia_contenthub\Event\PreEntitySaveEvent;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\SynchronizableInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\depcalc\DependentEntityWrapper;
@@ -109,18 +113,16 @@ class CreateStubs implements EventSubscriberInterface {
         }
         /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
         $entity = $storage->create($values);
-        /** @var \Drupal\Core\Field\FieldItemListInterface $field */
-        foreach ($entity as $field_name => $field) {
-          if ($entity->getEntityType()->getKey('id') === $field_name || $entity->getEntityType()->getKey('revision') === $field_name) {
-            continue;
-          }
-          if ($field->isEmpty() && $this->fieldIsRequired($field)) {
-            $field->generateSampleItems();
-          }
-        }
+        $this->generateRequiredSampleItems($entity);
+
         $pre_entity_save_event = new PreEntitySaveEvent($entity, $event->getStack(), $cdf);
         $dispatcher->dispatch(AcquiaContentHubEvents::PRE_ENTITY_SAVE, $pre_entity_save_event);
         $entity = $pre_entity_save_event->getEntity();
+        // Added to avoid creating new revisions with stubbed data.
+        // See \Drupal\content_moderation\Entity\Handler\ModerationHandler.
+        if ($entity instanceof SynchronizableInterface) {
+          $entity->setSyncing(TRUE);
+        }
         $entity->save();
       }
       $wrapper = new DependentEntityWrapper($entity, TRUE);
@@ -137,6 +139,32 @@ class CreateStubs implements EventSubscriberInterface {
       $event->setException($e);
     }
     static::$count = 0;
+  }
+
+  /**
+   * Generate sample items for fields that require it.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The stub entity.
+   */
+  protected function generateRequiredSampleItems(ContentEntityInterface $entity) {
+
+    // Fields that either don't require samples.
+    $skip_fields = [
+      $entity->getEntityType()->getKey('id'),
+      $entity->getEntityType()->getKey('revision'),
+      'revision_log',
+    ];
+
+    /** @var \Drupal\Core\Field\FieldItemListInterface $field */
+    foreach ($entity as $field_name => $field) {
+      if (in_array($field_name, $skip_fields)) {
+        continue;
+      }
+      if ($field->isEmpty() && $this->fieldIsRequired($field)) {
+        $field->generateSampleItems();
+      }
+    }
   }
 
   /**
@@ -173,7 +201,7 @@ class CreateStubs implements EventSubscriberInterface {
    * @return \Drupal\Core\Entity\EntityTypeManagerInterface
    *   The entity type manager.
    */
-  protected function getEntityTypeManager() {
+  protected function getEntityTypeManager(): EntityTypeManagerInterface {
     return \Drupal::entityTypeManager();
   }
 
@@ -183,7 +211,7 @@ class CreateStubs implements EventSubscriberInterface {
    * @return \Drupal\Core\Entity\EntityFieldManagerInterface
    *   The entity field manager.
    */
-  protected function getEntityFieldManager() {
+  protected function getEntityFieldManager(): EntityFieldManagerInterface {
     return \Drupal::service('entity_field.manager');
   }
 

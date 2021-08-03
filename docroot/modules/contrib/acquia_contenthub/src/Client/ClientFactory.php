@@ -12,6 +12,7 @@ use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubSettingsEvent;
 use Drupal\acquia_contenthub\Event\BuildClientCdfEvent;
 use Drupal\Component\Uuid\Uuid;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Laminas\Diactoros\ResponseFactory;
@@ -80,6 +81,13 @@ class ClientFactory {
   protected $moduleList;
 
   /**
+   * Acquia ContentHub Admin Settings Config.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
    * ClientManagerFactory constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -88,12 +96,14 @@ class ClientFactory {
    *   The logger factory.
    * @param \Drupal\Core\Extension\ModuleExtensionList $module_list
    *   The module extension list.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The configuration factory.
    */
-  public function __construct(EventDispatcherInterface $dispatcher, LoggerChannelFactoryInterface $logger_factory, ModuleExtensionList $module_list) {
+  public function __construct(EventDispatcherInterface $dispatcher, LoggerChannelFactoryInterface $logger_factory, ModuleExtensionList $module_list, ConfigFactoryInterface $config_factory) {
     $this->dispatcher = $dispatcher;
     $this->loggerFactory = $logger_factory;
     $this->moduleList = $module_list;
-
+    $this->config = $config_factory->get('acquia_contenthub.admin_settings');
     // Whenever a new client is constructed, make sure settings are invoked.
     $this->populateSettings();
   }
@@ -154,7 +164,10 @@ class ClientFactory {
       $this->dispatcher
     );
 
-    if ($validate && $this->client->getRemoteSettings()) {
+    $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
+
+    // Only send Client CDF updates, if send update flag is TRUE.
+    if ($validate && $send_update && $this->client->getRemoteSettings()) {
       $event = new BuildClientCdfEvent(ClientCDFObject::create($settings->getUuid(), ['settings' => $settings->toArray()]));
       $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
       $this->clientCDFObject = $event->getCdf();

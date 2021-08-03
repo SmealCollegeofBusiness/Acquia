@@ -25,6 +25,20 @@ class AuthmapDeleteLink extends LinkBase {
   /**
    * {@inheritdoc}
    */
+  public function query() {
+    // This is overridden to not call $this->getEntityTranslationRenderer()
+    // which will break because we don't have an entity type. (And we assume
+    // we can skip calling it because we never need to add extra tables/fields
+    // in order to translate this link. As an aside: this class would be much
+    // smaller if LinkBase didn't contain entity related code and if all non
+    // entity related code was actually in LinkBase so we didn't need to copy
+    // it from EntityLinkBase.)
+    $this->addAdditionalFields();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function render(ResultRow $row) {
     // This whole link is a quick hack because this functionality should move
     // into the externalauth module. We'll do the access checks in the form.
@@ -35,10 +49,17 @@ class AuthmapDeleteLink extends LinkBase {
    * {@inheritdoc}
    */
   protected function renderLink(ResultRow $row) {
+    // From EntityLink:
     if ($this->options['output_url_as_text']) {
       return $this->getUrlInfo($row)->toString();
     }
-    return parent::renderLink($row);
+    // From LinkBase, minus addLangCode() which needs an entity. (If this needs
+    // 'alter']['language' set sometimes, then we still need to work out when
+    // and how.)
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['url'] = $this->getUrlInfo($row);
+    $text = !empty($this->options['text']) ? $this->sanitizeValue($this->options['text']) : $this->getDefaultLabel();
+    return $text;
   }
 
   /**

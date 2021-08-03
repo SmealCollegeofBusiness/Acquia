@@ -3,11 +3,8 @@
 namespace Drupal\cohesion\Services;
 
 use Drupal\cohesion\UsageUpdateManager;
-use Drupal\cohesion_base_styles\Entity\BaseStyles;
-use Drupal\cohesion_custom_styles\Entity\CustomStyle;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -154,7 +151,8 @@ class RebuildInuseBatch {
         $in_use_by_type[$type][][] = $uuid;
       }
       else {
-        $in_use_by_type[$type][array_key_last($in_use_by_type[$type])][] = $uuid;
+        $end = end($in_use_by_type[$type]);
+        $in_use_by_type[$type][key($end)][] = $uuid;
       }
     }
 

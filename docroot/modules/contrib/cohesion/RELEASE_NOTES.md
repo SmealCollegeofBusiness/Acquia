@@ -1,5 +1,121 @@
 # Release notes
 
+## 6.6.0
+
+## Slider - accessibility improvements
+
+### What is it?
+Accessibility of the Site Studio Slider has been enhanced to include features from Accessible360's Slick replacement.
+These include:
+- Users can define an `aria-label` for the Slider container, which also has a `role="region"` attribute/value.
+- Instructions can be provided for screen reader users on the Slider container. This is added as a visually-hidden paragraph within the Slider container but before the slides.
+- Each Slide item has a `role="group"` attribute/value with an `aria-label` value of `slide x`, where x is the numerical index in total number of slides.
+- When `Autoplay` is enabled the user can add a play/pause button to the Slider, add visually-hidden state labels and customise its appearance and position.
+- When `Center mode` is enabled, the `aria-label` of the centered slide will be appended with the text `(centered)`.
+- The ARIA roles `tablist`, `tab`, `presentation` and `tabpanel` have been removed from pagination HTML and slide items.
+- Keyboard navigation (using left and right arrow keys to traverse slides) was originally enabled programmatically. Whilst on by default for backwards compatibility, there is now a toggle option in the Slider container settings form to disable this option.
+
+#### What impact will there be?
+Customers using screen reader technology on your websites should have a better experience, providing configurable options are completed by site builder. 
+
+#### What actions do I need to take?
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+Pagination or Slide item styles could be be broken if a site builder has used the now-removed tab roles as attribute css selectors.
+
+### Components that rely on entity IDs not rendering after upgrade  
+
+#### What is it?
+
+Fixes a bug where components that rely on entity IDs where not rendering the referenced content as expected. 
+
+#### What impact will there be?
+
+Components can rely on either entity UUIDs or IDs for rendering referenced content. 
+If your components rely on entity IDs, upgrading will resolve referenced content not rendering.
+
+#### What actions do i need to take?
+
+`drush cohesion:rebuild`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## Wire mode is now available for the Visual page builder.
+
+#### What is it?
+
+Adds the ability to toggle on borders for components and borders for component drop zones.
+
+#### What impact will there be?
+
+Users will now be able to view borders on their components and drop zones. They can use the visual page builder menu, or toggle with (Alt + b).
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Content titles with brackets not appearing in Link typeahead  
+
+#### What is is?
+
+Fixes a bug where content titles that contained brackets weren't appearing in the link typeahead.
+
+#### What impact will there be?
+
+When using the link typeahead content titles now appear as expected if they have brackets or not.
+
+#### What actions do i need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### KeyValue template storage fails on Drupal 9
+
+#### What is is?
+
+Fixes a bug where KeyValue storage would fail to locate templates with specific filenames.
+
+#### What impact will there be?
+
+KeyValue template storage will work correctly on Drupal 9.
+
+#### What actions do i need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Pattern Repeater and Hide if No data results in data "bleeding" between repeated elements
+
+#### What is is?
+
+Fixes a bug where by having a component with multiple element having no data on different component field token, the data would "bleed" between elements
+
+#### What impact will there be?
+
+Hide if not data will now be respected on all elements within pattern repeaters
+
+#### What actions do i need to take?
+
+If affected by this issue, do a cache clear
+
+#### Are there any risks I should be aware of?
+
+None.
+
 ## 6.5.1
 
 ### Media library modal not always closing upon creating new media
@@ -54,7 +170,7 @@ The horizontal and vertical rulers in Base and Custom styles have now been remov
 
 #### Are there any risks I should be aware of?
 
-None.  
+None.
 
 ### When using a Field repeater the default minimum number of fields not working as expected
 
@@ -887,6 +1003,26 @@ None.
 ---
 
 ## 6.4.0
+
+### Provide an override for rebuild batch limit
+
+#### What is it?
+
+By default the rebuild process will handle 10 items at a time to reduce the memory required to run this operation. This feature exposes a method for increasing that number via Drupal settings.
+
+#### What impact will there be?
+
+Where more memory is available the `rebuild_max_entity` can be set to a number greater than 10 to process the rebuild faster.
+
+#### What actions do I need to take?
+
+Add a settings value such as:
+
+`$settings['rebuild_max_entity'] = 20;`
+
+#### Are there any risks I should be aware of?
+
+Increasing the `rebuild_max_entity` value will require more memory to process each rebuild batch.
 
 ### Style builder - field tokenization
 

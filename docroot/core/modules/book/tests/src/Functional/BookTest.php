@@ -5,6 +5,7 @@ namespace Drupal\Tests\book\Functional;
 use Drupal\Core\Cache\Cache;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\user\RoleInterface;
+use Drupal\book\Cache\BookNavigationCacheContext;
 
 /**
  * Create a book, add pages, and test book interface.
@@ -94,6 +95,18 @@ class BookTest extends BrowserTestBase {
       'administer site configuration',
       'view any unpublished content',
     ]);
+  }
+
+  /**
+   * Test the book navigation cache context argument deprecation.
+   *
+   * @group legacy
+   */
+  public function testBookNavigationCacheContextDeprecatedParameter() {
+    $this->expectDeprecation('Passing the request_stack service to Drupal\book\Cache\BookNavigationCacheContext::__construct() is deprecated in drupal:9.2.0 and will be removed before drupal:10.0.0. The parameter should be an instance of \Drupal\Core\Routing\RouteMatchInterface instead.');
+    $request_stack = $this->container->get('request_stack');
+    $book_navigation_cache_context = new BookNavigationCacheContext($request_stack);
+    $this->assertNotNull($book_navigation_cache_context);
   }
 
   /**
@@ -624,7 +637,7 @@ class BookTest extends BrowserTestBase {
 
     $elements = $this->xpath('//table//ul[@class="dropbutton"]/li/a');
     $this->assertEquals('View', $elements[0]->getText(), 'View link is found from the list.');
-    $this->assertEquals(count($nodes), count($elements), 'All the book pages are displayed on the book outline page.');
+    $this->assertSameSize($nodes, $elements, 'All the book pages are displayed on the book outline page.');
 
     // Unpublish a book in the hierarchy.
     $nodes[0]->setUnPublished();
@@ -633,7 +646,7 @@ class BookTest extends BrowserTestBase {
     // Node should still appear on the outline for admins.
     $this->drupalGet('admin/structure/book/' . $this->book->id());
     $elements = $this->xpath('//table//ul[@class="dropbutton"]/li/a');
-    $this->assertEquals(count($nodes), count($elements), 'All the book pages are displayed on the book outline page.');
+    $this->assertSameSize($nodes, $elements, 'All the book pages are displayed on the book outline page.');
 
     // Saving a book page not as the current version shouldn't effect the book.
     $old_title = $nodes[1]->getTitle();
@@ -644,7 +657,7 @@ class BookTest extends BrowserTestBase {
     $nodes[1]->save();
     $this->drupalGet('admin/structure/book/' . $this->book->id());
     $elements = $this->xpath('//table//ul[@class="dropbutton"]/li/a');
-    $this->assertEquals(count($nodes), count($elements), 'All the book pages are displayed on the book outline page.');
+    $this->assertSameSize($nodes, $elements, 'All the book pages are displayed on the book outline page.');
     $this->assertSession()->responseNotContains($new_title);
     $this->assertSession()->responseContains($old_title);
   }

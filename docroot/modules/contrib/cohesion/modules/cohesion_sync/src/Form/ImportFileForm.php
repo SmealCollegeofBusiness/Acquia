@@ -278,12 +278,14 @@ class ImportFileForm extends FormBase {
 
     // Remove action entries depending on user input.
     if ($this->step == 1) {
-      foreach ($form_state->getValue('indexes') as $uuid => $item) {
-        if ($item['action'] == FALSE) {
-          $this->action_data[$uuid]['entry_action_state'] = ENTRY_EXISTING_IGNORED;
-        }
-        else {
-          $this->action_data[$uuid]['entry_action_state'] = ENTRY_EXISTING_OVERWRITTEN;
+      if ($form_state->getValue('indexes')) {
+        foreach ($form_state->getValue('indexes') as $uuid => $item) {
+          if ($item['action'] == FALSE) {
+            $this->action_data[$uuid]['entry_action_state'] = ENTRY_EXISTING_IGNORED;
+          }
+          else {
+            $this->action_data[$uuid]['entry_action_state'] = ENTRY_EXISTING_OVERWRITTEN;
+          }
         }
       }
     }

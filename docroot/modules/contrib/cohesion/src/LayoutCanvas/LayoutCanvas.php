@@ -19,7 +19,14 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
    *
    * @var object
    */
-  protected $raw_decoded_canvas;
+  protected $raw_decoded_canvas = NULL;
+
+  /**
+   * The json canvas as stored in database
+   *
+   * @var string
+   */
+  protected $json_values;
 
   /**
    * The top elements in the canvas.
@@ -95,8 +102,8 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
    * @param $json_values
    */
   public function __construct($json_values) {
+    $this->json_values = $json_values;
     $decoded_json_values = json_decode($json_values);
-    $this->raw_decoded_canvas = json_decode($json_values);
 
     $model = property_exists($decoded_json_values, 'model') && is_object($decoded_json_values->model) ? $decoded_json_values->model : FALSE;
 
@@ -336,6 +343,10 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
   }
 
   public function getRawDecodedJsonValues() {
+    if($this->raw_decoded_canvas == NULL) {
+      $this->raw_decoded_canvas = json_decode($this->json_values);
+    }
+
     return $this->raw_decoded_canvas;
   }
 

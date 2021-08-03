@@ -4,6 +4,7 @@ namespace Drupal\acquia_contenthub_server_test\Client;
 
 use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\ContentHubClient\Settings;
+use Acquia\ContentHubClient\Webhook;
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
 use Acquia\Hmac\Key;
 use Drupal\acquia_contenthub_test\MockDataProvider;
@@ -125,6 +126,41 @@ class ContentHubClientMock extends ContentHubClient {
   /**
    * {@inheritdoc}
    */
+  public function getWebHooks() {
+    return [
+      new Webhook([
+        'uuid' => '4e68da2e-a729-4c81-9c16-e4f8c05a11be',
+        'client_uuid' => 'valid_client_uuid',
+        'client_name' => 'client',
+        'url' => 'http://example.com/acquia-contenthub/webhook',
+        'version' => 2,
+        'disable_retries' => 'false',
+        'filters' => [
+          'valid_filter_uuid_1',
+          'valid_filter_uuid_2',
+          'valid_filter_uuid_3',
+        ],
+        'status' => 'ENABLED',
+        'is_migrated' => FALSE,
+        'suppressed_until' => 0,
+      ]),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFilter($filter_id): array {
+    return [
+      'data' => [
+        'name' => 'default_filter_client',
+      ],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function updateWebhook($uuid, array $options) {
     return [
       'client_name' => $this->options['name'],
@@ -221,6 +257,13 @@ class ContentHubClientMock extends ContentHubClient {
     return [
       'success' => TRUE,
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function listEntities(array $options = []) {
+    return MockDataProvider::mockListEntities();
   }
 
   /**

@@ -272,7 +272,7 @@ class CohesionLayoutBuilderWidget extends WidgetBase implements ContainerFactory
    * @param array $complete_form
    */
   public function validateElement(array &$element, FormStateInterface $form_state, array &$complete_form) {
-    /** @var CohesionLayout $entity */
+    /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $entity */
     $entity = &$element['target_id']['#entity'];
 
     $value = [

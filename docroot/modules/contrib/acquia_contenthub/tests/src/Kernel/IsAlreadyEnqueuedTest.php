@@ -58,7 +58,7 @@ class IsAlreadyEnqueuedTest extends QueueingTestBase {
     $node->setPublished();
     $node->save();
 
-    $this->assertEqual(
+    $this->assertEquals(
       $this->contentHubQueue->getQueueCount(),
       1,
       'Node created and queued.'
@@ -66,7 +66,7 @@ class IsAlreadyEnqueuedTest extends QueueingTestBase {
 
     $node->setTitle('New title');
     $node->save();
-    $this->assertEqual(
+    $this->assertEquals(
       $this->contentHubQueue->getQueueCount(),
       1,
       'Node not queued again.'

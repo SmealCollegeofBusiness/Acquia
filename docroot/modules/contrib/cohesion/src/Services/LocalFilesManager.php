@@ -4,12 +4,14 @@ namespace Drupal\cohesion\Services;
 
 use Drupal\Component\FileSecurity\FileSecurity;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * Class LocalFilesManager.
@@ -60,12 +62,22 @@ class LocalFilesManager {
    * @param \Drupal\Core\TempStore\SharedTempStoreFactory $shared_store_factory
    *   The tempstore service.
    * @param \Drupal\cohesion\Services\CohesionUtils $cohesion_utils
+   * @param \Symfony\Component\HttpFoundation\Session\Session $session
    */
-  public function __construct(TranslationInterface $stringTranslation, ConfigFactoryInterface $configFactory, KeyValueFactoryInterface $keyValueFactory, SharedTempStoreFactory $shared_store_factory, CohesionUtils $cohesion_utils) {
+  public function __construct(TranslationInterface $stringTranslation, ConfigFactoryInterface $configFactory, KeyValueFactoryInterface $keyValueFactory, SharedTempStoreFactory $shared_store_factory, CohesionUtils $cohesion_utils, Session $session) {
     $this->stringTranslation = $stringTranslation;
     $this->stylesheetJsonKeyvalue = $configFactory->get('cohesion.settings')->get('stylesheet_json_storage_keyvalue');
     $this->keyValueStore = $keyValueFactory->get('sitestudio');
-    $this->sharedTempStore = $shared_store_factory->get('sitestudio');
+    // When cohesion module is installed during Site Installation, it redirects user to access denied page. During Site
+    // installation, when the request is made to get sharedTempStoreObject without passing userId, it creates a
+    // SharedTempStore for the anonymous user (i.e some random generated identifier).
+    // (@see \Drupal\Core\TempStore\SharedTempStoreFactory::get($collection, $owner)) But after Site Installation is
+    // completed, new drupal session is created for the admin user.
+    if (InstallerKernel::installationAttempted()) {
+      $this->sharedTempStore = $shared_store_factory->get('sitestudio', $session->getId());
+    } else {
+      $this->sharedTempStore = $shared_store_factory->get('sitestudio');
+    }
     $this->cohesionUtils = $cohesion_utils;
   }
 

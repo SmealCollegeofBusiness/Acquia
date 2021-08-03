@@ -3,7 +3,6 @@
 namespace Drupal\cohesion_website_settings;
 
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
-use Drupal\cohesion_website_settings\Entity\Color;
 use Drupal\cohesion_website_settings\Entity\FontStack;
 use Drupal\cohesion_website_settings\Entity\WebsiteSettings;
 use Drupal\Component\Serialization\Json;

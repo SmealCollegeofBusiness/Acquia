@@ -6,6 +6,7 @@ use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
@@ -44,6 +45,13 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
   protected $factory;
 
   /**
+   * The Content Hub Client.
+   *
+   * @var \Acquia\ContentHubClient\ContentHubClient
+   */
+  protected $client;
+
+  /**
    * The Subscriber Tracker.
    *
    * @var \Drupal\acquia_contenthub_subscriber\SubscriberTracker
@@ -58,6 +66,13 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
   protected $achLoggerChannel;
 
   /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
    * ContentHubExportQueueWorker constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -70,6 +85,8 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    *   The Subscriber Tracker.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger factory.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    * @param array $configuration
    *   The plugin configuration.
    * @param string $plugin_id
@@ -79,7 +96,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    *
    * @throws \Exception
    */
-  public function __construct(EventDispatcherInterface $dispatcher, ContentHubCommonActions $common, ClientFactory $factory, SubscriberTracker $tracker, LoggerChannelFactoryInterface $logger_factory, array $configuration, $plugin_id, $plugin_definition) {
+  public function __construct(EventDispatcherInterface $dispatcher, ContentHubCommonActions $common, ClientFactory $factory, SubscriberTracker $tracker, LoggerChannelFactoryInterface $logger_factory, ConfigFactoryInterface $config_factory, array $configuration, $plugin_id, $plugin_definition) {
 
     $this->common = $common;
     if (!empty($this->common->getUpdateDbStatus())) {
@@ -89,6 +106,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
     $this->factory = $factory;
     $this->tracker = $tracker;
     $this->achLoggerChannel = $logger_factory->get('acquia_contenthub_subscriber');
+    $this->configFactory = $config_factory;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -102,10 +120,20 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
       $container->get('acquia_contenthub.client.factory'),
       $container->get('acquia_contenthub_subscriber.tracker'),
       $container->get('logger.factory'),
+      $container->get('config.factory'),
       $configuration,
       $plugin_id,
       $plugin_definition
     );
+  }
+
+  /**
+   * Initializes the Connection Manager.
+   */
+  public function initializeClient(): void {
+    if (empty($this->client)) {
+      $this->client = $this->factory->getClient();
+    }
   }
 
   /**
@@ -117,7 +145,8 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    * @throws \Exception
    */
   public function processItem($data): void {
-    if (!$ach_client = $this->factory->getClient()) {
+    $this->initializeClient();
+    if (!$this->client) {
       $this->achLoggerChannel->error('Acquia Content Hub client cannot be initialized because connection settings are empty.');
       return;
     }
@@ -126,7 +155,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
     $webhook = $settings->getWebhook('uuid');
 
     try {
-      $interests = $ach_client->getInterestsByWebhook($webhook);
+      $interests = $this->client->getInterestsByWebhook($webhook);
     }
     catch (\Exception $exception) {
       $this->achLoggerChannel->error(
@@ -138,6 +167,9 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
 
       return;
     }
+
+    $config = $this->configFactory->get('acquia_contenthub.admin_settings');
+    $send_update = $config->get('send_contenthub_updates') ?? TRUE;
 
     $process_items = explode(', ', $data->uuids);
 
@@ -162,7 +194,8 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
 
     try {
       $stack = $this->common->importEntities(...$uuids);
-      $this->factory->getClient();
+      // Reinitialize the client to refresh the client CDF metrics.
+      $this->client = $this->factory->getClient();
     }
     catch (ContentHubImportException $e) {
       // Get UUIDs.
@@ -175,7 +208,9 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
             try {
               if (!$this->tracker->getEntityByRemoteIdAndHash($uuid)) {
                 // If we cannot load, delete interest and tracking record.
-                $ach_client->deleteInterest($uuid, $webhook);
+                if ($send_update) {
+                  $this->client->deleteInterest($uuid, $webhook);
+                }
                 $this->tracker->delete($uuid);
                 $this->achLoggerChannel->info(
                   sprintf(
@@ -206,10 +241,9 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
       }
     }
 
-    if ($webhook) {
+    if ($webhook && $send_update) {
       try {
-        $ach_client->addEntitiesToInterestList($webhook, array_keys($stack->getDependencies()));
-
+        $this->client->addEntitiesToInterestList($webhook, array_keys($stack->getDependencies()));
         $this->achLoggerChannel->info(
           sprintf(
             'The following imported entities have been added to the interest list on Content Hub for webhook "%s": [%s].',

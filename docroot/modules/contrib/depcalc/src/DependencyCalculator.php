@@ -2,6 +2,7 @@
 
 namespace Drupal\depcalc;
 
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\depcalc\Event\CalculateEntityDependenciesEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -23,13 +24,23 @@ class DependencyCalculator {
   protected $dispatcher;
 
   /**
+   * The depcalc logger channel.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $logger;
+
+  /**
    * The DependencyCalculator constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
    *   The event dispatcher.
+   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
+   *   The depcalc logger channel.
    */
-  public function __construct(EventDispatcherInterface $dispatcher) {
+  public function __construct(EventDispatcherInterface $dispatcher, LoggerChannelInterface $logger) {
     $this->dispatcher = $dispatcher;
+    $this->logger = $logger;
   }
 
   /**
@@ -53,28 +64,28 @@ class DependencyCalculator {
     if (!empty($dependencies[$wrapper->getUuid()])) {
       return $dependencies;
     }
+
     // Prevent handling the same entity more than once.
-    try {
-      if ($dependency = $stack->getDependency($wrapper->getUuid())) {
-        // Get module dependencies from cache.
-        $modules = $dependency->getModuleDependencies();
-        if ($modules) {
-          $wrapper->addModuleDependencies($modules);
-          $dependencies['module'] = $modules;
-        }
-        // Get list of the dependencies from cache.
+    if ($dependency = $stack->getDependency($wrapper->getUuid())) {
+      // Get module dependencies from cache.
+      $modules = $dependency->getModuleDependencies();
+      if ($modules) {
+        $wrapper->addModuleDependencies($modules);
+        $dependencies['module'] = $modules;
+      }
+
+      // Tries to get a list of the dependencies from cache.
+      try {
         $dependencies = $stack->getDependenciesByUuid(array_keys($dependency->getDependencies()));
         // Add the dependencies from cache to the main wrapper as well as stack.
         $wrapper->addDependencies($stack, ...array_values($dependencies));
         $dependencies[$wrapper->getUuid()] = $dependency;
         return $dependencies;
       }
-    }
-    catch (\Exception $exception) {
-      $msg = $exception->getMessage();
-      if ($msg !== sprintf("Missing Dependency requested: %s.", $wrapper->getUuid())) {
-        $missing_dep_msg = sprintf("Dependency calculation failed for entity (%s, %s) as one of the dependency is missing from the cache. Please resave/reenqueue this entity." . PHP_EOL, $wrapper->getEntityTypeId(), $wrapper->getUuid());
-        throw new \Exception($missing_dep_msg . $msg);
+      catch (\Exception $exception) {
+        $msg = $exception->getMessage();
+        $missing_dep_msg = sprintf("Retrieving dependencies from cache failed for entity (%s, %s) as one of the dependency is missing from the cache. Dependencies will be re-calculated." . PHP_EOL, $wrapper->getEntityTypeId(), $wrapper->getUuid());
+        $this->logger->warning($missing_dep_msg . $msg);
       }
     }
 

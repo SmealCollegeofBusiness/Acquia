@@ -56,9 +56,10 @@ function acquia_contenthub_subscriber_track_imported_linked_entities(&$context) 
 
   /** @var \Drupal\acquia_contenthub\Client\ClientFactory $client_factory */
   $client_factory = \Drupal::service('acquia_contenthub.client.factory');
-  $webhook = \Drupal::configFactory()->get('acquia_contenthub.admin_settings')->get('webhook');
+  $config = \Drupal::configFactory()->get('acquia_contenthub.admin_settings');
+  $webhook = $config->get('webhook');
   $webhook_uuid = $webhook['uuid'] ?? NULL;
-  if ($webhook_uuid && $uuids) {
+  if ($webhook_uuid && $uuids && ($config->get('send_contenthub_updates') ?? TRUE)) {
     // Adding imported entities to interest list.
     $settings = $client_factory->getSettings();
     $client_factory

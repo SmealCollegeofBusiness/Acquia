@@ -56,10 +56,15 @@ class EntityEmbedCollector extends BaseDependencyCollector {
     if (!$entity instanceof ContentEntityInterface) {
       return;
     }
-    $fields = FieldExtractor::getFieldsFromEntity($entity, function(ContentEntityInterface $entity, $field_name, FieldItemListInterface $field) {
-      $storage_definition = $field->getFieldDefinition()->getFieldStorageDefinition();
-      return ($storage_definition instanceof FieldStorageConfig && $storage_definition->getTypeProvider() == 'text');
-    });
+    $fields = FieldExtractor::getFieldsFromEntity($entity,
+      function(ContentEntityInterface $entity, $field_name, FieldItemListInterface $field) {
+        $storage_definition = $field->getFieldDefinition()->getFieldStorageDefinition();
+        return (
+          $storage_definition instanceof FieldStorageConfig &&
+          $storage_definition->getTypeProvider() === 'text'
+        );
+      }
+    );
     foreach ($fields as $field) {
       foreach ($field->getValue() as $value) {
         if (empty($value['format'])) {

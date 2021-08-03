@@ -3,11 +3,15 @@
 namespace Drupal\acquia_contenthub\Commands;
 
 use Acquia\ContentHubClient\ContentHubClient;
+use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Client\ClientFactory;
+use Drupal\acquia_contenthub\ContentHubConnectionManager;
+use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
 use Drupal\acquia_contenthub\Form\ContentHubSettingsForm;
 use Drupal\Core\Form\FormState;
 use Drush\Commands\DrushCommands;
 use Drush\Log\LogLevel;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Drush commands for interacting with Acquia Content Hub client site.
@@ -24,13 +28,33 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
   protected $clientFactory;
 
   /**
+   * Event dispatcher.
+   *
+   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   */
+  protected $eventDispatcher;
+
+  /**
+   * ACH connection manager.
+   *
+   * @var \Drupal\acquia_contenthub\ContentHubConnectionManager
+   */
+  protected $achConnectionManager;
+
+  /**
    * AcquiaContentHubSiteCommands constructor.
    *
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
-   *   The client factory.
+   *   ACH client factory.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
+   *   Symfony event dispatcher.
+   * @param \Drupal\acquia_contenthub\ContentHubConnectionManager $achConnectionManager
+   *   ACH connection manager.
    */
-  public function __construct(ClientFactory $client_factory) {
+  public function __construct(ClientFactory $client_factory, EventDispatcherInterface $eventDispatcher, ContentHubConnectionManager $achConnectionManager) {
     $this->clientFactory = $client_factory;
+    $this->eventDispatcher = $eventDispatcher;
+    $this->achConnectionManager = $achConnectionManager;
   }
 
   /**
@@ -71,8 +95,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
     $config_origin = $settings->getUuid();
 
     $provider = $this->clientFactory->getProvider();
-    $disabled = $provider != 'core_config';
-    if ($disabled) {
+    if ($provider != 'core_config') {
       $message = dt('Settings are being provided by @provider, and already connected.', ['@provider' => $provider]);
       $this->logger()->log(LogLevel::CANCEL, $message);
       return;
@@ -119,6 +142,10 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
   /**
    * Disconnects a site with contenthub.
    *
+   * @option delete
+   *   Flag to delete all the entities from Content Hub.
+   * @default delete
+   *
    * @command acquia:contenthub-disconnect-site
    * @aliases ach-disconnect,acquia-contenthub-disconnect-site
    */
@@ -132,8 +159,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
     }
 
     $provider = $this->clientFactory->getProvider();
-    $disabled = $provider != 'core_config';
-    if ($disabled) {
+    if ($provider != 'core_config') {
       $message = dt(
         'Settings are being provided by %provider and cannot be disconnected manually.',
         ['%provider' => $provider]
@@ -142,8 +168,56 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
       return;
     }
 
+    $client = $this->clientFactory->getClient();
+    $settings = $client->getSettings();
+    $remote_settings = $client->getRemoteSettings();
+
+    foreach ($remote_settings['webhooks'] as $webhook) {
+      // Checks that webhook from settings and url from options are matching.
+      $uri_option = $this->input->getOption('uri');
+      if ($uri_option && $settings->getWebhook() !== $uri_option) {
+        continue;
+      }
+
+      if ($webhook['client_name'] === $settings->getName()) {
+        $webhook_uuid = $webhook['uuid'];
+        break;
+      }
+    }
+
+    if (empty($webhook_uuid)) {
+      $this->logger->log(LogLevel::ERROR, 'Cannot find webhook UUID.');
+      return;
+    }
+
+    $event = new AcquiaContentHubUnregisterEvent($webhook_uuid);
+    $this->eventDispatcher->dispatch(AcquiaContentHubEvents::ACH_UNREGISTER, $event);
+
     try {
-      $client->deleteClient();
+      $delete = $this->input->getOption('delete');
+      if ($delete === 'all') {
+        $warning_message = dt('This command will delete ALL the entities published by this origin before unregistering the client. There is no way back from this action. It might take a while depending how many entities originated from this site. Are you sure you want to proceed (Y/n)?');
+        if ($this->io()->confirm($warning_message) === FALSE) {
+          $this->logger->log(LogLevel::ERROR, 'Cancelled.');
+          return;
+        }
+        foreach ($event->getOrphanedEntities() as $entity) {
+          if ($entity['type'] === 'client') {
+            continue;
+          }
+          $client->deleteEntity($entity['uuid']);
+        }
+      }
+
+      if ($event->getOrphanedEntitiesAmount() > 0 && $delete !== 'all') {
+        $message = $this->output->writeln(dt('There are @count entities published from this origin. You have to delete/reoriginate those entities before proceeding with the unregistration. If you want to delete those entities and unregister the client, use the following drush command "drush ach-disconnect --delete=all".', [
+          '@count' => $event->getOrphanedEntitiesAmount(),
+        ]));
+        $this->logger->log(LogLevel::CANCEL, $message);
+        return;
+      }
+
+      $this->achConnectionManager->unregister($event);
     }
     catch (\Exception $exception) {
       $this->logger->log(LogLevel::ERROR, $exception->getMessage());
@@ -154,8 +228,6 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
     $client_name = $config->get('client_name');
     $config->delete();
 
-    // @todo We should disconnect the webhook, but first we need to know its
-    // ours.
     $message = dt(
       'Successfully disconnected site %site from contenthub',
       ['%site' => $client_name]

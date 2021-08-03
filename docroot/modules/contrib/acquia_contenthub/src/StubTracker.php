@@ -24,7 +24,7 @@ class StubTracker {
   /**
    * Potential stub entities.
    *
-   * @var \Drupal\Core\Entity\EntityInterface[]
+   * @var array
    */
   protected $stubs = [];
 
@@ -129,6 +129,22 @@ class StubTracker {
    */
   protected function getEntityTypeManager() {
     return \Drupal::entityTypeManager();
+  }
+
+  /**
+   * Checks if a stub is being tracked.
+   *
+   * @param string $entity_type
+   *   The entity type.
+   * @param int|string|null $entity_id
+   *   The entity ID.
+   *
+   * @return bool
+   *   Whether a stub is being tracked or not.
+   */
+  public function hasStub($entity_type, $entity_id): bool {
+    return isset($this->stubs[$entity_type]) &&
+      in_array($entity_id, $this->stubs[$entity_type]);
   }
 
 }

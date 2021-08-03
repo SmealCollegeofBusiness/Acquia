@@ -77,6 +77,13 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
   protected $achLoggerChannel;
 
   /**
+   * The Content Hub Client.
+   *
+   * @var \Acquia\ContentHubClient\ContentHubClient
+   */
+  protected $client;
+
+  /**
    * ContentHubExportQueueWorker constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -137,6 +144,15 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
   }
 
   /**
+   * Initializes the Connection Manager.
+   */
+  public function initializeClient(): void {
+    if (empty($this->client)) {
+      $this->client = $this->factory->getClient();
+    }
+  }
+
+  /**
    * {@inheritdoc}
    *
    * This method return values will be used within ContentHubExportQueue.
@@ -148,7 +164,8 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
    *      Entities processed and queue item will be deleted.
    */
   public function processItem($data) {
-    if (!$ach_client = $this->factory->getClient()) {
+    $this->initializeClient();
+    if (!$this->client) {
       $this->achLoggerChannel->error('Acquia Content Hub client cannot be initialized because connection settings are empty.');
       return FALSE;
     }
@@ -181,7 +198,7 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
     // we want to export were imported initially? We should dispatch an event
     // to look at the output and see if there are entries in our subscriber
     // table and then compare the rest against plexus data.
-    $event = new PrunePublishCdfEntitiesEvent($ach_client, $document, $config->get('origin'));
+    $event = new PrunePublishCdfEntitiesEvent($this->client, $document, $config->get('origin'));
     $this->dispatcher->dispatch(AcquiaContentHubEvents::PRUNE_PUBLISH_CDF_ENTITIES, $event);
     $output = array_values($event->getDocument()->getEntities());
     if (empty($output)) {
@@ -195,7 +212,7 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
     }
 
     // ContentHub backend determines new or update on the PUT endpoint.
-    $response = $ach_client->putEntities(...$output);
+    $response = $this->client->putEntities(...$output);
     if ($response->getStatusCode() !== 202) {
       $this->achLoggerChannel->error(
         sprintf(
@@ -218,7 +235,7 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
     }
 
     // Reinitialize client cdf metrics data.
-    $this->factory->getClient();
+    $this->client = $this->factory->getClient();
     $webhook = $config->get('webhook.uuid');
     $exported_entities = implode(', ', $entity_uuids);
 
@@ -232,25 +249,27 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
       return FALSE;
     }
 
-    try {
-      $ach_client->addEntitiesToInterestList($webhook, $entity_uuids);
-      $this->achLoggerChannel->info(
-        sprintf(
-          'The following exported entities have been added to the interest list on Content Hub for webhook "%s": [%s].',
-          $webhook,
-          $exported_entities
-        )
-      );
-    }
-    catch (\Exception $e) {
-      $this->achLoggerChannel->error(
-        sprintf(
-          'Error adding the following entities to the interest list for webhook "%s": [%s]. Error message: "%s".',
-          $webhook,
-          $exported_entities,
-          $e->getMessage()
-        )
-      );
+    if (($config->get('send_contenthub_updates') ?? TRUE)) {
+      try {
+        $this->client->addEntitiesToInterestList($webhook, $entity_uuids);
+        $this->achLoggerChannel->info(
+          sprintf(
+            'The following exported entities have been added to the interest list on Content Hub for webhook "%s": [%s].',
+            $webhook,
+            $exported_entities
+          )
+        );
+      }
+      catch (\Exception $e) {
+        $this->achLoggerChannel->error(
+          sprintf(
+            'Error adding the following entities to the interest list for webhook "%s": [%s]. Error message: "%s".',
+            $webhook,
+            $exported_entities,
+            $e->getMessage()
+          )
+        );
+      }
     }
 
     return count($output);

@@ -3,9 +3,11 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 use Acquia\ContentHubClient\Settings as AcquiaSettings;
+use Drupal\acquia_contenthub\Client\ProjectVersionClient;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Prophecy\Argument;
 
 /**
  * Tests the client factory.
@@ -28,6 +30,21 @@ class ClientFactoryTest extends EntityKernelTestBase {
     'acquia_contenthub',
     'acquia_contenthub_test',
   ];
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+    $pv_client = $this->prophesize(ProjectVersionClient::class);
+    $pv_client
+      ->getContentHubReleases()
+      ->willReturn(['latest' => '8.x-2.25']);
+    $pv_client
+      ->getDrupalReleases(Argument::any())
+      ->willReturn(['also_available' => '9.2.1', 'latest' => '8.9.16']);
+    $this->container->set('acquia_contenthub.project_version_client', $pv_client->reveal());
+  }
 
   /**
    * Test case when content hub configured via core config or UI.

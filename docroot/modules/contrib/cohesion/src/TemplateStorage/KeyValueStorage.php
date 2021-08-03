@@ -76,7 +76,7 @@ final class KeyValueStorage extends TemplateStorageBase {
   public function exists($name) {
     // To avoid needlessly querying the database, we only do the check if this
     // is a Cohesion template.
-    if (strpos($name, '--cohesion--')) {
+    if (strpos($name, self::TEMPLATE_PREFIX)) {
       $key = $this->getKey($name);
       return $this->keyValue->has($key);
     }
@@ -85,6 +85,9 @@ final class KeyValueStorage extends TemplateStorageBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function delete(string $name) {
     $this->keyValue->delete($this->getKey($name));
   }

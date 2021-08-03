@@ -73,7 +73,7 @@ class ContentHubWebhookController extends ControllerBase {
     $payload = $request->getContent();
 
     try {
-      $key = $this->validateWebhookSignature($request, $payload);
+      $key = $this->validateWebhookSignature($request);
       if ($key) {
         // Notify about the arrival of the webhook request.
         $this->getLogger('acquia_contenthub')->debug(new FormattableMarkup('Webhook landing: @whook', ['@whook' => print_r($payload, TRUE)]));
@@ -110,13 +110,11 @@ class ContentHubWebhookController extends ControllerBase {
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
-   * @param string $payload
-   *   The request payload.
    *
    * @return bool|\Acquia\Hmac\KeyInterface
    *   TRUE if signature verification passes, FALSE otherwise.
    */
-  public function validateWebhookSignature(Request $request, $payload) {
+  public function validateWebhookSignature(Request $request) {
     return $this->clientFactory->authenticate($request);
   }
 

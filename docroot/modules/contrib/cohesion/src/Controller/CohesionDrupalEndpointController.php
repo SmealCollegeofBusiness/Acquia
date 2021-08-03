@@ -468,7 +468,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
 
               foreach ($matches as $match) {
                 // Extract the node ID.
-                preg_match('#\((.*?)\)#', $match['value'], $var);
+                preg_match('#.*\(([^)]+)\)#', $match['value'], $var);
 
                 /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
                 $entity = $entity_type->load($var[1]);

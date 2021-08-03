@@ -253,6 +253,15 @@ final class AcquiaContentHubEvents {
   const DELETE_REMOTE_ENTITY = 'acquia_contenthub_delete_remote_entity';
 
   /**
+   * Event used to gather information before un-registration, webhook deletion.
+   *
+   * When any un-registration or webhook deletion process start we can dispatch
+   * this event to gather the necessary information for safe deletion. Gathers
+   * filters and entities which would be orphaned after the delete process.
+   */
+  const ACH_UNREGISTER = 'acquia_contenthub_unregister';
+
+  /**
    * Event used to build the clientcdf.
    *
    * When the clientcdf is created, this event allows modules to inject extra

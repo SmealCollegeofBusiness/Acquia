@@ -48,7 +48,6 @@ class SitestudioFrontendEditForm extends FormBase {
    * @inheritDoc
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    return;
   }
 
 }

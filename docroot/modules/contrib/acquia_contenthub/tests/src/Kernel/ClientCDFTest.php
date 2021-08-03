@@ -63,6 +63,7 @@ class ClientCDFTest extends EntityKernelTestBase {
     'acquia_contenthub',
     'acquia_contenthub_publisher',
     'acquia_contenthub_subscriber',
+    'acquia_contenthub_server_test',
   ];
 
   /**

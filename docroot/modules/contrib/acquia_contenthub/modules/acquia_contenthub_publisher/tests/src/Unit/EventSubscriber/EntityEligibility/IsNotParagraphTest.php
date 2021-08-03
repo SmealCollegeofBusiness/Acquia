@@ -18,6 +18,11 @@ use Drupal\Tests\UnitTestCase;
  */
 class IsNotParagraphTest extends UnitTestCase {
 
+  /**
+   * Tests paragraph eligibility.
+   *
+   * @throws \Exception
+   */
   public function testParagraphEligibility() {
     // Setup our files for testing.
     $paragraph = $this->prophesize(ParagraphInterface::class);

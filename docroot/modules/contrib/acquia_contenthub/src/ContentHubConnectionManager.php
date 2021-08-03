@@ -3,6 +3,8 @@
 namespace Drupal\acquia_contenthub;
 
 use Acquia\ContentHubClient\Settings;
+use Drupal\acquia_contenthub\Client\ClientFactory;
+use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Url;
 use Psr\Http\Message\ResponseInterface;
@@ -38,6 +40,13 @@ class ContentHubConnectionManager {
   protected $configFactory;
 
   /**
+   * The ContentHub client factory.
+   *
+   * @var \Drupal\acquia_contenthub\Client\ClientFactory
+   */
+  protected $factory;
+
+  /**
    * The Content Hub Client.
    *
    * @var \Acquia\ContentHubClient\ContentHubClient
@@ -63,15 +72,28 @@ class ContentHubConnectionManager {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The Config Factory.
+   * @param \Drupal\acquia_contenthub\Client\ClientFactory $factory
+   *   The ContentHub client factory.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger channel.
    * @param \Acquia\ContentHubClient\Settings $settings
    *   The settings object constructed from Content Hub settings form.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, LoggerInterface $logger, Settings $settings) {
+  public function __construct(ConfigFactoryInterface $config_factory, ClientFactory $factory, LoggerInterface $logger, Settings $settings) {
     $this->configFactory = $config_factory;
+    $this->factory = $factory;
     $this->logger = $logger;
     $this->settings = $settings;
+  }
+
+  /**
+   * Initializes the Connection Manager.
+   */
+  public function initialize() {
+    if (empty($this->client)) {
+      $client = $this->factory->getClient();
+      $this->setClient($client);
+    }
   }
 
   /**
@@ -111,6 +133,7 @@ class ContentHubConnectionManager {
    * @throws \Exception
    */
   public function registerWebhook(string $webhook_url): array {
+    $this->initialize();
     $response = $this->client->addWebhook($webhook_url);
     if (isset($response['success']) && $response['success'] === FALSE) {
       if (isset($response['error']['code']) && $response['error']['code'] === self::WEBHOOK_ALREADY_EXISTS) {
@@ -142,6 +165,7 @@ class ContentHubConnectionManager {
    * @throws \Exception
    */
   public function addDefaultFilterToWebhook(string $webhook_uuid): void {
+    $this->initialize();
     $filter_name = self::DEFAULT_FILTER . $this->client->getSettings()->getName();
     $filter = $this->createDefaultFilter($filter_name);
     $list = $this->client->listFiltersForWebhook($webhook_uuid);
@@ -186,6 +210,7 @@ class ContentHubConnectionManager {
    * @throws \Exception
    */
   public function updateWebhook(string $webhook_url): array {
+    $this->initialize();
     if (!$this->webhookIsRegistered($this->settings->getWebhook('url'))) {
       return $this->registerWebhook($webhook_url);
     }
@@ -229,62 +254,89 @@ class ContentHubConnectionManager {
   /**
    * Unregisters the client.
    *
+   * @param \Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent $event
+   *   ACH unregister event.
+   *
+   * @return bool
+   *   TRUE if unregister is successful, FALSE otherwise.
+   *
    * @throws \Exception
    */
-  public function unregister(): void {
-    // Make sure nothing has changed in our client since the setup of this
-    // service, therefore use the settings from client instead.
+  public function unregister(AcquiaContentHubUnregisterEvent $event): bool {
+    $this->initialize();
     $this->settings = $this->client->getSettings();
-    $webhook_uuid = $this->settings->getWebhook('uuid');
-    if ($webhook_uuid) {
-      $resp = $this->client->deleteWebhook($webhook_uuid);
-      if ($resp instanceof ResponseInterface && $resp->getStatusCode() !== Response::HTTP_OK) {
-        $this->logger->error('Could not unregister webhook: @e_message', ['@e_message' => $resp->getReasonPhrase()]);
-        return;
-      }
+
+    $success = $this->unregisterWebhook($event, TRUE);
+    if (!$success) {
+      $this->logger->error('Some error occurred during webhook deletion.');
+      return FALSE;
     }
 
-    $client_name = $this->settings->getName();
-    $default_filter = $this->client->getFilterByName(self::DEFAULT_FILTER . $client_name);
-    if (isset($default_filter['uuid'])) {
-      $this->client->deleteFilter($default_filter['uuid']);
-    }
+    $client_uuid = empty($event->getOriginUuid()) ? $this->settings->getUuid() : $event->getOriginUuid();
 
-    $resp = $this->client->deleteClient();
+    $client_name = $event->getClientName();
+    $resp = $this->client->deleteClient($client_uuid);
     if ($resp instanceof ResponseInterface && $resp->getStatusCode() !== Response::HTTP_OK) {
       $this->logger->error('Could not delete client: @e_message', ['@e_message' => $resp->getReasonPhrase()]);
-      return;
+      return FALSE;
     }
 
     $this->logger->notice('Successfully unregistered client @client', ['@client' => $client_name]);
-    $this->getContentHubConfig()->delete();
+
+    // If origin is set, then we unregister a different site, do not delete
+    // the config on this.
+    if (!$event->getOriginUuid()) {
+      $this->getContentHubConfig()->delete();
+    }
+
+    return TRUE;
   }
 
   /**
    * Unregisters the webhook url assigned to this site.
    *
-   * @throws \Exception
+   * @param \Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent $event
+   *   AcquiaContentHubUnregisterEvent instance.
+   * @param bool $delete_orphaned_filters
+   *   TRUE if orphaned filters should be deleted, FALSE otherwise.
+   *
+   * @return bool
+   *   TRUE, if un-registration is successful, FALSE otherwise.
    */
-  public function unregisterWebhook() {
-    $this->settings = $this->client->getSettings();
-    $webhook_uuid = $this->settings->getWebhook('uuid');
-    if ($webhook_uuid) {
-      $resp = $this->client->deleteWebhook($webhook_uuid);
-      if ($resp instanceof ResponseInterface && $resp->getStatusCode() !== Response::HTTP_OK) {
-        $this->logger->error('Could not unregister webhook: @e_message', ['@e_message' => $resp->getReasonPhrase()]);
-        return;
-      }
+  public function unregisterWebhook(AcquiaContentHubUnregisterEvent $event, bool $delete_orphaned_filters = FALSE): bool {
+    $this->initialize();
 
-      $client_name = $this->settings->getName();
-      $default_filter = $this->client->getFilterByName(self::DEFAULT_FILTER . $client_name);
-      if (isset($default_filter['uuid'])) {
-        $this->client->deleteFilter($default_filter['uuid']);
-      }
-
-      // Clears the webhook configuration.
-      $this->getContentHubConfig()->clear('webhook')->save();
-      return $resp;
+    $resp = $this->client->deleteWebhook($event->getWebhookUuid());
+    if ($resp instanceof ResponseInterface && $resp->getStatusCode() !== Response::HTTP_OK) {
+      $this->logger->error('Could not unregister webhook: @e_message', ['@e_message' => $resp->getReasonPhrase()]);
+      return FALSE;
     }
+
+    // Clears the webhook configuration.
+    $this->getContentHubConfig()->clear('webhook')->save();
+
+    $resp = $this->client->deleteFilter($event->getDefaultFilter());
+    if ($resp instanceof ResponseInterface && $resp->getStatusCode() !== Response::HTTP_OK) {
+      $this->logger->error('Could not delete default filter for webhook: @e_message', ['@e_message' => $resp->getReasonPhrase()]);
+      return FALSE;
+    }
+
+    if ($delete_orphaned_filters) {
+      foreach ($event->getOrphanedFilters() as $filter_id) {
+        if ($this->client->deleteFilter($filter_id) instanceof ResponseInterface && $resp->getStatusCode() !== Response::HTTP_OK) {
+          $this->logger->error('
+            Could not delete orphaned filter (@filter) for webhook: @e_message',
+            [
+              '@e_message' => $resp->getReasonPhrase(),
+              '@filter' => $filter_id,
+            ]);
+
+          return FALSE;
+        }
+      }
+    }
+
+    return TRUE;
   }
 
   /**
@@ -299,6 +351,7 @@ class ContentHubConnectionManager {
    * @throws \Exception
    */
   public function checkClient(): self {
+    $this->initialize();
     if (is_null($this->client)) {
       throw new \RuntimeException('Client is not configured.');
     }
@@ -323,6 +376,7 @@ class ContentHubConnectionManager {
    * @throws \Exception
    */
   protected function createDefaultFilter(string $filter_name) {
+    $this->initialize();
     $filter = $this->client->getFilterByName($filter_name);
     // Only create default filter if it does not exist yet for the current
     // client.
@@ -362,6 +416,7 @@ class ContentHubConnectionManager {
    * @throws \Exception
    */
   public function webhookIsRegistered(string $webhook_url): bool {
+    $this->initialize();
     $resp = $this->client->getWebHook($webhook_url);
     return !empty($resp);
   }
@@ -376,6 +431,7 @@ class ContentHubConnectionManager {
    *   TRUE if we get the response with success TRUE value.
    */
   public function removeWebhookSuppression(string $webhook_uuid): bool {
+    $this->initialize();
     $response_body = $this->client->unSuppressWebhook($webhook_uuid);
 
     if (!empty($response_body) && $response_body['success'] === TRUE) {
@@ -407,6 +463,7 @@ class ContentHubConnectionManager {
    *   TRUE if we get the response with success TRUE value.
    */
   public function suppressWebhook(string $webhook_uuid): bool {
+    $this->initialize();
     $response_body = $this->client->suppressWebhook($webhook_uuid);
 
     if (!empty($response_body) && $response_body['success'] === TRUE) {
@@ -464,6 +521,7 @@ class ContentHubConnectionManager {
    *   Webhook url.
    */
   protected function saveWebhookConfig(string $uuid, string $url): void {
+    $this->initialize();
     $wh_path = Url::fromRoute('acquia_contenthub.webhook')->toString();
     $settings_url = str_replace($wh_path, '', $url);
     $webhook = [
@@ -478,9 +536,12 @@ class ContentHubConnectionManager {
    * Synchronizes this webhook's interest list with tracking table.
    */
   public function syncWebhookInterestListWithTrackingTables() {
+    $this->initialize();
     $database = \Drupal::database();
     $module_handler = \Drupal::moduleHandler();
-    $webhook_uuid = $this->configFactory->get("acquia_contenthub.admin_settings")->get("webhook.uuid");
+    $config = $this->getContentHubConfig();
+    $webhook_uuid = $config->get("webhook.uuid");
+    $send_update = $config->get('send_contenthub_updates') ?? TRUE;
 
     // If subscriber.
     if ($module_handler->moduleExists('acquia_contenthub_subscriber')) {
@@ -492,7 +553,7 @@ class ContentHubConnectionManager {
       foreach ($results as $result) {
         $uuids[] = $result->entity_uuid;
       }
-      if (!empty($uuids)) {
+      if (!empty($uuids) && $send_update) {
         $this->client->addEntitiesToInterestList($webhook_uuid, $uuids);
         $this->logger->notice('Added @count imported entities to interest list for webhook uuid = "@webhook_uuid".', [
           '@count' => count($uuids),
@@ -511,7 +572,7 @@ class ContentHubConnectionManager {
       foreach ($results as $result) {
         $uuids[] = $result->entity_uuid;
       }
-      if (!empty($uuids)) {
+      if (!empty($uuids) && $send_update) {
         $this->client->addEntitiesToInterestList($webhook_uuid, $uuids);
         $this->logger->notice('Added @count exported entities to interest list for webhook uuid = "@webhook_uuid".', [
           '@count' => count($uuids),

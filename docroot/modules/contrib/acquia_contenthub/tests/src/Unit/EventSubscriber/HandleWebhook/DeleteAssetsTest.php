@@ -9,6 +9,8 @@ use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\DeleteAssets;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
+use Drupal\Core\Config\Config;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityBase;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
@@ -64,6 +66,13 @@ class DeleteAssetsTest extends UnitTestCase {
   private $clientFactory;
 
   /**
+   * The Config Factory Interface.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
    * The HMAC Key.
    *
    * @var \Acquia\Hmac\Key
@@ -101,6 +110,16 @@ class DeleteAssetsTest extends UnitTestCase {
 
     $this->clientFactory = $this->prophesize(ClientFactory::class);
     $this->clientFactory->getClient()->willReturn($this->contentHubClient);
+
+    $this->configFactory = $this->prophesize(ConfigFactoryInterface::class);
+    $config = $this->prophesize(Config::class);
+    $config
+      ->get(Argument::any())
+      ->willReturn(TRUE);
+    $this
+      ->configFactory
+      ->getEditable(Argument::any())
+      ->willReturn($config->reveal());
 
     $this->key = new Key('id', 'secret');
 
@@ -342,7 +361,7 @@ class DeleteAssetsTest extends UnitTestCase {
    * @throws \Exception
    */
   private function triggerEvent(HandleWebhookEvent $event): void {
-    (new DeleteAssets($this->tracker->reveal()))->onHandleWebhook($event);
+    (new DeleteAssets($this->tracker->reveal(), $this->configFactory->reveal()))->onHandleWebhook($event);
   }
 
   /**

@@ -123,6 +123,18 @@ Set the sync directory that Site studio should use:
 $settings['site_studio_sync'] = '../config/sync';
 ```
 
+Set the max number of entities to import via sync in the batch process:
+
+```
+$settings['sync_max_entity'] = 10;
+```
+
+Set the max number of entities to rebuild at one time in the rebuild batch process:
+
+```
+$settings['rebuild_max_entity'] = 10;
+```
+
 ## Global $config options
 
 Set API key:

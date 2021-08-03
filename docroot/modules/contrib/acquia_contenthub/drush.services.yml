@@ -7,7 +7,7 @@ services:
 
   acquia_contenthub.commands.entity:
     class: Drupal\acquia_contenthub\Commands\AcquiaContentHubEntityCommands
-    arguments: ['@entity.dependency.calculator', '@entity.cdf.serializer', '@acquia_contenthub.client.factory']
+    arguments: ['@entity.dependency.calculator', '@acquia_contenthub_common_actions']
     tags:
       - { name: drush.command }
 
@@ -43,18 +43,24 @@ services:
 
   acquia_contenthub.commands.site:
     class: Drupal\acquia_contenthub\Commands\AcquiaContentHubSiteCommands
-    arguments: ['@acquia_contenthub.client.factory']
+    arguments: ['@acquia_contenthub.client.factory', '@event_dispatcher', '@acquia_contenthub.connection_manager']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.settings:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubSettingsCommands
+    arguments: [ '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@messenger', '@config.factory' ]
     tags:
       - { name: drush.command }
 
   acquia_contenthub.commands.webhook:
     class: Drupal\acquia_contenthub\Commands\AcquiaContentHubWebhookCommands
-    arguments: ['@acquia_contenthub.client.factory']
+    arguments: ['@acquia_contenthub.client.factory', '@event_dispatcher']
     tags:
       - { name: drush.command }
 
   acquia_contenthub.commands.webhook.interests:
     class: Drupal\acquia_contenthub\Commands\AcquiaContentHubWebhookInterestCommands
-    arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.connection_manager']
+    arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.connection_manager', '@config.factory']
     tags:
       - { name: drush.command }

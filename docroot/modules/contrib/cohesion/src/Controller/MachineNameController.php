@@ -86,7 +86,9 @@ class MachineNameController extends CoreMachineNameController {
 
       // Quote the pattern delimiter and remove null characters to avoid the e
       // or other modifiers being injected.
+      // phpcs:disable
       $transliterated = preg_replace('@' . strtr($replace_pattern, ['@' => '\@', chr(0) => '']) . '@', $replace, $transliterated);
+      // phpcs:enable
     }
 
     // Get a quniue transliterated string.

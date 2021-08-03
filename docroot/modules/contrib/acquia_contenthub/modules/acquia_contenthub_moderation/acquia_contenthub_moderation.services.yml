@@ -2,6 +2,6 @@ services:
 
   create_moderated_forward_revision.pre_entity_save:
     class: Drupal\acquia_contenthub_moderation\EventSubscriber\PreEntitySave\CreateModeratedForwardRevision
-    arguments: ['@entity_type.manager', '@config.factory', '@content_moderation.moderation_information']
+    arguments: ['@entity_type.manager', '@config.factory', '@content_moderation.moderation_information', '@logger.factory']
     tags:
       - { name: event_subscriber }

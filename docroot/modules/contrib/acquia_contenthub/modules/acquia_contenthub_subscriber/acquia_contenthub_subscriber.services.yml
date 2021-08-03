@@ -6,7 +6,7 @@ services:
 
   acquia_contenthub_subscriber.handle_webhook.import_assets:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\ImportUpdateAssets
-    arguments: ['@queue', '@event_dispatcher', '@acquia_contenthub_subscriber.tracker', '@logger.factory']
+    arguments: ['@queue', '@event_dispatcher', '@acquia_contenthub_subscriber.tracker', '@logger.factory', '@config.factory']
     tags:
       - { name: event_subscriber }
 
@@ -18,7 +18,7 @@ services:
 
   acquia_contenthub_subscriber.handle_webhook.import_delete_assets:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\DeleteAssets
-    arguments: ['@acquia_contenthub_subscriber.tracker']
+    arguments: ['@acquia_contenthub_subscriber.tracker', '@config.factory']
     tags:
       - { name: event_subscriber }
 
@@ -80,5 +80,11 @@ services:
 
   acquia_contenthub.config_entity_null_uuid.pre_entity_save:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\PreEntitySave\ConfigEntityWithNullUuid
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub.entity_subqueue.pre_entity_save:
+    class: Drupal\acquia_contenthub_subscriber\EventSubscriber\PreEntitySave\EntitySubqueuePreSave
+    arguments: ['@database']
     tags:
       - { name: event_subscriber }

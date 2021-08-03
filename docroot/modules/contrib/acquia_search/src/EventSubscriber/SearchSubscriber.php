@@ -11,8 +11,6 @@ use Solarium\Core\Client\Adapter\AdapterHelper;
 use Solarium\Core\Client\Client;
 use Solarium\Core\Client\Response;
 use Solarium\Core\Event\Events;
-use Solarium\Core\Event\PostExecuteRequest;
-use Solarium\Core\Event\PreExecuteRequest;
 use Solarium\Core\Plugin\AbstractPlugin;
 use Solarium\Exception\HttpException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -67,11 +65,11 @@ class SearchSubscriber extends AbstractPlugin implements EventSubscriberInterfac
   /**
    * Build Acquia Search Solr Authenticator.
    *
-   * @param \Solarium\Core\Event\PreExecuteRequest $event
+   * @param \Solarium\Core\Event\PreExecuteRequest|\Drupal\search_api_solr\Solarium\EventDispatcher\EventProxy $event
    *   PreExecuteRequest event.
    */
-  public function preExecuteRequest(PreExecuteRequest $event) {
-
+  public function preExecuteRequest($event) {
+    /** @var \Solarium\Core\Event\PreExecuteRequest $event */
     /** @var \Solarium\Core\Client\Request $request */
     $request = $event->getRequest();
 
@@ -127,16 +125,17 @@ class SearchSubscriber extends AbstractPlugin implements EventSubscriberInterfac
   /**
    * Validate response.
    *
-   * @param \Solarium\Core\Event\PostExecuteRequest $event
+   * @param \Solarium\Core\Event\PostExecuteRequest|\Drupal\search_api_solr\Solarium\EventDispatcher\EventProxy $event
    *   postExecuteRequest event.
    *
    * @throws \Solarium\Exception\HttpException
    */
-  public function postExecuteRequest(PostExecuteRequest $event) {
+  public function postExecuteRequest($event) {
     if (!($this->client instanceof Client)) {
       return;
     }
 
+    /** @var \Solarium\Core\Event\PostExecuteRequest $event */
     $response = $event->getResponse();
 
     if ($response->getStatusCode() != 200) {

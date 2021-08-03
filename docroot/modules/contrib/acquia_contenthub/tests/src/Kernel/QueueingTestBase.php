@@ -18,7 +18,7 @@ abstract class QueueingTestBase extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'depcalc',

@@ -11,7 +11,7 @@ dependencies:
   - drupal:node
   - drupal:taxonomy
 
-# Information added by Drupal.org packaging script on 2020-09-18
-version: '8.x-4.3'
+# Information added by Drupal.org packaging script on 2021-07-15
+version: '8.x-4.4'
 project: 'acquia_lift'
-datestamp: 1600460604
+datestamp: 1626368037

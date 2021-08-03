@@ -8,6 +8,8 @@ use Drupal\Tests\BrowserTestBase;
 /**
  * Tests the Content Hub settings form.
  *
+ * @coversDefaultClass \Drupal\acquia_contenthub\Form\ContentHubSettingsForm
+ *
  * @group acquia_contenthub
  */
 class ContentHubSettingsFormTest extends BrowserTestBase {
@@ -98,6 +100,9 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
     $session->fieldExists('API Key');
     $session->fieldExists('Secret Key');
     $session->fieldExists('Client Name');
+    $session->fieldExists('Send updates to Content Hub Service.');
+    $session->fieldDisabled('Send updates to Content Hub Service.');
+    $session->fieldValueEquals('Send updates to Content Hub Service.', TRUE);
     $session->fieldExists('Publicly Accessible URL');
     $session->pageTextContains('Site\'s Origin UUID');
     $session->buttonExists('Register Site');
@@ -149,18 +154,9 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
     $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Register Site');
     $session->pageTextContains('Site successfully connected to Content Hub. To change connection settings, unregister the site first.');
     $session->statusCodeEquals(200);
-
     $session->buttonNotExists('Register Site');
     $session->buttonExists('Update Public URL');
-    $session->buttonExists('Unregister Site');
-
-    // Successful attempt to unregister client.
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, [], 'Unregister Site');
-    $session->pageTextContains(sprintf('Successfully disconnected site %s from Content Hub.', $settings['client_name']));
-
-    $session->buttonExists('Register Site');
-    $session->buttonNotExists('Update Public URL');
-    $session->buttonNotExists('Unregister Site');
+    $session->linkExists('Unregister Site');
   }
 
   /**
@@ -188,7 +184,7 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
 
     $session->buttonNotExists('Register Site');
     $session->buttonExists('Update Public URL');
-    $session->buttonExists('Unregister Site');
+    $session->linkExists('Unregister Site');
 
     // Failed attempt to update url.
     $settings = ['webhook' => MockDataProvider::ALREADY_REGISTERED_WEBHOOK];

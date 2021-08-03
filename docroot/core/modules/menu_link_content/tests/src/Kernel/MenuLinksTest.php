@@ -67,8 +67,8 @@ class MenuLinksTest extends KernelTestBase {
     // Then create a simple link hierarchy:
     // - parent
     //   - child-1
-    //      - child-1-1
-    //      - child-1-2
+    //     - child-1-1
+    //     - child-1-2
     //   - child-2
     $base_options = [
       'title' => 'Menu link test',
@@ -205,7 +205,7 @@ class MenuLinksTest extends KernelTestBase {
   }
 
   /**
-   * Test automatic reparenting of menu links.
+   * Tests automatic reparenting of menu links.
    */
   public function testMenuLinkReparenting($module = 'menu_test') {
     // Check the initial hierarchy.

@@ -16,7 +16,7 @@ use Drupal\Core\Entity\EntityInterface;
  * @throws \Exception
  */
 function acquia_contenthub_subscriber_entity_delete(EntityInterface $entity) {
-  /* @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
+  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
   $factory = \Drupal::service('acquia_contenthub.client.factory');
   $client = $factory->getClient();
   if ($client) {
@@ -46,6 +46,10 @@ function _acquia_contenthub_subscriber_delete_entity(EntityInterface $entity, Co
       ->info(sprintf("Removed tracking for entity with UUID = \"%s\".", $uuid));
 
     // Clean up the interest list.
+    $config = \Drupal::config('acquia_contenthub.admin_settings');
+    if (!($config->get('send_contenthub_updates') ?? TRUE)) {
+      return;
+    }
     $settings = $client->getSettings();
     $webhook_uuid = $settings->getWebhook('uuid');
     $client->deleteInterest($uuid, $webhook_uuid);

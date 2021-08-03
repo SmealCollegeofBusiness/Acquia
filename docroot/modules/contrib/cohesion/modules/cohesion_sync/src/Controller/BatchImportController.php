@@ -66,7 +66,7 @@ class BatchImportController extends ControllerBase {
       ->condition('uuid', $style_guide_managers, 'IN')
       ->execute();
 
-    /** @var StyleGuideManager[] $style_guide_managers */
+    /** @var \Drupal\cohesion_style_guide\Entity\StyleGuideManager[] $style_guide_managers */
     $style_guide_managers = StyleGuideManager::loadMultiple($style_guide_managers_ids);
     foreach ($style_guide_managers as $style_guide_manager) {
       $decoded_json = $style_guide_manager->getDecodedJsonValues(TRUE);
@@ -230,7 +230,7 @@ class BatchImportController extends ControllerBase {
    */
   public static function batchValidateEntry($file_uri, $entry_uuids, $store_key, &$context) {
     // Skip if there is validation errors
-    if($context['results']['error']) {
+    if ($context['results'] && $context['results']['error']) {
       return;
     }
     /** @var \Drupal\cohesion_sync\PackagerManager $package_manager */

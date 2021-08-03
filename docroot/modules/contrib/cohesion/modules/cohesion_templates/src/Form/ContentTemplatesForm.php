@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion_templates\Form;
 
+use Drupal\cohesion\TemplateStorage\TemplateStorageBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
@@ -191,7 +192,7 @@ class ContentTemplatesForm extends TemplateForm {
     \Drupal::moduleHandler()->alter('cohesion_templates_' . $entity_type . '_base_hook', $base_hook);
 
     // Node_type specific templates use custom prefix and suggestion.
-    $filename = str_replace('_', '-', sprintf('%s--cohesion--%s', $base_hook, $this->entity->get('id')));
+    $filename = str_replace('_', '-', sprintf('%s' . TemplateStorageBase::TEMPLATE_PREFIX . '-%s', $base_hook, $this->entity->get('id')));
     $this->entity->set('twig_template', $filename);
 
     // Set as default template?

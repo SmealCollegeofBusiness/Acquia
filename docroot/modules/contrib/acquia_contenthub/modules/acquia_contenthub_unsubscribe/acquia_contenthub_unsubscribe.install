@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Acquia Content Hub - Unsubscribe module install file.
+ */
+
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 
 /**
@@ -22,7 +27,8 @@ function acquia_contenthub_unsubscribe_install() {
   $client_factory = \Drupal::service('acquia_contenthub.client.factory');
 
   // Obtaining the Webhook.
-  $webhook = \Drupal::configFactory()->get('acquia_contenthub.admin_settings')->get('webhook');
+  $config = \Drupal::configFactory()->get('acquia_contenthub.admin_settings');
+  $webhook = $config->get('webhook');
   $webhook_uuid = $webhook['uuid'] ?? NULL;
   if (empty($webhook_uuid)) {
     \Drupal::logger('acquia_contenthub_unsubscribe')->error('There is no webhook defined for this site. Cannot add entities to interest list.');
@@ -31,7 +37,7 @@ function acquia_contenthub_unsubscribe_install() {
 
   $entities = [];
   foreach ($disconnected_entities as $key => $entity) {
-      $entities[] = $entity['uuid'];
+    $entities[] = $entity['uuid'];
     // Disconnecting it from the tracker.
     $tracker->setStatusByTypeId($entity['type'], $entity['id'], SubscriberTracker::AUTO_UPDATE_DISABLED);
     print sprintf("Disconnected tracker for entity ID = %s, type = %s\n", $entity['id'], $entity['type']);
@@ -39,10 +45,13 @@ function acquia_contenthub_unsubscribe_install() {
 
   // Adding imported entities to interest list.
   if (!empty($entities)) {
-    $client_factory
-      ->getClient()
-      ->addEntitiesToInterestList($webhook_uuid, $entities);
-    print "Added entities to interest list.\n";
+    $send_update = $config->get('send_contenthub_updates') ?? TRUE;
+    if ($send_update) {
+      $client_factory
+        ->getClient()
+        ->addEntitiesToInterestList($webhook_uuid, $entities);
+      print "Added entities to interest list.\n";
+    }
 
     // Deleting state variable.
     $state->delete('acquia_contenthub_update_82001_disconnected_entities');

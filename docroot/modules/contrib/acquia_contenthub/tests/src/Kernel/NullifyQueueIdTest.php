@@ -7,6 +7,7 @@ use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
+use Drupal\node\NodeInterface;
 
 /**
  * Tests the NullifyQueueId class.
@@ -26,6 +27,11 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
    * Queue name.
    */
   const QUEUE_NAME = 'acquia_contenthub_publish_export';
+
+  /**
+   * Entity Bundle name.
+   */
+  protected const BUNDLE = 'article';
 
   /**
    * Modules to enable.
@@ -99,10 +105,14 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
       'user',
     ]);
 
+    // Creates sample node type.
+    $this->createNodeType();
+
     $origin_uuid = '00000000-0000-0001-0000-123456789123';
     $configFactory = $this->container->get('config.factory');
     $config = $configFactory->getEditable('acquia_contenthub.admin_settings');
     $config->set('origin', $origin_uuid);
+    $config->set('send_contenthub_updates', TRUE);
     $config->save();
 
     // Acquia ContentHub export queue service.
@@ -161,6 +171,7 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
         $this->container->get('entity.dependency.calculator'),
         $this->container->get('acquia_contenthub.client.factory'),
         $this->container->get('logger.factory'),
+        $this->container->get('config.factory'),
       ])
       ->setMethods(['getUpdateDbStatus'])
       ->getMock();
@@ -177,8 +188,6 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
    * Test "queue_id" nullification when entities loose their queued state.
    */
   public function testQueueIdNullification() {
-    // Creates sample node type.
-    $this->createNodeType('article', 'Article');
     // Get some node.
     $node = $this->createNode();
 
@@ -220,18 +229,13 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
   /**
    * Creates sample node types.
    *
-   * @param string $type
-   *   Machine name of the node type.
-   * @param string $name
-   *   Label of the node type.
-   *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function createNodeType($type, $name) {
+  protected function createNodeType() {
     // Create the node bundle required for testing.
     $type = NodeType::create([
-      'type' => $type,
-      'name' => $name,
+      'type' => self::BUNDLE,
+      'name' => self::BUNDLE,
     ]);
     $type->save();
   }
@@ -239,15 +243,15 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
   /**
    * Creates node samples.
    *
-   * @return int
-   *   Node id.
+   * @return \Drupal\node\NodeInterface
+   *   Node object.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function createNode() {
+  protected function createNode(): NodeInterface {
     $node = Node::create([
       'title' => $this->randomMachineName(),
-      'type' => 'article',
+      'type' => self::BUNDLE,
       'langcode' => 'en',
       'created' => \Drupal::time()->getRequestTime(),
       'changed' => \Drupal::time()->getRequestTime(),

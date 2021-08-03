@@ -85,7 +85,7 @@ class CohesionApiClient {
     $cohesion_configs = \Drupal::config('cohesion.settings');
 
     return [
-      'dx8-env' => Settings::get('dx8_env', 'production'),
+      'dx8-env' => !empty($_ENV['AH_PRODUCTION']) && $_ENV['AH_PRODUCTION'] === 1 ? 'production' : Settings::get('dx8_env', 'non-production'),
       'dx8-site-id' => \Drupal::config('system.site')->get('uuid'),
       'dx8-api-key' => $cohesion_configs->get('api_key'),
       'dx8-drupal-path' => \Drupal::request()->getRequestUri(),

@@ -19,6 +19,11 @@ use Drupal\Tests\UnitTestCase;
  */
 class UnsupportedFileSchemeTest extends UnitTestCase {
 
+  /**
+   * Tests file scheme eligibility.
+   *
+   * @throws \Exception
+   */
   public function testFileSchemeEligibility() {
     // Setup our files for testing.
     $supported_file = $this->prophesize(FileInterface::class);

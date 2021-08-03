@@ -5,7 +5,6 @@ namespace Drupal\cohesion\Controller;
 use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
-use Drupal\views\Entity\View;
 use Drupal\views\Views;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -38,13 +37,17 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
       ],
     ];
     // And use that to get the list of view modes for the entity type.
-    $view_modes = \Drupal::entityQuery('entity_view_mode')->condition('targetEntityType', $entity_type)->execute();
+    $view_modes = $this->entityTypeManager()
+      ->getStorage('entity_view_mode')
+      ->getQuery()
+      ->condition('targetEntityType', $entity_type)
+      ->execute();
 
     // Get a list of view modes for the desired entity.
     foreach ($view_modes as $view_mode) {
 
       // Load the view mode config entity to get the label.
-      $view_mode_entity = \Drupal::entityTypeManager()->getStorage('entity_view_mode')->load($view_mode);
+      $view_mode_entity = $this->entityTypeManager()->getStorage('entity_view_mode')->load($view_mode);
 
       // Save the data.
       try {
@@ -81,12 +84,10 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
 
     $restrict = $request->query->get('restrict', []);
 
-    $storage = \Drupal::service('entity_type.manager')
-      ->getStorage('entity_view_mode');
+    $storage = $this->entityTypeManager()->getStorage('entity_view_mode');
     $entity_ids = $storage->getQuery()->execute();
     $entities = $storage->loadMultiple($entity_ids);
-    $entity_types_definition = \Drupal::service('entity_type.manager')
-      ->getDefinitions();
+    $entity_types_definition = $this->entityTypeManager->getDefinitions();
 
     $default_view_modes = [];
     foreach ($entities as $view_mode => $entity) {
@@ -169,7 +170,7 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
 
     $views_data = [];
     // Get a list of views.
-    if (($views = View::loadMultiple())) {
+    if (($views = $this->entityTypeManager()->getStorage('view')->loadMultiple())) {
       foreach ($views as $view) {
         $views_data[] = [
           'value' => $view->id(),
@@ -223,7 +224,7 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
     $view_name = $request->attributes->get('view');
     $view_display_name = $request->attributes->get('display');
 
-    if ($view = View::load($view_name)) {
+    if ($view = $this->entityTypeManager()->getStorage('view')->load($view_name)) {
 
       // Get the defined pager for this view display.
       $this_pager_type = isset($view->get('display')[$view_display_name]['display_options']['pager']['type']) ? $view->get('display')[$view_display_name]['display_options']['pager']['type'] : $view->get('display')['default']['display_options']['pager']['type'];
@@ -273,7 +274,7 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
       ];
     }
 
-    if (($view = View::load($view_id))) {
+    if (($view = $this->entityTypeManager()->getStorage('view')->load($view_id))) {
       $displays = $view->get('display');
 
       // Views data.

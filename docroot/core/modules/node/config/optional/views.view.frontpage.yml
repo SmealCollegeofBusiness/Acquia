@@ -243,7 +243,7 @@ display:
       arguments: {  }
       display_extenders: {  }
     display_plugin: default
-    display_title: Master
+    display_title: Default
     id: default
     position: 0
     cache_metadata:
@@ -293,6 +293,9 @@ display:
     display_options:
       path: node
       display_extenders: {  }
+      title: 'Content'
+      defaults:
+        title: false
     display_plugin: page
     display_title: Page
     id: page_1

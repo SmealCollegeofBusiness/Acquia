@@ -113,6 +113,7 @@ class UnserializationTest extends EntityKernelTestBase {
         $this->container->get('entity.dependency.calculator'),
         $this->container->get('acquia_contenthub.client.factory'),
         $this->container->get('logger.factory'),
+        $this->container->get('config.factory'),
       ])
       ->setMethods(['getUpdateDbStatus'])
       ->getMock();
@@ -125,6 +126,7 @@ class UnserializationTest extends EntityKernelTestBase {
         $this->container->get('acquia_contenthub.client.factory'),
         $this->container->get('acquia_contenthub_subscriber.tracker'),
         $this->container->get('logger.factory'),
+        $this->container->get('config.factory'),
         [],
         NULL,
         NULL,

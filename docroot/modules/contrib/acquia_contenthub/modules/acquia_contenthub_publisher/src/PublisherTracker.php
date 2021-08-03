@@ -38,6 +38,23 @@ class PublisherTracker {
   }
 
   /**
+   * Gets the tracking entity for a given uuid.
+   *
+   * @param string $uuid
+   *   The entity uuid.
+   *
+   * @return \Drupal\Core\Database\StatementInterface|int|null
+   *   Database statement
+   */
+  public function get(string $uuid) {
+    $query = $this->database->select(self::EXPORT_TRACKING_TABLE, 't')
+      ->fields('t', ['entity_uuid']);
+    $query->condition('entity_uuid', $uuid);
+
+    return $query->execute()->fetchObject();
+  }
+
+  /**
    * Gets the tracking record for a given uuid.
    *
    * @param string $uuid
@@ -46,9 +63,9 @@ class PublisherTracker {
    * @return \Drupal\Core\Database\StatementInterface|int|null
    *   Database statement
    */
-  public function get($uuid) {
+  public function getRecord(string $uuid) {
     $query = $this->database->select(self::EXPORT_TRACKING_TABLE, 't')
-      ->fields('t', ['entity_uuid']);
+      ->fields('t');
     $query->condition('entity_uuid', $uuid);
     return $query->execute()->fetchObject();
   }
@@ -64,7 +81,7 @@ class PublisherTracker {
    * @return int|null|bool
    *   The Queue ID or FALSE.
    */
-  public function getQueueId($uuid, $tracker_only = FALSE) {
+  public function getQueueId(string $uuid, bool $tracker_only = FALSE) {
     $query = $this->database->select(self::EXPORT_TRACKING_TABLE, 't')
       ->fields('t', ['queue_id']);
     $query->condition('entity_uuid', $uuid);
@@ -89,7 +106,7 @@ class PublisherTracker {
    *
    * @throws \Exception
    */
-  public function track(EntityInterface $entity, $hash) {
+  public function track(EntityInterface $entity, string $hash) {
     $this->insertOrUpdate($entity, self::EXPORTED, $hash);
   }
 
@@ -116,7 +133,7 @@ class PublisherTracker {
    *
    * @throws \Exception
    */
-  public function delete($uuid) {
+  public function delete(string $uuid) {
     $query = $this->database->delete(self::EXPORT_TRACKING_TABLE);
     $query->condition('entity_uuid', $uuid);
     return $query->execute();
@@ -137,7 +154,7 @@ class PublisherTracker {
    *
    * @throws \Exception
    */
-  protected function insertOrUpdate(EntityInterface $entity, $status, $hash = '') {
+  protected function insertOrUpdate(EntityInterface $entity, string $status, string $hash = '') {
     if ($entity instanceof EntityChangedInterface) {
       $modified = date('c', $entity->getChangedTime());
     }
@@ -145,36 +162,43 @@ class PublisherTracker {
       $modified = date('c');
     }
 
-    $results = $this->get($entity->uuid());
-
     // If we've previously tracked this thing, set its created date.
-    if ($results) {
-      $values = ['modified' => $modified, 'status' => $status];
-      if ($hash) {
-        $values['hash'] = $hash;
-      }
-      $query = $this->database->update(self::EXPORT_TRACKING_TABLE)
-        ->fields($values);
-      $query->condition('entity_uuid', $entity->uuid());
-      return $query->execute();
-    }
-    elseif ($entity instanceof NodeInterface) {
+    if ($entity instanceof NodeInterface) {
       $created = date('c', $entity->getCreatedTime());
     }
     // Otherwise just mirror the modified date.
     else {
       $created = $modified;
     }
-    $values = [
-      'entity_type' => $entity->getEntityTypeId(),
-      'entity_id' => $entity->id(),
-      'entity_uuid' => $entity->uuid(),
-      'status' => $status,
-      'created' => $created,
-      'modified' => $modified,
-      'hash' => $hash,
-    ];
-    return $this->database->insert(self::EXPORT_TRACKING_TABLE)
+
+    // Must check because of created field.
+    $results = $this->get($entity->uuid());
+
+    // If entity in the table update fields but not all of them.
+    if ($results) {
+      $values = [
+        'status' => $status,
+        'modified' => $modified,
+        'entity_uuid' => $entity->uuid(),
+      ];
+      if ($hash) {
+        $values['hash'] = $hash;
+      }
+    }
+    else {
+      $values = [
+        'entity_type' => $entity->getEntityTypeId(),
+        'entity_id' => $entity->id(),
+        'entity_uuid' => $entity->uuid(),
+        'status' => $status,
+        'created' => $created,
+        'modified' => $modified,
+        'hash' => $hash,
+      ];
+    }
+
+    return $this->database->merge(self::EXPORT_TRACKING_TABLE)
+      ->key('entity_uuid', $entity->uuid())
       ->fields($values)
       ->execute();
   }
@@ -222,7 +246,7 @@ class PublisherTracker {
    * @param string $uuid
    *   The uuid of an entity.
    */
-  public function nullifyQueueId($uuid) {
+  public function nullifyQueueId(string $uuid) {
     $query = $this->database->update(self::EXPORT_TRACKING_TABLE);
     $query->fields(['queue_id' => '']);
     $query->condition('entity_uuid', $uuid);
@@ -230,27 +254,56 @@ class PublisherTracker {
   }
 
   /**
-   * Obtains a list of entities.
+   * Obtains a list of tracked entities.
    *
-   * @param string $status
-   *   The status of the entities to track.
+   * @param string|array $status
+   *   The status of the entities to list or an array of statuses.
    * @param string $entity_type_id
    *   The Entity type.
    *
    * @return array
    *   An array of Tracked Entities set to reindex.
    */
-  public function listTrackedEntities(string $status, $entity_type_id = ''): array {
+  public function listTrackedEntities($status, string $entity_type_id = ''): array {
+    if (!is_array($status)) {
+      $status = [$status];
+    }
+
     $query = $this->database
       ->select(self::EXPORT_TRACKING_TABLE, 'ci')
       ->fields('ci')
-      ->condition('status', $status);
+      ->condition('status', $status, 'IN');
 
     if (!empty($entity_type_id)) {
       $query = $query->condition('entity_type', $entity_type_id);
     }
 
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
+  }
+
+  /**
+   * Nullifies hashes in the Publisher Tracker.
+   *
+   * @param array $statuses
+   *   An array of status.
+   * @param array $entity_types
+   *   An array of entity types.
+   * @param array $uuids
+   *   An array of Entity UUIDs.
+   */
+  public function nullifyHashes(array $statuses = [], array $entity_types = [], array $uuids = []) {
+    $query = $this->database->update(PublisherTracker::EXPORT_TRACKING_TABLE);
+    $query->fields(['hash' => '']);
+    if (!empty($statuses)) {
+      $query->condition('status', $statuses, 'IN');
+    }
+    if (!empty($entity_types)) {
+      $query->condition('entity_type', $entity_types, 'IN');
+    }
+    if (!empty($uuids)) {
+      $query->condition('entity_uuid', $uuids, 'IN');
+    }
+    $query->execute();
   }
 
 }
