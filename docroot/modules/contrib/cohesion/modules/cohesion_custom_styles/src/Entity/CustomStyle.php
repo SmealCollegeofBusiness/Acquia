@@ -313,7 +313,7 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
 
     // Patch in the settings.extended=true for child styles.
     if ($this->getParentId()) {
-      @ $entity_values->values->styles->settings->extended = TRUE;
+      @ $entity_values->values['styles']['settings']['extended'] = TRUE;
     }
 
     return $entity_values;

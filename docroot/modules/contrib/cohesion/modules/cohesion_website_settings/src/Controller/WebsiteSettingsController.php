@@ -482,7 +482,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
     // Process default element styles.
     $batch['operations'][] = [
       'cohesion_elements_get_elements_style_process_batch',
-      ['verbose' => $verbose],
+      [$verbose],
     ];
 
     $configs = \Drupal::entityTypeManager()->getDefinitions();
@@ -517,7 +517,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
           $ids = array_slice($entity_ids_needs_udpdate, $i, $entity_to_process);
           $batch['operations'][] = [
             '_resave_config_entity',
-            ['ids' => $ids, 'entity_type' => $style_config_type, 'verbose' => $verbose],
+            [$ids, $style_config_type, $verbose],
           ];
         }
 
@@ -529,7 +529,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
 
         $batch['operations'][] = [
           '_cohesion_styles_bulk_save',
-          ['ids' => $entity_ids_no_udpdate, 'entity_type' => $style_config_type , 'verbose' => $verbose],
+          [$entity_ids_no_udpdate, $style_config_type, $verbose],
         ];
 
         // Remove processed config type from all configs.
@@ -549,7 +549,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
             $ids = array_slice($entity_ids, $i, $entity_to_process);
             $batch['operations'][] = [
               '_resave_config_entity',
-              ['ids' => $ids, 'entity_type' => $entity_type_name, 'verbose' => $verbose],
+              [$ids, $entity_type_name, $verbose],
             ];
           }
 
@@ -569,7 +569,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
       $ids = array_slice($entity_ids, $i, $entity_to_process);
       $batch['operations'][] = [
         '_resave_cohesion_layout_entity',
-        ['ids' => $ids, 'verbose' => $verbose],
+        [$ids, $verbose],
       ];
     }
 
@@ -585,14 +585,14 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
     // Move temp to live.
     $batch['operations'][] = [
       'entity_rebuild_temp_to_live', [
-        'verbose' => $verbose,
+        $verbose,
       ],
     ];
 
     if(!$no_cache_clear) {
       $batch['operations'][] = [
         'batch_drupal_flush_all_caches', [
-        'verbose' => $verbose,
+          $verbose,
       ],
       ];
     }

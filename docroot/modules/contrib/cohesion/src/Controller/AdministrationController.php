@@ -96,7 +96,7 @@ class AdministrationController extends ControllerBase {
     $operations[] = [
       'cohesion_website_settings_enable_website_settings',
       [
-        'entities' => [
+        [
           'base_unit_settings',
           'responsive_grid_settings',
           'color_palette',

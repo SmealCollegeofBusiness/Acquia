@@ -67,7 +67,7 @@ class Random extends ProviderBase {
     $manager = new CountryManager($this->getModuleHandler());
     $countries = $manager->getList();
     uksort($countries, function () {
-      return rand() > rand();
+      return rand() <=> rand();
     });
     $country = array_slice($countries, 0, 1);
 
