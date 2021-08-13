@@ -32,13 +32,6 @@ class LanguageFieldSerializer implements EventSubscriberInterface {
     if ('language' !== $event->getField()->getFieldDefinition()->getType()) {
       return;
     }
-    if ($event->getFieldName() === $event->getEntity()->getEntityType()->getKey('langcode')) {
-      // Do not syndicate the "langcode" entity type key because Drupal will do
-      // its own determination of things like "default_langcode" if values are
-      // present in that field.
-      $event->setExcluded();
-      $event->stopPropagation();
-    }
 
     $this->setFieldMetaData($event);
     $data = [];

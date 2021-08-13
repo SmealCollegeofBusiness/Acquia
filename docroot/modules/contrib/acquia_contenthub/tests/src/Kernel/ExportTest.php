@@ -1404,9 +1404,6 @@ class ExportTest extends EntityKernelTestBase {
         'uuid' => [
           'type' => 'uuid',
         ],
-        'langcode' => [
-          'type' => 'language',
-        ],
         'type' => [
           'type' => 'entity_reference',
           'target' => 'node_type',
@@ -1587,7 +1584,6 @@ class ExportTest extends EntityKernelTestBase {
       'default_language' => 'en',
       'field' => [
         'uuid' => ['type' => 'uuid'],
-        'langcode' => ['type' => 'language'],
         'preferred_langcode' => ['type' => 'language'],
         'preferred_admin_langcode' => ['type' => 'language'],
         'name' => ['type' => 'string'],
@@ -1814,9 +1810,6 @@ class ExportTest extends EntityKernelTestBase {
       'field' => [
         'uuid' => [
           'type' => 'uuid',
-        ],
-        'langcode' => [
-          'type' => 'language',
         ],
         'vid' => [
           'type' => 'entity_reference',
@@ -2144,7 +2137,6 @@ class ExportTest extends EntityKernelTestBase {
       'default_language' => 'en',
       'field' => [
         'uuid' => ['type' => 'uuid'],
-        'langcode' => ['type' => 'language'],
         'uid' => [
           'type' => 'entity_reference',
           'target' => 'user',

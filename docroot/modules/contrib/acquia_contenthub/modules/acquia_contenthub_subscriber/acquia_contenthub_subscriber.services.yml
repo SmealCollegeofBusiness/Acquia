@@ -52,6 +52,11 @@ services:
     tags:
       - { name: event_subscriber }
 
+  acquia_contenthub_subscriber.load_local_entity.load_matching_redirect:
+    class: Drupal\acquia_contenthub_subscriber\EventSubscriber\LoadLocalEntity\LoadMatchingRedirect
+    tags:
+    - { name: event_subscriber }
+
   acquia_contenthub_subscriber.entity_import.track:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\EntityImport\TrackEntity
     arguments: ['@acquia_contenthub_subscriber.tracker']

@@ -429,13 +429,17 @@ class EntityCdfSerializer {
    * @throws \Exception
    */
   protected function handleImportFailure(int $count, CDFDocument $cdf, DependencyStack $stack) {
-    if ($count === count($stack->getDependencies()) && $count < count($cdf->getEntities())) {
-      // @todo get import failure logging and tracking working.
-      $failed_import_event = new FailedImportEvent($cdf, $stack, $count, $this);
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::IMPORT_FAILURE, $failed_import_event);
-      if ($failed_import_event->hasException()) {
-        throw $failed_import_event->getException();
-      }
+    $import_failed = $count === count($stack->getDependencies()) && $count < count($cdf->getEntities());
+    if (!$import_failed) {
+      return;
+    }
+
+    // @todo get import failure logging and tracking working.
+    $failed_import_event = new FailedImportEvent($cdf, $stack, $count, $this);
+    $this->dispatcher->dispatch(AcquiaContentHubEvents::IMPORT_FAILURE, $failed_import_event);
+    if ($failed_import_event->hasException()) {
+      $this->tracker->cleanUp(TRUE);
+      throw $failed_import_event->getException();
     }
   }
 

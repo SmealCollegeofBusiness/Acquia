@@ -6,6 +6,7 @@ use Acquia\ContentHubClient\CDF\CDFObject;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\CreateCdfEntityEvent;
+use Drupal\acquia_contenthub\Event\ExcludeEntityFieldEvent;
 use Drupal\acquia_contenthub\Event\ParseCdfEntityEvent;
 use Drupal\acquia_contenthub\Event\SerializeAdditionalMetadataEvent;
 use Drupal\acquia_contenthub\Event\SerializeCdfEntityFieldEvent;
@@ -118,11 +119,15 @@ class ContentEntityHandler implements EventSubscriberInterface {
 
     $fields = [];
     foreach ($entity as $field_name => $field) {
-      $field_event = new SerializeCdfEntityFieldEvent($entity, $field_name, $field, $cdf);
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD, $field_event);
-      if ($field_event->isExcluded()) {
+      $exclude_field_event = new ExcludeEntityFieldEvent($entity, $field_name, $field);
+      $this->dispatcher->dispatch(AcquiaContentHubEvents::EXCLUDE_CONTENT_ENTITY_FIELD, $exclude_field_event);
+      if ($exclude_field_event->isExcluded()) {
         continue;
       }
+
+      $field_event = new SerializeCdfEntityFieldEvent($entity, $field_name, $field, $cdf);
+      $this->dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD, $field_event);
+
       $fields[$field_name] = $field_event->getFieldData();
     }
     $metadata = $cdf->getMetadata();

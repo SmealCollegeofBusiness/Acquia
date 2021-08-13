@@ -7,7 +7,7 @@ dependencies:
   - acquia_contenthub
 hidden: true
 
-# Information added by Drupal.org packaging script on 2021-07-22
-version: '8.x-2.26'
+# Information added by Drupal.org packaging script on 2021-08-13
+version: '8.x-2.27'
 project: 'acquia_contenthub'
-datestamp: 1626980363
+datestamp: 1628870261

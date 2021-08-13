@@ -4,6 +4,7 @@ namespace Drupal\acquia_contenthub\EventSubscriber\PreEntitySave;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\PreEntitySaveEvent;
+use Drupal\redirect\Entity\Redirect;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -23,13 +24,14 @@ class RedirectSource implements EventSubscriberInterface {
   }
 
   /**
-   * Adds the query parameter to the Redirect Source Field.
+   * Adds the query parameter.
    *
    * @param \Drupal\acquia_contenthub\Event\PreEntitySaveEvent $event
    *   The pre entity save event.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function onPreEntitySave(PreEntitySaveEvent $event) {
     $entity = $event->getEntity();
@@ -39,15 +41,26 @@ class RedirectSource implements EventSubscriberInterface {
       return;
     }
 
-    $metadata = $event->getCdf()->getMetadata();
-    $data = json_decode(base64_decode($metadata['data']), TRUE);
+    $data = json_decode(base64_decode($event->getCdf()->getMetadata()['data']), TRUE);
     $redirect_source = $data['redirect_source'];
-    $langcode = $entity->getEntityType()->getKey('langcode');
-    $language = $entity->get($langcode)->value;
-    $query = $redirect_source['value'][$language]['query'] ?? NULL;
+    $this->setQuery($redirect_source, $entity);
+  }
+
+  /**
+   * Set query parameter for redirect.
+   *
+   * @param array $redirect_source
+   *   The redirect source.
+   * @param \Drupal\redirect\Entity\Redirect $redirect
+   *   The redirect entity.
+   */
+  protected function setQuery(array $redirect_source, Redirect $redirect) {
+    $langcode = $redirect->getEntityType()->getKey('langcode');
+    $language = $redirect->get($langcode)->value;
+    $query = $redirect_source['value'][$language]['query'] ?? [];
+    $path = $redirect->getSource()['path'];
     if (!empty($query)) {
-      $path = $entity->getSource()['path'];
-      $entity->setSource($path, $query);
+      $redirect->setSource($path, $query);
     }
   }
 

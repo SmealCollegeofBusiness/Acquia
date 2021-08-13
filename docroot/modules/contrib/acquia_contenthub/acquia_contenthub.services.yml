@@ -154,7 +154,7 @@ services:
 
   ach_version.client_cdf.attribute:
     class: Drupal\acquia_contenthub\EventSubscriber\CdfAttributes\AchVersionAttribute
-    arguments: ['@extension.list.module', '@acquia_contenthub.project_version_client']
+    arguments: ['@acquia_contenthub.project_version_client', '@module_handler']
     tags:
       - { name: event_subscriber }
 
@@ -194,18 +194,28 @@ services:
     tags:
       - { name: event_subscriber }
 
-  entity_id_and_revision.field.cdf.serializer:
-    class: Drupal\acquia_contenthub\EventSubscriber\SerializeContentField\RemoveIdAndRevisionFieldSerialization
+  entity_id.field.cdf.exclude:
+    class: Drupal\acquia_contenthub\EventSubscriber\ExcludeContentField\RemoveIdField
     tags:
       - { name: event_subscriber }
 
-  entity_subqueue_revision.field.cdf.serializer:
-    class: Drupal\acquia_contenthub\EventSubscriber\SerializeContentField\RemoveEntitySubqueueRevisionFieldSerialization
+  entity_revision.field.cdf.exclude:
+    class: Drupal\acquia_contenthub\EventSubscriber\ExcludeContentField\RemoveRevisionField
     tags:
       - { name: event_subscriber }
 
-  paragraph_parent_id.field.cdf.serializer:
-    class: Drupal\acquia_contenthub\EventSubscriber\SerializeContentField\RemoveParagraphParentId
+  paragraph_parent_id.field.cdf.exclude:
+    class: Drupal\acquia_contenthub\EventSubscriber\ExcludeContentField\RemoveParagraphParentId
+    tags:
+      - { name: event_subscriber }
+
+  language.field.cdf.exclude:
+    class: Drupal\acquia_contenthub\EventSubscriber\ExcludeContentField\RemoveLanguageField
+    tags:
+      - { name: event_subscriber }
+
+  path.field.cdf.exclude:
+    class: Drupal\acquia_contenthub\EventSubscriber\ExcludeContentField\RemovePathAliasField
     tags:
       - { name: event_subscriber }
 

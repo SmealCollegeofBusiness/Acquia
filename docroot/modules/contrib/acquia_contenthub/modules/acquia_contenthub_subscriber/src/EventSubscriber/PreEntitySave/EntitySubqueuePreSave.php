@@ -42,6 +42,8 @@ class EntitySubqueuePreSave implements EventSubscriberInterface {
    *   Database connection.
    */
   public function __construct(Connection $database) {
+    // Using \Drupal::entityTypeManager() do to caching of the instance in
+    // some services. Looks like a core bug.
     $this->entityTypeManager = \Drupal::entityTypeManager();
     $this->database = $database;
   }
@@ -50,7 +52,7 @@ class EntitySubqueuePreSave implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[AcquiaContentHubEvents::PRE_ENTITY_SAVE] = ['onPreEntitySave', 100];
+    $events[AcquiaContentHubEvents::PRE_ENTITY_SAVE] = ['onPreEntitySave', 80];
     return $events;
   }
 

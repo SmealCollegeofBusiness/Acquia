@@ -642,4 +642,22 @@ abstract class ImportExportTestBase extends EntityKernelTestBase {
     }
   }
 
+  /**
+   * Loads an entity of a given type by UUID.
+   *
+   * @param string $entity_type
+   *   The entity type.
+   * @param string $uuid
+   *   The UUID.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|bool
+   *   The entity (if any).
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function loadByUuid(string $entity_type, string $uuid) {
+    return current($this->entityTypeManager->getStorage($entity_type)->loadByProperties(['uuid' => $uuid]));
+  }
+
 }

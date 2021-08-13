@@ -25,6 +25,13 @@ function acquia_contenthub_subscriber_entity_delete(EntityInterface $entity) {
 }
 
 /**
+ * Implements hook_entity_insert().
+ */
+function acquia_contenthub_subscriber_entity_insert(EntityInterface $entity) {
+  \Drupal::service('acquia_contenthub.stub.tracker')->track($entity);
+}
+
+/**
  * Delete subscriber entities from the interest list and tracking table.
  *
  * @param \Drupal\Core\Entity\EntityInterface $entity

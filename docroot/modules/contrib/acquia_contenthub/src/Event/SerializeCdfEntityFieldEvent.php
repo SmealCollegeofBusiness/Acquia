@@ -55,15 +55,6 @@ class SerializeCdfEntityFieldEvent extends Event {
   protected $cdf;
 
   /**
-   * The "exclude" flag.
-   *
-   * If set to TRUE, the field will not be added to the CDF object.
-   *
-   * @var bool
-   */
-  protected $isExcludedField = FALSE;
-
-  /**
    * SerializeCdfEntityFieldEvent constructor.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
@@ -75,7 +66,7 @@ class SerializeCdfEntityFieldEvent extends Event {
    * @param \Acquia\ContentHubClient\CDF\CDFObject $cdf
    *   The CDF Object being created.
    */
-  public function __construct(ContentEntityInterface $entity, $field_name, FieldItemListInterface $field, CDFObject $cdf) {
+  public function __construct(ContentEntityInterface $entity, string $field_name, FieldItemListInterface $field, CDFObject $cdf) {
     $this->entity = $entity;
     $this->fieldName = $field_name;
     $this->field = $field;
@@ -154,23 +145,6 @@ class SerializeCdfEntityFieldEvent extends Event {
    */
   public function getCdf() {
     return $this->cdf;
-  }
-
-  /**
-   * Sets the "exclude" flag.
-   */
-  public function setExcluded() {
-    $this->isExcludedField = TRUE;
-  }
-
-  /**
-   * Returns the "exclude" flag state.
-   *
-   * @return bool
-   *   "Exclude" flag state.
-   */
-  public function isExcluded() {
-    return $this->isExcludedField;
   }
 
 }

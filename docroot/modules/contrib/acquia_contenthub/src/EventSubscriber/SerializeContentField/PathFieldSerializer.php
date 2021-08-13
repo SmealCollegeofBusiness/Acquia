@@ -71,22 +71,7 @@ class PathFieldSerializer extends FallbackFieldSerializer implements EventSubscr
     if ('path' !== $event->getField()->getFieldDefinition()->getType()) {
       return;
     }
-    parent::onSerializeContentField($event);
-    if (version_compare(\Drupal::VERSION, '8.8.0', '>=')) {
-      $event->setExcluded();
-      $event->stopPropagation();
-    }
-    // @todo remove this once we don't have to support 8.7.
-    $values = $event->getFieldData();
-    foreach ($values['value'] as $langcode => $value) {
-      // @todo check core's behavior around empty paths.
-      if (!empty($value['alias'])) {
-        $value['source'] = '';
-        $value['pid'] = '';
-        $values['value'][$langcode] = $value;
-        $event->setFieldData($values);
-      }
-    }
+    $event->stopPropagation();
   }
 
 }

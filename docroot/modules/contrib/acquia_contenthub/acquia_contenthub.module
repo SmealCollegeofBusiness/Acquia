@@ -50,10 +50,3 @@ function acquia_contenthub_entity_base_field_info_alter(&$fields, EntityTypeInte
     $fields['entity_type']->setClass(AcquiaContentHubGenerateNullFieldItemList::class);
   }
 }
-
-/**
- * Implements hook_entity_insert().
- */
-function acquia_contenthub_entity_insert(EntityInterface $entity) {
-  \Drupal::service('acquia_contenthub.stub.tracker')->track($entity);
-}

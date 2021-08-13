@@ -5,6 +5,7 @@ namespace Drupal\acquia_contenthub\EventSubscriber\PreEntitySave;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\PreEntitySaveEvent;
 use Drupal\acquia_contenthub\StubTracker;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -59,11 +60,24 @@ class CreateNewRevision implements EventSubscriberInterface {
     if (!$bundle_entity_type || $this->stubTracker->hasStub($entity->getEntityTypeId(), $entity->id())) {
       return;
     }
-    $bundle = \Drupal::entityTypeManager()->getStorage($bundle_entity_type)->load($entity->bundle());
+    $bundle = $this->getEntityTypeManager()->getStorage($bundle_entity_type)->load($entity->bundle());
     $should_create_new_revision = $bundle instanceof RevisionableEntityBundleInterface && $bundle->shouldCreateNewRevision();
     if ($entity->getEntityType()->isRevisionable() && $should_create_new_revision) {
       $entity->setNewRevision(TRUE);
     }
+  }
+
+  /**
+   * Returns uncached entity type manager.
+   *
+   * Using \Drupal::entityTypeManager() do to caching of the instance in
+   * some services. Looks like a core bug.
+   *
+   * @return \Drupal\Core\Entity\EntityTypeManagerInterface
+   *   The entity type manager.
+   */
+  public function getEntityTypeManager(): EntityTypeManagerInterface {
+    return \Drupal::entityTypeManager();
   }
 
 }

@@ -316,4 +316,12 @@ final class AcquiaContentHubEvents {
    */
   const UNSERIALIZE_ADDITIONAL_METADATA = 'acquia_contenthub_unserialize_additional_metadata';
 
+  /**
+   * Event triggered for content entity fields exclusion.
+   *
+   * This event allows to exclude fields from being added to the
+   * serialized output.
+   */
+  const EXCLUDE_CONTENT_ENTITY_FIELD = 'acquia_contenthub_exclude_entity_field';
+
 }

@@ -95,11 +95,14 @@ class StubTracker {
    * The stack and stub properties are reset when this is complete to prevent
    * bleed-through between runs.
    *
+   * @param bool $all
+   *   Whether to delete all stubs or to delete them conditionally.
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function cleanUp() {
+  public function cleanUp($all = FALSE) {
     if (!$this->isTracking()) {
       return;
     }
@@ -110,15 +113,33 @@ class StubTracker {
         if (!$entity) {
           continue;
         }
-        $event = new CleanUpStubsEvent($entity, $this->stack);
-        $this->dispatcher->dispatch(AcquiaContentHubEvents::CLEANUP_STUBS, $event);
-        if ($event->doDeleteStub()) {
+
+        if ($all) {
           $entity->delete();
+        }
+        else {
+          $this->deleteStubConditionally($entity);
         }
       }
     }
     $this->stack = [];
     $this->stubs = [];
+  }
+
+  /**
+   * Deletes stub based on results from an event.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The stub entity to possibly be deleted.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  protected function deleteStubConditionally(EntityInterface $entity) {
+    $event = new CleanUpStubsEvent($entity, $this->stack);
+    $this->dispatcher->dispatch(AcquiaContentHubEvents::CLEANUP_STUBS, $event);
+    if ($event->doDeleteStub()) {
+      $entity->delete();
+    }
   }
 
   /**
