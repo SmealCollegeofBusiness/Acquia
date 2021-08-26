@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "acquia/acquia_cms",
-            "version": "1.2.7",
+            "version": "1.2.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/acquia/acquia_cms.git",
-                "reference": "50a8a0205b44c99281aa0952ff854fc2deb5063e"
+                "reference": "6d25f33e271d9c66f7a4a1d0fc9be878bef30b67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acquia/acquia_cms/zipball/50a8a0205b44c99281aa0952ff854fc2deb5063e",
-                "reference": "50a8a0205b44c99281aa0952ff854fc2deb5063e",
+                "url": "https://api.github.com/repos/acquia/acquia_cms/zipball/6d25f33e271d9c66f7a4a1d0fc9be878bef30b67",
+                "reference": "6d25f33e271d9c66f7a4a1d0fc9be878bef30b67",
                 "shasum": ""
             },
             "require": {
@@ -34,7 +34,7 @@
                 "drupal/acquia_telemetry-acquia_telemetry": "1.0-alpha5",
                 "drupal/acsf": "^2",
                 "drupal/address": "^1",
-                "drupal/admin_toolbar": "^2.0",
+                "drupal/admin_toolbar": "^2.5",
                 "drupal/autologout": "^1",
                 "drupal/checklistapi": "^2.0",
                 "drupal/collapsiblock": "^3",
@@ -214,9 +214,9 @@
             "homepage": "https://github.com/acquia/acquia_cms",
             "support": {
                 "issues": "https://github.com/acquia/acquia_cms/issues",
-                "source": "https://github.com/acquia/acquia_cms/tree/1.2.7"
+                "source": "https://github.com/acquia/acquia_cms/tree/1.2.8"
             },
-            "time": "2021-08-12T20:25:53+00:00"
+            "time": "2021-08-25T18:47:49+00:00"
         },
         {
             "name": "acquia/acsf-contenthub-console",
@@ -522,16 +522,16 @@
         },
         {
             "name": "acquia/cohesion-theme",
-            "version": "6.6.0",
+            "version": "6.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/acquia/cohesion-theme.git",
-                "reference": "364d380b550ca010931d36ff3e76b221597f3daf"
+                "reference": "1f9e939906de24f010da0d2d2af217e926f322d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acquia/cohesion-theme/zipball/364d380b550ca010931d36ff3e76b221597f3daf",
-                "reference": "364d380b550ca010931d36ff3e76b221597f3daf",
+                "url": "https://api.github.com/repos/acquia/cohesion-theme/zipball/1f9e939906de24f010da0d2d2af217e926f322d9",
+                "reference": "1f9e939906de24f010da0d2d2af217e926f322d9",
                 "shasum": ""
             },
             "type": "drupal-theme",
@@ -549,9 +549,9 @@
             "description": "Site Studio minimal theme",
             "support": {
                 "issues": "https://github.com/acquia/cohesion-theme/issues",
-                "source": "https://github.com/acquia/cohesion-theme/tree/6.6.0"
+                "source": "https://github.com/acquia/cohesion-theme/tree/6.6.1"
             },
-            "time": "2021-06-23T13:06:00+00:00"
+            "time": "2021-08-16T09:52:37+00:00"
         },
         {
             "name": "acquia/content-hub-php",
@@ -832,16 +832,16 @@
         },
         {
             "name": "acquia/memcache-settings",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/acquia/memcache-settings.git",
-                "reference": "a45c708cb88a57324f9c7a2259ebc61aa8438fc7"
+                "reference": "1a2c6bb19d7aaaf3367147e3564744e89dd5469b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/acquia/memcache-settings/zipball/a45c708cb88a57324f9c7a2259ebc61aa8438fc7",
-                "reference": "a45c708cb88a57324f9c7a2259ebc61aa8438fc7",
+                "url": "https://api.github.com/repos/acquia/memcache-settings/zipball/1a2c6bb19d7aaaf3367147e3564744e89dd5469b",
+                "reference": "1a2c6bb19d7aaaf3367147e3564744e89dd5469b",
                 "shasum": ""
             },
             "require": {
@@ -862,9 +862,9 @@
             "description": "Recommended Memcache settings for use with Acquia hosting.",
             "support": {
                 "issues": "https://github.com/acquia/memcache-settings/issues",
-                "source": "https://github.com/acquia/memcache-settings/tree/master"
+                "source": "https://github.com/acquia/memcache-settings/tree/v1.1.0"
             },
-            "time": "2020-07-02T14:36:03+00:00"
+            "time": "2021-08-23T18:08:00+00:00"
         },
         {
             "name": "asm89/stack-cors",
@@ -3442,17 +3442,17 @@
         },
         {
             "name": "drupal/admin_toolbar",
-            "version": "2.4.0",
+            "version": "2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/admin_toolbar.git",
-                "reference": "8.x-2.4"
+                "reference": "8.x-2.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-8.x-2.4.zip",
-                "reference": "8.x-2.4",
-                "shasum": "6240047b8d91ac78f98d861ba8282af971fa0b38"
+                "url": "https://ftp.drupal.org/files/projects/admin_toolbar-8.x-2.5.zip",
+                "reference": "8.x-2.5",
+                "shasum": "c71e58051b8d6818272df96d14cb11407d5e5ceb"
             },
             "require": {
                 "drupal/core": "^8.8.0 || ^9.0"
@@ -3460,8 +3460,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-2.4",
-                    "datestamp": "1601999178",
+                    "version": "8.x-2.5",
+                    "datestamp": "1629907119",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -7794,17 +7794,17 @@
         },
         {
             "name": "drupal/webform",
-            "version": "6.0.4",
+            "version": "6.0.5",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/webform.git",
-                "reference": "6.0.4"
+                "reference": "6.0.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/webform-6.0.4.zip",
-                "reference": "6.0.4",
-                "shasum": "8b87ffb19f980e9d77957dfb2d784a1a68619d57"
+                "url": "https://ftp.drupal.org/files/projects/webform-6.0.5.zip",
+                "reference": "6.0.5",
+                "shasum": "a925d604e3b4a29f5a688a8e84fdb3a93490f641"
             },
             "require": {
                 "drupal/core": "^8.8 || ^9"
@@ -7852,8 +7852,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "6.0.4",
-                    "datestamp": "1624461046",
+                    "version": "6.0.5",
+                    "datestamp": "1629909787",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -10332,16 +10332,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "2.51.1",
+            "version": "2.52.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/briannesbitt/Carbon.git",
-                "reference": "8619c299d1e0d4b344e1f98ca07a1ce2cfbf1922"
+                "reference": "369c0e2737c56a0f39c946dd261855255a6fccbe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/8619c299d1e0d4b344e1f98ca07a1ce2cfbf1922",
-                "reference": "8619c299d1e0d4b344e1f98ca07a1ce2cfbf1922",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/369c0e2737c56a0f39c946dd261855255a6fccbe",
+                "reference": "369c0e2737c56a0f39c946dd261855255a6fccbe",
                 "shasum": ""
             },
             "require": {
@@ -10422,7 +10422,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-07-28T13:16:28+00:00"
+            "time": "2021-08-14T19:10:52+00:00"
         },
         {
             "name": "nikic/php-parser",
