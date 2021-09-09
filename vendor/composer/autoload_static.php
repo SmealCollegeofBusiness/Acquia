@@ -4,13 +4,13 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit43c04f33d80628b035ec64f2802e7495
+class ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd
 {
     public static $files = array (
-        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
+        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
@@ -18,8 +18,8 @@ class ComposerStaticInit43c04f33d80628b035ec64f2802e7495
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
         '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
-        '7e9bd612cc444b3eed788ebbe46263a0' => __DIR__ . '/..' . '/laminas/laminas-zendframework-bridge/src/autoload.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        '7e9bd612cc444b3eed788ebbe46263a0' => __DIR__ . '/..' . '/laminas/laminas-zendframework-bridge/src/autoload.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
@@ -1651,6 +1651,7 @@ class ComposerStaticInit43c04f33d80628b035ec64f2802e7495
         'Consolidation\\AnnotatedCommand\\Parser\\Internal\\BespokeDocBlockParser' => __DIR__ . '/..' . '/consolidation/annotated-command/src/Parser/Internal/BespokeDocBlockParser.php',
         'Consolidation\\AnnotatedCommand\\Parser\\Internal\\CommandDocBlockParserFactory' => __DIR__ . '/..' . '/consolidation/annotated-command/src/Parser/Internal/CommandDocBlockParserFactory.php',
         'Consolidation\\AnnotatedCommand\\Parser\\Internal\\CsvUtils' => __DIR__ . '/..' . '/consolidation/annotated-command/src/Parser/Internal/CsvUtils.php',
+        'Consolidation\\AnnotatedCommand\\Parser\\Internal\\DefaultValueFromString' => __DIR__ . '/..' . '/consolidation/annotated-command/src/Parser/Internal/DefaultValueFromString.php',
         'Consolidation\\AnnotatedCommand\\Parser\\Internal\\DocblockTag' => __DIR__ . '/..' . '/consolidation/annotated-command/src/Parser/Internal/DocblockTag.php',
         'Consolidation\\AnnotatedCommand\\Parser\\Internal\\FullyQualifiedClassCache' => __DIR__ . '/..' . '/consolidation/annotated-command/src/Parser/Internal/FullyQualifiedClassCache.php',
         'Consolidation\\AnnotatedCommand\\Parser\\Internal\\TagFactory' => __DIR__ . '/..' . '/consolidation/annotated-command/src/Parser/Internal/TagFactory.php',
@@ -9016,11 +9017,11 @@ class ComposerStaticInit43c04f33d80628b035ec64f2802e7495
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit43c04f33d80628b035ec64f2802e7495::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit43c04f33d80628b035ec64f2802e7495::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit43c04f33d80628b035ec64f2802e7495::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit43c04f33d80628b035ec64f2802e7495::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit43c04f33d80628b035ec64f2802e7495::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$classMap;
 
         }, null, ClassLoader::class);
     }
