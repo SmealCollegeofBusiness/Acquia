@@ -4,13 +4,13 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd
+class ComposerStaticInit131854e8d42d5b4b9be9ebefd19fb09f
 {
     public static $files = array (
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
-        'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
@@ -19,7 +19,6 @@ class ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd
         '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
-        '7e9bd612cc444b3eed788ebbe46263a0' => __DIR__ . '/..' . '/laminas/laminas-zendframework-bridge/src/autoload.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
@@ -39,6 +38,7 @@ class ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd
         'cc8e14526dc240491e17a838cb78508c' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/normalize_server.legacy.php',
         '786bf90caabc9e09b6ad4cc5ca8f0e30' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/normalize_uploaded_files.legacy.php',
         '751a5a3f463e4be759be31748b61737c' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/parse_cookie_header.legacy.php',
+        '7e9bd612cc444b3eed788ebbe46263a0' => __DIR__ . '/..' . '/laminas/laminas-zendframework-bridge/src/autoload.php',
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
         '2f69d3914119f042cca9e44442d5ce95' => __DIR__ . '/../..' . '/docroot/core/includes/bootstrap.inc',
         '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
@@ -1540,6 +1540,7 @@ class ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd
         'Composer\\Installers\\OsclassInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OsclassInstaller.php',
         'Composer\\Installers\\OxidInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OxidInstaller.php',
         'Composer\\Installers\\PPIInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PPIInstaller.php',
+        'Composer\\Installers\\PantheonInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PantheonInstaller.php',
         'Composer\\Installers\\PhiftyInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PhiftyInstaller.php',
         'Composer\\Installers\\PhpBBInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PhpBBInstaller.php',
         'Composer\\Installers\\PimcoreInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PimcoreInstaller.php',
@@ -9017,11 +9018,11 @@ class ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitdea94f4b56e2d0cb56fba9dda5d8bfdd::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit131854e8d42d5b4b9be9ebefd19fb09f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit131854e8d42d5b4b9be9ebefd19fb09f::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit131854e8d42d5b4b9be9ebefd19fb09f::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit131854e8d42d5b4b9be9ebefd19fb09f::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit131854e8d42d5b4b9be9ebefd19fb09f::$classMap;
 
         }, null, ClassLoader::class);
     }
