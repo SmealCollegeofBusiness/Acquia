@@ -241,7 +241,7 @@ class PublisherTracker {
   }
 
   /**
-   * Nullify queue_id when entities loose their queued state.
+   * Nullify queue_id when entities lose their queued state.
    *
    * @param string $uuid
    *   The uuid of an entity.

@@ -660,4 +660,16 @@ abstract class ImportExportTestBase extends EntityKernelTestBase {
     return current($this->entityTypeManager->getStorage($entity_type)->loadByProperties(['uuid' => $uuid]));
   }
 
+  /**
+   * Enables content_moderation and workflows module.
+   *
+   * Some test fixtures contain moderation fields which requires them to be
+   * enabled.
+   */
+  protected function enableContentModeration() {
+    $this->enableModules(['content_moderation', 'workflows']);
+    $this->installEntitySchema('content_moderation_state');
+    $this->installEntitySchema('workflow');
+  }
+
 }

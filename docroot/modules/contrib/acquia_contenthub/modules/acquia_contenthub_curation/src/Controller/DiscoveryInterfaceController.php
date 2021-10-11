@@ -5,6 +5,7 @@ namespace Drupal\acquia_contenthub_curation\Controller;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\Core\Access\CsrfTokenGenerator;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -147,8 +148,6 @@ class DiscoveryInterfaceController extends ControllerBase {
    * This also includes the 'bundle' key field. If the bundle key is empty this
    * means that this entity does not have any bundle information.
    *
-   * @todo This needs to be changed in the discovery interface to see all types.
-   *
    * @return array
    *   An array of entity_types and bundles keyed by entity_type.
    *
@@ -158,15 +157,23 @@ class DiscoveryInterfaceController extends ControllerBase {
     $entity_type_bundles = $this->bundleInfoManager->getAllBundleInfo();
     $entity_types_and_bundles = [];
     foreach ($entity_type_bundles as $entity_type => $bundles) {
-      $bundle_key = '';
+      $entity_type_definition = $this->entityTypeManager->getDefinition($entity_type);
+
+      // Skip config entities.
+      if ($entity_type_definition instanceof ConfigEntityTypeInterface) {
+        continue;
+      }
+
       if ($entity_type === 'taxonomy_term') {
         $bundle_key = 'vocabulary';
       }
       else {
-        $bundle_key = $this->entityTypeManager->getDefinition($entity_type)->getKey('bundle');
+        $bundle_key = $entity_type_definition->getKey('bundle');
       }
-      // For now, if there is no bundle key (config entity), skip.
+
+      // If no bundles, return only entity type.
       if ($bundle_key == '') {
+        $entity_types_and_bundles[$entity_type] = [];
         continue;
       }
       $entity_types_and_bundles[$entity_type] = [

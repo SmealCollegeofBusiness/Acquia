@@ -229,7 +229,9 @@ class ContentHubConnectionManager {
 
     if ($response['success'] === FALSE) {
       if (!isset($response['error']['message'])) {
-        $this->logger->error('Unable to update URL %url, Unable to connect to Content Hub.');
+        $this->logger->error('Unable to update URL %url, Unable to connect to Content Hub.', [
+          '%url' => $webhook_url,
+        ]);
         return [];
       }
 
@@ -480,7 +482,7 @@ class ContentHubConnectionManager {
 
     $this
       ->logger
-      ->error('Something went wrong during deregistering Content Hub: @e_message', ['@e_message' => $response_body['error']['message']]);
+      ->error('Something went wrong during webhook suppression: @e_message', ['@e_message' => $response_body['error']['message']]);
 
     return FALSE;
   }

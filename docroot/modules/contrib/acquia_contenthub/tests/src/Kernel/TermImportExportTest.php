@@ -56,6 +56,7 @@ class TermImportExportTest extends ImportExportTestBase {
    * @dataProvider termImportExportDataProvider
    */
   public function testTermImportExport(...$args) {
+    $this->enableContentModeration();
     parent::contentEntityImportExport(...$args);
   }
 

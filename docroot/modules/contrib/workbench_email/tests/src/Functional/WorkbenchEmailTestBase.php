@@ -99,6 +99,7 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
    */
   protected static $modules = [
     'workbench_email',
+    'workbench_email_test',
     'node',
     'options',
     'user',
@@ -256,8 +257,8 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
     $this->submitForm([
       'id' => 'approved',
       'label' => 'Content approved',
-      'body[value]' => 'Content with title [node:title] was approved. You can view it at [node:url].',
-      'subject' => 'Content approved: [node:title]',
+      'body[value]' => 'Content with [node:field_does_not_exist]title [node:title] was approved. You can view it at [node:url].',
+      'subject' => 'Content [node:field_does_not_exist]approved: [node:title][node:field_does_not_exist]',
       'enabled_recipient_types[author]' => TRUE,
       'enabled_recipient_types[email]' => TRUE,
       'enabled_recipient_types[role]' => TRUE,
@@ -269,7 +270,7 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
     $this->submitForm([
       'id' => 'needs_review',
       'label' => 'Content needs review',
-      'body[value]' => 'Content with title [node:title] needs review. You can view it at [node:url].',
+      'body[value]' => 'Content with [node:field_does_not_exist]title [node:title] needs review. You can view it at [node:url].[node:field_does_not_exist]',
       'subject' => 'Content needs review',
       'replyTo' => '[node:author:mail]',
       'enabled_recipient_types[role]' => TRUE,
@@ -294,8 +295,8 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
     $assert->checkboxChecked('Approver', $page->find('css', '#edit-recipient-types-role-settings-roles--wrapper'));
     $this->submitForm([
       'label' => 'Content needs review',
-      'body[value]' => 'Content with title [node:title] needs review. You can view it at [node:url].',
-      'subject' => 'Content needs review: [node:title]',
+      'body[value]' => 'Content with[node:field_does_not_exist] title [node:title] needs review. You can view it at [node:url].[node:field_does_not_exist]',
+      'subject' => 'Content needs[node:field_does_not_exist] review: [node:title][node:field_does_not_exist]',
       'replyTo' => '[node:author:mail]',
     ], t('Save'));
     $assert->pageTextContains('Saved the Content needs review Email Template');
@@ -348,10 +349,17 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
     $expected = [$this->editor->getEmail(), 'foo@example.com'];
     sort($expected);
     $this->assertEquals($expected, $mails);
-    $this->assertEquals(sprintf('Content approved: %s', $node->getTitle()), $last['subject']);
-    $this->assertEquals(sprintf('Content approved: %s', $node->getTitle()), $prev['subject']);
+
+    // The node id text is added to the email subject in the
+    // workbench_email_test_mail_alter() function.
+    // We check that it is set here.
+    $this->assertEquals(sprintf('Content approved: %s (node id: %s)', $node->getTitle(), $node->id()), $last['subject']);
+    $this->assertEquals(sprintf('Content approved: %s (node id: %s)', $node->getTitle(), $node->id()), $prev['subject']);
     $this->assertStringContainsString(sprintf('Content with title %s was approved. You can view it at', $node->label()), preg_replace('/\s+/', ' ', $prev['body']));
     $this->assertStringContainsString(sprintf('Content with title %s was approved. You can view it at', $node->label()), preg_replace('/\s+/', ' ', $last['body']));
+    // Check that empty tokens are removed.
+    $this->assertStringNotContainsString('[node:field_does_not_exist]', preg_replace('/\s+/', ' ', $prev['body']));
+    $this->assertStringNotContainsString('[node:field_does_not_exist]', preg_replace('/\s+/', ' ', $last['body']));
     $this->assertStringContainsString($node->toUrl('canonical', ['absolute' => TRUE])->toString(), preg_replace('/\s+/', ' ', $prev['body']));
     $this->assertStringContainsString($node->toUrl('canonical', ['absolute' => TRUE])->toString(), preg_replace('/\s+/', ' ', $last['body']));
 
@@ -418,12 +426,20 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
     $expected = [$this->approver1->getEmail(), $this->approver2->getEmail()];
     sort($expected);
     $this->assertEquals($expected, $mails);
-    $this->assertEquals(sprintf('Content needs review: %s', $node->getTitle()), $last['subject']);
-    $this->assertEquals(sprintf('Content needs review: %s', $node->getTitle()), $prev['subject']);
+
+    // The node id text is added to the email subject in the
+    // workbench_email_test_mail_alter() function.
+    // We check that it is set here.
+    $this->assertEquals(sprintf('Content needs review: %s (node id: %s)', $node->label(), $node->id()), preg_replace('/\s+/', ' ', $last['subject']));
+    $this->assertEquals(sprintf('Content needs review: %s (node id: %s)', $node->label(), $node->id()), preg_replace('/\s+/', ' ', $prev['subject']));
+
     $this->assertEquals($this->editor->getEmail(), $last['reply-to']);
     $this->assertEquals($this->editor->getEmail(), $prev['reply-to']);
     $this->assertStringContainsString(sprintf('Content with title %s needs review. You can view it at', $node->label()), preg_replace('/\s+/', ' ', $prev['body']));
     $this->assertStringContainsString(sprintf('Content with title %s needs review. You can view it at', $node->label()), preg_replace('/\s+/', ' ', $last['body']));
+    // Check that empty tokens are removed.
+    $this->assertStringNotContainsString('[node:field_does_not_exist]', preg_replace('/\s+/', ' ', $prev['body']));
+    $this->assertStringNotContainsString('[node:field_does_not_exist]', preg_replace('/\s+/', ' ', $last['body']));
     $this->assertStringContainsString($node->toUrl('canonical', ['absolute' => TRUE])->toString(), preg_replace('/\s+/', ' ', $prev['body']));
     $this->assertStringContainsString($node->toUrl('canonical', ['absolute' => TRUE])->toString(), preg_replace('/\s+/', ' ', $last['body']));
   }

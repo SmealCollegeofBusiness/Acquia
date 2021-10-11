@@ -99,6 +99,7 @@ class BackendTest extends BackendTestBase {
    */
   protected function checkBackendSpecificFeatures() {
     $this->checkMultiValuedInfo();
+    $this->searchWithRandom();
     $this->setServerMatchMode();
     $this->searchSuccessPartial();
     $this->setServerMatchMode('prefix');
@@ -123,6 +124,7 @@ class BackendTest extends BackendTestBase {
     $this->regressionTest2994022();
     $this->regressionTest2916534();
     $this->regressionTest2873023();
+    $this->regressionTest3199355();
   }
 
   /**
@@ -257,6 +259,36 @@ class BackendTest extends BackendTestBase {
     $server->setBackendConfig($backend_config);
     $this->assertTrue((bool) $server->save(), 'The server was successfully edited.');
     $this->resetEntityCache();
+  }
+
+  /**
+   * Tests whether random searches work.
+   */
+  protected function searchWithRandom() {
+    // Run the query 5 times, using random sorting as the first sort and verify
+    // that the results are not always the same.
+    $first_result = NULL;
+    $second_result = NULL;
+    for ($i = 1; $i <= 5; $i++) {
+      $results = $this->buildSearch('foo', [], NULL, FALSE)
+        ->sort('search_api_random')
+        ->sort('id')
+        ->execute();
+
+      $result_ids = array_keys($results->getResultItems());
+      if ($first_result === NULL) {
+        $first_result = $second_result = $result_ids;
+      }
+      elseif ($result_ids !== $first_result) {
+        $second_result = $result_ids;
+      }
+
+      // Make sure the search still returned the expected items.
+      $this->assertCount(4, $result_ids);
+      sort($result_ids);
+      $this->assertEquals($this->getItemIds([1, 2, 4, 5]), $result_ids);
+    }
+    $this->assertNotEquals($first_result, $second_result);
   }
 
   /**
@@ -788,6 +820,34 @@ class BackendTest extends BackendTestBase {
     $this->assertFalse($index->isValidProcessor('tokenizer'));
 
     $entity->delete();
+    unset($this->entities[$entity_id]);
+  }
+
+  /**
+   * Tests whether string field values with trailing spaces work correctly.
+   *
+   * @see https://www.drupal.org/node/3199355
+   */
+  protected function regressionTest3199355() {
+    // Index all items before adding a new one, so we can better predict the
+    // expected count.
+    $this->indexItems($this->indexId);
+
+    $entity_id = count($this->entities) + 1;
+    $entity = $this->addTestEntity($entity_id, [
+      'keywords' => ['foo', 'foo ', ' foo', ' foo '],
+      'type' => 'article',
+    ]);
+
+    $count = $this->indexItems($this->indexId);
+    $this->assertEquals(1, $count);
+    $results = $this->buildSearch()
+      ->addCondition('keywords', 'foo ')
+      ->execute();
+    $this->assertResults([$entity_id], $results, 'String filter with trailing space');
+
+    $entity->delete();
+    unset($this->entities[$entity_id]);
   }
 
   /**

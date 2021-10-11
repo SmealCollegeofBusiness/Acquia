@@ -6,7 +6,7 @@ type: module
 dependencies:
   - workbench_email:workbench_email
 
-# Information added by Drupal.org packaging script on 2021-03-03
-version: '2.0.1'
+# Information added by Drupal.org packaging script on 2021-10-11
+version: '2.2.1'
 project: 'workbench_email'
-datestamp: 1614808030
+datestamp: 1633933575

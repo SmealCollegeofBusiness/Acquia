@@ -88,7 +88,9 @@ class NodeImportUpdateExportTest extends ImportExportTestBase {
    *
    * @dataProvider nodeImportUpdateExportDataProvider
    */
-  public function testNodeImportUpdateExport($delta, $update_delta, array $validate_data, $export_type, $export_uuid) {
+  public function testNodeImportUpdateExport(int $delta, int $update_delta, array $validate_data, string $export_type, string $export_uuid): void {
+    $this->enableContentModeration();
+
     parent::contentEntityImportExport($delta, $validate_data, $export_type, $export_uuid);
     parent::contentEntityImportExport($update_delta, $validate_data, $export_type, $export_uuid);
 
@@ -110,7 +112,7 @@ class NodeImportUpdateExportTest extends ImportExportTestBase {
    * @return array
    *   Data provider for testNodeImportUpdateExport.
    */
-  public function nodeImportUpdateExportDataProvider() {
+  public function nodeImportUpdateExportDataProvider(): array {
     $export_uuid = [
       '5d1ba3c3-d527-4328-8fce-a6b714c5ef79',
       '40253012-2a03-47c1-86b8-87e4d0adf091',

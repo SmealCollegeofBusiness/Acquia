@@ -338,7 +338,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
         'uuid' => $item['uuid'],
         'name' => $this->truncateString($item['name']),
         'sites' => implode(', ', $sites),
-        'is_real_time' => $item['real_time_filter'],
+        'is_real_time' => $item['real_time_filter'] === TRUE ? 'TRUE' : 'FALSE',
       ];
     };
 
@@ -363,8 +363,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
         continue;
       }
 
-      $parsedUrl = parse_url($url);
-      $sites[] = sprintf('%s://%s', $parsedUrl['scheme'], $parsedUrl['host']);
+      $sites[] = $url;
     }
     return $sites;
   }

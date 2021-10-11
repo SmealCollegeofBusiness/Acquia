@@ -6,12 +6,12 @@ use Acquia\ContentHubClient\CDF\CDFObject;
 use Acquia\ContentHubClient\CDF\CDFObjectInterface;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
+use Drupal\acquia_contenthub_publisher\PublisherActions;
 use Drupal\acquia_contenthub_publisher\PublisherTracker;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Queue\QueueFactory;
-use Drupal\depcalc\DependencyCalculator;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Console\Helper\Table;
 
@@ -43,11 +43,11 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
   protected $tracker;
 
   /**
-   * The Dependency Calculator.
+   * The Publisher Actions Service.
    *
-   * @var \Drupal\depcalc\DependencyCalculator
+   * @var \Drupal\acquia_contenthub_publisher\PublisherActions
    */
-  protected $calculator;
+  protected $publisherActions;
 
   /**
    * The Content Hub Common Actions Service.
@@ -84,17 +84,17 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
    *   The published entity tracker.
    * @param \Drupal\Core\Queue\QueueFactory $queue_factory
    *   Queue factory.
-   * @param \Drupal\depcalc\DependencyCalculator $calculator
+   * @param \Drupal\acquia_contenthub_publisher\PublisherActions $publisher_actions
    *   The Dependency Calculator.
    * @param \Drupal\acquia_contenthub\ContentHubCommonActions $common_actions
    *   The Content Hub Common Actions Service.
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $factory
    *   The Content Hub Client Factory.
    */
-  public function __construct(PublisherTracker $tracker, QueueFactory $queue_factory, DependencyCalculator $calculator, ContentHubCommonActions $common_actions, ClientFactory $factory) {
+  public function __construct(PublisherTracker $tracker, QueueFactory $queue_factory, PublisherActions $publisher_actions, ContentHubCommonActions $common_actions, ClientFactory $factory) {
     $this->queue = $queue_factory->get('acquia_contenthub_publish_export');
     $this->tracker = $tracker;
-    $this->calculator = $calculator;
+    $this->publisherActions = $publisher_actions;
     $this->commonActions = $common_actions;
     $this->factory = $factory;
   }
@@ -149,7 +149,7 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
     }
 
     // Calculate the dependencies for the local entity.
-    $data = $this->getEntityDependencies($entity);
+    $data = $this->commonActions->getEntityCdfFullKeyedByUuids($entity);
     $cdf = $data[$entity->uuid()];
     $hash = $cdf->getAttribute('hash')->getValue()['und'];
     $remote_hash = $remote_cdf->getAttribute('hash')->getValue()['und'];
@@ -468,16 +468,7 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
    * @throws \Exception
    */
   protected function reExportEntity(EntityInterface $entity, array $dependencies) {
-    // Deleting depcalc cache entries so they are re-calculated.
-    $uuids = array_merge([$entity->uuid()], array_keys($dependencies));
-    $backend = \Drupal::cache('depcalc');
-    $backend->deleteMultiple($uuids);
-
-    // Nullifying hashes in tracking table.
-    $this->tracker->nullifyHashes([], [], $uuids);
-
-    // Enqueue entity.
-    _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+    $this->publisherActions->reExportEntityFull($entity, $dependencies);
     $this->output->writeln(sprintf(
       'Entity (%s, %s): "%s" has been enqueued for export.',
       $entity->getEntityTypeId(),
@@ -485,27 +476,6 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
       $entity->uuid()
     ));
     $this->output->writeln('Also, the "depcalc" cache for this entity and all its dependencies has been cleared and Hashes Nullified.');
-  }
-
-  /**
-   * Calculates all the dependencies of the current entity.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity to calculate dependencies from.
-   *
-   * @return \Acquia\ContentHubClient\CDF\CDFObject[]|array
-   *   An array of CDF Objects.
-   *
-   * @throws \Exception
-   */
-  protected function getEntityDependencies(EntityInterface $entity): array {
-    $entities = [];
-    $data = [];
-    $objects = $this->commonActions->getEntityCdf($entity, $entities, FALSE, TRUE);
-    foreach ($objects as $object) {
-      $data[$object->getUuid()] = $object;
-    }
-    return $data;
   }
 
   /**

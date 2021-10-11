@@ -97,6 +97,17 @@ class ImportTrackingTest extends EntityKernelTestBase {
     $content_hub_settings
       ->method('getUuid')
       ->willReturn($this->settingsClientUuid);
+    $content_hub_settings
+      ->method('getWebhook')
+      ->willReturn('some-uuid');
+    $content_hub_settings
+      ->method('toArray')
+      ->willReturn([
+        'webhook' => [
+          'uuid' => 'some-uuid',
+        ],
+        'name' => 'some-client-name',
+      ]);
 
     $content_hub_client = $this
       ->getMockBuilder(ContentHubClient::class)

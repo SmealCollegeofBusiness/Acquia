@@ -3,6 +3,7 @@
 namespace Drupal\entity_clone\EntityClone\Content;
 
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\ContentEntityStorageInterface;
 use Drupal\Core\Entity\EntityHandlerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -66,6 +67,8 @@ class ContentEntityCloneFormBase implements EntityHandlerInterface, EntityCloneF
    *   The string translation manager.
    * @param \Drupal\entity_clone\EntityCloneSettingsManager $entity_clone_settings_manager
    *   The entity clone settings manager.
+   * @param \Drupal\entity_clone\EntityCloneClonableField $entity_clone_clonable_field
+   *   The entity clone clonable field service.
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,

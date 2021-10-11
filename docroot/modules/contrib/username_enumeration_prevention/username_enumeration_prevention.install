@@ -30,9 +30,12 @@ function username_enumeration_prevention_requirements($phase) {
       'title' => t('Username enumeration prevention'),
       'value' => $value,
       'description' => t('Granting anonymous users permission to access user
-    profiles poses a security risk because it allows users who are not logged
-    into the site to obtain usernames. More information is available in the
-    module README or on the <a href=":url">@link_text</a>', [':url' => $url->toString(), '@link_text' => 'project page']),
+        profiles poses a security risk because it allows users who are not logged
+        into the site to obtain usernames. More information is available in the
+        module README or on the <a href=":url">@link_text</a>', [
+          ':url' => $url->toString(),
+          '@link_text' => 'project page',
+        ]),
       'severity' => $severity,
     ];
   }

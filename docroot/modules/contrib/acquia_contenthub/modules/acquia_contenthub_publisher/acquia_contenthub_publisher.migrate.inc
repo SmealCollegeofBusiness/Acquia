@@ -39,12 +39,23 @@ function acquia_contenthub_publisher_enqueue_exported_entities(&$context) {
         ->load($result->entity_id);
       if ($entity) {
         _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
-        $logger->info("Enqueue-ing entity for export: {$result->entity_type} - {$result->entity_id}");
+        $logger->info('Enqueue-ing entity for export: @entity_type - @entity_id',
+          [
+            '@entity_type' => $result->entity_type,
+            '@entity_id' => $result->entity_id,
+          ]
+        );
         $context['results']['enqueued']++;
       }
       else {
-        $message = sprintf("Upgrade : Entity (type = {$result->entity_type}, id = {$result->entity_id}, uuid = {$result->entity_uuid}) could not be loaded. It cannot be enqueued for export.");
-        $logger->warning($message);
+        $logger->warning(
+          'Upgrade : Entity (type = @entity_type, id = @entity_id, uuid = @uuid) could not be loaded. It cannot be enqueued for export.',
+          [
+            '@entity_type' => $result->entity_type,
+            '@entity_id' => $result->entity_id,
+            '@uuid' => $result->entity_uuid,
+          ]
+        );
       }
     }
     // Updating progress.

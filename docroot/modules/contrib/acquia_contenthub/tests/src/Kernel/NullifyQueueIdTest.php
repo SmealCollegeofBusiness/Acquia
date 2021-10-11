@@ -148,6 +148,8 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
     $contenthub_client_factory = $this->getMockBuilder('\Drupal\acquia_contenthub\Client\ClientFactory')
       ->disableOriginalConstructor()
       ->getMock();
+    $contenthub_client_factory->method('isConfigurationSet')
+      ->willReturn(TRUE);
     $contenthub_client_factory->method('getClient')
       ->willReturn($contenthub_client);
     $this->container->set('acquia_contenthub.client.factory', $contenthub_client_factory);
@@ -222,7 +224,6 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
     $query->fields('t', ['queue_id']);
     $query->condition('entity_id', $entity_id);
     $query->condition('status', $status);
-
     return $query->execute()->fetchCol();
   }
 

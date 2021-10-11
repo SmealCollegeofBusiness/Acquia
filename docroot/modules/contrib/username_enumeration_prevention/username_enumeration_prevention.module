@@ -76,7 +76,10 @@ function username_enumeration_prevention_pass_submit($form, FormStateInterface $
     // Mail one time login URL and instructions using current language.
     $mail = _user_mail_notify('password_reset', $account, $langcode);
     if (!empty($mail)) {
-      \Drupal::logger('username_enumeration_prevention')->notice('Password reset instructions mailed to %name at %email.', ['%name' => $account->getAccountName(), '%email' => $account->getEmail()]);
+      \Drupal::logger('username_enumeration_prevention')->notice('Password reset instructions mailed to %name at %email.', [
+        '%name' => $account->getAccountName(),
+        '%email' => $account->getEmail(),
+      ]);
     }
   }
   \Drupal::messenger()->addMessage(t('If the username or email address exists and is active, further instructions have been sent to your email address.'));

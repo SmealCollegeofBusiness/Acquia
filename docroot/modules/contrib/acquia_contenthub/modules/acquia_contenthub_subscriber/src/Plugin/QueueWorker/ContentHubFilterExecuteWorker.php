@@ -24,6 +24,16 @@ use Symfony\Component\HttpFoundation\Request;
 class ContentHubFilterExecuteWorker extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   /**
+   * Amount of entities to fetch in a scroll.
+   */
+  protected const SCROLL_SIZE = 100;
+
+  /**
+   * How long the scroll cursor will be retained inside memory.
+   */
+  protected const SCROLL_TIME_WINDOW = '10m';
+
+  /**
    * Event dispatcher.
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
@@ -45,7 +55,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
   protected $client;
 
   /**
-   * Logger channel of acquia_contenthub channel.
+   * Logger channel of acquia_contenthub_subscriber channel.
    *
    * @var \Drupal\Core\Logger\LoggerChannelInterface
    */
@@ -59,7 +69,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $factory
    *   Acquia Content Hub client factory.
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
-   *   Logger channel interface acquia_contenthub.
+   *   Logger channel interface acquia_contenthub_subscriber.
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
@@ -67,7 +77,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    */
-  public function __construct(EventDispatcherInterface $dispatcher, ClientFactory $factory, LoggerChannelInterface $logger_channel, array $configuration, $plugin_id, $plugin_definition) {
+  public function __construct(EventDispatcherInterface $dispatcher, ClientFactory $factory, LoggerChannelInterface $logger_channel, array $configuration, string $plugin_id, $plugin_definition) {
     $this->dispatcher = $dispatcher;
     $this->factory = $factory;
     $this->loggerChannel = $logger_channel;
@@ -82,75 +92,11 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
     return new static(
       $container->get('event_dispatcher'),
       $container->get('acquia_contenthub.client.factory'),
-      $container->get('acquia_contenthub.logger_channel'),
+      $container->get('acquia_contenthub_subscriber.logger_channel'),
       $configuration,
       $plugin_id,
       $plugin_definition
     );
-  }
-
-  /**
-   * Initiates Scroll API request chain.
-   *
-   * @param string $filter_uuid
-   *   Filter uuid to execute by.
-   * @param int $scroll_time_window
-   *   How long the scroll cursor will be retained inside memory.
-   *
-   * @return mixed
-   *   Response from backend call.
-   *
-   * @throws \Exception
-   */
-  private function startScrollByFilter($filter_uuid, $scroll_time_window) {
-    return $this->client->getResponseJson($this->client->post("filters/$filter_uuid/scroll?scroll=$scroll_time_window"));
-  }
-
-  /**
-   * Continue Scroll API request chain.
-   *
-   * Notice: scroll id is changing continuously once you make a call.
-   *
-   * @param string $scroll_id
-   *   Scroll id.
-   * @param int $scroll_time_window
-   *   How long the scroll cursor will be retained inside memory.
-   *
-   * @return mixed
-   *   Response from backend call.
-   *
-   * @throws \Exception
-   */
-  private function continueScroll($scroll_id, $scroll_time_window) {
-    $options = [
-      'body' => json_encode([
-        'scroll_id' => $scroll_id,
-        'scroll' => $scroll_time_window,
-      ]),
-    ];
-
-    return $this->client->getResponseJson($this->client->post('scroll/continue', $options));
-  }
-
-  /**
-   * Cancel Scroll API request chain.
-   *
-   * @param string $scroll_id
-   *   Scroll id.
-   *
-   * @return mixed
-   *   Response from backend call.
-   *
-   * @throws \Exception
-   */
-  private function cancelScroll($scroll_id) {
-    $options = [
-      'body' => json_encode([
-        'scroll_id' => [$scroll_id],
-      ]),
-    ];
-
-    return $this->client->getResponseJson($this->client->delete("scroll", $options));
   }
 
   /**
@@ -202,7 +148,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    */
   public function processItem($data): void {
     if (!isset($data->filter_uuid)) {
-      throw new \Exception('Filter uuid not found');
+      throw new \Exception('Filter uuid not found.');
     }
     $client = $this->client;
     $settings = $client->getSettings();
@@ -214,22 +160,21 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
 
     $uuids = [];
     $interest_list = $client->getInterestsByWebhook($webhook_uuid);
-    $scroll_time_window = 10;
-    $matched_data = $this->startScrollByFilter($data->filter_uuid, $scroll_time_window);
+    $matched_data = $this->client->startScrollByFilter($data->filter_uuid, self::SCROLL_TIME_WINDOW, self::SCROLL_SIZE);
     $is_final_page = $this->isFinalPage($matched_data);
-    $uuids = array_merge($uuids, $this->extractEntityUuids($matched_data, $interest_list));
+    $uuids = array_merge($uuids, $this->extractEntityUuids(array_merge($matched_data, $interest_list)));
 
     $scroll_id = $matched_data['_scroll_id'];
     try {
       while (!$is_final_page) {
-        $matched_data = $this->continueScroll($scroll_id, $scroll_time_window);
-        $uuids = array_merge($uuids, $this->extractEntityUuids($matched_data, $interest_list));
+        $matched_data = $this->client->continueScroll($scroll_id, self::SCROLL_TIME_WINDOW);
+        $uuids = array_merge($uuids, $this->extractEntityUuids(array_merge($matched_data, $interest_list)));
 
         $scroll_id = $matched_data['_scroll_id'];
         $is_final_page = $this->isFinalPage($matched_data);
       }
     } finally {
-      $this->cancelScroll($scroll_id);
+      $this->client->cancelScroll($scroll_id);
     }
 
     if (!$uuids) {

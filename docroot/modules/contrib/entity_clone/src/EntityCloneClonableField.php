@@ -5,7 +5,6 @@ namespace Drupal\entity_clone;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\field\FieldConfigInterface;
 
-
 /**
  * Manage entity clone clonable field.
  */

@@ -126,8 +126,8 @@ class WorkbenchEmailProcessor extends QueueWorkerBase implements ContainerFactor
         $entity_storage = $this->entityTypeManager->getStorage($this->targetEntityType);
         $latest_revision_id = $entity_storage->getLatestRevisionId($entity->id());
         $entity = $entity_storage->loadRevision($latest_revision_id);
-        $subject = $this->token->replace($template->getSubject(), [$entity->getEntityTypeId() => $entity]);
-        $body['value'] = $this->token->replace($body['value'], [$entity->getEntityTypeId() => $entity]);
+        $subject = $this->token->replace($template->getSubject(), [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
+        $body['value'] = $this->token->replace($body['value'], [$entity->getEntityTypeId() => $entity], ['clear' => TRUE]);
         $body = $this->checkMarkup($body['value'], $body['format']);
         $replyTo = !empty($template->getReplyTo()) ? $this->token->replace($template->getReplyTo(), [$entity->getEntityTypeId() => $entity]) : NULL;
 
@@ -136,6 +136,7 @@ class WorkbenchEmailProcessor extends QueueWorkerBase implements ContainerFactor
           'body' => $body,
           'template' => $template,
           'subject' => $subject,
+          'entity' => $entity,
         ], $replyTo);
       }
     }

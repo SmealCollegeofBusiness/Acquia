@@ -106,9 +106,9 @@ class SubscriberTracker {
    *
    * @throws \Exception
    */
-  public function track(EntityInterface $entity, $hash, $remote_uuid = NULL) {
+  public function track(EntityInterface $entity, string $hash, $remote_uuid = NULL) {
     $values = [
-      'entity_uuid' => $remote_uuid ? $remote_uuid : $entity->uuid(),
+      'entity_uuid' => $remote_uuid ?? $entity->uuid(),
       'entity_type' => $entity->getEntityTypeId(),
       'entity_id' => $entity->id(),
       'last_imported' => date('c'),

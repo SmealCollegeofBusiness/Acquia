@@ -239,7 +239,7 @@ class RecipientTypePluginsTest extends KernelTestBase {
       return $mail['to'];
     }, $captured_emails));
     foreach ($captured_emails as $email) {
-      $this->assertEquals(sprintf('Content needs review: %s', $node->getTitle()), $email['subject']);
+      $this->assertEquals(sprintf('Content needs review: %s (node id: %s)', $node->getTitle(), $node->id()), $email['subject']);
       $this->assertStringContainsString(sprintf('Content with title %s needs review.', $node->label()), preg_replace('/\s+/', ' ', $email['body']));
     }
   }

@@ -178,8 +178,15 @@ class ContentEntityNormalizer implements ContentEntityNormalizerInterface {
       $values[$entity_type->getKey('langcode')] = $data['_meta']['default_langcode'];
     }
 
+    // Load the entity by UUID and check if it exists.
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    $entity = $this->entityTypeManager->getStorage($entity_type->id())->create($values);
+    $entity = $this->entityTypeManager->getStorage($entity_type->id())->loadByProperties(['uuid' => $values['uuid']]);
+    $entity = reset($entity);
+    $exists = !empty($entity);
+    if (!$exists) {
+      $entity = $this->entityTypeManager->getStorage($entity_type->id())->create($values);
+    }
+
     foreach ($data['default'] as $field_name => $values) {
       $this->setFieldValues($entity, $field_name, $values);
     }
@@ -518,3 +525,4 @@ class ContentEntityNormalizer implements ContentEntityNormalizerInterface {
   }
 
 }
+

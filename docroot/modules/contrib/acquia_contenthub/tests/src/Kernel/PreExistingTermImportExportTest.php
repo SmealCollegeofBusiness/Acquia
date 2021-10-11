@@ -98,6 +98,7 @@ class PreExistingTermImportExportTest extends ImportExportTestBase {
    * Performs taxonomy terms import and runs assertions.
    */
   public function testTermImportExport() {
+    $this->enableContentModeration();
     // We're not going to use this expectation.
     $this->importFixture(0);
     /** @var \Drupal\Core\Entity\EntityRepositoryInterface $repository */

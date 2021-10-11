@@ -6,7 +6,6 @@ use Acquia\ContentHubClient\CDF\CDFObject;
 use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
-use Drupal\acquia_contenthub_publisher\PublisherTracker;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Prophecy\Argument;
 use Psr\Http\Message\ResponseInterface;
@@ -60,9 +59,9 @@ class DeleteEntityTest extends EntityKernelTestBase {
   protected $factory;
 
   /**
-   * The publisher tracker mock.
+   * The publisher tracker.
    *
-   * @var \Prophecy\Prophecy\ObjectProphecy
+   * @var \Drupal\acquia_contenthub_publisher\PublisherTracker
    */
   protected $tracker;
 
@@ -76,12 +75,10 @@ class DeleteEntityTest extends EntityKernelTestBase {
     $this->installEntitySchema('user');
     $this->installSchema('user', 'users_data');
     $this->installSchema('acquia_contenthub_publisher', 'acquia_contenthub_publisher_export_tracking');
-    $this->user = $this->createUser();
-    $uuid = $this->user->uuid();
 
     $origin_uuid = '00000000-0000-0001-0000-123456789123';
 
-    $cdfObject = new CDFObject('drupal8_content_entity', $uuid, 'foo', 'bar', $origin_uuid);
+    $cdfObject = new CDFObject('drupal8_content_entity', '00000000-0000-0001-0000-123456789124', 'foo', 'bar', $origin_uuid);
 
     $this->settings = $this->prophesize(Settings::class);
     $this->settings->getUuid()->willReturn($origin_uuid);
@@ -94,32 +91,18 @@ class DeleteEntityTest extends EntityKernelTestBase {
     $deleteInterestResponse->getStatusCode()->willReturn(200);
 
     $this->client = $this->prophesize(ContentHubClient::class);
-    $this->client->getEntity($uuid)->willReturn($cdfObject);
+    $this->client->getEntity(Argument::any())->willReturn($cdfObject);
     $this->client->getSettings()->willReturn($this->settings->reveal());
-    $this->client->deleteEntity($uuid)->willReturn($deleteEntityResponse->reveal());
-    $this->client->deleteInterest($this->user->uuid(), $origin_uuid)->willReturn($deleteInterestResponse->reveal());
+    $this->client->deleteEntity(Argument::any())->willReturn($deleteEntityResponse->reveal());
+    $this->client->deleteInterest(Argument::any(), $origin_uuid)->willReturn($deleteInterestResponse->reveal());
 
     $this->factory = $this->prophesize(ClientFactory::class);
+    $this->factory->isConfigurationSet()->willReturn(TRUE);
     $this->factory->getClient()->willReturn($this->client->reveal());
     $this->container->set('acquia_contenthub.client.factory', $this->factory->reveal());
 
-    $this->tracker = $this->prophesize(PublisherTracker::class);
-    $this->tracker->get(Argument::any())->will(
-      function ($uuid) {
-        $query = \Drupal::database()->select('acquia_contenthub_publisher_export_tracking', 't')
-          ->fields('t', ['entity_uuid']);
-        $query->condition('entity_uuid', $uuid);
-        return $query->execute()->fetchObject();
-      }
-    );
-    $this->tracker->delete(Argument::any())->will(
-      function ($uuid) {
-        $query = \Drupal::database()->delete('acquia_contenthub_publisher_export_tracking');
-        $query->condition('entity_uuid', $uuid);
-        return $query->execute();
-      }
-    );
-    $this->container->set('acquia_contenthub_publisher.tracker', $this->tracker->reveal());
+    $this->tracker = $this->container->get('acquia_contenthub_publisher.tracker');
+    $this->user = $this->createUser();
   }
 
   /**
@@ -128,9 +111,10 @@ class DeleteEntityTest extends EntityKernelTestBase {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testEntityDelete() {
+    $this->assertNotNull($this->tracker->get($this->user->uuid()));
     $this->user->delete();
-    $this->tracker->get($this->user->uuid())->shouldBeCalled();
-    $this->tracker->delete($this->user->uuid())->shouldBeCalled();
+    // Assert user entity has been deleted implicitly.
+    $this->assertFalse($this->tracker->get($this->user->uuid()));
     $this->client->getEntity($this->user->uuid())->shouldBeCalled();
     $this->client->deleteEntity($this->user->uuid())->shouldBeCalled();
     $this->client->deleteInterest($this->user->uuid(), $this->container->get('acquia_contenthub.client.factory')->getClient()->getSettings()->getWebhook('uuid'))->shouldBeCalled();

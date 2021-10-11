@@ -3,6 +3,7 @@
 namespace Drupal\default_content\Commands;
 
 use Drupal\default_content\ExporterInterface;
+use Drupal\default_content\ImporterInterface;
 use Drush\Commands\DrushCommands;
 
 /**
@@ -20,13 +21,23 @@ class DefaultContentCommands extends DrushCommands {
   protected $defaultContentExporter;
 
   /**
+   * The default content importer.
+   *
+   * @var \Drupal\default_content\ImporterInterface
+   */
+  protected $defaultContentImporter;
+
+  /**
    * SimplesitemapController constructor.
    *
    * @param \Drupal\default_content\ExporterInterface $default_content_exporter
    *   The default content exporter.
+   * @param \Drupal\default_content\ImporterInterface $default_content_importer
+   *   The default content importer.
    */
-  public function __construct(ExporterInterface $default_content_exporter) {
+  public function __construct(ExporterInterface $default_content_exporter, ImporterInterface $default_content_importer) {
     $this->defaultContentExporter = $default_content_exporter;
+    $this->defaultContentImporter = $default_content_importer;
   }
 
   /**
@@ -89,6 +100,19 @@ class DefaultContentCommands extends DrushCommands {
       ->getModule($module)
       ->getPath() . '/content';
     $this->defaultContentExporter->exportModuleContent($module, $module_folder);
+  }
+
+  /**
+   * Imports all the content defined in a module info file.
+   *
+   * @param string $module
+   *   The name of the module.
+   *
+   * @command default-content:import-module
+   * @aliases dcim
+   */
+  public function contentImportModule($module) {
+    $this->defaultContentImporter->importContent($module);
   }
 
 }

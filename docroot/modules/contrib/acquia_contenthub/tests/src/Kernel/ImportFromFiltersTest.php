@@ -9,6 +9,7 @@ use Drupal\acquia_contenthub_subscriber\ContentHubImportQueueByFilter;
 use Drupal\acquia_contenthub_test\MockDataProvider;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Tests that imports from filters work properly.
@@ -79,6 +80,9 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
     $content_hub_settings
       ->method('getWebhook')
       ->willReturn('00000000-0000-460b-ac74-b6bed08b4441');
+    $content_hub_settings
+      ->method('toArray')
+      ->willReturn(['name' => 'test-client']);
 
     $content_hub_client = $this
       ->getMockBuilder(ContentHubClient::class)
@@ -111,18 +115,18 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
   /**
    * Tests import from filter.
    *
-   * @param mixed $filtersUuids
+   * @param array $filtersUuids
    *   Filters Uuids.
-   * @param mixed $expectedItems
+   * @param int $expectedItems
    *   Expected Items.
-   * @param mixed $responses
+   * @param string $responses
    *   Responses as callbacks.
    *
    * @dataProvider dataProviderForImportFromFilters
    *
    * @throws \Exception
    */
-  public function testImportFromFilters($filtersUuids, $expectedItems, $responses) {
+  public function testImportFromFilters(array $filtersUuids, int $expectedItems, string $responses) {
     $this->assertEquals(0, $this->importQueue->getQueueCount());
 
     $this->alterContentHubMockPostCallback($responses);
@@ -141,7 +145,7 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
    *    - Expected items in the import queue.
    *    - ID of responses stack.
    */
-  public function dataProviderForImportFromFilters() {
+  public function dataProviderForImportFromFilters(): array {
     return [
       [
         ['74a196d5-0000-0000-0000-000000000001'],
@@ -182,10 +186,10 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
   /**
    * Returns empty response.
    *
-   * @return \GuzzleHttp\Psr7\Response
+   * @return \Psr\Http\Message\ResponseInterface
    *   Guzzle response.
    */
-  public function returnEmptyResponse() {
+  public function returnEmptyResponse(): ResponseInterface {
     return new Response(200, [], "");
   }
 
@@ -198,7 +202,7 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
    * @return mixed
    *   Responses.
    */
-  protected function responsesStackById($id) {
+  protected function responsesStackById(string $id) {
     $responses = [
       'one_filter' => [
         // Start scrolling.
@@ -257,10 +261,10 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
    * @param int $foundItems
    *   Search result items.
    *
-   * @return \GuzzleHttp\Psr7\Response
+   * @return \Psr\Http\Message\ResponseInterface
    *   Guzzle response.
    */
-  protected function buildSearchResultResponse($foundItems) {
+  protected function buildSearchResultResponse(int $foundItems): ResponseInterface {
     $items = [];
     for ($i = 0; $i < $foundItems; $i++) {
       $items[] = [

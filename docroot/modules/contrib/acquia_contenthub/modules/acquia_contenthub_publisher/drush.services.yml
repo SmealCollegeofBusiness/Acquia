@@ -13,7 +13,7 @@ services:
 
   acquia_contenthub_publisher_audit_entity.commands:
     class: Drupal\acquia_contenthub_publisher\Commands\AcquiaContentHubPublisherAuditEntityCommands
-    arguments: ['@acquia_contenthub_publisher.tracker', '@queue', '@entity.dependency.calculator', '@acquia_contenthub_common_actions', '@acquia_contenthub.client.factory']
+    arguments: ['@acquia_contenthub_publisher.tracker', '@queue', '@acquia_contenthub_publisher.actions', '@acquia_contenthub_common_actions', '@acquia_contenthub.client.factory']
     tags:
       - { name: drush.command }
 

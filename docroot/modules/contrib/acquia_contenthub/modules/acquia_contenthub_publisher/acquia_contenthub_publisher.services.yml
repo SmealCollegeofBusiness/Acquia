@@ -4,6 +4,10 @@ services:
     class: Drupal\acquia_contenthub_publisher\PublisherTracker
     arguments: ['@database']
 
+  acquia_contenthub_publisher.actions:
+    class: Drupal\acquia_contenthub_publisher\PublisherActions
+    arguments: ['@acquia_contenthub_publisher.tracker', '@acquia_contenthub_common_actions', '@cache.depcalc']
+
   acquia_contenthub_publisher.entity_moderated_revision:
     class: Drupal\acquia_contenthub_publisher\EntityModeratedRevision
     arguments: ['@logger.factory']
@@ -20,7 +24,7 @@ services:
 
   pathalias_for_unpublished_content.enqueue:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\EnqueueEligibility\IsPathAliasForUnpublishedContent
-    arguments: ['@router.no_access_checks', '@acquia_contenthub_publisher.entity_moderated_revision']
+    arguments: ['@router.no_access_checks', '@acquia_contenthub_publisher.entity_moderated_revision', '@acquia_contenthub_publisher.logger_channel']
     tags:
       - { name: event_subscriber }
 
@@ -98,6 +102,12 @@ services:
     tags:
       - { name: event_subscriber }
 
+  acquia_contenthub_publisher.handle_webhook.re_export:
+    class: Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook\ReExport
+    arguments: ['@acquia_contenthub_publisher.actions', '@entity.repository', '@logger.factory']
+    tags:
+      - { name: event_subscriber }
+
   acquia_contenthub_publisher.not_confirmed_entities.log:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\NotConfirmedEntitiesFound\Log
     arguments: ['@acquia_contenthub.logger_channel']
@@ -129,3 +139,9 @@ services:
     class: Drupal\Core\Config\Config
     factory: config.factory:get
     arguments: ['acquia_contenthub_publisher.exclude_settings']
+
+  # @todo replace all the occurrences of direct access of acquia_contenthub_publisher channel from logger factory with this service by DI.
+  acquia_contenthub_publisher.logger_channel:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: [ 'acquia_contenthub_publisher' ]

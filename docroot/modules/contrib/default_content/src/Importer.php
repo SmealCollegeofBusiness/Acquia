@@ -225,7 +225,10 @@ class Importer implements ImporterInterface {
             $entity = $this->contentEntityNormalizer->denormalize(Yaml::decode($contents));
           }
 
-          $entity->enforceIsNew(TRUE);
+          if (empty($entity)) {
+            continue;
+          }
+
           // Ensure that the entity is not owned by the anonymous user.
           if ($entity instanceof EntityOwnerInterface && empty($entity->getOwnerId())) {
             $entity->setOwner($root_user);

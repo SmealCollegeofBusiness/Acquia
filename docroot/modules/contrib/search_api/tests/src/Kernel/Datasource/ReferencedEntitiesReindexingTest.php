@@ -8,6 +8,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\search_api\Entity\Index;
 use Drupal\search_api\Entity\Server;
+use Drupal\search_api\Utility\TrackingHelper;
 use Drupal\search_api\Utility\Utility;
 
 /**
@@ -73,9 +74,10 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
         'entity:node' => [
           'bundles' => [
             'default' => FALSE,
-            'selected' => ['parent'],
+            'selected' => ['grandparent', 'parent'],
           ],
         ],
+        'entity:user' => [],
       ],
       'server' => 'server',
       'field_settings' => [
@@ -83,6 +85,12 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
           'label' => 'Child > Indexed',
           'datasource_id' => 'entity:node',
           'property_path' => 'entity_reference:entity:indexed',
+          'type' => 'text',
+        ],
+        'grandchild_indexed' => [
+          'label' => 'Parent > Child > Indexed',
+          'datasource_id' => 'entity:node',
+          'property_path' => 'parent_reference:entity:entity_reference:entity:indexed',
           'type' => 'text',
         ],
       ],
@@ -94,9 +102,6 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
   /**
    * Tests correct tracking of changes in referenced entities.
    *
-   * @param array $parent_map
-   *   Map of parent nodes to create. It should be compatible with the
-   *   ::createEntitiesFromMap() method.
    * @param array $child_map
    *   Map of the child nodes to create. It should be compatible with the
    *   ::createEntitiesFromMap().
@@ -109,9 +114,22 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
    *
    * @dataProvider referencedEntityChangedDataProvider
    */
-  public function testReferencedEntityChanged(array $parent_map, array $child_map, array $updates, array $expected) {
+  public function testReferencedEntityChanged(array $child_map, array $updates, array $expected) {
     $children = $this->createEntitiesFromMap($child_map, [], 'child');
-    $this->createEntitiesFromMap($parent_map, $children, 'parent');
+    $parent_map = [
+      'parent' => [
+        'title' => 'Parent',
+        'entity_reference' => 'child',
+      ],
+    ];
+    $parents = $this->createEntitiesFromMap($parent_map, $children, 'parent');
+    $grandparent_map = [
+      'grandparent' => [
+        'title' => 'Grandparent',
+        'parent_reference' => 'parent',
+      ],
+    ];
+    $this->createEntitiesFromMap($grandparent_map, $parents, 'grandparent');
 
     $this->index->indexItems();
     $tracker = $this->index->getTrackerInstance();
@@ -143,33 +161,23 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
    * @see \Drupal\Tests\search_api\Kernel\ReferencedEntitiesReindexingTest::testReferencedEntityChanged()
    */
   public function referencedEntityChangedDataProvider(): array {
-    $tests = [];
-
-    $parent_map = [
-      'parent' => [
-        'title' => 'Parent',
-        'entity_reference' => 'child',
-      ],
-    ];
-
-    $parent_expected = ['entity:node/3:en'];
-
+    $parents_expected = ['entity:node/3:en', 'entity:node/4:en'];
     $child_variants = ['child', 'unrelated'];
     $field_variants = ['indexed', 'not_indexed'];
 
+    $tests = [];
     foreach ($child_variants as $child) {
       foreach ($field_variants as $field) {
         if ($child == 'child' && $field == 'indexed') {
           // This is how Search API represents our "parent" node in its tracking
           // data.
-          $expected = $parent_expected;
+          $expected = $parents_expected;
         }
         else {
           $expected = [];
         }
 
         $tests["changing value of $field field within the $child entity"] = [
-          $parent_map,
           [
             'child' => [
               'title' => 'Child',
@@ -191,7 +199,6 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
         ];
 
         $tests["appending value of $field field within the $child entity"] = [
-          $parent_map,
           [
             'child' => [
               'title' => 'Child',
@@ -211,7 +218,6 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
         ];
 
         $tests["removing value of $field field within the $child entity"] = [
-          $parent_map,
           [
             'child' => [
               'title' => 'Child',
@@ -234,7 +240,6 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
       }
 
       $tests["removing the $child entity"] = [
-        $parent_map,
         [
           'child' => [
             'title' => 'Child',
@@ -250,7 +255,7 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
         [
           $child => FALSE,
         ],
-        $child == 'child' ? $parent_expected : [],
+        $child == 'child' ? $parents_expected : [],
       ];
     }
 
@@ -281,8 +286,11 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
     $entities = [];
 
     foreach ($entity_fields as $i => $fields) {
-      if (isset($fields['entity_reference'])) {
-        $fields['entity_reference'] = $references_map[$fields['entity_reference']]->id();
+      $reference_fields = ['entity_reference', 'parent_reference'];
+      foreach ($reference_fields as $reference_field) {
+        if (isset($fields[$reference_field])) {
+          $fields[$reference_field] = $references_map[$fields[$reference_field]]->id();
+        }
       }
       $fields['type'] = $bundle;
       $entities[$i] = Node::create($fields);
@@ -290,6 +298,74 @@ class ReferencedEntitiesReindexingTest extends KernelTestBase {
     }
 
     return $entities;
+  }
+
+  /**
+   * Tests whether relationships are correctly separated between datasources.
+   *
+   * @see https://www.drupal.org/node/3178941
+   */
+  public function testUnrelatedDatasourceUnaffected() {
+    // First, check whether the tracking helper correctly includes "datasource"
+    // keys with all foreign relationship entries.
+    $tracking_helper = \Drupal::getContainer()
+      ->get('search_api.tracking_helper');
+    $method = new \ReflectionMethod(TrackingHelper::class, 'getForeignEntityRelationsMap');
+    $method->setAccessible(TRUE);
+    /** @see \Drupal\search_api\Utility\TrackingHelper::getForeignEntityRelationsMap() */
+    $map = $method->invoke($tracking_helper, $this->index);
+    usort($map, function (array $a, array $b): int {
+      $field = 'property_path_to_foreign_entity';
+      return $a[$field] <=> $b[$field];
+    });
+    $expected = [
+      [
+        'datasource' => 'entity:node',
+        'entity_type' => 'node',
+        // Note: It's unspecified that this array has string keys, only its
+        // values are important. Still, it's easier to just reflect the current
+        // implementation, when checking for equality.
+        'bundles' => ['child' => 'child'],
+        'property_path_to_foreign_entity' => 'entity_reference:entity',
+        'field_name' => 'indexed',
+      ],
+      [
+        'datasource' => 'entity:node',
+        'entity_type' => 'node',
+        'bundles' => ['parent' => 'parent'],
+        'property_path_to_foreign_entity' => 'parent_reference:entity',
+        'field_name' => 'entity_reference',
+      ],
+      [
+        'datasource' => 'entity:node',
+        'entity_type' => 'node',
+        'bundles' => ['child' => 'child'],
+        'property_path_to_foreign_entity' => 'parent_reference:entity:entity_reference:entity',
+        'field_name' => 'indexed',
+      ],
+    ];
+    $this->assertEquals($expected, $map);
+
+    // Then, check whether datasources correctly ignore relationships from other
+    // datasources, or that they at least don't lead to an exception/error.
+    $datasource = $this->index->getDatasource('entity:user');
+    $entities = $this->createEntitiesFromMap([
+      'child' => [
+        'title' => 'Child',
+        'indexed' => 'Indexed value',
+        'not_indexed' => 'Not indexed value.',
+      ],
+    ], [], 'child');
+    $child = reset($entities);
+    $original_child = clone $child;
+    $child->get('indexed')->setValue(['New value']);
+    $result = $datasource->getAffectedItemsForEntityChange($child, $map, $original_child);
+    $this->assertEquals([], $result);
+
+    // Change foreign relationships map slightly to trigger #3178941 on purpose.
+    $map[0]['property_path_to_foreign_entity'] = 'entity_reference:entity';
+    $result = $datasource->getAffectedItemsForEntityChange($child, $map, $original_child);
+    $this->assertEquals([], $result);
   }
 
 }

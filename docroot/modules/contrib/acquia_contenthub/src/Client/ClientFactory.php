@@ -119,6 +119,30 @@ class ClientFactory {
   }
 
   /**
+   * Verifies whether Content Hub has been configured or not.
+   *
+   * @return bool
+   *   TRUE if configuration is set, FALSE otherwise.
+   */
+  public function isConfigurationSet(Settings $settings = NULL): bool {
+    $settings = $settings ?? $this->getSettings();
+
+    // If any of these variables is empty, then we do NOT have a valid
+    // connection.
+    // @todo add validation for the Hostname.
+    if (!$settings
+      || !Uuid::isValid($settings->getUuid())
+      || empty($settings->getName())
+      || empty($settings->getUrl())
+      || empty($settings->getApiKey())
+      || empty($settings->getSecretKey())
+    ) {
+      return FALSE;
+    }
+    return TRUE;
+  }
+
+  /**
    * Instantiates the content hub client.
    *
    * @return \Acquia\ContentHubClient\ContentHubClient|bool
@@ -133,16 +157,7 @@ class ClientFactory {
       $settings = $this->getSettings();
     }
 
-    // If any of these variables is empty, then we do NOT have a valid
-    // connection.
-    // @todo add validation for the Hostname.
-    if (!$settings
-      || !Uuid::isValid($settings->getUuid())
-      || empty($settings->getName())
-      || empty($settings->getUrl())
-      || empty($settings->getApiKey())
-      || empty($settings->getSecretKey())
-    ) {
+    if (!$this->isConfigurationSet($settings)) {
       return FALSE;
     }
 

@@ -34,6 +34,7 @@ class OptionalDependencyCalculationTest extends KernelTestBase {
     'depcalc',
     'path_alias',
     'acquia_contenthub',
+    'acquia_contenthub_server_test',
     'acquia_contenthub_publisher',
   ];
 

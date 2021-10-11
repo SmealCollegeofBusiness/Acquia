@@ -53,4 +53,11 @@ class ClientFactoryMock extends ClientFactory {
     return $this->client;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public function isConfigurationSet(Settings $settings = NULL): bool {
+    return TRUE;
+  }
+
 }

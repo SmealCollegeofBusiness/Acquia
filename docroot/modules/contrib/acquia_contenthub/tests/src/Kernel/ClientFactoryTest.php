@@ -7,6 +7,7 @@ use Drupal\acquia_contenthub\Client\ProjectVersionClient;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTrait;
 use Prophecy\Argument;
 
 /**
@@ -17,6 +18,8 @@ use Prophecy\Argument;
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class ClientFactoryTest extends EntityKernelTestBase {
+
+  use AcquiaContentHubAdminSettingsTrait;
 
   /**
    * Modules to enable.
@@ -66,17 +69,17 @@ class ClientFactoryTest extends EntityKernelTestBase {
    *
    * @see GetSettingsFromCoreConfig
    */
-  public function testGetClientConfiguredByCoreConfig($name, $uuid, $api_key, $secret_key, $url, $shared_secret) {
-    $admin_settings = \Drupal::configFactory()
-      ->getEditable('acquia_contenthub.admin_settings');
+  public function testGetClientConfiguredByCoreConfig(string $name, string $uuid, string $api_key, string $secret_key, string $url, string $shared_secret) {
 
-    $admin_settings->set('client_name', $name);
-    $admin_settings->set('origin', $uuid);
-    $admin_settings->set('api_key', $api_key);
-    $admin_settings->set('secret_key', $secret_key);
-    $admin_settings->set('hostname', $url);
-    $admin_settings->set('shared_secret', $shared_secret);
-    $admin_settings->save();
+    $ch_settings = [
+      'client_name' => $name,
+      'origin' => $uuid,
+      'api_key' => $api_key,
+      'secret_key' => $secret_key,
+      'hostname' => $url,
+      'shared_secret' => $shared_secret,
+    ];
+    $this->createAcquiaContentHubAdminSettings($ch_settings);
 
     Cache::invalidateTags(['acquia_contenthub_settings']);
 
@@ -115,7 +118,7 @@ class ClientFactoryTest extends EntityKernelTestBase {
    *
    * @dataProvider settingsDataProvider
    */
-  public function testGetClientConfiguredBySettings($name, $uuid, $api_key, $secret_key, $url, $shared_secret) {
+  public function testGetClientConfiguredBySettings(string $name, string $uuid, string $api_key, string $secret_key, string $url, string $shared_secret) {
     // Get existing values from settings.php file.
     $system_settings = Settings::getAll();
     // Merge our settings.
@@ -150,14 +153,14 @@ class ClientFactoryTest extends EntityKernelTestBase {
    * @return array
    *   Settings.
    */
-  public function settingsDataProvider() {
+  public function settingsDataProvider(): array {
     return [
       [
         'test-client',
         '00000000-0000-0001-0000-123456789123',
-        'kZvJl17RyLUhIOCdssssshm5j',
-        'Sv6KgchlGWNgxBqFls123213MkmVwklnuOK2pIimlXss23123Xl',
-        'https://dev-euc1.content-hub.acquia.dev',
+        '12312321312321',
+        '12312321312321',
+        'https://dev.content-hub.dev',
         '12312321312321',
       ],
     ];

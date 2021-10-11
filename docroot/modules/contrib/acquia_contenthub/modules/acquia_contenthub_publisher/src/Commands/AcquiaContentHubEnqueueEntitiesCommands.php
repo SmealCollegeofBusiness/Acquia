@@ -3,8 +3,10 @@
 namespace Drupal\acquia_contenthub_publisher\Commands;
 
 use Drupal\acquia_contenthub_publisher\PublisherTracker;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\depcalc\Cache\DepcalcCacheBackend;
@@ -82,6 +84,9 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
    * @option type
    *   The entity type.
    * @default type
+   * @option uuid
+   *   The entity UUID.
+   * @default uuid
    * @option bundle
    *   The entity bundle.
    * @default bundle
@@ -102,6 +107,9 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
    * @usage acquia:contenthub-re-queue --type=node --bundle=page
    *   Requeues all eligible node pages in the site
    * (disregards what has been published before).
+   * @usage acquia:contenthub-re-queue --type=node --uuid=00000aa0-a00a-000a-aa00-aaa000a0a0aa
+   *   Requeues entity by UUID
+   * (disregards all other options).
    * @usage acquia:contenthub-re-queue --only-queued-entities
    *   Requeues all entities with "queued" status in the publisher tracking
    * table but are not in the export queue anymore.
@@ -114,33 +122,44 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
    * @command acquia:contenthub-re-queue
    * @aliases ach-rq
    *
+   * @return int
+   *   The exit code.
+   *
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Exception
    */
-  public function enqueueEntities() {
-    // Performing validations on user input.
-    $entity_type = NULL;
+  public function enqueueEntities():int {
     $data = [];
-    try {
-      if ($entity_type = $this->input->getOption('type')) {
-        $storage = $this->entityTypeManager->getStorage($entity_type);
-      }
-    }
-    catch (PluginNotFoundException $exception) {
-      throw $exception;
+
+    $entity_type = $this->input->getOption('type');
+    if ($entity_type) {
+      $storage = $this->entityTypeManager->getStorage($entity_type);
     }
 
-    if ($bundle = $this->input->getOption('bundle')) {
+    $uuid = $this->input->getOption('uuid');
+    if ($storage && $uuid) {
+      return $this->enqueueByUuid($storage, $uuid);
+    }
+
+    $bundle = $this->input->getOption('bundle');
+    if ($bundle) {
       $data = $this->checkBundleKeyAndInfo($entity_type, $bundle);
+    }
+
+    $only_queued_entities = $this->input->getOption('only-queued-entities');
+    $use_tracking_table = $this->input->getOption('use-tracking-table');
+    if (!$only_queued_entities && !$use_tracking_table && !$entity_type) {
+      $this->logger()->error(dt('You cannot use the command without any options. Please provide at least one option.'));
+      return self::EXIT_FAILURE_WITH_CLARITY;
     }
 
     // Always enqueue entities that have "QUEUED" status
     // but are not in the queue.
     $queued_entities = $this->publisherTracker->listTrackedEntities(PublisherTracker::QUEUED);
-    $this->enqueueTrackedOrQueuedEntities($queued_entities, $entity_type, $bundle);
+    $exit_code = $this->enqueueTrackedOrQueuedEntities($queued_entities, $entity_type, $bundle);
 
-    if ($this->input->getOption('only-queued-entities')) {
-      return $this->output->writeln(sprintf('<info>Finished enqueuing all "queued" entities.</info>'));
+    if ($only_queued_entities) {
+      return $exit_code;
     }
 
     // Clear the depcalc cache table.
@@ -150,23 +169,21 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
     // all dependencies are re-exported.
     $this->publisherTracker->nullifyHashes();
 
-    if ($this->input->getOption('use-tracking-table')) {
-      // We are going to re-queue ALL entities
-      // (if given options of a particular entity type and bundle)
-      // that have been previously published.
-      $tracked_entities = $this->publisherTracker->listTrackedEntities(
-        [PublisherTracker::EXPORTED, PublisherTracker::CONFIRMED],
-        $entity_type
-      );
-      $this->enqueueTrackedOrQueuedEntities($tracked_entities, $entity_type, $bundle, TRUE);
-    }
-    else {
+    if (!$use_tracking_table) {
       // We are going to re-queue ALL entities that match a particular entity
       // type (and bundle) disregarding whether they have been previously
       // published or not.
       return $this->enqueueWithoutTrackingTable($entity_type, $bundle, $data, $storage);
     }
 
+    // We are going to re-queue ALL entities
+    // (if given options of a particular entity type and bundle)
+    // that have been previously published.
+    $tracked_entities = $this->publisherTracker->listTrackedEntities(
+      [PublisherTracker::EXPORTED, PublisherTracker::CONFIRMED],
+      $entity_type
+    );
+    return $this->enqueueTrackedOrQueuedEntities($tracked_entities, $entity_type, $bundle, TRUE);
   }
 
   /**
@@ -211,63 +228,74 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
    * @param bool|false $track
    *   Entity is tracked or not.
    *
+   * @return int
+   *   The exit code.
+   *
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Exception
    */
-  protected function enqueueTrackedOrQueuedEntities(array $entities, string $entity_type, string $bundle, bool $track = FALSE) {
+  protected function enqueueTrackedOrQueuedEntities(array $entities, string $entity_type, string $bundle, bool $track = FALSE):int {
     $count = 0;
     foreach ($entities as $enqueue_entity) {
       $entity_type_id = ($track && !empty($entity_type)) ? $entity_type : $enqueue_entity['entity_type'];
       // Enqueue entity if it is not already enqueued.
       $entity = $this->entityTypeManager->getStorage($entity_type_id)->load($enqueue_entity['entity_id']);
 
-      if ($entity) {
-        if ($track && $bundle && $bundle !== $entity->bundle()) {
-          continue;
-        }
-        _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
-        $count++;
-      }
-      else {
+      if (!$entity) {
         // Entity cannot be loaded, it must have been deleted.
         // Delete it from the tracking table too.
         $this->publisherTracker->delete($enqueue_entity['entity_uuid']);
-        $this->output->writeln(sprintf('<warning>Could not load entity (%s,%s) : "%s". Deleted from Tracking Table.</warning>', $enqueue_entity['entity_type'], $enqueue_entity['entity_id'], $enqueue_entity['entity_uuid']));
-        return;
+        $this->logger()->warning(dt('Could not load entity (@entity_type, @entity_id) : "@entity_uuid". Deleted from Tracking Table.', [
+          '@entity_type' => $enqueue_entity['entity_type'],
+          '@entity_id' => $enqueue_entity['entity_id'],
+          '@entity_uuid' => $enqueue_entity['entity_uuid'],
+        ]));
+        continue;
       }
+
+      if ($track && $bundle && $bundle !== $entity->bundle()) {
+        continue;
+      }
+      _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+      $count++;
+
     }
-    $this->output->writeln(sprintf('<info>Processed %s "queued" entities for export.</info>', $count));
+    $this->logger()->success(dt('Processed @count "queued" entities for export.', [
+      '@count' => $count,
+    ]));
+
+    return self::EXIT_SUCCESS;
   }
 
   /**
    * Requeue entities without using the Tracking Table.
    *
-   * @param string|bool|null $entity_type
+   * @param string $entity_type
    *   The entity type.
-   * @param string|bool|null $bundle
+   * @param string|null $bundle
    *   The entity bundle.
    * @param array $data
    *   The data array.
-   * @param \Drupal\Core\Entity\EntityStorageInterface|null $storage
+   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
    *   A storage instance.
    *
-   * @return mixed
-   *   The return to print in the screen.
+   * @return int
+   *   The exit code.
    *
    * @throws \Exception
    */
-  protected function enqueueWithoutTrackingTable($entity_type, $bundle, array $data, $storage) {
-    if (empty($entity_type)) {
-      return $this->output->writeln('<error>You cannot use the command without any options. Please provide at least one option.</error>');
-    }
+  protected function enqueueWithoutTrackingTable(string $entity_type, ?string $bundle, array $data, EntityStorageInterface $storage):int {
     // We are going to re-queue ALL entities that match a particular entity
     // type (and bundle) disregarding whether they have been previously
     // published or not.
     // Re-enqueue all entities.
     $entities = $storage->loadByProperties($data);
     if (empty($entities)) {
-      return $this->output->writeln(sprintf('<error>No entities found for bundle = "%s".</error>', $bundle));
+      $this->logger()->error(dt('No entities found for bundle @bundle.', [
+        '@bundle' => $bundle,
+      ]));
+      return self::EXIT_FAILURE_WITH_CLARITY;
     }
 
     $count = 0;
@@ -277,12 +305,57 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
     }
 
     $msg = !empty($bundle) ? "and bundle = \"{$bundle}\"." : '';
-    return $this->output->writeln(sprintf(
-      '<info>Processed %s entities of type = "%s" %s for export.</info>',
-      $count,
-      $entity_type,
-      $msg
-    ));
+    $this->logger()->success(dt('Processed @count entities of type = @entity_type @msg for export.', [
+      '@count' => $count,
+      '@entity_type' => $entity_type,
+      '@msg' => $msg,
+    ]));
+    return self::EXIT_SUCCESS;
+  }
+
+  /**
+   * Enqueues by UUID.
+   *
+   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
+   *   The entity storage.
+   * @param string $uuid
+   *   The UUID.
+   *
+   * @return int
+   *   The exit code.
+   *
+   * @throws \Exception
+   */
+  protected function enqueueByUuid(EntityStorageInterface $storage, string $uuid):int {
+
+    if (!Uuid::isValid($uuid)) {
+      $this->logger()->error(dt('Invalid UUID.'));
+      return self::EXIT_FAILURE_WITH_CLARITY;
+    }
+
+    $entity = $storage->loadByProperties(['uuid' => $uuid]);
+    $entity = reset($entity);
+
+    if (!$entity instanceof EntityInterface) {
+      $this->logger()->error(dt('Entity with UUID @uuid not found.', [
+        '@uuid' => $uuid,
+      ]));
+      return self::EXIT_FAILURE_WITH_CLARITY;
+    }
+
+    // Clear the depcalc cache table for this UUID.
+    $this->depcalcCache->delete($uuid);
+
+    // We are nullifying hashes for this UUID.
+    $this->publisherTracker->nullifyHashes([], [], [$uuid]);
+
+    _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+
+    $this->logger()->success(dt('Queued entity with UUID @uuid.', [
+      '@uuid' => $uuid,
+    ]));
+
+    return self::EXIT_SUCCESS;
   }
 
 }

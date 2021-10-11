@@ -4,9 +4,14 @@ services:
     class: Drupal\acquia_contenthub_subscriber\SubscriberTracker
     arguments: ['@database']
 
+  acquia_contenthub_subscriber.logger_channel:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: [ 'acquia_contenthub_subscriber' ]
+
   acquia_contenthub_subscriber.handle_webhook.import_assets:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\ImportUpdateAssets
-    arguments: ['@queue', '@event_dispatcher', '@acquia_contenthub_subscriber.tracker', '@logger.factory', '@config.factory']
+    arguments: ['@queue', '@event_dispatcher', '@acquia_contenthub_subscriber.tracker', '@acquia_contenthub_subscriber.logger_channel', '@config.factory']
     tags:
       - { name: event_subscriber }
 

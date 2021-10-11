@@ -36,6 +36,7 @@ class FixedEmail extends RecipientTypeBase {
         '#title' => $this->t('Recipients'),
         '#description' => $this->t('Enter recipient addresses, separated by commas'),
         '#default_value' => $this->getConfiguration()['settings']['recipients'],
+        '#maxlength' => 2048,
       ],
     ];
   }

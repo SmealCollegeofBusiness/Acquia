@@ -9,6 +9,7 @@
  * Implements hook_drush_command().
  */
 function default_content_drush_command() {
+  $items = [];
   $items['default-content-export'] = [
     'description' => dt('Exports a single entity'),
     'arguments' => [
@@ -39,6 +40,14 @@ function default_content_drush_command() {
       'module' => dt('The name of the module.'),
     ],
     'aliases' => ['dcem'],
+    'required-arguments' => 1,
+  ];
+  $items['default-content-import-module'] = [
+    'description' => dt('Imports all the content defined in a module info file.'),
+    'arguments' => [
+      'module' => dt('The name of the module.'),
+    ],
+    'aliases' => ['dcim'],
     'required-arguments' => 1,
   ];
 
@@ -101,4 +110,16 @@ function drush_default_content_export_module($module_name) {
     ->getModule($module_name)
     ->getPath() . '/content';
   $exporter->exportModuleContent($module_name, $module_folder);
+}
+
+/**
+ * Imports all of the content for a given module.
+ *
+ * @param string $module_name
+ *   The module name to import.
+ */
+function drush_default_content_import_module($module_name) {
+  /** @var \Drupal\default_content\Importer $importer */
+  $importer = \Drupal::service('default_content.importer');
+  $importer->importContent($module_name);
 }

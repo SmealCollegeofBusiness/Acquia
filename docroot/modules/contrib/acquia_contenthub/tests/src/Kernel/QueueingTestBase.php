@@ -24,6 +24,7 @@ abstract class QueueingTestBase extends KernelTestBase {
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_publisher',
+    'acquia_contenthub_server_test',
   ];
 
   /**

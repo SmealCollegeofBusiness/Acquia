@@ -38,6 +38,12 @@ function acquia_contenthub_publisher_entity_update(EntityInterface $entity) {
  * @throws \Exception
  */
 function acquia_contenthub_publisher_entity_delete(EntityInterface $entity) {
+  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
+  $factory = \Drupal::service('acquia_contenthub.client.factory');
+  if (!$factory->isConfigurationSet()) {
+    return;
+  }
+
   $uuid = $entity->uuid();
   if (!$uuid) {
     return;
@@ -63,18 +69,27 @@ function acquia_contenthub_publisher_entity_delete(EntityInterface $entity) {
  * @throws \Exception
  */
 function _acquia_contenthub_publisher_enqueue_entity(EntityInterface $entity, string $op) {
+  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
+  $factory = \Drupal::service('acquia_contenthub.client.factory');
+  if (!$factory->isConfigurationSet()) {
+    return;
+  }
+  $logger = \Drupal::logger('acquia_contenthub_publisher');
+
   $uuid = $entity->uuid();
-  \Drupal::logger('acquia_contenthub')
-    ->info("Attempting to add entity with UUID $uuid to the export queue 
-    after operation: $op.");
+  $logger
+    ->info(
+      'Attempting to add entity with UUID @uuid to the export queue after operation: @op.',
+      ['@uuid' => $uuid, '@op' => $op]
+    );
 
   $event = new ContentHubEntityEligibilityEvent($entity, $op);
   /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
   $dispatcher = \Drupal::service('event_dispatcher');
   $dispatcher->dispatch(ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY, $event);
   if (!$event->getEligibility()) {
-    \Drupal::logger('acquia_contenthub')
-      ->info("Entity with UUID $uuid not eligible to be added to the export queue.");
+    $logger
+      ->info('Entity with UUID @uuid not eligible to be added to the export queue.', ['@uuid' => $uuid]);
     return;
   }
 
@@ -92,13 +107,15 @@ function _acquia_contenthub_publisher_enqueue_entity(EntityInterface $entity, st
   $tracker = \Drupal::service('acquia_contenthub_publisher.tracker');
   $tracker->queue($entity);
   $tracker->setQueueItemByUuid($item->uuid, $queue_id);
-  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
-  $factory = \Drupal::service('acquia_contenthub.client.factory');
+
   // Reinitialize client cdf metrics data.
   $factory->getClient();
 
-  \Drupal::logger('acquia_contenthub')
-    ->info("Entity with UUID $uuid added to the export queue and to the tracking table.");
+  $logger
+    ->info(
+      'Entity with UUID @uuid added to the export queue and to the tracking table.',
+      ['@uuid' => $uuid]
+    );
 
 }
 

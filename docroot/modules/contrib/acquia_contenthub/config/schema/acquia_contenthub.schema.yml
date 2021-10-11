@@ -20,6 +20,9 @@ acquia_contenthub.admin_settings:
     shared_secret:
       type: string
       label: 'ContentHub Secret Key'
+    event_service_url:
+      type: string
+      label: 'ContentHub Event Logging Url'
     webhook:
       type: mapping
       label: 'ContentHub Webhook details'

@@ -61,7 +61,7 @@ class PasswordPolicyValidator implements PasswordPolicyValidatorInterface {
     $original_roles = array_combine($original_roles, $original_roles);
 
     $force_failure = FALSE;
-    if ($edited_user_roles !== $original_roles && $password === '' && !empty($applicable_policies)) {
+    if (!empty(array_diff($edited_user_roles, $original_roles)) && $password === '' && !empty($applicable_policies)) {
       // New role has been added and applicable policies are available.
       $force_failure = TRUE;
     }

@@ -8,7 +8,7 @@ use Drupal\acquia_contenthub\Event\BuildClientCdfEvent;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -71,7 +71,7 @@ class ImportUpdateAssets implements EventSubscriberInterface {
    *   Event dispatcher.
    * @param \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker
    *   The subscription tracker.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
+   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
    *   The logger channel factory.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The configuration factory.
@@ -80,12 +80,12 @@ class ImportUpdateAssets implements EventSubscriberInterface {
     QueueFactory $queue,
     EventDispatcherInterface $dispatcher,
     SubscriberTracker $tracker,
-    LoggerChannelFactoryInterface $logger_factory,
+    LoggerChannelInterface $logger_channel,
     ConfigFactoryInterface $config_factory) {
     $this->queue = $queue->get('acquia_contenthub_subscriber_import');
     $this->dispatcher = $dispatcher;
     $this->tracker = $tracker;
-    $this->channel = $logger_factory->get('acquia_contenthub');
+    $this->channel = $logger_channel;
     $this->config = $config_factory->get('acquia_contenthub.admin_settings');
   }
 
@@ -118,8 +118,8 @@ class ImportUpdateAssets implements EventSubscriberInterface {
 
     if ($payload['status'] !== 'successful' || !isset($payload['assets']) || !count($payload['assets'])) {
       $this->channel
-        ->info("Payload will not be processed because it is not successful or it does not have assets.
-        Payload data: " . print_r($payload, TRUE));
+        ->info('Payload will not be processed because it is not successful or it does not have assets.
+        Payload data: @payload', ['@payload' => print_r($payload, TRUE)]);
       return;
     }
 
@@ -127,8 +127,8 @@ class ImportUpdateAssets implements EventSubscriberInterface {
       // Only log if we're trying to update something other than client objects.
       if ($payload['assets'][0]['type'] !== 'client') {
         $this->channel
-          ->info("Payload will not be processed because its initiator is the existing client.
-        Payload data: " . print_r($payload, TRUE));
+          ->info('Payload will not be processed because its initiator is the existing client.
+        Payload data: @payload', ['@payload' => print_r($payload, TRUE)]);
       }
 
       return;
@@ -141,7 +141,9 @@ class ImportUpdateAssets implements EventSubscriberInterface {
       $type = $asset['type'];
       if (!in_array($type, $types)) {
         $this->channel
-          ->info("Entity with UUID $uuid was not added to the import queue because it has an unsupported type: $type");
+          ->info('Entity with UUID @uuid was not added to the import queue because it has an unsupported type: @type',
+            ['@uuid' => $uuid, '@type' => $type]
+          );
         continue;
       }
 
@@ -149,7 +151,9 @@ class ImportUpdateAssets implements EventSubscriberInterface {
         $status = $this->tracker->getStatusByUuid($uuid);
         if ($status === SubscriberTracker::AUTO_UPDATE_DISABLED) {
           $this->channel
-            ->info("Entity with UUID $uuid was not added to the import queue because it has auto update disabled.");
+            ->info('Entity with UUID @uuid was not added to the import queue because it has auto update disabled.',
+              ['@uuid' => $uuid]
+            );
           continue;
         }
       }
@@ -157,7 +161,9 @@ class ImportUpdateAssets implements EventSubscriberInterface {
       $uuids[] = $uuid;
       $this->tracker->queue($uuid);
       $this->channel
-        ->info("Attempting to add entity with UUID $uuid to the import queue.");
+        ->info('Attempting to add entity with UUID @uuid to the import queue.',
+        ['@uuid' => $uuid]
+        );
 
     }
     if ($uuids) {

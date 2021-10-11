@@ -102,10 +102,11 @@ class TrackingHelper implements TrackingHelperInterface {
       // Can't really happen, but play it safe to appease static code analysis.
     }
 
-    // Map of foreign entity relations. Will get lazily populated as soon as we
-    // actually need it.
-    $original = $deleted ? NULL : $entity->original ?? NULL;
+    // Original entity, if available.
+    $original = $deleted ? NULL : ($entity->original ?? NULL);
     foreach ($indexes as $index) {
+      // Map of foreign entity relations. Will get lazily populated as soon as
+      // we actually need it.
       $map = NULL;
       foreach ($index->getDatasources() as $datasource_id => $datasource) {
         if (!$datasource->canContainEntityReferences()) {
@@ -142,6 +143,8 @@ class TrackingHelper implements TrackingHelperInterface {
    *   A (numerically keyed) array of foreign relationship mappings. Each
    *   sub-array represents a single known relationship. Such sub-arrays will
    *   have the following structure:
+   *   - datasource: (string) The ID of the datasource which contains this
+   *     relationship.
    *   - entity_type: (string) The entity type that is referenced from the
    *     index.
    *   - bundles: (string[]) An optional array of particular entity bundles that
@@ -175,6 +178,7 @@ class TrackingHelper implements TrackingHelperInterface {
       }
 
       $relation_info = [
+        'datasource' => $datasource->getPluginId(),
         'entity_type' => NULL,
         'bundles' => NULL,
         'property_path_to_foreign_entity' => NULL,
@@ -212,10 +216,20 @@ class TrackingHelper implements TrackingHelperInterface {
         }
 
         $entity_reference = $this->isEntityReferenceDataDefinition($property_definition, $cacheability);
-        if ($entity_reference
-            && $relation_info['entity_type'] !== $entity_reference['entity_type']) {
+        if ($entity_reference) {
+          // Unfortunately, the nested "entity" property for entity reference
+          // fields comes without a bundles restriction, so we need to copy the
+          // bundles information from the level above (on the field itself), if
+          // any.
+          if ($relation_info['entity_type'] === $entity_reference['entity_type']
+              && empty($entity_reference['bundles'])
+              && !empty($relation_info['bundles'])
+              && $field_property[0] === 'entity') {
+            $entity_reference['bundles'] = $relation_info['bundles'];
+          }
           $relation_info = $entity_reference;
           $relation_info['property_path_to_foreign_entity'] = implode(IndexInterface::PROPERTY_PATH_SEPARATOR, $seen_path_chunks);
+          $relation_info['datasource'] = $datasource->getPluginId();
         }
 
         if ($property_definition instanceof ComplexDataDefinitionInterface) {

@@ -3,7 +3,9 @@
 namespace Drupal\acquia_contenthub;
 
 use Acquia\ContentHubClient\CDF\CDFObjectInterface;
+use Acquia\ContentHubClient\CDF\ClientCDFObject;
 use Acquia\ContentHubClient\CDFDocument;
+use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\ContentHubPublishEntitiesEvent;
@@ -257,6 +259,9 @@ class ContentHubCommonActions {
       $vanished_uuids = array_intersect($diff_uuids, array_keys($dependencies));
       if (!empty($vanished_uuids)) {
         $type = $cdf_objects[$uuid]->getAttribute('entity_type')->getValue()[LanguageInterface::LANGCODE_NOT_SPECIFIED];
+        $origin = $cdf_objects[$uuid]->getOrigin();
+        // Using array_keys() to only pass the dependency UUIDs, not the hashes.
+        $this->requestToRepublishEntity($origin, $type, $uuid, array_keys($dependencies));
         $message .= sprintf("The entity (%s, %s) could not be imported because the following dependencies are missing from Content Hub: %s.", $type, $uuid, implode(', ', $vanished_uuids)) . PHP_EOL;
       }
     }
@@ -363,6 +368,104 @@ class ContentHubCommonActions {
   }
 
   /**
+   * Generates the CDF of an entity and all its dependencies keyed by UUIDs.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to generate the CDF from.
+   *
+   * @return \Acquia\ContentHubClient\CDF\CDFObject[]|array
+   *   An array of CDF Objects.
+   *
+   * @throws \Exception
+   */
+  public function getEntityCdfFullKeyedByUuids(EntityInterface $entity): array {
+    $entities = [];
+    $data = [];
+    $objects = $this->getEntityCdf($entity, $entities, FALSE);
+    foreach ($objects as $object) {
+      $data[$object->getUuid()] = $object;
+    }
+    return $data;
+  }
+
+  /**
+   * Request to republish an entity via Webhook.
+   *
+   * @param string $origin
+   *   Entity Origin.
+   * @param string $type
+   *   Entity Type.
+   * @param string $uuid
+   *   Entity UUID to republish.
+   * @param array $dependencies
+   *   An array of dependency UUIDs.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   */
+  public function requestToRepublishEntity(string $origin, string $type, string $uuid, array $dependencies) {
+    $client = $this->getClient();
+    $webhook_url = $this->getWebhookUrlFromClientOrigin($origin);
+    if (!$webhook_url) {
+      $message = sprintf('Could not find Webhook URL for origin = "%s". Request to re-export entity "%s/%s" could not be made.',
+        $origin,
+        $type,
+        $uuid
+      );
+      $this->channel->error($message);
+      return;
+    }
+    $settings = $client->getSettings();
+    $cdf = [
+      'uuid' => $uuid,
+      'type' => $type,
+      'dependencies' => $dependencies,
+    ];
+
+    $payload = [
+      'status' => 'successful',
+      'uuid' => $uuid,
+      'crud' => 'republish',
+      'initiator' => $settings->getUuid(),
+      'cdf' => $cdf,
+    ];
+    $response = $client->request('post', $webhook_url, [
+      'body' => json_encode($payload),
+    ]);
+
+    $message = $response->getBody()->getContents();
+    $code = $response->getStatusCode();
+    if ($code == 200) {
+      $this->channel->info('@message', ['@message' => $message]);
+    }
+    else {
+      $this->channel->error(sprintf('Request to re-export entity failed. Response code = %s, Response message = "%s".', $code, $message));
+    }
+  }
+
+  /**
+   * Obtain the webhook from the Client CDF, given origin.
+   *
+   * @param string $origin
+   *   The origin of the site.
+   *
+   * @return false|mixed
+   *   The webhook URL if it can be obtained, FALSE otherwise.
+   *
+   * @throws \Exception
+   */
+  public function getWebhookUrlFromClientOrigin(string $origin) {
+    // Obtaining the webhook from the remote origin.
+    $cdf = $this->getClient()->getEntity($origin);
+    if ($cdf instanceof ClientCDFObject) {
+      $webhook = $cdf->getWebhook();
+      if (isset($webhook['url'])) {
+        return $webhook['url'];
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * Request a Remote Entity via Webhook.
    *
    * @param string $webhook_url
@@ -442,8 +545,10 @@ class ContentHubCommonActions {
    */
   protected function getClient() {
     $client = $this->factory->getClient();
-    if (!$client) {
-      throw new \Exception("Client is not properly configured. Please check your ContentHub registration credentials.");
+    if (!($client instanceof ContentHubClient)) {
+      $message = "Client is not properly configured. Please check your ContentHub registration credentials.";
+      $this->channel->error($message);
+      throw new \Exception($message);
     }
     return $client;
   }
