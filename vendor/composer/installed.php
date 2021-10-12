@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '4c754bce0bee99ce6e70a186e27634cd020763e3',
+        'reference' => '3a18bce9da2a347578100f6a36045b191f4308a6',
         'name' => 'acquia/sf_acms',
         'dev' => false,
     ),
@@ -139,7 +139,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '4c754bce0bee99ce6e70a186e27634cd020763e3',
+            'reference' => '3a18bce9da2a347578100f6a36045b191f4308a6',
             'dev_requirement' => false,
         ),
         'asm89/stack-cors' => array(
@@ -2701,12 +2701,12 @@
             'dev_requirement' => false,
         ),
         'spatie/ssl-certificate' => array(
-            'pretty_version' => '1.22.1',
-            'version' => '1.22.1.0',
+            'pretty_version' => '1.21.0',
+            'version' => '1.21.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../spatie/ssl-certificate',
             'aliases' => array(),
-            'reference' => 'c4756c3f18f9abeea62cfe99fc841229d9fead2c',
+            'reference' => '3f827acdbff1745e1af2a4a38d7b985494db4ac1',
             'dev_requirement' => false,
         ),
         'squizlabs/php_codesniffer' => array(
