@@ -66,7 +66,7 @@ class MenuTemplatesForm extends TemplateForm {
 
     // Global template uses existing menu mode template suggestion name, whereas
     // node_type specific templates use custom prefix and suggestion.
-    $filename_prefix = 'menu' . TemplateStorageBase::TEMPLATE_PREFIX . '-';
+    $filename_prefix = 'menu' . TemplateStorageBase::TEMPLATE_PREFIX;
     $filename = $filename_prefix . str_replace('_', '-', $entity->get('id'));
     $entity->set('twig_template', $filename);
 

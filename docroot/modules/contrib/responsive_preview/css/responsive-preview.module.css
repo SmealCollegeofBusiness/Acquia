@@ -140,6 +140,11 @@ body.toolbar-tray-open.responsive-preview-frame {
   overflow-x: hidden !important;
 }
 
+/* Fix for Gin's sidebar navigation */
+.responsive-preview-frame.gin--vertical-toolbar.toolbar-fixed {
+  padding-left: 0;
+}
+
 .responsive-preview-frame #toolbar-administration {
   display: none !important;
 }

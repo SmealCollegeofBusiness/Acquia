@@ -56,7 +56,6 @@ class ResponsivePreviewToolbarTest extends ResponsivePreviewTestBase {
     $this->assertSession()->elementExists('xpath', $toolbar_xpath);
     $this->assertSession()->elementNotExists('xpath', $tab_xpath);
     $this->assertNoResponsivePreviewLibrary();
-    $this->assertResponsivePreviewCachesTagAndContexts();
 
     // Users with 'access responsive preview' permission can use the toolbar
     // and the preview so the module library and the cache tags and contexts

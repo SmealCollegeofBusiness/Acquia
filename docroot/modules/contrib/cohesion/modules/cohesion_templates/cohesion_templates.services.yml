@@ -6,5 +6,8 @@ services:
     tags:
       - { name: twig.extension }
 
-  cohesion_templates.cache_contexts:
-    class: Drupal\cohesion_templates\Plugin\CacheContexts
+  cohesion_templates.context.cache_metadata:
+    class: Drupal\cohesion_templates\ContextCacheMetadata
+    arguments:
+      - '@module_handler'
+      - '@keyvalue'

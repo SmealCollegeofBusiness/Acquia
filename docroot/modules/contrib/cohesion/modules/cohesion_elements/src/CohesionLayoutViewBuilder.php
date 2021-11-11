@@ -30,8 +30,6 @@ class CohesionLayoutViewBuilder extends EntityViewBuilder {
       $cache_tags[] = 'layout_formatter.' . $host->uuid();
     }
 
-    $cacheContexts = \Drupal::service('cohesion_templates.cache_contexts');
-
     // Set up some variables.
     $variables = $entities;
     $variables['layout_builder_entity'] = [
@@ -41,15 +39,27 @@ class CohesionLayoutViewBuilder extends EntityViewBuilder {
       'revision_id' => $entity->getRevisionId(),
     ];
 
+    $context_cache_metadata = \Drupal::service('cohesion_templates.context.cache_metadata');
+    $context_names = $entity->getTwigContexts();
+    if (!empty($context_names)) {
+      $cache = $context_cache_metadata->getContextsCacheMetadata($context_names);
+    }
+    else {
+      $cache = [
+        'tags' => [],
+        'contexts' => [],
+      ];
+    }
+
+    $cache['tags'] = array_merge($cache['tags'], $entity->getCacheTags(), $cache_tags);
+    $cache['contexts'] = array_merge($cache['contexts'], $entity->getCacheContexts());
+
     // Tell the field to render as a "cohesion_layout".
     $build = [
       '#type' => 'inline_template',
       '#template' => $entity->getTwig(),
       '#context' => $variables,
-      '#cache' => [
-        'contexts' => $cacheContexts->getFromContextName($entity->getTwigContexts()),
-        'tags' => $cache_tags,
-      ],
+      '#cache' => $cache,
     ];
 
     $content = '<style>' . $entity->getStyles() . '</style>';

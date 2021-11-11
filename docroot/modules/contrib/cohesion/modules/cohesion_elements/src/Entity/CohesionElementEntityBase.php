@@ -263,7 +263,7 @@ abstract class CohesionElementEntityBase extends CohesionConfigEntityBase implem
     $cohesion_sync_lock = &drupal_static('cohesion_sync_lock');
 
     // Don't attempt to convert to "Uncategorized" if we're importing or updating.
-    if (!$cohesion_sync_lock && !is_null($cohesion_sync_lock)) {
+    if (!$cohesion_sync_lock) {
       $category_class = \Drupal::entityTypeManager()->getStorage($this->getCategoryEntityTypeId())->getEntitytype()->getOriginalClass();
       \Drupal::service('cohesion_elements.category_relationships')->processCategory($this->getCategory(), $this->getCategoryEntityTypeId(), $category_class);
     }

@@ -101,6 +101,9 @@ class ElementModel implements \JsonSerializable {
       if (is_object($current_pointer) && property_exists($current_pointer, $property_name)) {
         $current_pointer = $current_pointer->{$property_name};
       }
+      elseif (is_array($current_pointer) && isset($current_pointer[$property_name])) {
+        $current_pointer = $current_pointer[$property_name];
+      }
       else {
         return NULL;
       }

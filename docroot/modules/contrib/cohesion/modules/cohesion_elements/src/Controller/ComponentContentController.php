@@ -130,8 +130,8 @@ class ComponentContentController extends ControllerBase {
         $data[$component->id()]['children'][] = [
           'title' => $component_content->label(),
           'type' => 'component-content',
-          'componentContentId' => 'cc_' . $component_content->id(),
-          'uid' => 'cc_' . $component_content->id(),
+          'componentContentId' => 'cc_' . $component_content->uuid(),
+          'uid' => 'cc_' . $component_content->uuid(),
           'componentId' => $component->id(),
           'category' => $category_entity ? $category_entity->getClass() : FALSE,
           'componentType' => $top_type,
@@ -165,7 +165,12 @@ class ComponentContentController extends ControllerBase {
     if (is_array($uids)) {
       foreach ($uids as $uid) {
         $id = str_replace('cc_', '', $uid);
-        if ($component_content = ComponentContent::load($id)) {
+        $component_contents = $this->entityTypeManager
+          ->getStorage('component_content')
+          ->loadByProperties(['uuid' => $id]);
+        $component_content = reset($component_contents);
+
+        if ($component_content) {
           $category_entity = $component_content->getComponent()->getCategoryEntity();
 
           $components[$uid] = array_merge([
@@ -226,7 +231,7 @@ class ComponentContentController extends ControllerBase {
           return new CohesionJsonResponse([
             'status' => 'success',
             'data' => [
-              'componentId' => 'cc_' . $component_content->id(),
+              'componentId' => 'cc_' . $component_content->uuid(),
               'title' => $component_content->label(),
               'url' => $component_content->toUrl('edit-form')->toString(),
             ],

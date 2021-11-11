@@ -3,6 +3,7 @@
 namespace Drupal\cohesion\Controller;
 
 use Drupal\Component\Uuid\Uuid;
+use Drupal\Core\Url;
 use Drupal\entity_browser\Element\EntityBrowserElement;
 use Drupal\block\BlockRepositoryInterface;
 use Drupal\cohesion\CohesionJsonResponse;
@@ -752,7 +753,6 @@ class CohesionDrupalEndpointController extends ControllerBase {
 
       // If the media types are not set then allow all.
       if (!isset($target_bundles_ids)) {
-
         $target_bundles_ids = [];
         $media_types = \Drupal::service('entity_type.bundle.info')
           ->getBundleInfo('media');
@@ -763,11 +763,17 @@ class CohesionDrupalEndpointController extends ControllerBase {
       }
 
       $allowed_types = array_filter($target_bundles_ids);
-      $allowed_media_types_query = http_build_query(['media_library_allowed_types' => $target_bundles_ids]);
       $selected_type = array_shift($target_bundles_ids);
       $media_lib_state = MediaLibraryState::create('media_library.opener.cohesion', $allowed_types, $selected_type, 1);
 
-      $url = '/cohesion-media-library?coh_clean_page=true&media_library_opener_id=media_library.opener.cohesion&' . $allowed_media_types_query . '&media_library_selected_type=' . $media_lib_state->getSelectedTypeId() . '&media_library_remaining=1&hash=' . $media_lib_state->getHash() . '';
+      $url = Url::fromRoute('cohesion.media_library_ui', [
+        'coh_clean_page' => 'true',
+        'media_library_opener_id' => 'media_library.opener.cohesion',
+        'media_library_allowed_types' => $allowed_types,
+        'media_library_selected_type' => $media_lib_state->getSelectedTypeId(),
+        'media_library_remaining' => 1,
+        'hash' => $media_lib_state->getHash()
+      ])->toString();
 
       $data = [
         'url' => $url,
@@ -794,7 +800,13 @@ class CohesionDrupalEndpointController extends ControllerBase {
             $display = $entity_browser->getDisplay();
             // Reset display id.
             $display->setUuid('');
-            $url = $display->path() . '?uuid=' . $display->getUuid() . '&coh_clean_page=true';
+
+            $url = Url::fromUserInput($display->path(), [
+              'query' => [
+                'uuid' => $display->getUuid(),
+                'coh_clean_page' => 'true'
+              ]
+            ])->toString();
 
             $target_bundles = [];
             if ($target_bundles_ids) {

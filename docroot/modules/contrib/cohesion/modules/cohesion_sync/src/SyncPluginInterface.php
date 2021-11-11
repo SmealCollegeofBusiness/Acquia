@@ -60,10 +60,11 @@ interface SyncPluginInterface extends PluginInspectionInterface {
    *
    * @param $entry
    * @param $action_state
+   * @param $type
    *
    * @return mixed
    */
-  public function getActionData($entry, $action_state);
+  public function getActionData($entry, $action_state, $type);
 
   /**
    * Apply to the site.

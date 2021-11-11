@@ -4,14 +4,17 @@ namespace Drupal\cohesion_website_settings\Controller;
 
 use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -22,6 +25,31 @@ use Symfony\Component\HttpFoundation\Response;
  * @package Drupal\cohesion_website_settings\Controller
  */
 class WebsiteSettingsController extends ControllerBase implements ContainerInjectionInterface {
+
+  /**
+   * Current request.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $request;
+
+  /**
+   * WebsiteSettingsController constructor.
+   *
+   * @param \Symfony\Component\HttpFoundation\RequestStack
+   */
+  public function __construct(RequestStack $requestStack) {
+    $this->request = $requestStack->getCurrentRequest();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('request_stack')
+    );
+  }
 
   /**
    * POST: /admin/cohesion/upload/font_libraries.
@@ -284,7 +312,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
   }
 
   /**
-   * Filter elments by permissions.
+   * Filter elements by permissions.
    *
    * @param $data
    * @param $entity_type_id
@@ -316,6 +344,29 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
   }
 
   /**
+   * Access check for elementAction method.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   * @return \Drupal\Core\Access\AccessResultInterface
+   */
+  public function elementActionAccess(AccountInterface $account) {
+    $group = $this->request->get('group');
+
+    // Map groups to permissions.
+    $map = [
+      'elements' => 'access elements',
+      'form_elements' => 'access fields',
+    ];
+
+    if (array_key_exists($group, $map)) {
+      return AccessResult::allowedIfHasPermission($account, $map[$group]);
+    }
+
+    // Fallback to original _is_logged_in check if unknown group.
+    return AccessResult::allowedIf($account->isAuthenticated());
+  }
+
+  /**
    * GET: /cohesionapi/element/{group}/{type}
    * Retrieve one or all elements from asset storage group. Endpoint.
    *
@@ -333,7 +384,13 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
     $with_categories = $request->query->get('withcategories');
     $entity_type_id = $request->query->get('entityTypeId');
 
-    [$error, $data, $message] = \Drupal::service('settings.endpoint.utils')->getAssets($assetLibrary, $type, $group, $with_categories);
+    // Check if it's a component.
+    $isComponentBuilder = FALSE;
+    if ($entity_type_id === 'cohesion_component') {
+      $isComponentBuilder = TRUE;
+    }
+
+    [$error, $data, $message] = \Drupal::service('settings.endpoint.utils')->getAssets($isComponentBuilder, $assetLibrary, $type, $group, $with_categories);
 
     if ($group == 'elements') {
       if ($with_categories) {
@@ -408,7 +465,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
       // Using the status /Drupal:keyValue here instead of the one from the
       // collection so the base collection can be modified in the loop.
       $assetLibrary = \Drupal::keyValue($collection->collection);
-      [$error, $group_data, $message] = \Drupal::service('settings.endpoint.utils')->getAssets($assetLibrary, '__ALL__', $base_name, FALSE);
+      [$error, $group_data, $message] = \Drupal::service('settings.endpoint.utils')->getAssets(FALSE, $assetLibrary, '__ALL__', $base_name, FALSE);
 
       // Patch in any custom element data.
       switch ($base_name) {
@@ -584,16 +641,12 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
 
     // Move temp to live.
     $batch['operations'][] = [
-      'entity_rebuild_temp_to_live', [
-        $verbose,
-      ],
+      'entity_rebuild_temp_to_live', [$verbose],
     ];
 
     if(!$no_cache_clear) {
       $batch['operations'][] = [
-        'batch_drupal_flush_all_caches', [
-          $verbose,
-      ],
+        'batch_drupal_flush_all_caches', [$verbose],
       ];
     }
 

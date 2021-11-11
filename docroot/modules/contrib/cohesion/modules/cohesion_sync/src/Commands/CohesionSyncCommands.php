@@ -4,6 +4,7 @@ namespace Drupal\cohesion_sync\Commands;
 
 use Drupal\cohesion_sync\Drush\CommandHelpers;
 use Drush\Commands\DrushCommands;
+use Consolidation\AnnotatedCommand\CommandResult;
 
 /**
  * A Drush commandfile.
@@ -55,6 +56,7 @@ class CohesionSyncCommands extends DrushCommands {
     try {
       if ($result = $this->commandHelpers->exportAll($filename_prefix)) {
         $this->say($result);
+        return CommandResult::exitCode(self::EXIT_SUCCESS);
       }
       else {
         $this->say(t('Site Studio', 'Unable to export Site Studio packages. Check the dblog for more information.'));
@@ -63,6 +65,7 @@ class CohesionSyncCommands extends DrushCommands {
     catch (\Exception $e) {
       $this->yell($e->getMessage());
     }
+    return CommandResult::exitCode(self::EXIT_FAILURE);
   }
 
   /**
@@ -110,7 +113,8 @@ class CohesionSyncCommands extends DrushCommands {
         ];
 
         batch_set($batch);
-        return drush_backend_batch_process();
+        $result = drush_backend_batch_process();
+        return is_array($result) && isset(array_shift($result)['error']) ? CommandResult::exitCode(self::EXIT_FAILURE) : CommandResult::exitCode(self::EXIT_SUCCESS);
       }
       // None of the options set.
       else {
@@ -120,6 +124,8 @@ class CohesionSyncCommands extends DrushCommands {
     catch (\Exception $e) {
       $this->yell($e->getMessage(), 200, 'red');
     }
+
+    return CommandResult::exitCode(self::EXIT_FAILURE);
   }
 
 }

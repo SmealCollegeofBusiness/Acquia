@@ -42,19 +42,19 @@ class SettingsEndpointUtils {
   }
 
   /**
+   * @param bool $isComponentBuilder
    * @param array $categories
    * @param array $asset_data
    *
    * @return array
    */
-  public function elementCategoriesData($categories = [], $asset_data = []) {
-    $referer = \Drupal::request()->server->get('HTTP_REFERER');
+  public function elementCategoriesData($isComponentBuilder, $categories = [], $asset_data = []) {
     $results = [];
 
     // Filter categories based on dx8 access permissions.
     foreach ($categories as $key => $category) {
       // Component builder group should only be available within the component builder.
-      if ($key == 'component-builder-elements' && !(strpos($referer, '/admin/cohesion/components/components') !== FALSE)) {
+      if ($key == 'component-builder-elements' && $isComponentBuilder !== TRUE) {
         continue;
       }
       $access_key = isset($category['label']) ? 'access ' . strtolower($category['label']) . ' group' : NULL;
@@ -78,6 +78,7 @@ class SettingsEndpointUtils {
   /**
    * Return one or all elements from asset storage group.
    *
+   * @param bool $isComponentBuilder
    * @param $assetLibrary
    * @param $type
    * @param $group
@@ -85,7 +86,7 @@ class SettingsEndpointUtils {
    *
    * @return array
    */
-  public function getAssets($assetLibrary, $type, $group, $with_categories = FALSE) {
+  public function getAssets($isComponentBuilder, $assetLibrary, $type, $group, $with_categories = FALSE) {
     if ($assetLibrary) {
       if ($group) {
         if ($type == '__ALL__') {
@@ -105,7 +106,7 @@ class SettingsEndpointUtils {
             $categories = $assetCategoryLibrary->getMultiple($element_keys);
 
             $asset = [
-              'categories' => $this->elementCategoriesData($categories, $asset_data),
+              'categories' => $this->elementCategoriesData($isComponentBuilder, $categories, $asset_data),
             ];
 
             // Patch in the custom elements.
@@ -160,7 +161,7 @@ class SettingsEndpointUtils {
   public function getCohFormOnInit($group, $type) {
     $assetLibrary = \Drupal::keyValue('cohesion.assets.' . $group);
 
-    [$error, $data, $message] = $this->getAssets($assetLibrary, $type, $group, FALSE);
+    [$error, $data, $message] = $this->getAssets(FALSE, $assetLibrary, $type, $group, FALSE);
 
     // Return the (optionally) patched results.
     return $data;

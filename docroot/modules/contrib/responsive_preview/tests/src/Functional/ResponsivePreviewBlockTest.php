@@ -24,7 +24,7 @@ class ResponsivePreviewBlockTest extends ResponsivePreviewTestBase {
     // Anonymous user by default cannot use the preview so the module library
     // and the cache tags and contexts should not be present.
     $this->drupalGet('');
-    $this->assertSession()->pageTextNotContains('Responsive preview controls');
+    $this->assertSession()->elementNotExists('css', '.block-responsive-preview');
     $this->assertNoResponsivePreviewLibrary();
     $this->assertNoResponsivePreviewCachesTagAndContexts();
 
@@ -32,7 +32,7 @@ class ResponsivePreviewBlockTest extends ResponsivePreviewTestBase {
     // the module library and the cache tags and contexts should be included.
     $preview_user = $this->drupalCreateUser(['access responsive preview']);
     $this->drupalLogin($preview_user);
-    $this->assertSession()->pageTextNotContains('Responsive preview controls');
+    $this->assertSession()->elementExists('css', '.block-responsive-preview');
     $this->assertResponsivePreviewLibrary();
     $this->assertResponsivePreviewCachesTagAndContexts();
     $this->assertDeviceListEquals($devices);

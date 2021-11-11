@@ -47,7 +47,7 @@ class CustomStyleBatch {
 
     $batch['operations'][] = [
       '_cohesion_style_save',
-      ['forms' => $forms],
+      [$forms],
     ];
 
     batch_set($batch);

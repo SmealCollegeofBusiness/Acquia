@@ -29,9 +29,6 @@ use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
 
-$cohesion_configs = \Drupal::config('cohesion.settings');
-$cohesion_static_configs = \Drupal::config('cohesion.static.settings');
-
 define('COHESION_FILESYSTEM_URI', 'public://cohesion/');
 define('COHESION_CSS_PATH', COHESION_FILESYSTEM_URI . 'styles');
 define('COHESION_TEMPLATE_PATH', COHESION_FILESYSTEM_URI . 'templates');
@@ -308,7 +305,12 @@ function cohesion_page_attachments(array &$attachments) {
     ->get('image_browser');
 
   if ($is_admin && (!isset($image_browser['config']) || !isset($image_browser['content'])) && strpos($current_path, 'cohesion') !== FALSE) {
-    \Drupal::messenger()->addWarning(t('No image browsers have been defined for Site Studio. <a href="/admin/cohesion/configuration/system-settings">Click here to configure the image browser settings.</a>'));
+
+    $args = [
+      '@link' => Link::createFromRoute('Click here to configure the image browser settings.', 'cohesion.configuration.system_settings')->toString()
+    ];
+
+    \Drupal::messenger()->addWarning(t('No image browsers have been defined for Site Studio. @link', $args));
   }
 }
 

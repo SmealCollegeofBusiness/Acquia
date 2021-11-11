@@ -227,8 +227,6 @@ final class CommandHelpers {
     }
     // Full import (no paths specified, so look up from settings.php)
     else {
-      // For a full import, set the site to maintenance mode.
-      $no_maintenance ?: $this->state->set('system.maintenance_mode', TRUE);
 
       // Make sure the config sync directory has been set.
       $dir = $this->getSyncDirectory();

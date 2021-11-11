@@ -5,6 +5,7 @@ namespace Drupal\cohesion\Plugin\ImageBrowser;
 use Drupal\cohesion\ImageBrowserPluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Class MediaImageBrowser.
@@ -91,9 +92,16 @@ class EntityImageBrowser extends ImageBrowserPluginBase {
         if ($entity_browser = \Drupal::entityTypeManager()->getStorage('entity_browser')->load($entity_browser_id)) {
           // Only Displays inherited form iframe will have the path() function.
           if (method_exists($entity_browser->getDisplay(), 'path')) {
+            // Generate the Url through Drupal.
+            $url = Url::fromUserInput($entity_browser->getDisplay()->path(), [
+              'query' => [
+                'uuid' => 'dx8'
+              ]
+            ])->toString();
+
             // Tell Angular which iframe URL to popup.
             $attachments['drupalSettings']['cohesion']['imageBrowser'] = [
-              'url' => $entity_browser->getDisplay()->path() . '?uuid=dx8',
+              'url' => $url,
               'title' => $this->getName(),
             ];
 

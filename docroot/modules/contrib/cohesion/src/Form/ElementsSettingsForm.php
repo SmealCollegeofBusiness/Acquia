@@ -65,7 +65,7 @@ class ElementsSettingsForm extends ConfigFormBase {
     $type = '__ALL__';
     $assetLibrary = \Drupal::keyValue('cohesion.assets.' . $group);
 
-    list($error, $data, $message) = \Drupal::service('settings.endpoint.utils')->getAssets($assetLibrary, $type, $group, TRUE);
+    list($error, $data, $message) = \Drupal::service('settings.endpoint.utils')->getAssets(FALSE, $assetLibrary, $type, $group, TRUE);
 
     $config = $this->config('cohesion.settings');
     $perms = ($config && $config->get("elements_permissions")) ? $config->get("elements_permissions") : "{}";

@@ -5,6 +5,7 @@ namespace Drupal\cohesion\Plugin\ImageBrowser;
 use Drupal\cohesion\ImageBrowserPluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\media_library\MediaLibraryState;
 use Drupal\views\Views;
 
@@ -109,13 +110,20 @@ class MediaLibraryImageBrowser extends ImageBrowserPluginBase {
         $selected_type = $allowed_types[0];
       }
 
-      $allowed_media_types_query = http_build_query(['media_library_allowed_types' => $allowed_types]);
       $media_lib_state = MediaLibraryState::create('media_library.opener.cohesion', $allowed_types, $selected_type, 1);
-      $base_path = \Drupal::request()->getBasePath();
+
+      $url = Url::fromRoute('cohesion.media_library_ui', [
+        'coh_clean_page' => 'true',
+        'media_library_opener_id' => 'media_library.opener.cohesion',
+        'media_library_allowed_types' => $allowed_types,
+        'media_library_selected_type' => $media_lib_state->getSelectedTypeId(),
+        'media_library_remaining' => 1,
+        'hash' => $media_lib_state->getHash()
+      ])->toString();
 
       $attachments['drupalSettings']['cohesion']['imageBrowser'] = [
         // Add the image browser iFrame URL.
-        'url' => $base_path . '/cohesion-media-library?coh_clean_page=true&media_library_opener_id=media_library.opener.cohesion&' . $allowed_media_types_query . '&media_library_selected_type=' . $media_lib_state->getSelectedTypeId() . '&media_library_remaining=1&hash=' . $media_lib_state->getHash() . '',
+        'url' => $url,
         'title' => $this->getName(),
       ];
     }

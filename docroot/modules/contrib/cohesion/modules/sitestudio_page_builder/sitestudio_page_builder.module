@@ -5,6 +5,7 @@
  * Implements hook_page_attachments().
  */
 
+use Drupal\Core\Url;
 use Drupal\entity_reference_revisions\EntityReferenceRevisionsFieldItemList;
 use Drupal\Core\Entity\ContentEntityInterface;
 
@@ -22,9 +23,9 @@ function sitestudio_page_builder_page_attachments_alter(array &$attachments) {
   }
 
   // Attach add urls for sidebar browser.
-  $attachments['#attached']['drupalSettings']['cohesion']['urls']['component-add'] = \Drupal::entityTypeManager()->getDefinition('cohesion_component')->getLinkTemplate('add-form');
-  $attachments['#attached']['drupalSettings']['cohesion']['urls']['helper-add'] = \Drupal::entityTypeManager()->getDefinition('cohesion_helper')->getLinkTemplate('add-form');
-  $attachments['#attached']['drupalSettings']['cohesion']['urls']['component-content-add'] = \Drupal::entityTypeManager()->getDefinition('component_content')->getLinkTemplate('collection');
+  $attachments['#attached']['drupalSettings']['cohesion']['urls']['component-add'] = Url::fromUserInput(\Drupal::entityTypeManager()->getDefinition('cohesion_component')->getLinkTemplate('add-form'))->toString();
+  $attachments['#attached']['drupalSettings']['cohesion']['urls']['helper-add'] = Url::fromUserInput(\Drupal::entityTypeManager()->getDefinition('cohesion_helper')->getLinkTemplate('add-form'))->toString();
+  $attachments['#attached']['drupalSettings']['cohesion']['urls']['component-content-add'] = Url::fromUserInput(\Drupal::entityTypeManager()->getDefinition('component_content')->getLinkTemplate('collection'))->toString();
   $attachments['#attached']['drupalSettings']['cohesion']['permissions'] = \Drupal::service('settings.endpoint.utils')->dx8PermissionsList();
 }
 

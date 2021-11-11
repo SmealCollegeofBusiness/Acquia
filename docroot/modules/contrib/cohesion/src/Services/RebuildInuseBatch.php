@@ -79,6 +79,7 @@ class RebuildInuseBatch {
       'title' => $this->t('Rebuilding entities in use.'),
       'operations' => [],
       'finished' => '\Drupal\cohesion\Services\RebuildInuseBatch::finishedCallback',
+      'progressive' => FALSE,
     ];
 
     $batch['operations'][] = [
@@ -97,7 +98,7 @@ class RebuildInuseBatch {
     ];
 
     // Setup and run the batch.
-    return batch_set($batch);
+    batch_set($batch);
   }
 
   /**
@@ -116,10 +117,7 @@ class RebuildInuseBatch {
     foreach ($changed_entities as $entity) {
       // Only rebuild entities that have been activated.
       $operations[] = [
-        '_resave_entity', [
-          'entity' => $entity,
-          'realsave' => TRUE,
-        ],
+        '_resave_entity', [$entity, TRUE],
       ];
     }
 
@@ -172,8 +170,7 @@ class RebuildInuseBatch {
 
           if(!empty($ids)) {
             $operations[] = [
-              '_resave_config_entity',
-              ['ids' => $ids, 'entity_type' => $entity_type_id],
+              '_resave_config_entity', [$ids, $entity_type_id, FALSE],
             ];
           }
         }
@@ -192,7 +189,7 @@ class RebuildInuseBatch {
           if(!empty($ids)) {
             $operations[] = [
               '_resave_cohesion_layout_entity',
-              ['ids' => $ids],
+              [$ids, FALSE],
             ];
           }
         }

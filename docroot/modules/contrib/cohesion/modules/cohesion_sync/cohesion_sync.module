@@ -85,3 +85,21 @@ function cohesion_sync_modules_installed($modules) {
     }
   }
 }
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function cohesion_sync_page_attachments_alter(array &$attachments) {
+  // Only attach for the sync import route.
+  $route = \Drupal::routeMatch()->getRouteName();
+  if ($route === 'cohesion_sync.import') {
+    // Attach sync file chunk that can be used in module file-js.
+    $attachments['#attached']['drupalSettings']['cohesion']['urls']['sync_file_chunk'] = Url::fromRoute('cohesion_sync.chunked')
+      ->toString();
+  }
+
+  // Only attach for sync react app package add & edit forms.
+  if (in_array($route, ['entity.cohesion_sync_package.add_form', 'entity.cohesion_sync_package.edit_form'])) {
+    $attachments['#attached']['drupalSettings']['cohesion']['urls']['sync_refresh'] = Url::fromRoute('cohesion_sync.refresh')->toString();
+  }
+}

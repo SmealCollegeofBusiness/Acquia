@@ -73,10 +73,10 @@ class ComponentContentUsage extends UsagePluginBase {
           if ($k == 'componentContentId' && $v != NULL) {
             $v = str_replace('cc_', '', $v);
             // Load the component to get its UUID.
-            if ($component_entity = $this->storage->load($v)) {
+            if ($component_content_uuid = $this->loadComponentContent($v)) {
               $entities[] = [
                 'type' => $this->getEntityType(),
-                'uuid' => $component_entity->uuid(),
+                'uuid' => $component_content_uuid,
                 'subid' => NULL,
               ];
             }
@@ -86,6 +86,21 @@ class ComponentContentUsage extends UsagePluginBase {
     }
 
     return $entities;
+  }
+
+  /**
+   * @param $v
+   *
+   * @return \Drupal\Core\Entity\EntityInterface|mixed
+   */
+  public function loadComponentContent($v) {
+    $component_entity = $this->storage->loadByProperties(['uuid' => $v]);
+    $component_content_entity = reset($component_entity);
+
+    if ($component_content_entity) {
+      return $component_content_entity->uuid();
+    }
+    return FALSE;
   }
 
 }

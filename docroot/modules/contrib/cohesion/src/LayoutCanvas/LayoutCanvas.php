@@ -14,6 +14,19 @@ namespace Drupal\cohesion\LayoutCanvas;
  */
 class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
 
+  const MEDIA_REFERENCE_REGEX = '/\[media-reference:(.*?)\]/m';
+  const LINK_REFERENCE_REGEX = '/([a-z_-])+::(.*?)/m';
+  const ENTITY_REFERENCES = [
+    [
+      'id' => 'entity',
+      'type' => 'entity_type',
+    ],
+    [
+      'id' => 'entityId',
+      'type' => 'entityType',
+    ],
+  ];
+
   /**
    * The raw canvas
    *
@@ -286,9 +299,15 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
   /**
    * Get references to entities on components and component content.
    *
+   * @param bool $withMediaReferences
+   *   True to include media-reference entities.
+   * @param bool $withLinksReferences
+   *   True to include references to entities in links.
+   *
    * @return array
+   *   Array of entity reference ids/uuids and types.
    */
-  public function getEntityReferences() {
+  public function getEntityReferences(bool $withMediaReferences = FALSE, bool $withLinksReferences = FALSE): array {
     $references = [];
 
     foreach ($this->iterateCanvas() as $element) {
@@ -300,29 +319,88 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
       }
 
       if ($element->getModel()) {
-        foreach ($element->getModel()->getValues() as $key => $value) {
-          if (preg_match(ElementModel::MATCH_UUID, $key) && is_object($value)) {
-            if (property_exists($value, 'entity') && property_exists($value, 'entity_type')) {
-              // Entity reference.
-              $references[] = [
-                'entity_type' => $value->entity_type,
-                'entity_id' => $value->entity,
-              ];
+        $leaves = $element->getModel()->getLeavesWithPathToRoot();
+        foreach ($leaves as $leaf) {
+          foreach (self::ENTITY_REFERENCES as $entity_reference) {
+            // Let's check if key is of entity reference or browser.
+            if ($leaf['key'] === $entity_reference['id']) {
+              // Double check path and set pointer to end.
+              if (end($leaf['path']) == $entity_reference['id']) {
+                $path = $leaf['path'];
+                // Leverage pointer being set to end and get entity type.
+                $path[key($leaf['path'])] = $entity_reference['type'];
+                // Attempt fetching type property from the model.
+                $type = $element->getModel()->getProperty($path);
+                if ($type) {
+                  $reference = [
+                    'entity_type' => $type,
+                    'entity_id' => $leaf['value'],
+                  ];
+                  if (!in_array($reference, $references)) {
+                    $references[] = $reference;
+                  }
+                }
+              }
             }
-            elseif (property_exists($value, 'entity') && property_exists($value->entity, 'entityId') && property_exists($value->entity, 'entityType')) {
-              // Entity browser.
-              $references[] = [
-                'entity_type' => $value->entity->entityType,
-                'entity_id' => $value->entity->entityId,
+          }
+          if ($withMediaReferences && is_string($leaf['value']) && preg_match(self::MEDIA_REFERENCE_REGEX, $leaf['value'])) {
+            if ($media_reference = $this->decodeMediaReferenceToken($leaf['value'])) {
+              $reference = [
+                'entity_type' => $media_reference[1],
+                'entity_id' => $media_reference[2],
               ];
+              if (!in_array($reference, $references)) {
+                $references[] = $reference;
+              }
+            }
+          }
+          if ($withLinksReferences && is_string($leaf['value']) && preg_match(self::LINK_REFERENCE_REGEX, $leaf['value'])) {
+            if ($link_reference = $this->decodeLinkReference($leaf['value'])) {
+              $reference = [
+                'entity_type' => $link_reference[0],
+                'entity_id' => $link_reference[1],
+              ];
+              if (!in_array($reference, $references)) {
+                $references[] = $reference;
+              }
             }
           }
         }
+
       }
 
     }
 
     return $references;
+  }
+
+  /**
+   * Fetches array of entities referenced via links in Layout Canvas.
+   *
+   * @return array
+   *   Array of link references.
+   */
+  public function getLinksReferences(): array {
+    $links = [];
+    foreach ($this->iterateCanvas() as $element) {
+      if ($element->getModel()) {
+        $leaves = $element->getModel()->getLeavesWithPathToRoot();
+        foreach ($leaves as $leaf) {
+          if (is_string($leaf['value']) && preg_match(self::LINK_REFERENCE_REGEX, $leaf['value'])) {
+            $link = $this->decodeLinkReference($leaf['value']);
+            if (is_array($link) && !empty($link)) {
+              $links[$element->getUUID()][] = [
+                'entity_type' => $link[0],
+                'entity_id' => $link[1],
+                'path' => $leaf['path'],
+              ];
+            }
+          }
+        }
+      }
+    }
+
+    return $links;
   }
 
   /**
@@ -378,6 +456,32 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
       }
     }
     return $canvas;
+  }
+
+  /**
+   * Decodes a [media-reference:?:?] token and return the Uri.
+   *
+   * @param string $token
+   *   Token to decode.
+   *
+   * @return array|bool
+   *   Array with entity reference or FALSE.
+   */
+  protected function decodeMediaReferenceToken(string $token) {
+    return explode(':', str_replace(['[', ']'], '', $token));
+  }
+
+  /**
+   * Decodes a "type::id" token and return the Uri.
+   *
+   * @param string $token
+   *   Token to decode.
+   *
+   * @return array|bool
+   *   Array with entity reference or FALSE.
+   */
+  protected function decodeLinkReference(string $token) {
+    return explode('::', $token);
   }
 
 }

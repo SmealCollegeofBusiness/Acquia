@@ -235,13 +235,12 @@ class FileSync extends SyncPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getActionData($entry, $action_state) {
-    return [
-      'entity_type_label' => $this->t('File')->__toString(),
-      'entity_label' => $entry['uri'],
-      'entry_uuid' => $entry['uuid'],
-      'entry_action_state' => $action_state,
-    ];
+  public function getActionData($entry, $action_state, $type) {
+    $action_data = parent::getActionData($entry, $action_state, $type);
+    $action_data['entity_type_label'] = $this->t('File')->__toString();
+    $action_data['entity_label'] = $entry['uri'];
+
+    return $action_data;
   }
 
 }

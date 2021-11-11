@@ -17,6 +17,7 @@ use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Yaml\Yaml as SymfonyYaml;
 
 define('ENTRY_NEW_IMPORTED', 1);
 define('ENTRY_EXISTING_ASK', 2);
@@ -180,6 +181,7 @@ class PackagerManager {
         if ($yaml != '' && $line == "-\n") {
           $entry_data = Yaml::decode($yaml)[0];
           if($entry_data['export']['uuid'] == $uuid) {
+            $this->flattenJsonEntry($entry_data);
             $entry = $entry_data;
           }
           $yaml = $line;
@@ -193,6 +195,7 @@ class PackagerManager {
       if($entry == NULL) {
         $entry_data = Yaml::decode($yaml)[0];
         if($entry_data['export']['uuid'] == $uuid) {
+          $this->flattenJsonEntry($entry_data);
           $entry = $entry_data;
         }
       }
@@ -215,6 +218,7 @@ class PackagerManager {
         if ($yaml != '' && $line == "-\n") {
           $entry_data = Yaml::decode($yaml)[0];
           if(in_array($entry_data['export']['uuid'], $uuids)) {
+            $this->flattenJsonEntry($entry_data);
             $entries[] = $entry_data;
           }
           $yaml = $line;
@@ -234,6 +238,40 @@ class PackagerManager {
 
       return $entries;
     }
+  }
+
+  /**
+   * Converts jsons from package entry to one line jsons for storage
+   *
+   * @param $entry - The entry for the package
+   */
+  private function flattenJsonEntry(&$entry) {
+    $is_multiline = Settings::get('site_studio_package_multiline', FALSE);
+    if($is_multiline) {
+      // Flatten any json_values
+      if(isset($entry['export']['json_values']) && is_string($entry['export']['json_values'])) {
+        $entry['export']['json_values'] = $this->flattenJson($entry['export']['json_values']);
+      }
+
+      // Flatten any json_mapper
+      if(isset($entry['export']['json_mapper']) && is_string($entry['export']['json_mapper'])) {
+        $entry['export']['json_mapper'] = $this->flattenJson($entry['export']['json_mapper']);
+      }
+
+      // Flatten any json_values
+      if($entry['type'] == 'cohesion_sync_package' && isset($entry['export']['settings']) && is_string($entry['export']['settings'])) {
+        $entry['export']['settings'] = $this->flattenJson($entry['export']['settings']);
+      }
+    }
+  }
+
+  private function flattenJson($json) {
+    $decoded = json_decode($json);
+    if(json_last_error() === JSON_ERROR_NONE) {
+      return json_encode($decoded);
+    }
+
+    return $json;
   }
 
   /**
@@ -257,7 +295,7 @@ class PackagerManager {
     // Check to see if the entry can be applied without asking what to do.
     $action_state = $plugin->validatePackageEntryShouldApply($entry['export']);
 
-    return $plugin->getActionData($entry['export'], $action_state);
+    return $plugin->getActionData($entry['export'], $action_state, $entry['type']);
   }
 
   /**
@@ -319,32 +357,6 @@ class PackagerManager {
   }
 
   /**
-   * @param array $entry
-   *   Package entry.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  public function postApplyPackageEntry($entry) {
-    $cohesion_sync_lock = &drupal_static('cohesion_sync_lock');
-    $cohesion_sync_lock = FALSE;
-
-    // Get the imported entity to work on.
-    if ($entity = $this->entityRepository->loadEntityByUuid($entry['type'], $entry['export']['uuid'])) {
-      // Send to API and re-calculate in-use table.
-      try {
-        if (method_exists($entity, 'process')) {
-          if (!method_exists($entity, 'status') || $entity->status()) {
-            $entity->process();
-          }
-        }
-        $this->usageUpdateManager->buildRequires($entity);
-      }
-      catch (\Exception $e) {
-      }
-    }
-  }
-
-  /**
    * Scan a Yaml package stream and create a batch array for the entries in
    * $action_data.
    *
@@ -357,14 +369,49 @@ class PackagerManager {
    */
   public function applyBatchYamlPackageStream($uri, $action_data, $no_rebuild = FALSE) {
 
+    // Operations for the batch process
     $operations = [];
-
+    // Entities that need to be imported. Can be a mix of config (site studio and others) and Files
     $uuids = [];
+    // Entities that need to be rebuilt.
+    $entities_need_rebuild = [];
+    // Does the sync requires an entire rebuild because base unit settings or responsive grid has been changed
+    $needs_complete_rebuild = FALSE;
+
     foreach ($action_data as $uuid => $action) {
       if(in_array($action['entry_action_state'], [
         ENTRY_NEW_IMPORTED,
         ENTRY_EXISTING_OVERWRITTEN,
       ])) {
+        // Does this sync require a full rebuild.
+        if($action['entity_type'] == 'cohesion_website_settings' && in_array($action['id'], ['base_unit_settings', 'responsive_grid_settings'])) {
+          $needs_complete_rebuild = TRUE;
+        }
+
+        $config_prefix = 'cohesion_';
+        if(!$needs_complete_rebuild && $action['is_config'] && substr($action['entity_type'], 0, strlen($config_prefix)) === $config_prefix) {
+          // If the entity already exisits under a different UUID the UUID currently in DB will be used
+          $uuid_in_use = isset($action['replace_uuid']) ? $action['replace_uuid'] : $action['entry_uuid'];
+          // If a cohesion config, add it to the list of entities that neeeds to be rebuilt
+          $entities_need_rebuild[$uuid_in_use] = $action['entity_type'];
+
+          // Entity types that might be used in other entity that will need to be rebuild as well as the entity.
+          // Ex: a scss variable that has a change in value, we need to rebuild every entity where this scss variable is used
+          $entity_type_with_dependency = ['cohesion_scss_variable', 'cohesion_style_guide', 'cohesion_color', 'cohesion_font_stack'];
+          if(in_array($action['entity_type'], $entity_type_with_dependency)) {
+
+            $usage = \Drupal::database()->select('coh_usage', 'c1')
+              ->fields('c1', ['source_uuid', 'source_type'])
+              ->condition('c1.requires_uuid', $uuid_in_use, '=')
+              ->execute()
+              ->fetchAllKeyed();
+
+            $entities_need_rebuild = array_merge($entities_need_rebuild, $usage);
+          }
+
+        }
+
+        // Store all entities that need to be imported
         $uuids[] = $uuid;
       }
     }
@@ -392,22 +439,9 @@ class PackagerManager {
     }
 
     if ($no_rebuild !== TRUE) {
-      foreach ($action_data as $uuid => $action) {
-        if(in_array($action['entry_action_state'], [
-          ENTRY_NEW_IMPORTED,
-          ENTRY_EXISTING_OVERWRITTEN,
-        ])) {
-          // Add  item to the batch.
-          $operations[] = [
-            '\Drupal\cohesion_sync\Controller\BatchImportController::batchPostAction',
-            [$uri, $uuid, $action_data],
-          ];
-        }
-      }
-
       $operations[] = [
-        '\Drupal\cohesion_sync\Controller\BatchImportController::inUseRebuild',
-        [],
+        '\Drupal\cohesion_sync\Controller\BatchImportController::batchPostAction',
+        [$entities_need_rebuild, $needs_complete_rebuild],
       ];
     }
 
@@ -537,7 +571,27 @@ class PackagerManager {
           ];
 
           if ($yaml) {
-            yield Yaml::encode([$item]);
+            $is_multiline = Settings::get('site_studio_package_multiline', FALSE);
+            if($is_multiline) {
+              // Json values multilne
+              if(isset($item['export']['json_values']) && is_string($item['export']['json_values'])) {
+                $item['export']['json_values'] = $this->prettyPrintJson($item['export']['json_values']);
+              }
+
+              if(isset($item['export']['json_mapper']) && is_string($item['export']['json_mapper'])) {
+                $item['export']['json_mapper'] = $this->prettyPrintJson($item['export']['json_mapper']);
+              }
+
+              // Package settings multiline
+              if($item['type'] == 'cohesion_sync_package' && isset($item['export']['settings']) && is_string($item['export']['settings'])) {
+                $item['export']['settings'] = $this->prettyPrintJson($item['export']['settings']);
+              }
+
+              yield SymfonyYaml::dump([$item], PHP_INT_MAX, 2, SymfonyYaml::DUMP_EXCEPTION_ON_INVALID_TYPE + SymfonyYaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+            } else {
+              yield Yaml::encode([$item]);
+            }
+
           }
           else {
             yield $item;
@@ -545,6 +599,20 @@ class PackagerManager {
         }
       }
     }
+  }
+
+  /**
+   * Return a json pretty printed
+   *
+   * @param $json
+   */
+  private function prettyPrintJson($json) {
+    $decoded = json_decode($json);
+    if(json_last_error() === JSON_ERROR_NONE) {
+      return json_encode($decoded, JSON_PRETTY_PRINT);
+    }
+
+    return $json;
   }
 
   /**
@@ -629,6 +697,8 @@ class PackagerManager {
    */
   public function buildPackageEntityList($entities, $excluded_entity_type_ids = [], &$list = [], $recurse = TRUE) {
     foreach ($entities as $entity) {
+
+      $this->usageUpdateManager->buildRequires($entity);
 
       // Get the Sync plugin for this entity.
       if ($plugin = $this->getPluginInstanceFromType($entity->getEntityType())) {

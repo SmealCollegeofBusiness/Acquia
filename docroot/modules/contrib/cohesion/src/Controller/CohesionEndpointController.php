@@ -10,15 +10,18 @@ use Drupal\cohesion_elements\Entity\CohesionElementEntityBase;
 use Drupal\cohesion_elements\Entity\Component;
 use Drupal\Component\Serialization\Json;
 use Drupal\cohesion\Services\CohesionUtils;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityRepository;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldStorageConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Class CohesionEndpointController.
@@ -58,11 +61,18 @@ class CohesionEndpointController extends ControllerBase {
   protected $entityRepository;
 
   /**
-   * Cohesion utils service
+   * Cohesion utils service.
    *
    * @var \Drupal\cohesion\Services\CohesionUtils
    */
   protected $cohesionUtils;
+
+  /**
+   * Current request.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $request;
 
   /**
    * CohesionEndpointController constructor.
@@ -70,12 +80,14 @@ class CohesionEndpointController extends ControllerBase {
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
    * @param \Drupal\cohesion\Services\CohesionUtils $cohesion_utils
+   * @param \Symfony\Component\HttpFoundation\RequestStack
    */
-  public function __construct(EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EntityRepository $entity_repository, CohesionUtils $cohesion_utils) {
+  public function __construct(EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EntityRepository $entity_repository, CohesionUtils $cohesion_utils, RequestStack $requestStack) {
     $this->entityFieldManager = $entity_field_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->entityRepository = $entity_repository;
     $this->cohesionUtils = $cohesion_utils;
+    $this->request = $requestStack->getCurrentRequest();
 
     $this->helper = new CohesionEndpointHelper();
   }
@@ -88,7 +100,8 @@ class CohesionEndpointController extends ControllerBase {
       $container->get('entity_field.manager'),
       $container->get('entity_type.bundle.info'),
       $container->get('entity.repository'),
-      $container->get('cohesion.utils')
+      $container->get('cohesion.utils'),
+      $container->get('request_stack')
     );
   }
 
@@ -153,6 +166,31 @@ class CohesionEndpointController extends ControllerBase {
       'status' => !$error ? 'success' : 'error',
       'data' => $results,
     ]);
+  }
+
+  /**
+   * Custom access check for the ElementGroupInfo route
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result
+   */
+  public function getElementGroupInfoAccess(AccountInterface $account) {
+
+    // Map entity types to permissions.
+    $map = [
+      'cohesion_helper' => 'access helpers',
+      'cohesion_component' => 'access components',
+    ];
+
+    $entity_type = $this->request->query->get('entity_type');
+    if (array_key_exists($entity_type, $map)) {
+      return AccessResult::allowedIfHasPermission($account, $map[$entity_type]);
+    }
+
+    // Fallback to original _is_logged_in check if unknown entity.
+    return AccessResult::allowedIf($account->isAuthenticated());
   }
 
   /**

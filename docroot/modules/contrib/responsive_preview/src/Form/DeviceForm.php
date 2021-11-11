@@ -53,7 +53,7 @@ class DeviceForm extends EntityForm {
     $form['dimensions']['width'] = [
       '#type' => 'number',
       '#title' => $this->t('Width'),
-      '#default_value' => $dimensions['width'],
+      '#default_value' => $dimensions['width'] ?? '',
       '#field_suffix' => $this->t('px'),
       '#required' => TRUE,
       '#min' => 1,
@@ -62,7 +62,7 @@ class DeviceForm extends EntityForm {
     $form['dimensions']['height'] = [
       '#type' => 'number',
       '#title' => $this->t('Height'),
-      '#default_value' => $dimensions['height'],
+      '#default_value' => $dimensions['height'] ?? '',
       '#field_suffix' => $this->t('px'),
       '#required' => TRUE,
       '#min' => 1,
@@ -71,7 +71,7 @@ class DeviceForm extends EntityForm {
     $form['dimensions']['dppx'] = [
       '#type' => 'number',
       '#title' => $this->t('Dots per pixel (dppx)'),
-      '#default_value' => $dimensions['dppx'],
+      '#default_value' => $dimensions['dppx'] ?? '',
       '#field_suffix' => $this->t('px'),
       '#description' => $this->t('Size of a single dot in graphical representation. Classic desktop displays have 1dppx, typical modern smartphones and laptops have 2dppx or higher. For example Google Nexus 4 and iPhone 5 has 2dppx, while Google Nexus 7 has 1.325dppx and Samsung Galaxy S4 has 3dppx.'),
       '#required' => TRUE,

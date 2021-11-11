@@ -1517,6 +1517,11 @@ serialize-javascript@3.0.0:
   resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-3.0.0.tgz#492e489a2d77b7b804ad391a5f5d97870952548e"
   integrity sha512-skZcHYw2vEX4bw90nAr2iTTsz6x2SrHEnfxgKYmZlvJYBEZrvbKtobJWlQ20zczKb3bsHHXXTYt48zBA7ni9cw==
 
+serverless-tag-cloud-watch-log-groups@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/serverless-tag-cloud-watch-log-groups/-/serverless-tag-cloud-watch-log-groups-1.2.5.tgz#bbdd54f653b9ac338623c494564881cc208ccfb2"
+  integrity sha512-5gYky30f2+k+aYUPLumIJC0G0JESFWQqb6srTJhyByQtIdI0AV5PeICSGxTFVqzLnYsztT9j6mJJ1borJmRRng==
+
 set-blocking@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"

@@ -131,7 +131,7 @@ class ComponentContentForm extends ContentEntityForm {
     $form['meta']['author'] = [
       '#type' => 'item',
       '#title' => $this->t('Author'),
-      '#markup' => $component_content->getOwner()->getDisplayName(),
+      '#markup' => $component_content->getOwner() ? $component_content->getOwner()->getDisplayName() : \Drupal::config('user.settings')->get('anonymous'),
       '#wrapper_attributes' => ['class' => ['entity-meta__author']],
     ];
 

@@ -2,9 +2,10 @@
 
 namespace Drupal\cohesion_sync\Controller;
 
-use Drupal\cohesion_style_guide\Entity\StyleGuideManager;
+use Drupal\cohesion_website_settings\Controller\WebsiteSettingsController;
 use Drupal\config\StorageReplaceDataWrapper;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -32,70 +33,6 @@ class BatchImportController extends ControllerBase {
   }
 
   /**
-   * Set a batch for entities that needs to be rebuilt if style guide or style guide manager
-   * as been imported
-   *
-   * @param $context
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   */
-  public static function inUseRebuild(&$context) {
-    if(!\Drupal::moduleHandler()->moduleExists('cohesion_style_guide')) {
-      return;
-    }
-    $style_guide_managers = [];
-    $style_guides_uuids = [];
-    // extract all style guide manager and style guide that have been
-    // processed during import
-    foreach ($context['results'] as $result) {
-      $result_entity = explode(':', $result);
-      // $result[1] == entity uuid - $result_entity[0] == entity type.
-      if(is_array($result_entity) && count($result_entity) == 2 && isset($result_entity[0])) {
-        if($result_entity[0] == 'cohesion_style_guide_manager') {
-          $style_guide_managers[] = $result_entity[1];
-        }elseif ($result_entity[0] == 'cohesion_style_guide') {
-          $style_guides_uuids[] = $result_entity[1];
-        }
-      }
-    }
-
-    // Extract each style guide for each style guide manager
-    $style_guide_managers_ids = \Drupal::entityTypeManager()->getStorage('cohesion_style_guide_manager')->getQuery()
-      ->condition('status', TRUE)
-      ->condition('uuid', $style_guide_managers, 'IN')
-      ->execute();
-
-    /** @var \Drupal\cohesion_style_guide\Entity\StyleGuideManager[] $style_guide_managers */
-    $style_guide_managers = StyleGuideManager::loadMultiple($style_guide_managers_ids);
-    foreach ($style_guide_managers as $style_guide_manager) {
-      $decoded_json = $style_guide_manager->getDecodedJsonValues(TRUE);
-      if (property_exists($decoded_json, 'model') && is_object($decoded_json->model)) {
-        foreach ($decoded_json->model as $style_guide_uuid => $style_guide_values) {
-          $style_guides_uuids[] = $style_guide_uuid;
-        }
-      }
-    }
-
-    if(!empty($style_guides_uuids)) {
-      $in_use_list = \Drupal::database()->select('coh_usage', 'c1')
-        ->fields('c1', ['source_uuid', 'source_type'])
-        ->condition('c1.requires_uuid', $style_guides_uuids, 'IN')
-        ->execute()
-        ->fetchAllKeyed();
-
-      // remove any entity that would already have been resaved by the import
-      foreach ($in_use_list as $uuid => $entity_type) {
-        if(in_array("{$entity_type}:{$uuid}", $context['results'])) {
-          unset($in_use_list[$uuid]);
-        }
-      }
-
-      \Drupal::service('cohesion.rebuild_inuse_batch')->run($in_use_list);
-    }
-  }
-
-  /**
    * @param $uri
    * @param $uuids
    * @param $action_data
@@ -105,6 +42,9 @@ class BatchImportController extends ControllerBase {
     if (isset($context['results']['error'])) {
       return;
     }
+    // Make sure API send() function just returns without sending anything to the API.
+    $cohesion_sync_lock = &drupal_static('cohesion_sync_lock');
+    $cohesion_sync_lock = TRUE;
     $package_manager = \Drupal::service('cohesion_sync.packager');
     $config_storage = \Drupal::service('config.storage');
     $source_storage = new StorageReplaceDataWrapper($config_storage);
@@ -123,19 +63,25 @@ class BatchImportController extends ControllerBase {
   }
 
   /**
+   * Run rebuild depending on package entities being imported
+   *
    * @param $entry
    * @param $context
    */
-  public static function batchPostAction($uri, $uuid, $action_data, &$context) {
-    if (isset($context['results']['error'])) {
-      return;
-    }
+  public static function batchPostAction($entities_need_rebuild, $needs_complete_rebuild, &$context) {
 
-    $package_manager = \Drupal::service('cohesion_sync.packager');
-    if($entry = $package_manager->getExportByUUID($uri, $uuid)) {
-      $entry['export'] = $package_manager->matchUUIDS($action_data, $entry['export']);
-      $package_manager->postApplyPackageEntry($entry);
-      $context['message'] = t('Building:  @type - @uuid', ['@type' => $entry['type'], '@uuid' => $entry['export']['uuid']]);
+    $options = [
+      'verbose' => FALSE,
+      'no-cache-clear' => FALSE,
+    ];
+
+    $cohesion_sync_lock = &drupal_static('cohesion_sync_lock');
+    $cohesion_sync_lock = FALSE;
+    if ($needs_complete_rebuild) {
+      $batch = WebsiteSettingsController::batch(TRUE, $options['verbose'], $options['no-cache-clear']);
+      batch_set($batch);
+    } else {
+      \Drupal::service('cohesion.rebuild_inuse_batch')->run($entities_need_rebuild);
     }
   }
 
@@ -150,7 +96,7 @@ class BatchImportController extends ControllerBase {
     // other error management should be handled using 'results'.
     if ($success) {
       \Drupal::messenger()->addMessage(t('The import succeeded. @count tasks completed.', ['@count' => count($results)]));
-      return new RedirectResponse('/admin/cohesion/sync/import/report');
+      return new RedirectResponse(Url::fromRoute('cohesion_sync.import_report')->toString());
     }
     else {
       \Drupal::messenger()->addError(t('Finished with an error.'));
@@ -182,6 +128,7 @@ class BatchImportController extends ControllerBase {
    */
   public static function batchDrushFinishedCallback($path, $no_maintenance, &$context) {
     $no_maintenance ?: \Drupal::service('state')->set('system.maintenance_mode', FALSE);
+    $no_maintenance ?: \Drupal::messenger()->addMessage(t('Maintenance mode disabled'));
     if (!isset($context['results']['error'])) {
       $context['message'] = t('Imported @count items from package: @path', ['@count' => count($context['results']), '@path' => $path]);
     }
@@ -199,7 +146,6 @@ class BatchImportController extends ControllerBase {
       $context['message'] = t('Validation done');
     }
     else {
-      $no_maintenance ?: \Drupal::service('state')->set('system.maintenance_mode', FALSE);
       \Drupal::messenger()->addError(t('Finished with an error.'));
     }
   }
@@ -353,6 +299,10 @@ class BatchImportController extends ControllerBase {
           }
         }
       }
+
+      // For a full import, set the site to maintenance mode.
+      $no_maintenance ?: \Drupal::state()->set('system.maintenance_mode', TRUE);
+      $no_maintenance ?: \Drupal::messenger()->addMessage(t('Maintenance mode enabled'));
 
       /** @var \Drupal\cohesion_sync\PackagerManager $package_manager */
       $package_manager = \Drupal::service('cohesion_sync.packager');

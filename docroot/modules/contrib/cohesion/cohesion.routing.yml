@@ -415,7 +415,7 @@ drupal_data_endpoint.element_group_info:
     access_elements: ''
   methods:  [GET]
   requirements:
-    _user_is_logged_in: 'TRUE'
+    _custom_access: '\Drupal\cohesion\Controller\CohesionEndpointController::getElementGroupInfoAccess'
     entity_type: ^[a-zA-Z0-9_]+
     entity_type_access: ^[a-zA-Z0-9_]+
     bundle_access: ^[a-zA-Z0-9_]+

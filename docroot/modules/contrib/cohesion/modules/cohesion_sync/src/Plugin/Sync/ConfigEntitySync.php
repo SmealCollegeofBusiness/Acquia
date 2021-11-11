@@ -379,14 +379,12 @@ class ConfigEntitySync extends SyncPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getActionData($entry, $action_state) {
-    $action_data = [
-      'entity_type_label' => $this->entityTypeDefinition->getLabel()
-        ->__toString(),
-      'entity_label' => $entry['label'] ?? $entry['name'] ?? $entry['id'],
-      'entry_uuid' => $entry['uuid'],
-      'entry_action_state' => $action_state,
-    ];
+  public function getActionData($entry, $action_state, $type) {
+    $action_data = parent::getActionData($entry, $action_state, $type);
+
+    $action_data['entity_type_label'] = $this->entityTypeDefinition->getLabel()
+      ->__toString();
+    $action_data['entity_label'] = $entry['label'] ?? $entry['name'] ?? $entry['id'];
 
     $config_name = $this->entityTypeDefinition->getConfigPrefix() . '.' . $entry[$this->id_key];
     $config = $this->configStorage->read($config_name);

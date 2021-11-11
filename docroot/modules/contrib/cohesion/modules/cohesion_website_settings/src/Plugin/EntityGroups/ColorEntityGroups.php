@@ -98,36 +98,8 @@ class ColorEntityGroups extends EntityGroupsPluginBase {
       }
     }
 
-    // Re-order all colors.
-    $this->reorderColors($colors);
-
     // Return the data as an array to be mapped by list().
     return [$in_use_list, $changed_entities];
-  }
-
-  /**
-   * Reorder the colors in the list by weight.
-   *
-   * @param $colors
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  private function reorderColors($colors) {
-    // Build the weighting array.
-    $c = 0;
-    $weights = [];
-    foreach ($colors->colors as $color) {
-      $weights[$color->uid] = $c++;
-    }
-
-    // And re-order all the colors.
-    /** @var \Drupal\cohesion_website_settings\Entity\Color $entity */
-    foreach ($this->storage->loadMultiple() as $entity) {
-      if (isset($weights[$entity->id()])) {
-        $entity->setWeight($weights[$entity->id()]);
-        $entity->save();
-      }
-    }
   }
 
   /**

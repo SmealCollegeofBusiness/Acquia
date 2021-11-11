@@ -9,6 +9,7 @@ use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Entity\EntityRepository;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Link;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -93,7 +94,12 @@ abstract class ExportFormBase extends ConfigFormBase {
    * Show no entity types message with link.
    */
   protected function showNoEntityTypesMessage() {
-    \Drupal::messenger()->addWarning($this->t('Entities available for export have not been defined. <a href="/admin/cohesion/sync/export_settings">Click here to go to the export settings.</a>'), 'warning');
+
+    $args = [
+      '@link' => Link::createFromRoute('Click here to go to the export settings.', 'cohesion_sync.export_settings')->toString()
+    ];
+
+    \Drupal::messenger()->addWarning($this->t('Entities available for export have not been defined. @link', $args), TRUE);
   }
 
   /**

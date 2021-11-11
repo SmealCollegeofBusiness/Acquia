@@ -2,6 +2,19 @@
 
 All notable changes to `ssl-certificate` will be documented in this file
 
+## 1.22.1 - 2021-02-15
+
+- fix `getOrganization` method which always returned an empty result (#139)
+
+## 1.22.0 - 2020-11-09
+
+- allow set followLocation to be set to zero, ignoring redirect (#134)
+
+## 1.21.1 - 2020-11-04
+
+- add support for PHP 8.0
+- drop support for PHP 7.3 and below
+
 ## 1.21.0 - 2020-10-19
 
 - add option to disable certificate validation in createForHostName (#132)

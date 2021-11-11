@@ -21,7 +21,6 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
@@ -466,7 +465,7 @@ class TwigExtension extends \Twig_Extension {
     $token_replacement = $this->token->replace(new HtmlEscapedText($token), $data, [
       'langcode' => $language,
       'clear' => TRUE,
-    ], new BubbleableMetadata());
+    ]);
 
     // If layout canvas, decode entities as component will take care of escaping.
     if (!$isTemplate) {
@@ -538,9 +537,15 @@ class TwigExtension extends \Twig_Extension {
   public function renderComponent($componentId, $isTemplate, $_context, $componentFields, $componentInstanceUuid = NULL, $componentContentId = FALSE) {
 
     // Render component content if specified.
-    if ($componentContentId && is_numeric($componentContentId) && (!isset($_context['component_content']) || $_context['component_content'] instanceof ComponentContent && $_context['component_content']->id() !== $componentContentId)) {
+    if ($componentContentId && Uuid::isValid($componentContentId) && (!isset($_context['component_content']) || $_context['component_content'] instanceof ComponentContent && $_context['component_content']->uuid() !== $componentContentId)) {
       /** @var \Drupal\cohesion_elements\Entity\ComponentContent $componentContent */
-      $componentContent = ComponentContent::load($componentContentId);
+
+      $componentContents = $this->entityTypeManager
+        ->getStorage('component_content')
+        ->loadByProperties(['uuid' => $componentContentId]);
+
+      $componentContent = reset($componentContents);
+
       if ($componentContent && $componentContent->isPublished()) {
         $view_builder = $this->entityTypeManager->getViewBuilder('component_content');
         $build = $view_builder->view($componentContent);
@@ -616,18 +621,30 @@ class TwigExtension extends \Twig_Extension {
       ];
 
       // Build the render array.
-      $cacheContexts = \Drupal::service('cohesion_templates.cache_contexts');
-      $cache_contexts = $cacheContexts->getFromTemplateEntityId($component, $componentFieldsValues);
+      $context_cache_metadata = \Drupal::service('cohesion_templates.context.cache_metadata');
+      $context_names = $context_cache_metadata->extractContextNames($component, $componentFieldsValues);
+      if (!empty($context_names)) {
+        $cache = $context_cache_metadata->getContextsCacheMetadata($context_names);
+      }
+      else {
+        $cache = [];
+      }
+
+      $cache['tags'][] = 'component.cohesion.' . $componentId;
+      $cache['tags'] = array_merge($cache['tags'], $component->getCacheTags());
+      if (isset($cache['contexts'])) {
+        $cache['contexts'] = array_merge($cache['contexts'], $component->getCacheContexts());
+      }
+      else {
+        $cache['contexts'] = $component->getCacheContexts();
+      }
 
       $template = 'component__cohesion_' . str_replace('-', '_', $componentId);
 
       $renderer = [
         '#theme' => $template,
         '#content' => isset($contextual_content) ? $contextual_content : '',
-        '#cache' => [
-          'tags' => ['component.cohesion.' . $componentId],
-          'contexts' => $cache_contexts,
-        ],
+        '#cache' => $cache,
         '#parentContext' => $_context,
         // This is used inside preprocess_cohesion_elements_component()
         '#parentIsComponent' => TRUE,
@@ -1307,17 +1324,30 @@ class TwigExtension extends \Twig_Extension {
       // Finally, build a renderable array from the transformed tree.
       $menu = $menu_tree->build($tree);
 
-      // Add the cache tag (so menu is invalidated when the menu template changes).
-      $menu['#cache']['tags'][] = 'cohesion.templates.' . $templateId;
-
-      $cacheContexts = \Drupal::service('cohesion_templates.cache_contexts');
-      if (!isset($menu['#cache']['contexts'])) {
-        $menu['#cache']['contexts'] = [];
-      }
+      $cache = [
+        'tags' => ['cohesion.templates.' . $templateId],
+        'contexts' => [],
+      ];
 
       $candidate_template_storage = $this->entityTypeManager->getStorage('cohesion_menu_templates');
       $candidate_template = $candidate_template_storage->load($templateId);
-      $menu['#cache']['contexts'] = array_merge($menu['#cache']['contexts'], $cacheContexts->getFromTemplateEntityId($candidate_template));
+
+      if ($candidate_template) {
+        $cache['tags'] = array_merge($cache['tags'], $candidate_template->getCacheTags());
+        $cache['contexts'] = array_merge($cache['contexts'], $candidate_template->getCacheContexts());
+
+        $context_cache_metadata = \Drupal::service('cohesion_templates.context.cache_metadata');
+        $context_names = $context_cache_metadata->extractContextNames($candidate_template);
+        if (!empty($context_names)) {
+          $context_cache = $context_cache_metadata->getContextsCacheMetadata($context_names);
+          $cache['contexts'] = array_merge($cache['contexts'], $context_cache['contexts']);
+          $cache['tags'] = array_merge($cache['tags'], $context_cache['tags']);
+        }
+      }
+
+      // Add the cache tag (so menu is invalidated when the menu template changes).
+      $menu['#cache']['tags'] = array_merge($menu['#cache']['tags'], $cache['tags']);
+      $menu['#cache']['contexts'] = array_merge($menu['#cache']['contexts'], $cache['contexts']);
 
       // Suggest the menu template.
       $menu['#theme'] = 'menu__cohesion_' . $templateId;
@@ -1585,41 +1615,42 @@ class TwigExtension extends \Twig_Extension {
   public function getComponentFieldValue($context, $key, $sub_key_path = NULL) {
     $keys = [];
     // If we need to find the find further down the array
-    if(is_string($sub_key_path) && !empty($sub_key_path)) {
+    if (is_string($sub_key_path) && !empty($sub_key_path)) {
       $keys = array_merge($keys, explode(',', $sub_key_path));
     }
 
     $value = FALSE;
 
+    if (isset($context['componentFieldsValues'][$key])) {
+      $value = $context['componentFieldsValues'][$key];
+    }
     // If within the context of a field repeater check if the key exists
     // otherwise check in the component field values
-    if (isset($context['coh_repeater_val'])) {
+    elseif (isset($context['coh_repeater_val'])) {
       if (isset($context['coh_repeater_val']['#' . $key])) {
         $value = $context['coh_repeater_val']['#' . $key];
       }
     }
-    elseif (isset($context['componentFieldsValues'][$key])) {
-      $value = $context['componentFieldsValues'][$key];
-    }
-    else{
+    elseif (isset($context['componentFieldsValues'])) {
       // Try to find the key in all componentFieldsValues
       // If this is a field inside a field repeater but used outside a pattern repeater
       // use case: Hide if no data
-      foreach ($context['componentFieldsValues'] as $cpt_key => $cpt_value) {
-        if(is_array($cpt_value)) {
+      foreach ($context['componentFieldsValues'] as $cpt_value) {
+        if (is_array($cpt_value)) {
           foreach ($cpt_value as $repeater_value) {
-            if(is_array($repeater_value) && isset($repeater_value['#' . $key])) {
+            if (is_array($repeater_value) && isset($repeater_value['#' . $key])) {
 
               $value = $repeater_value['#' . $key];
               foreach ($keys as $key) {
-                if(is_array($value) && isset($value[$key])) {
+                if (is_array($value) && isset($value[$key])) {
                   $value = $value[$key];
-                } else {
+                }
+                else {
                   $value = '';
                 }
               }
 
-              if(trim($value) !== '') {
+              if (trim($value) !== '') {
                 return $value;
               }
 

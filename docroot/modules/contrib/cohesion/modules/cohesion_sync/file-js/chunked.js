@@ -3,7 +3,7 @@
  * @preserve
  **/
 
-(function ($, Drupal) {
+(function ($, Drupal, drupalSettings) {
   Drupal.behaviors.fileValidateAutoAttach = {
     attach: function attach(context, settings) {
       var $context = $(context);
@@ -88,7 +88,7 @@
           xhr = new XMLHttpRequest();
 
           // Send the file through POST.
-          xhr.open('POST', '/admin/chunked/file', true);
+          xhr.open('POST', drupalSettings.cohesion.urls.sync_file_chunk, true);
 
           // Send the filename in the header.
           xhr.setRequestHeader('filename', file.name);
@@ -146,4 +146,4 @@
       }
     }
   };
-})(jQuery, Drupal);
+})(jQuery, Drupal, drupalSettings);

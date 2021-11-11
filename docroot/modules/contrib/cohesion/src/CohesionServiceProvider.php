@@ -3,9 +3,6 @@
 namespace Drupal\cohesion;
 
 use Drupal\cohesion\Controller\CohesionMediaLibraryUiBuilder;
-use Drupal\cohesion\EventSubscriber\DependencyCollector\CohesionEntityReferenceFieldDependencyCollector;
-use Drupal\cohesion\EventSubscriber\SerializeContentField\CohesionEntityReferenceFieldSerializer;
-use Drupal\cohesion\EventSubscriber\UnserializeContentField\CohesionEntityReferenceField;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
 use Symfony\Component\DependencyInjection\Reference;
@@ -48,15 +45,6 @@ class CohesionServiceProvider extends ServiceProviderBase {
             new Reference('media_library.opener_resolver'),
           ]
         );
-    }
-
-    if (isset($modules['acquia_contenthub'])) {
-      $container->register('cohesion_entity_reference.field.cdf.unserializer', CohesionEntityReferenceField::class)
-        ->addTag('event_subscriber');
-      $container->register('cohesion_entity_reference.field.cdf.serializer', CohesionEntityReferenceFieldSerializer::class)
-        ->addTag('event_subscriber');
-      $container->register('cohesion_entity_reference.dependency_calculator', CohesionEntityReferenceFieldDependencyCollector::class)
-        ->addTag('event_subscriber');
     }
   }
 

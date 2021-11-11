@@ -4,6 +4,8 @@ namespace Drupal\Tests\responsive_preview\FunctionalJavascript;
 
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 
 /**
  * Tests the toolbar integration.
@@ -15,7 +17,12 @@ class ResponsivePreviewTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['responsive_preview', 'toolbar', 'entity_test'];
+  protected static $modules = [
+    'entity_test',
+    'node',
+    'responsive_preview',
+    'toolbar',
+  ];
 
   /**
    * {@inheritdoc}
@@ -35,11 +42,15 @@ class ResponsivePreviewTest extends WebDriverTestBase {
   public function setUp() {
     parent::setUp();
 
+    NodeType::create(['type' => 'article', 'name' => 'Article'])->save();
+
     $this->previewUser = $this->drupalCreateUser([
       'access responsive preview',
       'access toolbar',
       'view test entity',
       'administer entity_test content',
+      'create article content',
+      'edit own article content',
     ]);
   }
 
@@ -47,12 +58,6 @@ class ResponsivePreviewTest extends WebDriverTestBase {
    * Tests that the toolbar integration works properly.
    */
   public function testToolbarIntegration() {
-    /** @var \Drupal\FunctionalJavascriptTests\WebDriverWebAssert $assert_session */
-    $assert_session = $this->assertSession();
-
-    /** @var \Behat\Mink\Session $session */
-    $session = $this->getSession();
-
     $entity = EntityTest::create();
     $entity->name->value = $this->randomMachineName();
     $entity->save();
@@ -60,10 +65,35 @@ class ResponsivePreviewTest extends WebDriverTestBase {
     $this->drupalLogin($this->previewUser);
 
     $this->drupalGet($entity->toUrl());
+    $this->selectDevice('(//*[@id="responsive-preview-toolbar-tab"]//button[@data-responsive-preview-name])[1]');
+    $this->assertSession()->elementNotExists('xpath', '//*[@id="responsive-preview-orientation" and contains(@class, "rotated")]');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $this->assertTrue($this->getSession()->evaluateScript("jQuery('#responsive-preview-frame')[0].contentWindow.location.href.endsWith('/entity_test/1')"));
+  }
+
+  /**
+   * Tests that preview works on node edit.
+   */
+  public function testContentEdit() {
+    $this->drupalLogin($this->previewUser);
+
+    $node = Node::create([
+      'type' => 'article',
+      'uid' => $this->previewUser->id(),
+      'title' => $this->randomString(),
+    ]);
+    $node->save();
+
+    $this->drupalGet('node/' . $node->id() . '/edit');
 
     $this->selectDevice('(//*[@id="responsive-preview-toolbar-tab"]//button[@data-responsive-preview-name])[1]');
-    $assert_session->elementNotExists('xpath', '//*[@id="responsive-preview-orientation" and contains(@class, "rotated")]');
-    $this->assertTrue($session->evaluateScript("jQuery('#responsive-preview-frame')[0].contentWindow.location.href.endsWith('/entity_test/1')"));
+    $this->assertSession()->elementNotExists('xpath', '//*[@id="responsive-preview-orientation" and contains(@class, "rotated")]');
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    $this->assertTrue($this->getSession()->evaluateScript(
+      "jQuery('#responsive-preview-frame')[0].contentWindow.location.href.endsWith('/node/preview/" . $node->uuid() . "/full')"
+    ));
   }
 
   /**

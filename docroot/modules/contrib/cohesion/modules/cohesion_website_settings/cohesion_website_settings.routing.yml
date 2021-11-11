@@ -81,7 +81,7 @@ cohesion_website_settings.elements:
   requirements:
     group: ^[a-zA-Z0-9_-]+
     type: ^[a-zA-Z0-9_-]+
-    _user_is_logged_in: 'TRUE'
+    _custom_access: '\Drupal\cohesion_website_settings\Controller\WebsiteSettingsController:elementActionAccess'
 
 cohesion_website_settings.elements_all:
   path: '/cohesionapi/element'

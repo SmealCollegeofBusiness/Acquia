@@ -165,7 +165,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
     // @see \Drupal\sitestudio_page_builder\Routing\Route
     $query_param = $this->currentRequest->query->all();
 
-    if($entity = $this->pageBuilderManager->shouldEnablePageBuilder()) {
+    if ($entity = $this->pageBuilderManager->shouldEnablePageBuilder()) {
       $params = [
         $entity->getEntityTypeId() => $entity->id(),
         'coh_clean_page' => 'true',
@@ -185,7 +185,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
 
     // Get the react app library asset
     $lib = $this->libraryDiscovery->getLibraryByName('sitestudio_page_builder', 'cohesion-frontend-edit-scripts');
-    if(isset($lib['js'][0]['data'])) {
+    if (isset($lib['js'][0]['data'])) {
       $event->addFrontEndUrl('frontend-builder-js', [
         'url' => file_url_transform_relative(file_create_url($lib['js'][0]['data'])),
         'method' => 'GET'
@@ -194,10 +194,10 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
 
     // Get the react app library asset
     $lib = $this->libraryDiscovery->getLibraryByName('cohesion', 'global_libraries.visual_page_builder_element_js_loader');
-    if(isset($lib['js'][0]['data'])) {
+    if (isset($lib['js'][0]['data'])) {
       $urls = [];
       foreach ($lib['js'] as $js) {
-        if(isset($js['data'])) {
+        if (isset($js['data'])) {
           $urls[] = [
             'url' => file_url_transform_relative(file_create_url($js['data'])),
             'method' => 'GET'
@@ -226,12 +226,12 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
     $host = $entity->getParentEntity();
     $route_entity = $this->pageBuilderManager->shouldEnablePageBuilder();
 
-    if($route_entity && $host && $host->getEntityTypeId() == $route_entity->getEntityTypeId() && $host->id() == $route_entity->id() && $host->access('update')) {
+    if ($route_entity && $host && $host->getEntityTypeId() == $route_entity->getEntityTypeId() && $host->id() == $route_entity->id() && $host->access('update')) {
       // Get the latest layout canvas and pass it to drupalSettings
       $latest_entity = $this->entityRepository->getActive($entity->getEntityTypeId(), $entity->id());
 
       $json_values = json_decode($latest_entity->getJsonValues());
-      if($payload = $this->cohesionUtils->getPayloadForLayoutCanvasDataMerge($latest_entity)) {
+      if ($payload = $this->cohesionUtils->getPayloadForLayoutCanvasDataMerge($latest_entity)) {
         $response = $this->cohesionApiClient->layoutCanvasDataMerge($payload);
         if ($response && $response['code'] == 200) {
           $json_values = $response['data']->layoutCanvas;
@@ -256,7 +256,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
         $moderation_information = \Drupal::service('content_moderation.moderation_information');
       }
 
-      if($moderation_information && $moderation_information->isModeratedEntity($latest_host)) {
+      if ($moderation_information && $moderation_information->isModeratedEntity($latest_host)) {
         /** @var \Drupal\content_moderation\StateTransitionValidationInterface $validator */
         $validator = \Drupal::service('content_moderation.state_transition_validation');
         // Get the states the entity can transition into and the current state
@@ -275,8 +275,8 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
             $transition_labels[$transition_to_state->id()]['selected'] = TRUE;
           }
         }
-      }else {
-        // If not workflow enabled add pusblished/unbublished state
+      } else {
+        // If not workflow enabled add published/unpublished state
         $transition_labels['published'] = [
           'state' => 'published',
           'label' => $this->t('Published'),
@@ -286,10 +286,10 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
           'label' => $this->t('Unpublished'),
         ];
 
-        if($latest_host->isPublished()) {
+        if (!method_exists($latest_host, 'isPublished') || $latest_host->isPublished()) {
           $transition_labels['published']['selected'] = TRUE;
           $build['#attached']['drupalSettings']['cohesion']['currentState'] = $this->t('Published');
-        }else {
+        } else {
           $transition_labels['unpublished']['selected'] = TRUE;
           $build['#attached']['drupalSettings']['cohesion']['currentState'] = $this->t('Unpublished');
         }

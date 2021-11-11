@@ -12,6 +12,24 @@ use Drupal\Component\Serialization\Json;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Installer\InstallerKernel;
+
+/**
+ * Implements hook_requirements().
+ */
+function cohesion_requirements($phase) {
+  $requirements = [];
+  if (\Drupal::moduleHandler()->moduleExists('acquia_lift') && !\Drupal::moduleHandler()->moduleExists('sitestudio_contenthub_publisher')) {
+    $settings = ['@link' => 'https://github.com/acquia/sitestudio_contenthub'];
+    $requirements['cohesion'] = array(
+      'title' => t('Site Studio'),
+      'value' => t('The ContentHub integration required for Personalization & Site Studio has changed'),
+      'description' => t('Please download and configure <a href="@link">sitestudio_contenthub</a>', $settings),
+      'severity' => REQUIREMENT_ERROR,
+    );
+  }
+  return $requirements;
+}
 
 /**
  * Implements hook_install().
@@ -1155,6 +1173,16 @@ function cohesion_update_8702() {
 }
 
 /**
+ * Contenthub integration for Personalization
+ */
+function cohesion_update_8703() {
+  if (\Drupal::moduleHandler()->moduleExists('acquia_lift')) {
+    $settings = ['@link' => 'https://github.com/acquia/sitestudio_contenthub'];
+    return t("Manual Action Required: the ContentHub integration required for Personalization & Site Studio has changed - please download and configure @link (composer require acquia/sitestudio_contenthub)", $settings);
+  }
+}
+
+/**
  * Update callback.
  *
  * @param $json_values
@@ -1845,6 +1873,11 @@ function _cohesion_create_directory($path, $message = '') {
 
   // Create the Site Studio  directory.
   if (\Drupal::service('file_system')->prepareDirectory($path, FileSystemInterface::CREATE_DIRECTORY)) {
+    // Skip the message about directory being created if the
+    // module was installed in the Drupal installation process.
+    if (InstallerKernel::installationAttempted()) {
+      return;
+    }
     \Drupal::messenger()->addMessage(t(":message", [':message' => $message,]));
   }
 }

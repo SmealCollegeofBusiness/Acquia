@@ -12,6 +12,7 @@ use Drupal\image\Entity\ImageStyle;
 use Drupal\Core\Config\Entity\ConfigEntityType;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Annotation\PluralTranslation;
+use Drupal\Core\Installer\InstallerKernel;
 
 /**
  * Implements hook_install().
@@ -20,6 +21,11 @@ function cohesion_elements_install() {
   // Create preview images directory.
   $path = COHESION_FILESYSTEM_URI . '/preview';
   if (\Drupal::service('file_system')->prepareDirectory($path, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS)) {
+    // Skip the message about preview directory being created if the
+    // module was installed in the Drupal installation process.
+    if (InstallerKernel::installationAttempted()) {
+      return;
+    }
     \Drupal::messenger()->addMessage(t('Site Studio preview directory created.'));
   }
 }

@@ -3,7 +3,6 @@
 namespace Drupal\cohesion\Services;
 
 use Drupal\cohesion_elements\Entity\Component;
-use Drupal\cohesion_elements\Entity\ComponentContent;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\Utility\Xss;
@@ -462,11 +461,11 @@ class CohesionUtils {
     $component_content_ids = [];
     $has_components = FALSE;
     foreach ($layout_canvas->iterateCanvas() as $layout_element) {
-      if($layout_element->isComponent()) {
+      if ($layout_element->isComponent()) {
         $has_components = TRUE;
         $component_ids[] = $layout_element->getComponentID();
       }
-      if($layout_element->isComponentContent()) {
+      if ($layout_element->isComponentContent()) {
         $has_components = TRUE;
         $component_content_ids[] = $layout_element->getComponentContentId();
       }
@@ -482,7 +481,14 @@ class CohesionUtils {
     }
 
     $components_content_data = [];
-    $components_content = ComponentContent::loadMultiple($component_content_ids);
+    $components_content = [];
+
+    if ($component_content_ids) {
+      $components_content = $this->entityTypeManager
+        ->getStorage('component_content')
+        ->loadByProperties(['uuid' => $component_content_ids]);
+    }
+
     foreach ($components_content as $component_content) {
       $category_entity = $component_content->getComponent()->getCategoryEntity();
 
@@ -491,14 +497,14 @@ class CohesionUtils {
         $component_content = $component_content->getTranslation($language);
       }
 
-      $components_content_data[$component_content->id()] = array_merge([
+      $components_content_data[$component_content->uuid()] = array_merge([
         'title' => $component_content->label(),
         'url' => $component_content->toUrl('edit-form')->toString(),
         'category' => $component_content ? $category_entity->getClass() : FALSE,
       ]);
     }
 
-    if($has_components) {
+    if ($has_components) {
       return [
         'layoutCanvas' => $layout_canvas->getRawDecodedJsonValues(),
         'components' => $components_data,

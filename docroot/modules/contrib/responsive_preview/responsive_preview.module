@@ -7,7 +7,6 @@
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\responsive_preview\ResponsivePreviewHandler;
 
 /**
  * Implements hook_help().
@@ -28,62 +27,10 @@ function responsive_preview_help($route_name, RouteMatchInterface $route_match) 
  * Implements hook_toolbar().
  */
 function responsive_preview_toolbar() {
-  $device_definition = \Drupal::entityTypeManager()->getDefinition('responsive_preview_device');
-
-  $items['responsive_preview'] = [
-    '#cache' => [
-      'tags' => $device_definition->getListCacheTags(),
-      'contexts' => ['user.permissions', 'route.is_admin', 'url'],
-    ],
-  ];
-
   /** @var \Drupal\responsive_preview\ResponsivePreview $responsivePreviewService */
   $responsivePreviewService = \Drupal::service('responsive_preview');
-  $url = $responsivePreviewService->getUrl();
-  $preview_access = \Drupal::currentUser()->hasPermission('access responsive preview');
 
-  // If ajax responsive preview handling is available then url is not relevant.
-  // And base url can be used in that case.
-  if (empty($url) && ResponsivePreviewHandler::isAvailableAjaxPreview()) {
-    $url = '/';
-  }
-
-  if ($preview_access && $url) {
-    $items['responsive_preview'] += [
-      '#type' => 'toolbar_item',
-      '#weight' => 50,
-      'tab' => [
-        'trigger' => [
-          '#type' => 'html_tag',
-          '#tag' => 'button',
-          '#value' => t('<span class="visually-hidden">Layout preview</span>'),
-          '#attributes' => [
-            'title' => t('Preview page layout'),
-            'class' => [
-              'responsive-preview-icon',
-              'responsive-preview-icon-responsive-preview',
-              'responsive-preview-trigger',
-            ],
-          ],
-        ],
-        'device_options' => $responsivePreviewService->getRenderableDevicesList(),
-      ],
-      '#wrapper_attributes' => [
-        'id' => 'responsive-preview-toolbar-tab',
-        'class' => ['toolbar-tab-responsive-preview'],
-      ],
-      '#attached' => [
-        'library' => ['responsive_preview/drupal.responsive-preview'],
-        'drupalSettings' => [
-          'responsive_preview' => [
-            'url' => ltrim($url, '/'),
-          ],
-        ],
-      ],
-    ];
-  }
-
-  return $items;
+  return $responsivePreviewService->previewToolbar();
 }
 
 /**
@@ -115,5 +62,8 @@ function responsive_preview_preprocess_item_list__responsive_preview(array &$var
 function responsive_preview_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Add alter of form for responsive preview triggering element. So that
   // responsive preview of non saved node entity is can be executed.
-  ResponsivePreviewHandler::handleFormAlter($form, $form_state, $form_id);
+  /** @var \Drupal\responsive_preview\ResponsivePreview $responsivePreviewService */
+  $responsivePreviewService = \Drupal::service('responsive_preview');
+
+  $responsivePreviewService->formAlter($form, $form_state, $form_id);
 }

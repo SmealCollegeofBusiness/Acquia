@@ -543,3 +543,50 @@ function cohesion_elements_entity_revision_create(ContentEntityInterface $new_re
     }
   }
 }
+
+/**
+ * Implements hook_user_cancel().
+ */
+function cohesion_elements_user_cancel($edit, $account, $method) {
+  switch ($method) {
+    case 'user_cancel_block_unpublish':
+
+      // Unpublish component contents (current revisions).
+      module_load_include('inc', 'cohesion_elements', 'cohesion_elements.admin');
+      $component_content = \Drupal::entityQuery('component_content')
+        ->condition('uid', $account
+          ->id())
+        ->execute();
+      component_contents_mass_update($component_content, [
+        'status' => 0,
+      ], NULL, TRUE);
+      break;
+
+    case 'user_cancel_reassign':
+
+      // Anonymize component content (current revisions).
+      module_load_include('inc', 'cohesion_elements', 'cohesion_elements.admin');
+      $component_content = \Drupal::entityQuery('component_content')
+        ->condition('uid', $account
+          ->id())
+        ->execute();
+      component_contents_mass_update($component_content, [
+        'uid' => 0,
+      ], NULL, TRUE);
+      break;
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_predelete() for user entities.
+ */
+function cohesion_elements_user_predelete($account) {
+  // Delete component content & revisions.
+  $ids = \Drupal::entityQuery('component_content')
+    ->condition('uid', $account->id())
+    ->accessCheck(FALSE)
+    ->execute();
+  $storage_controller = \Drupal::entityTypeManager()->getStorage('component_content');
+  $component_contents = $storage_controller->loadMultiple($ids);
+  $storage_controller->delete($component_contents);
+}

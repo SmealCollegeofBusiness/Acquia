@@ -1,10 +1,354 @@
 # Release notes
 
+## 6.7.0
+
+### PHP 8.0 compatibility
+
+#### What is it?
+
+PHP 8 has added supported for named arguments. This can cause problems when using call_user_func_array() as is the case
+with batch operations - see https://wiki.php.net/rfc/named_params for the changes in question.
+
+#### What impact will there be?
+
+Site Studio batch operations will operate as expected on php 8.0 based environments as of 6.7.0.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Non serialised JSON when exporting site studio packages
+
+#### What is it?
+
+When exporting Site Studio assets you can now set a setting to export all json values non serialised.
+This is to increase the readability of sync packages when doing diffs as it will output json values in multiple lines.
+
+#### What impact will there be?
+
+None.
+
+#### What actions do I need to take?
+
+To enable this functionality add `$settings['site_studio_package_multiline'] = TRUE` to your settings.php.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Loaded config before bootstrap
+
+#### What is it?
+
+This fixes a bug where config would be loaded before bootstrap causing side effects on other services.
+
+#### What impact will there be?
+
+None.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Entity reference fields not working after upgrading to 6.6.0
+
+#### What is it?
+
+This fixes a bug where entity references inside field repeater would not be updated properly resulting in a broken reference.
+
+#### What impact will there be?
+
+There is no impact, entity references should now be linked to the correct entities.
+
+#### What actions do I need to take?
+
+`drush cohesion:rebuild`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Integration with Acquia ContentHub
+
+#### What is it?
+
+We are moving default functionality when using Acquia ContentHub into a new contrib module. The new module is called
+"Sitestudio Contenthub" ([sitestudio_contenthub](https://github.com/acquia/sitestudio_contenthub)) and contains two
+new submodules `sitestudio_contenthub_publisher` and `sitestudio_contenthub_subscriber`.
+They add additional Site Studio support for Content publishing and importing via ContentHub.
+
+#### What impact will there be?
+
+Customers leveraging Content hub for [Personalization/Lift](https://www.acquia.com/products/marketing-cloud/personalization) integration with Site Studio will be required to take manual action to ensure continued operation,
+Site Studio related entities will no longer be published and imported until the new "Sitestudio Contenthub" ([sitestudio_contenthub](https://github.com/acquia/sitestudio_contenthub))
+is downloaded and appropriate submodule is enabled. Once the submodules are enabled, the functionality will resume, but integration behaviour might be different, depending on how it was used until 6.7.0.
+Please refer to the [documentation](https://sitestudiodocs.acquia.com/6.7/user-guide/using-acquia-cohesion-acquia-content-hub) to find out more.
+
+#### What actions do I need to take?
+
+If integration with Acquia ContentHub is required, please read updated [documentation](https://sitestudiodocs.acquia.com/6.7/user-guide/using-acquia-cohesion-acquia-content-hub),
+download the new "Sitestudio Contenthub" ([sitestudio_contenthub](https://github.com/acquia/sitestudio_contenthub))
+and enable submodules relevant to the Publisher and the Subscriber sites.
+
+#### Are there any risks I should be aware of?
+
+This update removes default integration with ContentHub. If no actions are taken, Layout Canvas entities will no longer be published and imported via ContentHub.
+Once the new module is downloaded relevant submodules are enabled, ContentHub integration with Site Studio will resume,
+but will behave differently compared to 6.6.0 and earlier versions.
+More information is available [here](https://sitestudiodocs.acquia.com/6.7/user-guide/using-acquia-cohesion-acquia-content-hub).
+
+### Nested components in pattern repeaters not rendering
+
+#### What is it?
+
+Fixes a bug where nested components inside pattern repeaters with tokenized fields where not rendering.
+
+#### What impact will there be?
+
+Components that are nested inside another component and use a pattern repeater, that contain tokenized values will now render as expected.
+
+#### What actions do I need to take?
+
+Run a rebuild.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Component Configure links not working correctly on sub-directory multi-site setups
+
+#### What is it?
+
+Fixes a bug when using a components configure links on a layout canvas on a sub-directory multi-site setup, the URL returned was incorrect.
+
+#### What impact will there be?
+
+The component layout canvas configure links will now work for multi-sites that are configured in a sub-directory setup.
+For example: www.domain.com/site1 www.domain.com/site2
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Component content throwing an error on Drupal 9 when moderation is enabled
+
+#### What is it?
+
+Fixes a bug where the edit page of a component content would throw a `Call to undefined method isReusable()` error when moderation is enabled.
+
+#### What impact will there be?
+
+Editing component content while having content moderation enabled will work as expected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### References to Component Content on the Layout canvas have changed from IDs to UUIDs
+
+#### What is it?
+
+Component content that is placed on a layout canvas is now referenced by its UUID rather than ID.
+This makes it compatible with modules such as contenthub and default content.
+
+#### What impact will there be?
+
+There should be no impact from a users perspective.
+Any existing component contents on layout canvases will be updated to reference by UUUID, and new ones will be referenced by UUIDs.
+
+#### What actions do I need to take?
+
+When upgrading be sure to follow the upgrade guide and run a rebuild when stated.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### When using the template selector field a warning appears on the Drupal status page
+
+#### What is it?
+
+Fixes a bug where the warning "Tokens or token types missing name property." appears on the Drupal status page when using the template selector field.
+
+#### What impact will there be?
+
+This warning will no longer appear.
+
+#### What actions do I need to take?
+
+Run `drush updb` as usual when upgrading.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Missing contexts no longer show as "undefined" in the context visibility select
+
+#### What is it?
+
+Fixes an issue where if a context is missing it would appear as "undefined" in the context visibility select where it had been used.
+
+#### What impact will there be?
+
+If a context has been selected in the context visibility select and is subsequently then removed, it will now show "Selected context is missing."
+
+#### What actions do I need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### When cancelling a user that had created component content the uid was not updated correctly
+
+#### What is it?
+
+Fixes a bug where a users account is cancelled and component content that they had created should be reassigned, unpublished or deleted, was not being re-assigned or deleted correctly.
+
+#### What impact will there be?
+
+When cancelling a user account that has created component content it will be re-assigned, unpublished or deleted correctly based on what the user selects when cancelling the users account.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Installing Site Studio via a profile resulted in 403
+
+#### What is it?
+
+Fixes a bug when installing Site Studio through a profile, would result in a 403 rather than being logged in as user 1.
+
+#### What impact will there be?
+
+Installing Site Studio through a profile will now log the user in after installation as expected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Entity browser URLs not respecting sub-directory sites
+
+#### What is it?
+
+Fixes a bug where Entity browser URLs don't respect sub-directory multi-site setup and the URL returned was incorrect for this setup.
+
+#### What impact will there be?
+
+The URLs are now correct for both sub-directory multi-site setup and standard Drupal setups.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Component builder elements not always appearing in the sidebar browser
+
+#### What is it?
+
+Fixes a bug where the component builder elements category did not show in the sidebar browser as expected on component creation and edit forms, if certain referer policies were in place.
+
+#### What impact will there be?
+
+The component builder elements category will now appear as expected even if certain referer policies are in place.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Sync import through UI not working when on a sub-directory multi-site
+
+#### What is it?
+
+Fixes a bug where the sync file chunk URL was hardcoded rather than generated through Drupal.
+
+#### What impact will there be?
+
+No error will be encountered when importing a sync file through the UI on a sub-directory site.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Error: Call to undefined method isPublished()
+
+#### What is it?
+
+Fixes a bug where a call to an undefined method for entity types that do not use the trait EntityPublishedTrait and as such do not have a isPublished() method.
+
+#### What impact will there be?
+
+The error will no longer appear.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 6.6.1
+
+### Menu templates are generated with incorrect filename
+
+#### What is it?
+
+Fixes a bug that causes menu templates to be generated with an incorrect filename and therefore results in not rendering the template selected.
+
+#### What impact will there be?
+
+Menu templates are now generated with the correct filename and will start to render as expected.
+
+#### What actions do I need to take?
+
+A Site Studio rebuild or re-save the affected menu templates.
+
+#### Are there any risks I should be aware of?
+
+None.
+
 ## 6.6.0
 
-## Slider - accessibility improvements
+### Slider - accessibility improvements
 
-### What is it?
+#### What is it?
 Accessibility of the Site Studio Slider has been enhanced to include features from Accessible360's Slick replacement.
 These include:
 - Users can define an `aria-label` for the Slider container, which also has a `role="region"` attribute/value.
@@ -16,7 +360,7 @@ These include:
 - Keyboard navigation (using left and right arrow keys to traverse slides) was originally enabled programmatically. Whilst on by default for backwards compatibility, there is now a toggle option in the Slider container settings form to disable this option.
 
 #### What impact will there be?
-Customers using screen reader technology on your websites should have a better experience, providing configurable options are completed by site builder. 
+Customers using screen reader technology on your websites should have a better experience, providing configurable options are completed by site builder.
 
 #### What actions do I need to take?
 `drush cohesion:import`
@@ -25,15 +369,15 @@ Customers using screen reader technology on your websites should have a better e
 
 Pagination or Slide item styles could be be broken if a site builder has used the now-removed tab roles as attribute css selectors.
 
-### Components that rely on entity IDs not rendering after upgrade  
+### Components that rely on entity IDs not rendering after upgrade
 
 #### What is it?
 
-Fixes a bug where components that rely on entity IDs where not rendering the referenced content as expected. 
+Fixes a bug where components that rely on entity IDs where not rendering the referenced content as expected.
 
 #### What impact will there be?
 
-Components can rely on either entity UUIDs or IDs for rendering referenced content. 
+Components can rely on either entity UUIDs or IDs for rendering referenced content.
 If your components rely on entity IDs, upgrading will resolve referenced content not rendering.
 
 #### What actions do i need to take?
@@ -62,7 +406,7 @@ None.
 
 None.
 
-### Content titles with brackets not appearing in Link typeahead  
+### Content titles with brackets not appearing in Link typeahead
 
 #### What is is?
 

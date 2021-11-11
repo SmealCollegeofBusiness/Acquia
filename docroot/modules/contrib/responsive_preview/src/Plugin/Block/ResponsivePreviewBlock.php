@@ -10,7 +10,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\AdminContext;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
-use Drupal\responsive_preview\ResponsivePreviewInterface;
+use Drupal\responsive_preview\ResponsivePreview;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -66,10 +66,10 @@ class ResponsivePreviewBlock extends BlockBase implements ContainerFactoryPlugin
    *   The entity type manager.
    * @param \Drupal\Core\Session\AccountProxyInterface $currentUser
    *   The current user.
-   * @param \Drupal\responsive_preview\ResponsivePreviewInterface $responsivePreview
+   * @param \Drupal\responsive_preview\ResponsivePreview $responsivePreview
    *   The current user.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, AdminContext $admin_context, EntityTypeManagerInterface $entity_type_manager, AccountProxyInterface $currentUser, ResponsivePreviewInterface $responsivePreview) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, AdminContext $admin_context, EntityTypeManagerInterface $entity_type_manager, AccountProxyInterface $currentUser, ResponsivePreview $responsivePreview) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->adminContext = $admin_context;
     $this->entityTypeManager = $entity_type_manager;
@@ -103,14 +103,9 @@ class ResponsivePreviewBlock extends BlockBase implements ContainerFactoryPlugin
    * {@inheritdoc}
    */
   public function build() {
-    $block = [];
-
-    $preview_access = $this->currentUser->hasPermission('access responsive preview');
-
-    $url = $this->responsivePreview->getUrl();
-
-    if ($preview_access && $url) {
-      $block = [
+    $url = $this->responsivePreview->getPreviewUrl();
+    if ($url) {
+      return [
         'device_options' => $this->responsivePreview->getRenderableDevicesList(),
         '#attached' => [
           'library' => ['responsive_preview/drupal.responsive-preview'],
@@ -122,15 +117,17 @@ class ResponsivePreviewBlock extends BlockBase implements ContainerFactoryPlugin
         ],
       ];
     }
-
-    return $block;
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCacheContexts() {
-    return Cache::mergeContexts(parent::getCacheContexts(), ['user.permissions', 'route.is_admin']);
+    return Cache::mergeContexts(
+      parent::getCacheContexts(),
+      ['user.permissions', 'route.is_admin'],
+    );
   }
 
   /**

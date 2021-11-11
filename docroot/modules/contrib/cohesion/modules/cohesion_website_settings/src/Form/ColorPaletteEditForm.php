@@ -31,7 +31,7 @@ class ColorPaletteEditForm extends WebsiteSettingsGroupFormBase {
   protected function stepOneSubmit(array &$form, FormStateInterface $form_state) {
     // Fetch and decode the color palette JSON blob.
     $colors = json_decode($form_state->getValue('json_values'));
-    if ($colors->colors != NULL) {
+    if ($colors->colors !== NULL) {
       list($this->in_use_list, $this->changed_entities) = $this->getEntityGroupsPlugin()->saveFromModel($colors);
 
       // (Optionally) run color rebuild batch for entities using changed colors.

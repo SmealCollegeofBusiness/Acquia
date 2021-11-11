@@ -3,6 +3,7 @@
 namespace Drupal\cohesion_sync;
 
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Entity\EntityRepository;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -136,6 +137,19 @@ abstract class SyncPluginBase extends PluginBase implements SyncPluginInterface,
     // Make sure API send() function just returns without sending anything to the API.
     $cohesion_sync_lock = &drupal_static('cohesion_sync_lock');
     $cohesion_sync_lock = TRUE;
+  }
+
+  /**
+   * (@inerhitDoc}
+   */
+  public function getActionData($entry, $action_state, $type) {
+    return [
+      'entry_uuid' => $entry['uuid'],
+      'entry_action_state' => $action_state,
+      'entity_type' => $type,
+      'id' => $entry[$this->entityTypeDefinition->getKey('id')],
+      'is_config' => $this->entityTypeDefinition instanceof ConfigEntityTypeInterface
+    ];
   }
 
 }

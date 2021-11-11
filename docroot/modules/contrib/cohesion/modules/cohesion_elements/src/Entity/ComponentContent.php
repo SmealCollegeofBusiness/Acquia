@@ -30,7 +30,7 @@ use Drupal\user\UserInterface;
  *       "delete" = "Drupal\cohesion_elements\Form\ComponentContentDeleteForm",
  *     },
  *     "translation" = "Drupal\cohesion_elements\ComponentContentTranslationHandler",
- *     "moderation" = "Drupal\content_moderation\Entity\Handler\BlockContentModerationHandler"
+ *     "moderation" = "Drupal\content_moderation\Entity\Handler\NodeModerationHandler"
  *   },
  *   admin_permission = "administer component content",
  *   base_table = "component_contents",

@@ -97,15 +97,46 @@ function cohesion_templates_entity_view(array &$build, EntityInterface $entity, 
     if (count($candidate_template_ids) > 0) {
       $candidate_template_id = reset($candidate_template_ids);
 
-      $cacheContexts = \Drupal::service('cohesion_templates.cache_contexts');
       if (!isset($build['#cache']['contexts'])) {
         $build['#cache']['contexts'] = [];
       }
       $candidate_template_storage = \Drupal::entityTypeManager()
         ->getStorage('cohesion_content_templates');
-      $candidate_template = $candidate_template_storage->load($candidate_template_id);
-      $build['#cache']['contexts'] = array_merge($build['#cache']['contexts'], $cacheContexts->getFromTemplateEntityId($candidate_template));
+      $context_cache_metadata = \Drupal::service('cohesion_templates.context.cache_metadata');
 
+      $candidate_template = $candidate_template_storage->load($candidate_template_id);
+      $context_names = $context_cache_metadata->extractContextNames($candidate_template);
+
+      // Fetch cache metadata from Context.
+      if (!empty($context_names)) {
+        $cache = $context_cache_metadata->getContextsCacheMetadata($context_names);
+      }
+      else {
+        $cache = [
+          'tags' => [],
+          'contexts' => [],
+        ];
+      }
+
+      // Fetch catch metadata from template.
+      $cache['tags'] = array_merge($cache['tags'], $candidate_template->getCacheTags());
+      $cache['contexts'] = array_merge($cache['contexts'], $candidate_template->getCacheContexts());
+
+      // Merge cache contexts.
+      if (isset($build['#cache']['contexts'])) {
+        $build['#cache']['contexts'] = array_merge($build['#cache']['contexts'], $cache['contexts']);
+      }
+      else {
+        $build['#cache']['contexts'] = $cache['contexts'];
+      }
+
+      // Merge cache tags.
+      if (isset($build['#cache']['tags'])) {
+        $build['#cache']['tags'] = array_merge($build['#cache']['tags'], $cache['tags']);
+      }
+      else {
+        $build['#cache']['tags'] = $cache['tags'];
+      }
     }
   }
 }
@@ -121,14 +152,43 @@ function cohesion_templates_preprocess_page(&$variables) {
     }
     $variables['page']['#cache']['tags'][] = 'cohesion.templates.' . $master_template;
 
-    $cacheContexts = \Drupal::service('cohesion_templates.cache_contexts');
-    if (!isset($variables['page']['#cache']['contexts'])) {
-      $variables['page']['#cache']['contexts'] = [];
-    }
     $candidate_template_storage = \Drupal::entityTypeManager()
       ->getStorage('cohesion_master_templates');
     $candidate_template = $candidate_template_storage->load($master_template);
-    $variables['page']['#cache']['contexts'] = array_merge($variables['page']['#cache']['contexts'], $cacheContexts->getFromTemplateEntityId($candidate_template));
+
+    $context_cache_metadata = \Drupal::service('cohesion_templates.context.cache_metadata');
+    $context_names = $context_cache_metadata->extractContextNames($candidate_template);
+
+    // Fetch cache metadata from Context.
+    if (!empty($context_names)) {
+      $cache = $context_cache_metadata->getContextsCacheMetadata($context_names);
+    }
+    else {
+      $cache = [
+        'tags' => [],
+        'contexts' => [],
+      ];
+    }
+
+    // Fetch catch metadata from template.
+    $cache['tags'] = array_merge($cache['tags'], $candidate_template->getCacheTags());
+    $cache['contexts'] = array_merge($cache['contexts'], $candidate_template->getCacheContexts());
+
+    // Merge cache contexts.
+    if (isset($variables['page']['#cache']['contexts'])) {
+      $variables['page']['#cache']['contexts'] = array_merge($variables['page']['#cache']['contexts'], $cache['contexts']);
+    }
+    else {
+      $variables['page']['#cache']['contexts'] = $cache['contexts'];
+    }
+
+    // Merge cache tags.
+    if (isset($variables['page']['#cache']['tags'])) {
+      $variables['page']['#cache']['tags'] = array_merge($variables['page']['#cache']['tags'], $cache['tags']);
+    }
+    else {
+      $variables['page']['#cache']['tags'] = $cache['tags'];
+    }
   }
 }
 
