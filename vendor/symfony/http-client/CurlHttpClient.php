@@ -90,7 +90,7 @@ final class CurlHttpClient implements HttpClientInterface, LoggerAwareInterface,
         }
 
         // HTTP/2 push crashes before curl 7.61
-        if (!\defined('CURLMOPT_PUSHFUNCTION') || 0x073d00 > self::$curlVersion['version_number'] || !(\CURL_VERSION_HTTP2 & self::$curlVersion['features'])) {
+        if (!\defined('CURLMOPT_PUSHFUNCTION') || 0x073D00 > self::$curlVersion['version_number'] || !(\CURL_VERSION_HTTP2 & self::$curlVersion['features'])) {
             return;
         }
 
@@ -185,7 +185,7 @@ final class CurlHttpClient implements HttpClientInterface, LoggerAwareInterface,
             $this->multi->dnsCache->evictions = [];
             $port = parse_url($authority, \PHP_URL_PORT) ?: ('http:' === $scheme ? 80 : 443);
 
-            if ($resolve && 0x072a00 > self::$curlVersion['version_number']) {
+            if ($resolve && 0x072A00 > self::$curlVersion['version_number']) {
                 // DNS cache removals require curl 7.42 or higher
                 // On lower versions, we have to create a new multi handle
                 curl_multi_close($this->multi->handle);
@@ -336,30 +336,8 @@ final class CurlHttpClient implements HttpClientInterface, LoggerAwareInterface,
 
     public function reset()
     {
-        if ($this->logger) {
-            foreach ($this->multi->pushedResponses as $url => $response) {
-                $this->logger->debug(sprintf('Unused pushed response: "%s"', $url));
-            }
-        }
-
-        $this->multi->pushedResponses = [];
-        $this->multi->dnsCache->evictions = $this->multi->dnsCache->evictions ?: $this->multi->dnsCache->removals;
-        $this->multi->dnsCache->removals = $this->multi->dnsCache->hostnames = [];
-
-        if (\is_resource($this->multi->handle) || $this->multi->handle instanceof \CurlMultiHandle) {
-            if (\defined('CURLMOPT_PUSHFUNCTION')) {
-                curl_multi_setopt($this->multi->handle, \CURLMOPT_PUSHFUNCTION, null);
-            }
-
-            $active = 0;
-            while (\CURLM_CALL_MULTI_PERFORM === curl_multi_exec($this->multi->handle, $active));
-        }
-
-        foreach ($this->multi->openHandles as [$ch]) {
-            if (\is_resource($ch) || $ch instanceof \CurlHandle) {
-                curl_setopt($ch, \CURLOPT_VERBOSE, false);
-            }
-        }
+        $this->multi->logger = $this->logger;
+        $this->multi->reset();
     }
 
     /**
@@ -377,7 +355,7 @@ final class CurlHttpClient implements HttpClientInterface, LoggerAwareInterface,
 
     public function __destruct()
     {
-        $this->reset();
+        $this->multi->logger = $this->logger;
     }
 
     private function handlePush($parent, $pushed, array $requestHeaders, int $maxPendingPushes): int

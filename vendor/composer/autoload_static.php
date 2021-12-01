@@ -4,17 +4,17 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e
+class ComposerStaticInitf76c13b618732f5e7960552498e000ac
 {
     public static $files = array (
-        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
-        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
         '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
@@ -289,9 +289,9 @@ class ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e
         ),
         'phpDocumentor\\Reflection\\' => 
         array (
-            0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
-            1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
-            2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            0 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+            1 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
         ),
         'lsolesen\\pel\\' => 
         array (
@@ -5608,6 +5608,8 @@ class ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e
         'PhpParser\\Builder\\ClassConst' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder/ClassConst.php',
         'PhpParser\\Builder\\Class_' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder/Class_.php',
         'PhpParser\\Builder\\Declaration' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder/Declaration.php',
+        'PhpParser\\Builder\\EnumCase' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder/EnumCase.php',
+        'PhpParser\\Builder\\Enum_' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder/Enum_.php',
         'PhpParser\\Builder\\FunctionLike' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder/FunctionLike.php',
         'PhpParser\\Builder\\Function_' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder/Function_.php',
         'PhpParser\\Builder\\Interface_' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder/Interface_.php',
@@ -7078,7 +7080,9 @@ class ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e
         'Symfony\\Component\\Cache\\Adapter\\ArrayAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/ArrayAdapter.php',
         'Symfony\\Component\\Cache\\Adapter\\ChainAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/ChainAdapter.php',
         'Symfony\\Component\\Cache\\Adapter\\CouchbaseBucketAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/CouchbaseBucketAdapter.php',
+        'Symfony\\Component\\Cache\\Adapter\\CouchbaseCollectionAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/CouchbaseCollectionAdapter.php',
         'Symfony\\Component\\Cache\\Adapter\\DoctrineAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/DoctrineAdapter.php',
+        'Symfony\\Component\\Cache\\Adapter\\DoctrineDbalAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/DoctrineDbalAdapter.php',
         'Symfony\\Component\\Cache\\Adapter\\FilesystemAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/FilesystemAdapter.php',
         'Symfony\\Component\\Cache\\Adapter\\FilesystemTagAwareAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/FilesystemTagAwareAdapter.php',
         'Symfony\\Component\\Cache\\Adapter\\MemcachedAdapter' => __DIR__ . '/..' . '/symfony/cache/Adapter/MemcachedAdapter.php',
@@ -8299,6 +8303,7 @@ class ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e
         'Symfony\\Component\\VarDumper\\Caster\\DsPairStub' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/DsPairStub.php',
         'Symfony\\Component\\VarDumper\\Caster\\EnumStub' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/EnumStub.php',
         'Symfony\\Component\\VarDumper\\Caster\\ExceptionCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/ExceptionCaster.php',
+        'Symfony\\Component\\VarDumper\\Caster\\FiberCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/FiberCaster.php',
         'Symfony\\Component\\VarDumper\\Caster\\FrameStub' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/FrameStub.php',
         'Symfony\\Component\\VarDumper\\Caster\\GmpCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/GmpCaster.php',
         'Symfony\\Component\\VarDumper\\Caster\\ImagineCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/ImagineCaster.php',
@@ -8390,6 +8395,7 @@ class ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e
         'Symfony\\Contracts\\HttpClient\\Test\\HttpClientTestCase' => __DIR__ . '/..' . '/symfony/http-client-contracts/Test/HttpClientTestCase.php',
         'Symfony\\Contracts\\HttpClient\\Test\\TestHttpServer' => __DIR__ . '/..' . '/symfony/http-client-contracts/Test/TestHttpServer.php',
         'Symfony\\Contracts\\Service\\Attribute\\Required' => __DIR__ . '/..' . '/symfony/service-contracts/Attribute/Required.php',
+        'Symfony\\Contracts\\Service\\Attribute\\SubscribedService' => __DIR__ . '/..' . '/symfony/service-contracts/Attribute/SubscribedService.php',
         'Symfony\\Contracts\\Service\\ResetInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ResetInterface.php',
         'Symfony\\Contracts\\Service\\ServiceLocatorTrait' => __DIR__ . '/..' . '/symfony/service-contracts/ServiceLocatorTrait.php',
         'Symfony\\Contracts\\Service\\ServiceProviderInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ServiceProviderInterface.php',
@@ -9037,11 +9043,11 @@ class ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitc023910d58c60bbd567e3e4b3d6dbf4e::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitf76c13b618732f5e7960552498e000ac::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitf76c13b618732f5e7960552498e000ac::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitf76c13b618732f5e7960552498e000ac::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitf76c13b618732f5e7960552498e000ac::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitf76c13b618732f5e7960552498e000ac::$classMap;
 
         }, null, ClassLoader::class);
     }
