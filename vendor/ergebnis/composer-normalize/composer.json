@@ -1,21 +1,25 @@
 {
   "name": "ergebnis/composer-normalize",
-  "type": "composer-plugin",
   "description": "Provides a composer plugin for normalizing composer.json.",
+  "license": "MIT",
+  "type": "composer-plugin",
   "keywords": [
     "composer",
     "normalizer",
     "normalize",
     "plugin"
   ],
-  "homepage": "https://github.com/ergebnis/composer-normalize",
-  "license": "MIT",
   "authors": [
     {
       "name": "Andreas Möller",
       "email": "am@localheinz.com"
     }
   ],
+  "homepage": "https://github.com/ergebnis/composer-normalize",
+  "support": {
+    "issues": "https://github.com/ergebnis/composer-normalize/issues",
+    "source": "https://github.com/ergebnis/composer-normalize"
+  },
   "require": {
     "php": "^7.2 || ^8.0",
     "composer-plugin-api": "^2.0.0",
@@ -25,14 +29,26 @@
     "localheinz/diff": "^1.1.1"
   },
   "require-dev": {
-    "composer/composer": "^2.1.12",
+    "composer/composer": "^2.1.14",
     "ergebnis/license": "^1.1.0",
     "ergebnis/php-cs-fixer-config": "^2.14.0",
     "ergebnis/test-util": "^1.5.0",
     "phpunit/phpunit": "^8.5.21",
     "psalm/plugin-phpunit": "~0.16.1",
-    "symfony/filesystem": "^5.3.4",
-    "vimeo/psalm": "^4.12.0"
+    "symfony/filesystem": "^5.4.0",
+    "vimeo/psalm": "^4.14.0"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "autoload": {
+    "psr-4": {
+      "Ergebnis\\Composer\\Normalize\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Ergebnis\\Composer\\Normalize\\Test\\": "test/"
+    }
   },
   "config": {
     "platform": {
@@ -47,21 +63,5 @@
       "indent-size": 2,
       "indent-style": "space"
     }
-  },
-  "autoload": {
-    "psr-4": {
-      "Ergebnis\\Composer\\Normalize\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Ergebnis\\Composer\\Normalize\\Test\\": "test/"
-    }
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "support": {
-    "issues": "https://github.com/ergebnis/composer-normalize/issues",
-    "source": "https://github.com/ergebnis/composer-normalize"
   }
 }

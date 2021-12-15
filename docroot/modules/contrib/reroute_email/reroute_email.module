@@ -248,7 +248,13 @@ function reroute_email_check(array &$message) {
     }
 
     // Check whitelisted emails and domains.
-    $domain = mb_strtolower((new EmailParser(new EmailLexer()))->parse($email)['domain']);
+    $domain = (new EmailParser(new EmailLexer()));
+    if (is_object($domain->parse($email))) {
+      $domain = mb_strtolower($domain->getDomainPart());
+    }
+    else {
+      $domain = mb_strtolower($domain->parse($email)['domain']);
+    }
     if (in_array($email, $whitelisted_addresses, TRUE) ||
       in_array($domain, $whitelisted_domains, TRUE)) {
       continue;
