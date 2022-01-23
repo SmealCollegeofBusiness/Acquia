@@ -176,7 +176,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
   public function testInsertOrUpdate() {
     // Status is set to queued whenever a new entity is created.
     $queued_status = $this->getTrackingTableColByUuid($this->node->uuid(), 'status');
-    $this->assertEqual($queued_status, 'queued');
+    $this->assertEquals($queued_status, 'queued');
 
     // Process the queue.
     while ($item = $this->queue->claimItem()) {
@@ -184,18 +184,18 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
     }
     // Status changed to exported after queue process.
     $exported_status = $this->getTrackingTableColByUuid($this->node->uuid(), 'status');
-    $this->assertEqual($exported_status, 'exported');
+    $this->assertEquals($exported_status, 'exported');
 
     // Change the tracking table entity status to "queued".
     $this->publisherTracker->queue($this->node);
     $status_changed_to_queue = $this->getTrackingTableColByUuid($this->node->uuid(), 'status');
-    $this->assertEqual($status_changed_to_queue, 'queued');
+    $this->assertEquals($status_changed_to_queue, 'queued');
 
     $hash = $this->getTrackingTableColByUuid($this->node->uuid(), 'hash');
     // Change the tracking table entity status to "exported".
     $this->publisherTracker->track($this->node, $hash);
     $status_changed_to_export = $this->getTrackingTableColByUuid($this->node->uuid(), 'status');
-    $this->assertEqual($status_changed_to_export, 'exported');
+    $this->assertEquals($status_changed_to_export, 'exported');
   }
 
   /**

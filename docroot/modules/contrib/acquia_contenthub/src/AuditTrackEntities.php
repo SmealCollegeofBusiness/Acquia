@@ -100,22 +100,26 @@ class AuditTrackEntities {
    *   The entity to enqueue to ContentHub.
    * @param string $audit_command
    *   Commands trigger from pub or sub.
+   *
+   * @throws \Exception
    */
   public static function enqueueTrackedEntities(EntityInterface $entity, string $audit_command) {
     /** @var \Drupal\acquia_contenthub\PubSubModuleStatusChecker $check */
     $checker = \Drupal::service('pub.sub_status.checker');
     if ($checker->isPublisher() && $audit_command === 'publisher_audit') {
-      _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+      /** @var \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer $entity_enqueuer */
+      $entity_enqueuer = \Drupal::service('acquia_contenthub_publisher.entity_enqueuer');
+      $entity_enqueuer->enqueueEntity($entity, 'update');
     }
     if ($checker->isSubscriber() && $audit_command === 'subscriber_audit') {
       $item = new \stdClass();
       /** @var \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker */
       $tracker = \Drupal::service('acquia_contenthub_subscriber.tracker');
       $queue = \Drupal::queue('acquia_contenthub_subscriber_import');
-      $item->uuid = implode(', ', $entity->uuid());
+      $item->uuid = $entity->uuid();
       $queue_id = $queue->createItem($item);
-      $tracker->queue($entity);
-      $tracker->setQueueItemByUuid($item->uuid, $queue_id);
+      $tracker->queue($entity->uuid());
+      $tracker->setQueueItemByUuids([$entity->uuid()], $queue_id);
     }
   }
 
@@ -145,7 +149,6 @@ class AuditTrackEntities {
       $msg = dt('Finished with a PHP fatal error.');
     }
     \Drupal::messenger()->addStatus($msg);
-
   }
 
 }

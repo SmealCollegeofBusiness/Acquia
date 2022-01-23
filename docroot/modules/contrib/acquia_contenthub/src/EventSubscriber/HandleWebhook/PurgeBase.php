@@ -67,7 +67,7 @@ abstract class PurgeBase implements EventSubscriberInterface {
    */
   public function onHandleWebhook(HandleWebhookEvent $event) {
     $payload = $event->getPayload();
-    if (self::PURGE !== $payload['crud']) {
+    if (empty($payload['crud']) || self::PURGE !== $payload['crud']) {
       return;
     }
 

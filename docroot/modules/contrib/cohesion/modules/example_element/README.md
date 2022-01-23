@@ -172,3 +172,7 @@ the logic of showing/hiding based on this data (typically you would attach a `#c
 Your function should return a renderable array. An example of that (using a .twig template) can be found here:
 
 https://www.drupal.org/docs/8/theming/twig/create-custom-twig-templates-from-custom-module
+
+## Custom element container
+
+Custom elements can be a container element, please see `src/Plugin/CustomElement/ContainerExample.php` for an example of how to implement a custom element as a container.

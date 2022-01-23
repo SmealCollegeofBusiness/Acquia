@@ -89,7 +89,12 @@
 
                 clearTimeout(self.resizeTimer);
                 self.resizeTimer = setTimeout(function() {
-                    // self.onResizeWindowFinished();
+                  var msg = {
+                    type: 'contentResized',
+                    width: self.el.body.offsetWidth,
+                    height: self.el.body.offsetHeight,
+                  };
+                  window.parent.postMessage(JSON.stringify(msg), '*');
                 }, self.animSpeed+10);
 
             });
@@ -171,13 +176,6 @@
         }
 
         function onResizeWindowFinished() {
-            var msg = {
-                type: 'contentResized',
-                width: self.el.body.offsetWidth,
-                height: self.el.body.offsetHeight,
-            };
-            window.parent.postMessage(JSON.stringify(msg), '*');
-
             // This is to ensure child elements like videos are triggered into updating their size.
             if (typeof(Event) === 'function') {
                 window.dispatchEvent(new Event('resize'));
@@ -362,6 +360,7 @@
         }
 
         function init() {
+            self.el.body.style.minHeight = '240px';
             if(self.el.colContainer) {
                 if(!self.el.colContainer.children.length) {
                     self.el.colContainer.innerText = 'No content';

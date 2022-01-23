@@ -120,20 +120,53 @@ abstract class ExportFormBase extends ConfigFormBase {
   }
 
   /**
-   * Download and push buttons.
+   * Legacy download button.
    *
    * @param $form
    */
-  protected function addActionsToForm(&$form) {
-    $form['actions'] = [
+  protected function addLegacyActionsToForm(&$form) {
+    $form['legacy']['actions'] = [
+      '#type' => 'actions',
+      'legacy_download' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Download legacy file'),
+        '#button_type' => 'primary',
+        '#id' => 'legacy_download',
+      ],
+    ];
+  }
+
+  /**
+   * Download and remove buttons.
+   *
+   * @param string $label
+   *   Value to use as a button for file generation.
+   *
+   * @return array
+   *   Actions for the form.
+   */
+  protected function addActions(string $label, bool $disableRemoveButton = FALSE): array {
+    $actions = [
       '#type' => 'actions',
       'download' => [
         '#type' => 'submit',
-        '#value' => $this->t('Download file'),
+        '#value' => $this->t(':label', [':label' => $label]),
         '#button_type' => 'primary',
-        // '#disabled' => TRUE
+        '#id' => 'generate',
+      ],
+      'remove' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Remove file'),
+        '#button_type' => 'danger',
+        '#id' => 'remove',
+        '#attributes' => ['title' => t('Removes package file from the server file system.')],
       ],
     ];
+    if ($disableRemoveButton) {
+      $actions['remove']['#attributes']['disabled'] = 'disabled';
+    }
+
+    return $actions;
   }
 
 }

@@ -80,15 +80,14 @@ class TestEmailForm extends FormBase {
         'to' => [
           '#type' => 'textfield',
           '#title' => $this->t('To'),
-          '#required' => TRUE,
         ],
         'cc' => [
           '#type' => 'textfield',
-          '#title' => $this->t('Cc'),
+          '#title' => $this->t('cc'),
         ],
         'bcc' => [
           '#type' => 'textfield',
-          '#title' => $this->t('Bcc'),
+          '#title' => $this->t('bcc'),
         ],
       ],
       'subject' => [

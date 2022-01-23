@@ -52,7 +52,7 @@ class PackageForm extends EntityForm {
      * Hook for JS Sync APP
      */
     $form['app'] = [
-      '#markup' => '<div id="cohApp"></div>',
+      '#markup' => '<div id="ssaApp"></div>',
     // Suppresses https://www.drupal.org/project/drupal/issues/3027240
       '#parents' => [],
     ];
@@ -126,7 +126,7 @@ class PackageForm extends EntityForm {
     ];
 
     $form['excluded']['excluded_types'] = [
-      '#markup' => '<div id="package-excluded-container" class="coh-app package-loading-overlay"></div>',
+      '#markup' => '<div id="package-excluded-container" class="ssa-app package-loading-overlay"></div>',
     ];
 
     /**
@@ -144,7 +144,7 @@ class PackageForm extends EntityForm {
     ];
 
     $form_requirements['package_requirements_container'] = [
-      '#markup' => '<div id="package-requirements-container" class="coh-app package-loading-overlay"></div>',
+      '#markup' => '<div id="package-requirements-container" class="ssa-app package-loading-overlay"></div>',
     ];
 
     /**
@@ -162,7 +162,7 @@ class PackageForm extends EntityForm {
     ];
 
     $form_contents['package_contents_container'] = [
-      '#markup' => '<div id="package-contents-container" class="coh-app package-loading-overlay"></div>',
+      '#markup' => '<div id="package-contents-container" class="ssa-app package-loading-overlay"></div>',
     ];
 
     // LHS / RHS columns.

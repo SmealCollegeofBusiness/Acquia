@@ -3,8 +3,8 @@
 namespace Drupal\cohesion_templates\TwigExtension;
 
 use Drupal\block\Entity\Block;
+use Drupal\cohesion\Routing\CohesionCurrentRouteMatch;
 use Drupal\cohesion\Services\CohesionUtils;
-use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\cohesion_elements\Entity\ComponentContent;
 use Drupal\Component\Render\HtmlEscapedText;
 use Drupal\Component\Serialization\Json;
@@ -23,6 +23,7 @@ use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\Core\Template\TwigEnvironment;
@@ -103,6 +104,20 @@ class TwigExtension extends \Twig_Extension {
   protected $loggerChannel;
 
   /**
+   * Cohesion current route match services
+   *
+   * @var \Drupal\cohesion\Routing\CohesionCurrentRouteMatch
+   */
+  protected $cohesionCurrentRouteMatch;
+
+  /**
+   * The current user
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
    * TwigExtension constructor.
    *
    * @param \Drupal\Core\Render\RendererInterface $renderer
@@ -116,6 +131,9 @@ class TwigExtension extends \Twig_Extension {
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
    * @param \Drupal\cohesion\Services\CohesionUtils $cohesion_utils
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
+   * @param \Drupal\cohesion\Routing\CohesionCurrentRouteMatch $cohesion_current_route_match
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *
    */
   public function __construct(
     RendererInterface $renderer,
@@ -128,7 +146,9 @@ class TwigExtension extends \Twig_Extension {
     MimeTypeGuesserInterface $extension_mime_type_guesser,
     ThemeManagerInterface $theme_manager,
     CohesionUtils $cohesion_utils,
-    LoggerChannelFactoryInterface $loggerChannelFactory
+    LoggerChannelFactoryInterface $loggerChannelFactory,
+    CohesionCurrentRouteMatch $cohesion_current_route_match,
+    AccountInterface $current_user
   ) {
     $this->renderer = $renderer;
     $this->token = $token;
@@ -141,6 +161,8 @@ class TwigExtension extends \Twig_Extension {
     $this->themeManager = $theme_manager;
     $this->cohesionUtils = $cohesion_utils;
     $this->loggerChannel = $loggerChannelFactory->get('cohesion_templates');
+    $this->cohesionCurrentRouteMatch = $cohesion_current_route_match;
+    $this->currentUser = $current_user;
   }
 
   /**
@@ -354,7 +376,7 @@ class TwigExtension extends \Twig_Extension {
    * Used for tokenized inline styles.
    */
   public function cohInstanceId() {
-    return 'coh-instance-' . crc32($this->uuid->generate());
+    return 'ssa-instance-' . crc32($this->uuid->generate());
   }
 
   /**
@@ -475,42 +497,55 @@ class TwigExtension extends \Twig_Extension {
     return Markup::create($token_replacement);
   }
 
-  private function addComponentFrontEndBuilderMarkup($renderer, $_context, $componentInstanceUuid, $component_content_uuid = NULL, $component_content_id = NULL) {
+  public function addComponentFrontEndBuilderMarkup($renderer, $_context, $componentInstanceUuid, $component_content_uuid = NULL, $component_content_id = NULL) {
 
     $build = [];
 
-    if($this->isFrontendEditor() && !isset($_context['hideContextualLinks']) && !isset($_context['isPreview']) && $this->hasDrupalPermission(["access contextual links", "access components"])) {
-
-      if(!isset($_context['component_content'])) {
-        $coh_start = [
-          '#type' => 'container',
-          '#attributes' => [
-            'data-coh-start' => [$componentInstanceUuid],
-          ],
-        ];
-
-        if($component_content_uuid !== NULL) {
-          $coh_start['#attributes']['data-coh-component-content-uuid'] = $component_content_uuid;
-        }
-
-        if($component_content_id !== NULL) {
-          $coh_start['#attributes']['data-coh-component-content-id'] = $component_content_id;
-        }
-
-        $build[] = $coh_start;
+    $current_route_entities = $this->cohesionCurrentRouteMatch->getRouteEntities();
+    // Whether the component being rendered is part of the main page or a nested content entity (ex: block content)
+    $is_parent_content = FALSE;
+    foreach ($current_route_entities as $current_route_entity) {
+      if ($is_parent_content) {
+        // Stop searching if is has already been found that the component is part of the main page content
+        break;
       }
+
+      foreach ($_context as $context_item) {
+        if ($current_route_entity === $context_item) {
+          $is_parent_content = TRUE;
+          break;
+        }
+      }
+    }
+
+    if ($this->isFrontendEditor() && $is_parent_content && !isset($_context['hideContextualLinks']) && !isset($_context['isPreview']) && $this->hasDrupalPermission("access components")) {
+
+      $coh_start = [
+        '#type' => 'container',
+        '#attributes' => [
+            'data-ssa-start' => [$componentInstanceUuid],
+        ],
+      ];
+
+      if ($component_content_uuid !== NULL) {
+        $coh_start['#attributes']['data-ssa-component-content-uuid'] = $component_content_uuid;
+      }
+
+      if ($component_content_id !== NULL) {
+        $coh_start['#attributes']['data-ssa-component-content-id'] = $component_content_id;
+      }
+
+      $build[] = $coh_start;
 
       $build[] = $renderer;
 
-      if(!isset($_context['component_content'])) {
-        $build[] = [
-          '#type' => 'container',
-          '#attributes' => [
-            'data-coh-end' => [$componentInstanceUuid],
-          ],
-        ];
-      }
-    }else {
+      $build[] = [
+        '#type' => 'container',
+        '#attributes' => [
+            'data-ssa-end' => [$componentInstanceUuid],
+        ],
+      ];
+    } else {
       $build[] = $renderer;
     }
 
@@ -568,58 +603,6 @@ class TwigExtension extends \Twig_Extension {
         $componentFieldsValues[$uuid] = $this->buildComponentFields($component_field_id, $uuid, $component_model, $_context, $isTemplate);
       }
 
-      $contextual_content = [];
-      // Set up contextual links.
-      if (isset($_context['layout_builder_entity'])) {
-
-        if (!isset($_context['layout_builder_entity']['entity']) || !$_context['layout_builder_entity']['entity'] instanceof CohesionLayout) {
-          $cohesion_layout = $this->entityTypeManager->getStorage($_context['layout_builder_entity']['entity_type_id'])
-            ->loadRevision($_context['layout_builder_entity']['revision_id']);
-        }
-        else {
-          $cohesion_layout = $_context['layout_builder_entity']['entity'];
-        }
-
-        if ($_context['layout_builder_entity']['id'] !== NULL) {
-          if ($cohesion_layout instanceof CohesionLayout) {
-            if ($cohesion_layout->get('parent_type')->value == 'component_content') {
-              // Add Edit component content contextual link.
-              $contextual_content['#contextual_links']['cohesion_component_content_edit'] = [
-                'route_parameters' => [
-                  'component_content' => $cohesion_layout->get('parent_id')->value,
-                ],
-              ];
-            }
-            else {
-              // Add Edit component contextual link.
-              $contextual_content['#contextual_links']['cohesion_elements'] = [
-                'route_parameters' => [
-                  'entity_type_id' => $_context['layout_builder_entity']['entity_type_id'],
-                  'component_id' => $componentId,
-                  'id' => $_context['layout_builder_entity']['id'],
-                  'revision_id' => $_context['layout_builder_entity']['revision_id'],
-                  'uuid' => $componentInstanceUuid,
-                  'randomizer' => $this->uuid->generate(),
-                ],
-              ];
-            }
-          }
-        }
-
-        // Force a new 'data-contextual-id' attribute on blocks when this module is
-        // enabled so as not to reuse stale data cached client-side.
-        // @todo Remove when https://www.drupal.org/node/2773591 is fixed.
-        $contextual_content['#contextual_links']['settings_tray'] = [
-          'route_parameters' => [],
-        ];
-      }
-
-      $contextual_content['#contextual_links']['cohesion_configuration'] = [
-        'route_parameters' => [
-          'cohesion_component' => $componentId,
-        ],
-      ];
-
       // Build the render array.
       $context_cache_metadata = \Drupal::service('cohesion_templates.context.cache_metadata');
       $context_names = $context_cache_metadata->extractContextNames($component, $componentFieldsValues);
@@ -643,7 +626,6 @@ class TwigExtension extends \Twig_Extension {
 
       $renderer = [
         '#theme' => $template,
-        '#content' => isset($contextual_content) ? $contextual_content : '',
         '#cache' => $cache,
         '#parentContext' => $_context,
         // This is used inside preprocess_cohesion_elements_component()
@@ -664,18 +646,18 @@ class TwigExtension extends \Twig_Extension {
    *
    * @param $_context
    * @param $element_uuid
-   * @param $stratStop
+   * @param $startStop
    *
    * @return array|void
    */
-  public function frontendBuilderDropzone($_context, $element_uuid, $stratStop) {
+  public function frontendBuilderDropzone($_context, $element_uuid, $startStop) {
     // This only applies on the frontend builder endpoint
     // and only for components, not component content
     if($this->isFrontendEditor() && !isset($_context['component_content']) && !isset($_context['hideContextualLinks']) && !isset($_context['isPreview']) && $this->hasDrupalPermission(["access contextual links", "access components"])) {
       return [
         '#type' => 'container',
         '#attributes' => [
-          'data-coh-dropzone-' . $stratStop => [$element_uuid],
+          'data-ssa-dropzone-' . $startStop => [$element_uuid],
         ],
       ];
     }
@@ -687,8 +669,8 @@ class TwigExtension extends \Twig_Extension {
    * @return bool
    */
   public function isFrontendEditor() {
-    if (\Drupal::routeMatch()->getRouteObject()) {
-      return \Drupal::routeMatch()->getRouteObject()->getOption('sitestudio_build') == 'TRUE';
+    if ($this->cohesionCurrentRouteMatch->getRouteObject()) {
+      return $this->cohesionCurrentRouteMatch->getRouteObject()->getOption('sitestudio_build') == 'TRUE';
     }
     return FALSE;
   }
@@ -1126,12 +1108,17 @@ class TwigExtension extends \Twig_Extension {
       $markup[$filter_identifier]['#attributes']['data-submit-button-id'] = $submit_button_id;
       $markup[$filter_identifier]['#attributes']['data-reset-button-id'] = $reset_button_id;
       $markup[$filter_identifier]['#attributes']['data-reload-on-change'] = ($reloadOnChange == '1') ? 'true' : 'false';
-      unset($markup[$filter_identifier]['#id']);
-      foreach ($markup[$filter_identifier] as &$attribute) {
-        if (is_array($attribute) && isset($attribute['#type']) && ($attribute['#type'] == 'checkbox' || $attribute['#type'] == 'radio') && isset($attribute['#id'])) {
-          $attribute['#id'] = 'coh-view-filter-' . $attribute['#id'];
+
+      $id = &$markup[$filter_identifier]['#id'];
+      array_walk_recursive($markup[$filter_identifier], function ($value, $key) use (&$id) {
+        if ($key === '#type' && ($value == 'checkbox' || $value == 'checkboxes' || $value == 'radio') && !empty($id)) {
+          if (strpos($id, 'ssa-view-filter-')) {
+            return;
+          }
+            $id = 'ssa-view-filter-' . $id;
         }
-      }
+      });
+
     }
 
     // If it's a list of items, possibly change the theme type (<ul><li></ul> style).
@@ -1140,7 +1127,7 @@ class TwigExtension extends \Twig_Extension {
       $list_markup = [];
 
       foreach ($markup[$filter_identifier]['#options'] as $key => $value) {
-        $list_item_class = $filter ? 'coh-' . $filter . '-' . $key : 'coh-' . $key;
+        $list_item_class = $filter ? 'ssa-' . $filter . '-' . $key : 'ssa-' . $key;
 
         $prefix = '<li class="' . $list_item_class . '">';
         if (isset($markup[$filter_identifier]['#value']) && ((is_array($markup[$filter_identifier]['#value']) && in_array($key, $markup[$filter_identifier]['#value'])) || (!is_array($markup[$filter_identifier]['#value']) && ($key == $markup[$filter_identifier]['#value'])))) {
@@ -1416,7 +1403,7 @@ class TwigExtension extends \Twig_Extension {
    *
    * @return mixed
    */
-  public function customElement($elementSettings, $elementMarkup, $elementClassName, $elementContext = []) {
+  public function customElement($elementSettings, $elementMarkup, $elementClassName, $elementContext = [], $elementChildren = '') {
     // Make TWig_Markup strings raw values.
     array_walk_recursive($elementSettings, function (&$value) {
       /** @var \Twig_Markup|mixed $value */
@@ -1442,8 +1429,8 @@ class TwigExtension extends \Twig_Extension {
 
     // Render the custom element.
     $renderable = \Drupal::service('custom.elements')
-      ->render($elementSettings, $elementMarkup, $elementClassName, $elementContext);
-    return render($renderable);
+      ->render($elementSettings, $elementMarkup, $elementClassName, $elementContext, $elementChildren);
+    return $renderable;
   }
 
   /**
@@ -1593,7 +1580,7 @@ class TwigExtension extends \Twig_Extension {
   public function hasDrupalPermission($permissions) {
     if (is_array($permissions)) {
       foreach ($permissions as $permission) {
-        if (!\Drupal::currentUser()->hasPermission($permission)) {
+        if (!$this->currentUser->hasPermission($permission)) {
           return FALSE;
         }
       }
@@ -1621,15 +1608,15 @@ class TwigExtension extends \Twig_Extension {
 
     $value = FALSE;
 
-    if (isset($context['componentFieldsValues'][$key])) {
-      $value = $context['componentFieldsValues'][$key];
-    }
     // If within the context of a field repeater check if the key exists
     // otherwise check in the component field values
-    elseif (isset($context['coh_repeater_val'])) {
+    if (isset($context['coh_repeater_val'])) {
       if (isset($context['coh_repeater_val']['#' . $key])) {
         $value = $context['coh_repeater_val']['#' . $key];
       }
+    }
+    elseif (isset($context['componentFieldsValues'][$key])) {
+      $value = $context['componentFieldsValues'][$key];
     }
     elseif (isset($context['componentFieldsValues'])) {
       // Try to find the key in all componentFieldsValues

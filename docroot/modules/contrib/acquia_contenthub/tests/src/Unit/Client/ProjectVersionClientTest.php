@@ -12,6 +12,8 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * Tests ProjectVersionClient.
  *
+ * @group acquia_contenthub
+ *
  * @coversDefaultClass \Drupal\acquia_contenthub\Client\ProjectVersionClient
  *
  * @package Drupal\Tests\acquia_contenthub\Unit\Client

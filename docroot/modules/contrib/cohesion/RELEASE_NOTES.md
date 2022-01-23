@@ -1,5 +1,404 @@
 # Release notes
 
+## 6.8.0
+
+### Layout canvas undo and redo
+
+#### What is it?
+
+Adds a new feature to the layout canvas to allow you to undo changes to the layout canvas and redo. Two buttons are added to the top of a layout canvas allowing you to go back and go forward with your changes.
+
+#### What impact will there be?
+
+Two new buttons added to the layout canvas.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+There is the risk of manually deleting data by using the buttons inadvertently.
+
+### Copy token button
+
+#### What is it?
+
+Adds a new feature to the layout canvas to allow you to copy the token value of the layout canvas node. This allows you to easily copy and paste tokens without having to type them manually any more.
+
+#### What impact will there be?
+
+A new button on layout canvas nodes. Improved usability.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Updated Package entity definition
+
+#### What is it?
+
+We have updated the entity definition of Package config entities - `config_prefix` now matches entity `id`. Where previously entity `id` was `cohesion_sync_package` and `config_prefix` was `package`, now both are `cohesion_sync_package`.
+
+#### What impact will there be?
+
+There is no impact to packages exported via Site Studio package management mechanisms. Package entity definitions exported via Drupal should be renamed to use updated prefix.
+
+#### What actions do I need to take?
+
+If package entity definition was exported as an individual file via Drupal config, the file should be renamed in order for it to work correctly. For example, file exported as `cohesion_sync.package.pack_test_package.yml` should be renamed to `cohesion_sync.cohesion_sync_package.pack_test_package.yml`.
+
+#### Are there any risks I should be aware of?
+
+If Site Studio Package entity was exported via Drupal configuration management and package file is not renamed, importing such file will prevent the entity from behaving as expected, for example it will not appear in Package list.
+
+### Undefined breakpoint on menu template
+
+#### What is it?
+
+Fixes a bug where an error would be thrown in the console when using menu template `Uncaught TypeError: Cannot read property 'xl' of undefined on menu template`.
+
+#### What impact will there be?
+
+Using template will not throw that error.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Some content not rendering when inside of a pattern repeater
+
+#### What is it?
+
+Fixes a bug where some components content was not rendering when within a patter repeater.
+
+#### What impact will there be?
+
+Components that use pattern repeaters and are not rendering content will start rendering as expected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### In context editing of Components has been removed
+
+#### What is it?
+
+In context editing functionality is being deprecated in Drupal core, therefore support for in context editing on Components and Component content on the front-end has been removed in line with this.
+
+#### What impact will there be?
+
+Components and Component content in context editing will no longer be available.
+The Visual page builder can be used to edit a Site Studio layout canvas on the front end - please see [using the visual page builder for building pages and editing content](https://sitestudiodocs.acquia.com/user-guide/using-visual-page-builder-building-pages-and-editing-content).
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Permission "access contextual links" is no longer required for using Visual page builder
+
+#### What is it?
+
+The permission "access contextual links" is no longer needed to use the Visual page builder.
+
+#### What impact will there be?
+
+Access contextual links permission is no longer needed to use the Visual page builder.
+
+To use the Visual page builder these permissions are needed:
+
+- Use toolbar
+- Site Studio Visual page builder
+- Site Studio Access components group
+
+#### What actions do I need to take?
+
+If the permission "access contextual links" was applied to a role specifically to allow access to the Visual page builder this can be removed.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Multilingual letters in a paragraph element don't create line breaks
+
+#### What is it?
+
+Fixes a bug when using a paragraph and entering some multilingual letters which included line breaks, were not breaking onto separate lines as expected.
+
+#### What impact will there be?
+
+Multilingual letters will now line break as expected within paragraph elements.
+
+#### What actions do I need to take?
+
+You should perform a `drush cohesion:import` & `drush cohesion:rebuild`.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Custom elements can be containers
+
+#### What is it?
+
+Custom elements can now be containers, this allows other elements to be placed inside them.
+This gives developers more flexibility when creating custom elements.
+
+#### What impact will there be?
+
+There is no impact on existing custom elements.
+
+#### What actions do I need to take?
+
+To make a custom element a container you need to implement a few extra bits of code.
+Please see an example in the example element module of how to implement: `example_element/src/Plugin/CustomElement/ContainerExample.php`.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Rebuild events
+
+#### What is it?
+
+When a rebuild operation is run, an event is dispatched at the time the operation starts and completes.
+This allows developers to write event subscribers to listen for these events and trigger further actions if required.
+
+#### What impact will there be?
+
+Events will be dispatched during a Site Studio rebuild.
+
+#### What actions do I need to take?
+
+To take advantage of these events, event subscribers will need to be created in custom code.
+
+Events that can be subscribed to:
+
+Pre Rebuild: `Drupal\cohesion\SiteStudioEvents::PRE_REBUILD`
+Post Rebuild: `Drupal\cohesion\SiteStudioEvents::POST_REBUILD`
+
+See module readme for more information on these events.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Visual page builder throws an error in the page contains a block with a layout canvas
+
+#### What is it?
+
+The visual page builder would not work and return an error if the page contains a block that has a layout canvas. This could be a custom block or a view rendering entities with layout canvases.
+
+#### What impact will there be?
+
+No impact but it is worth noting that only the layout canvas of the page can be edited with the Visual page builder. Any entity rendered by a layout canvas that itself contains a layout canvas would need to be edited in the admin.
+
+#### What actions do I need to take?
+
+You should clear cache: `drush cr`.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Expose component content to views
+
+#### What is it?
+
+Adds the relevant data handler to enable component_content entities to be utilised with the views module.
+
+#### What impact will there be?
+
+It will now be possible to create custom views listing component_content entities.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Node revision delete module now a soft dependency
+
+#### What is it?
+
+A message will appear when installing Site Studio via composer suggesting to install the node revision delete module.
+If the node revision module isn't installed a message will also appear on the Drupal status page.
+
+#### What impact will there be?
+
+None.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Modals not working on AJAX enabled views when an AJAX action occurs
+
+#### What is it?
+
+Fixes a bug where modals used on an Ajax enabled view, would not open after the Ajax action had been triggered.
+
+#### What impact will there be?
+
+Modals loaded with Ajax will now work as expected.
+
+#### What actions do I need to take?
+
+You should perform a `drush cohesion:import`.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Youtube no cookie URLs not working correctly with the video element
+
+#### What is it?
+
+Fixes a bug where inputting a Youtube no cookie URL was still using the normal embed URL.
+
+#### What impact will there be?
+
+Youtube no cookie URLs will now work as expected.
+
+#### What actions do I need to take?
+
+You should perform a `drush cohesion:import`.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Theme specific templates not properly deleted
+
+#### What is it?
+
+Fixes a bug where templates that are more specific would not be deleted and still be selected as the template to render.
+Only deleting all templates and run a `drush cohesion:rebuild` would fix the issue.
+
+#### What impact will there be?
+
+There is not impact, follow the instructions below to resolve the issue.
+
+#### What actions do I need to take?
+
+You should perform a `drush cohesion:rebuild`.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Changing the "Base Unit Font Size" causes the media queries to be incorrectly calculated
+
+#### What is it?
+
+Fixes a bug when changing the Base font size is Base unit settings from 16px, CSS media queries were being incorrectly calculated into `rem` units.
+
+#### What impact will there be?
+
+All Site studio generated CSS styles will now use pixel (`px`) units on CSS media queries.
+
+#### What actions do I need to take?
+
+`drush cohesion:rebuild`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### New sync command to list out sync packages
+
+#### What is it?
+
+A new drush sync command `drush sitestudio:package:list` which lists available sync packages created using the package manager.
+
+#### What impact will there be?
+
+Running the command will list out available sync packages names and IDs in the CLI.
+
+#### What actions do I need to take?
+
+None.
+
+### PHP notices appearing when using Better exposed filters module
+
+#### What is it?
+
+This fixes a bug where some PHP notices were appearing when using Better exposed filters on a view.
+
+#### What impact will there be?
+
+No PHP notices will appear relating to Better exposed filters.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### "Package" entity appearing in "exclude entity types" package UI list
+
+#### What is it?
+
+The package entity was appearing within the exclude entity types list when creating a package in the UI, this could produce a blank package export if "packages" was selected to be excluded.
+
+#### What impact will there be?
+
+The package entity can no longer be excluded from packages.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### New Drush command for exporting and importing Site Studio Packages
+
+#### What is it?
+
+We are adding new Drush command that allows Site Studio Package export and import via individual files. This command no longer encodes Images and keeps Config files individually, allowing for better Developer experience.
+Config files are exported with pretty-printed Json, allowing for human readability and review of exported config. Images and other files exported with the package are now exported in their respective formats.
+Both individual files and full package export options are available.
+
+#### What impact will there be?
+
+The new commands will not be compatible with config exported by using old commands. Old commands are still available for use.
+The new Package export and import will behave in a way that is very similar to the Drupal config export and import via Drush.
+
+#### What actions do I need to take?
+
+We encourage trying new Import and Export commands as they significantly reduce the time required for Package import and export.
+Additional information about the new commands is available [here](https://sitestudiodocs.acquia.com/user-guide/sync-package-export-and-import).
+
+#### Are there any risks I should be aware of?
+
+Mysql settings for `max_allowed_packet` on the environment needs to be large enough to be able to handle whole package in a single Database transaction.
+
 ## 6.7.0
 
 ### PHP 8.0 compatibility
@@ -349,8 +748,10 @@ None.
 ### Slider - accessibility improvements
 
 #### What is it?
+
 Accessibility of the Site Studio Slider has been enhanced to include features from Accessible360's Slick replacement.
 These include:
+
 - Users can define an `aria-label` for the Slider container, which also has a `role="region"` attribute/value.
 - Instructions can be provided for screen reader users on the Slider container. This is added as a visually-hidden paragraph within the Slider container but before the slides.
 - Each Slide item has a `role="group"` attribute/value with an `aria-label` value of `slide x`, where x is the numerical index in total number of slides.
@@ -360,9 +761,11 @@ These include:
 - Keyboard navigation (using left and right arrow keys to traverse slides) was originally enabled programmatically. Whilst on by default for backwards compatibility, there is now a toggle option in the Slider container settings form to disable this option.
 
 #### What impact will there be?
+
 Customers using screen reader technology on your websites should have a better experience, providing configurable options are completed by site builder.
 
 #### What actions do I need to take?
+
 `drush cohesion:import`
 
 #### Are there any risks I should be aware of?
@@ -630,7 +1033,7 @@ None.
 
 Fixes a bug where viewing content in the view mode "search result" resulted in an untrusted callback exception on Drupal 9.
 
-``Drupal\Core\Security\UntrustedCallbackException: Render #post_render callbacks must be methods of a class that implements \Drupal\Core\Security\TrustedCallbackInterface or be an anonymous function. The callback was _cohesion_entity_clean_css. See https://www.drupal.org/node/2966725 in Drupal\Core\Render\Renderer->doTrustedCallback()``
+`Drupal\Core\Security\UntrustedCallbackException: Render #post_render callbacks must be methods of a class that implements \Drupal\Core\Security\TrustedCallbackInterface or be an anonymous function. The callback was _cohesion_entity_clean_css. See https://www.drupal.org/node/2966725 in Drupal\Core\Render\Renderer->doTrustedCallback()`
 
 #### What impact will there be?
 
@@ -669,12 +1072,15 @@ The fatal error has been resolved, but further research is required to make Site
 When building a package from manage package, it would take a significant amount of time to return the list of entities. This has now been improved.
 
 #### What impact will there be?
+
 None.
 
 #### What actions do I need to take?
+
 None.
 
 #### Are there any risks I should be aware of?
+
 None.
 
 ### Drupal preview on existing nodes looses unsaved changes
@@ -806,8 +1212,8 @@ Existing components that you would like to use this feature on need to be update
 #### Are there any risks I should be aware of?
 
 - Use of the `No follow` toggle will have an impact on SEO, given that it stops search engines passing page rank endorsement to the linked resource.
-This is often used in blog comments or forums, as these can be a source of spam or low-quality links.
-Google and other search engines require `nofollow` to be added to sponsored links and advertisements.
+  This is often used in blog comments or forums, as these can be a source of spam or low-quality links.
+  Google and other search engines require `nofollow` to be added to sponsored links and advertisements.
 
 - Use of the `No referrer` toggle will affect analytics, as it will report traffic as direct instead of referred.
 
@@ -850,6 +1256,7 @@ The accessibility of `Accordion tabs` elements has been improved, when in the ac
 - Accordion header links now have `aria-disabled="true"` set if the parent `Accordion tabs container` has the `Collapsible` setting toggled `OFF`. This is only applied when the item is expanded, to indicate to a screen reader that the panel cannot be collapsed manually.
 
   When the panel is collapsed because a sibling accordion item is expanded, the `aria-disabled` attribute is removed.
+
 - Accordion header links now have `aria-disabled="true"` permanently set if the accordion item has been disabled through `Navigation link` settings.
 
 ### Option to add `font-display` on Font libraries settings page
@@ -937,7 +1344,7 @@ None.
 
 Fixes an issue where creating a translation of component content could result an error and it was not appearing the sidebar browser.
 
-``Error: Call to a member function getCategoryEntity() on null in Drupal\cohesion\Services\CohesionUtils->getPayloadForLayoutCanvasDataMerge()``
+`Error: Call to a member function getCategoryEntity() on null in Drupal\cohesion\Services\CohesionUtils->getPayloadForLayoutCanvasDataMerge()`
 
 #### What impact will there be?
 
@@ -954,9 +1361,11 @@ None.
 ### Bugfix: Can't tokenize styles in the style builder on a component when TMGMT module is enabled
 
 #### What is it?
+
 When the TMGMT module is enabled users are unable to tokenize Styles in Style builder.
 
 #### What impact will there be?
+
 None.
 
 #### What actions do I need to take?
@@ -964,6 +1373,7 @@ None.
 `drush cohesion:import`
 
 #### Are there any risks I should be aware of?
+
 None
 
 ### Compatibility with the Webprofiler module
@@ -1074,7 +1484,7 @@ Reduce the time and memory required to run the `sync:import` process.
 
 Usage:
 
-  `drush sync:import --no-rebuild`
+`drush sync:import --no-rebuild`
 
 #### Are there any risks I should be aware of?
 
@@ -1153,11 +1563,11 @@ More granular control on how/when a site enters and leaves maintenance mode.
 
 Usage:
 
-  `drush sync:import --no-maintenance`
+`drush sync:import --no-maintenance`
 
 #### Are there any risks I should be aware of?
 
-A site *should* be in maintenance mode during the sync:import procedure to avoid cache issues, ensure this is handled by either the platform or additional scripts
+A site _should_ be in maintenance mode during the sync:import procedure to avoid cache issues, ensure this is handled by either the platform or additional scripts
 when employing the `--no-maintenance` option.
 
 ### Compressing data to the Site studio API
@@ -1415,6 +1825,7 @@ You can now add child elements to the `Button` element.
 #### What impact will there be?
 
 It will enable more advanced button styles, such as:
+
 - Animated menu buttons
 - Buttons that look like on/off toggle switches
 
@@ -1564,9 +1975,9 @@ Ex:
 `env.services.yml`
 
 > services:
-  cohesion.template_storage:
-     alias: cohesion.template_storage.key_value
+> cohesion.template_storage:
 
+     alias: cohesion.template_storage.key_value
 
 `settings.php`
 
@@ -1880,6 +2291,7 @@ Components can now include repeating sets of fields within the component form. A
 The field repeater form element is used with another new component layout element called a Pattern repeater. This allows a section of layout on the layout canvas to be repeated. When linked together, the field repeater will repeat the layout within the pattern repeater. The result is a component that can include a repeating set of fields that automatically repeats a corresponding layout.
 
 There are many use cases for this functionality. Some examples include:
+
 - A gallery component where the content author can add multiple images to a single component.
 - A map component where the content author can add multiple map pins to a single component.
 - A slider where the content author can add multiple slides to a single component.
@@ -2211,7 +2623,7 @@ You should be aware that this functionality will only build templates for Site S
 
 #### What is it?
 
-Form elements on Site Studio Components can now be conditionally displayed based on user specified logic.  The new "Show field if" field in the sidebar editor allows the user to enter custom conditional logic.
+Form elements on Site Studio Components can now be conditionally displayed based on user specified logic. The new "Show field if" field in the sidebar editor allows the user to enter custom conditional logic.
 
 Conditional logic is evaluated in real time as users fill in the form which allows for fields to be shown or hidden based on the values of other fields within the form.
 
@@ -2471,12 +2883,11 @@ Tokenising a link field to any type of field in a component will now render the 
 
 #### What is is it?
 
-A warning `First parameter must either be an object or the name of an existing class _0027EntityUpdate.php:50` is thrown on certain cases when upgrading a site to 6.1 on the _0027EntityUpdate
+A warning `First parameter must either be an object or the name of an existing class _0027EntityUpdate.php:50` is thrown on certain cases when upgrading a site to 6.1 on the \_0027EntityUpdate
 
 #### What impact will there be?
 
 The warning should not be thrown anymore
-
 
 #### What actions do I need to take?
 
@@ -2567,7 +2978,6 @@ This machine name will then be used to link the field to elements in your compon
 The syntax for tokenizing fields has changed slightly. Previously your input would be linked by entering `[Field 1]`, `[Field 2]` etc. The new syntax is `[field.` followed by the machine name you specify e.g. `[field.my-machine-name]`.
 
 As a result of this change it is now possible to add the token to fields on the layout canvas before you create the fields on the component form. Previously you had to add fields first.
-
 
 #### What impact will there be?
 
@@ -2696,7 +3106,7 @@ You can now tokenie Opacity in Base, Custom or Element styles
 
 #### What actions do I need to take?
 
-If you have already tokenized Opacity on a Base, Custom or Element  style you will need to run `drush cohesion:rebuild` or resave the style.
+If you have already tokenized Opacity on a Base, Custom or Element style you will need to run `drush cohesion:rebuild` or resave the style.
 
 #### Are there any risks I should be aware of?
 
@@ -2731,6 +3141,7 @@ When adding breakpoint-specific fields to component or SGM forms you can now dis
 #### What actions do I need to take?
 
 When enabling breakpoint icons on tab items:
+
 - Tab text is visually hidden. Make sure it is still meaningful for screen reader accessibility.
 - It is recommended you disable responsive mode on the tab container when four or less breakpoint tabs are defined, as these tabs are smaller and don't need to stack.
 
@@ -3395,6 +3806,7 @@ Fixed an edge case where components that were placed inside dropzones that were 
 When importing an entity with a UUID / machine name mismatch, the errors provided to the end user were not helpful. This has been fixed and provides enough information for the user to start debugging the issue with their package.
 
 Example:
+
 ```
 The validation failed with the following message: Custom style with UUID 00000000-0000-0000-0000-0000000000000 already exists but the machine name "coh_existing_machine_name" of the existing entity does not match the machine name "coh_mismatched_machine_name" of the entity being imported.`
 ```
@@ -3458,6 +3870,7 @@ Fixed an issue where the Cohesion layout canvas field was not rendering correctl
 Fixed an issue when tokenizing an existing select field in a component.
 
 This was causing the following validation error when selecting a value on a component instance:
+
 ```
 Invalid type, expected ["string","number","boolean"]
 ```
@@ -3698,7 +4111,7 @@ This allows the site administrator to set the default list view style of cohesio
 
 As before, this setting can be changed by the user by clicking the toggle icon at the top of the sidebar and those changes persist across the browser session.
 
-(Existing sites being upgraded will see the original list by default unless the user has already changed this for their session). 
+(Existing sites being upgraded will see the original list by default unless the user has already changed this for their session).
 
 ### XSS validation in element forms
 
@@ -3750,6 +4163,7 @@ Fixed a bug where selecting an uploaded image where the filename contained an am
 
 Cohesion is now using the `RESTful Web Services` core module for its endpoints. Before upgrading you MUST enable this module.
 ‌
+
 ### Modal trigger elements - `Trigger ID` field
 
 Focus will return to the body when a modal is closed. If you would like focus to return to your trigger element, give it a unique ID.
@@ -3808,7 +4222,7 @@ Fixed an issue where using Drupal tokens within Slides to show and slides to scr
 
 ### Editing other fields in sidebar after setting a link to page using typeahead could incorrectly set the link value
 
-Fixed an issue where on load a Typeahead *model* value could be incorrectly set to the *view* (label) value.
+Fixed an issue where on load a Typeahead _model_ value could be incorrectly set to the _view_ (label) value.
 
 ### Duplicated elements don't display variable mode correctly
 
@@ -3882,11 +4296,11 @@ This will allow you to display content in an accessible popup dialog and can be 
 
 - `Link`
 - `Button`
-- `Container`*
-- `Column`*
-- `Slide`*
+- `Container`\*
+- `Column`\*
+- `Slide`\*
 
-*_`Link and interaction` settings need to be enabled through `Properties > Settings`._
+\*_`Link and interaction` settings need to be enabled through `Properties > Settings`._
 
 To link a trigger to a modal, you need to select `Modal` from the interaction `Type` dropdown and specify the `Modal ID` of the modal to open.
 
@@ -3899,7 +4313,7 @@ To connect this with your modal:
 3. Add `data-modal-open="modal-id"` as an attribute to your link, where `modal-id` is the id you've given to your modal.
 4. Toggle out of `Source` mode and save your changes.
 
-**You may need to add `data-modal-open` as an allowed HTML attribute to your text format settings **for this to work.****
+**You may need to add `data-modal-open` as an allowed HTML attribute to your text format settings **for this to work.\*\*\*\*
 
 The modal element has several settings that you can configure:
 
@@ -4397,7 +4811,7 @@ Like `Accordion tabs`, tab items are nested within the tab container and can be 
 
 The component fields that you would like in your tab should be nested within the respective tab item.
 
-### Button and link elements -  jQuery animations
+### Button and link elements - jQuery animations
 
 You can now add jQuery UI animation targets to `button`, `link`, `column`,`container` and `slide` elements. To access these settings, make sure the `Interaction` section is enabled and `jQuery animation` selected as the `Type`.
 
@@ -4496,6 +4910,7 @@ Menu link entity tokens are now available in the token browser when editing a DX
 To add additional fields to menu links and use their tokens, we recommend using the [Menu Item Extras](https://www.drupal.org/project/menu_item_extras) module. This will expose field tokens to the DX8 token browser automatically.
 
 This module has been added to the recommended section of the `composer.json` file as:
+
 ```
 drupal/menu_item_extras
 ```
@@ -4573,7 +4988,6 @@ When using components that have default values, the default value will be applie
 This means that later updates to default values will not propagate to components saved on nodes or in helpers etc.
 
 Adding new fields or removing fields from a component will propagate to existing components and any new default data associated with those new fields will be added to the node when it's next saved.
-
 
 ### HTML base style
 
@@ -4654,7 +5068,7 @@ When adding toggle/add/remove class modifier to a link you now have a scope opti
 2. `Component` - Will traverse up parent elements from the current element until it finds the top of the component it is in. Then it searches the elements within that component for any that match the Target.
 3. `This element`- Will search the current element itself and any children for the target selector. If you choose `This element` and don’t specify a target the modifier will be applied to the current element itself.
 
-N.b. If you set the Scope as `Component` but the element is *not in a component* it will behave as if you had selected `Page`.
+N.b. If you set the Scope as `Component` but the element is _not in a component_ it will behave as if you had selected `Page`.
 
 ### composer.json
 
@@ -4699,7 +5113,6 @@ A new new deployment module is included in this version. See: `modules/cohesion_
 
 If you are using the `module/dx8_deployment` included in earlier releases, you will need to uninstall it before updating
 to this release as the module is no longer included in the repository.
-
 
 ### Responsive grid conversion - float to flex
 
@@ -4802,7 +5215,7 @@ This change will only remove `:before` and `:after` pseudos from styles if all o
 1. Ability to toggle clearfix on and off by breakpoint.
 2. Ability to override automatic container element clearfixes with the toggle without having to define the `:before` and `:after` elements in the style tree.
 
-### Video element ###
+### Video element
 
 This element supports multiple video formats including MP4, OGG, WebM, MKV, Facebook, Vimeo and YouTube. It also provides custom video controls that can be styled consistently across multiple browsers.
 
@@ -4818,7 +5231,7 @@ An import via the UI or `drush dx8 import` is required for this feature.
 
 A rebuild via the UI or `drush dx8 rebuild` is required for this feature.
 
-### Picture element ###
+### Picture element
 
 The HTML5 `picture` element provides a native solution to deliver responsive images, typically the same image of different filesize/dimensions across different breakpoints.
 

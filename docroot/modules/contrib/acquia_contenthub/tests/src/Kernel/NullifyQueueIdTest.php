@@ -45,6 +45,7 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_publisher',
+    'acquia_contenthub_server_test',
   ];
 
   /**

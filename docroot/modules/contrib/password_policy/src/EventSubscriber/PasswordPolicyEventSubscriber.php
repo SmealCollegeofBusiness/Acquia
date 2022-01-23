@@ -81,6 +81,7 @@ class PasswordPolicyEventSubscriber implements EventSubscriberInterface {
       'system.ajax',
       'user.logout',
       'admin_toolbar_tools.flush',
+      'user.pass',
     ]);
 
     // Ignore route for jsonapi calls.

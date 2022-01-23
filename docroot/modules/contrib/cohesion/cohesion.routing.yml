@@ -527,3 +527,13 @@ cohesion_website_settings.color_tags:
   requirements:
     _user_is_logged_in: 'TRUE'
     _content_type_format: json
+
+sitestudio-page-builder.layout_canvas.frontend_edit_component:
+  path: '/admin/cohesion/components/sidebar-edit'
+  defaults:
+    _form: '\Drupal\cohesion\Form\CohesionSidebarEditForm'
+    _title: 'Edit cohesion layout'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  options:
+    no_cache: 'TRUE'

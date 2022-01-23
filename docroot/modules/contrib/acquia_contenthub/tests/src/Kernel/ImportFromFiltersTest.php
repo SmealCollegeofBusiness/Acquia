@@ -92,10 +92,13 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
         'put',
         'delete',
         'getSettings',
+        'isFeatured',
         'listFiltersForWebhook',
         'getInterestsByWebhook',
       ])
       ->getMock();
+    $content_hub_client->method('isFeatured')->willReturn(FALSE);
+
     $content_hub_client
       ->method('getSettings')
       ->willReturn($content_hub_settings);
@@ -133,7 +136,7 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
     $filterQueue = $this->container->get('acquia_contenthub_subscriber.acquia_contenthub_import_queue_by_filter');
     $this->processFilterQueue($filterQueue, $filtersUuids);
 
-    $this->assertEqual($expectedItems, $this->importQueue->getQueueCount());
+    $this->assertEquals($expectedItems, $this->importQueue->getQueueCount());
   }
 
   /**

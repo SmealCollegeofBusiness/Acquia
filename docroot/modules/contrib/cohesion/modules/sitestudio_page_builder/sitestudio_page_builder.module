@@ -8,6 +8,7 @@
 use Drupal\Core\Url;
 use Drupal\entity_reference_revisions\EntityReferenceRevisionsFieldItemList;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\cohesion\Event\CohesionJsAppUrlsEvent;
 
 /**
  * Implements hook_page_attachments_alter().
@@ -18,7 +19,7 @@ function sitestudio_page_builder_page_attachments_alter(array &$attachments) {
   // tray overrides.
   $route_name = \Drupal::routeMatch()->getRouteName();
   $route = \Drupal::routeMatch()->getRouteObject();
-  if (!\Drupal::service('router.admin_context')->isAdminRoute($route) && \Drupal::currentUser()->hasPermission('access contextual links') && \Drupal::currentUser()->hasPermission('access visual page builder') && $route_name != 'cohesion_elements.component.preview') {
+  if (!\Drupal::service('router.admin_context')->isAdminRoute($route) && \Drupal::currentUser()->hasPermission('access visual page builder') && $route_name != 'cohesion_elements.component.preview') {
     $attachments['#attached']['library'][] = 'sitestudio_page_builder/editor-loader';
   }
 
@@ -41,15 +42,15 @@ function sitestudio_page_builder_toolbar() {
     return $items;
   }
 
-  if(Drupal::service('current_user')->hasPermission('access visual page builder')) {
+  if (Drupal::service('current_user')->hasPermission('access visual page builder')) {
     $items['sitestudio'] = [
       '#type' => 'toolbar_item',
       '#weight' => -100,
       '#wrapper_attributes' => [
-        'id' => 'coh-builder-toggle',
+        'id' => 'ssa-builder-toggle',
         'class' => [
           'hidden',
-          'coh-builder-toggle',
+          'ssa-builder-toggle',
         ],
       ],
       'tab' => [
@@ -90,25 +91,39 @@ function sitestudio_page_builder_theme($existing, $type, $theme, $path) {
  */
 function sitestudio_page_builder_entity_display_build_alter(&$build, $context) {
   $entity = NULL;
-  if(isset($context['entity']) && $context['entity'] instanceof ContentEntityInterface) {
+  if (isset($context['entity']) && $context['entity'] instanceof ContentEntityInterface) {
     $entity = $context['entity'];
   }
 
   // Add the page builder data attribute to the canvas element if the user has the right permission
-  if($entity && $entity->access('update') && Drupal::service('current_user')->hasPermission('access visual page builder')) {
+  if ($entity && $entity->access('update') && Drupal::service('current_user')->hasPermission('access visual page builder')) {
     /** @var \Drupal\sitestudio_page_builder\Services\SitestudioPageBuilderManagerInterface $page_builder_manager */
     $page_builder_manager = Drupal::service('sitestudio_page_builder.manager');
     foreach ($build as &$element) {
-      if(isset($element['#field_type']) && $element['#field_type'] == 'cohesion_entity_reference_revisions' && $element['#items'] instanceof EntityReferenceRevisionsFieldItemList) {
+      if (isset($element['#field_type']) && $element['#field_type'] == 'cohesion_entity_reference_revisions' && $element['#items'] instanceof EntityReferenceRevisionsFieldItemList) {
         foreach ($element['#items'] as &$item) {
           /** @var \Drupal\cohesion_elements\Plugin\Field\FieldType\CohesionEntityReferenceRevisionsItem $item */
           // Page builder is allowed only on page containing components only
           if ($item->getFieldDefinition()->getSetting('access_elements') !== 1 && $page_builder_manager->shouldEnablePageBuilder()) {
-            $element['#attributes']['data-coh-canvas'] = 'cohcanvas-' . $item->getValue()['target_id'];
+            $element['#attributes']['data-ssa-canvas'] = 'cohcanvas-' . $item->getValue()['target_id'];
             $element['#cache']['contexts'][] = 'user.permissions';
           }
         }
       }
     }
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function sitestudio_page_builder_page_attachments(array &$attachments) {
+  $is_admin = \Drupal::service('cohesion.utils')->isAdminTheme();
+  if(!$is_admin) {
+    // Url collection for js app
+    $event = new CohesionJsAppUrlsEvent();
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event_dispatcher->dispatch($event::FRONTEND_URL, $event);
+    $attachments['#attached']['drupalSettings']['cohesion']['urls'] = $event->getUrls();
   }
 }

@@ -4,6 +4,7 @@ namespace Drupal\cohesion_templates\Entity;
 
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\TemplateEntityTrait;
 use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
@@ -13,6 +14,8 @@ use Drupal\Core\Entity\EntityStorageInterface;
  * @package Drupal\cohesion_templates\Entity
  */
 abstract class CohesionTemplateBase extends CohesionConfigEntityBase implements CohesionSettingsInterface {
+
+  use TemplateEntityTrait;
 
   /**
    * @inheritdoc
@@ -120,38 +123,8 @@ abstract class CohesionTemplateBase extends CohesionConfigEntityBase implements 
     $send_to_api->setEntity($this);
     $send_to_api->delete();
 
-    // Clear the global template entry if it exists
-    $theme_filename = $this->getTwigFilename() . '.html.twig';
-    \Drupal::service('cohesion.template_storage')->delete($theme_filename);
-
-    // Clear any theme specific themes
-    foreach (\Drupal::service('cohesion.utils')->getCohesionEnabledThemes() as $theme_info) {
-      $theme_filename = $this->getTwigFilename($theme_info->getName()) . '.html.twig';
-      \Drupal::service('cohesion.template_storage')->delete($theme_filename);
-    }
-  }
-
-  /**
-   * @return bool|string
-   */
-  protected function getTwigPath() {
-    if ($this->get('twig_template')) {
-      return COHESION_TEMPLATE_PATH . '/' . $this->get('twig_template') . '.html.twig';
-    }
-    return FALSE;
-  }
-
-  /**
-   *
-   */
-  public function getTwigFilename($theme_name = NULL) {
-    if ($this->get('twig_template')) {
-      if (!is_null($theme_name)) {
-        return $this->get('twig_template') . '--' . str_replace('_', '-', $theme_name);
-      }
-      return $this->get('twig_template');
-    }
-    return FALSE;
+    // Remove all templates (global and theme specific)
+    $this->removeAllTemplates();
   }
 
   /**

@@ -21,7 +21,8 @@ use Drupal\Core\Entity\EntityInterface;
  *   exclude_from_package_requirements = FALSE,
  *   exportable = TRUE,
  *   config_type = "site_studio",
- *   scan_groups = {"core", "site_studio"}
+ *   scan_groups = {"core", "site_studio"},
+ *   can_be_excluded = TRUE
  * )
  */
 class IconLibraryUsage extends UsagePluginBase {

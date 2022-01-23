@@ -4,7 +4,6 @@
  * @file
  */
 
-use Drupal\cohesion\Event\FrontendUrlsEvent;
 use Drupal\cohesion\CohesionEntityViewBuilder;
 use Drupal\cohesion_elements\Plugin\Field\FieldType\CohesionEntityReferenceRevisionsItem;
 use Drupal\Core\Ajax\CloseDialogCommand;
@@ -273,16 +272,7 @@ function cohesion_page_attachments(array &$attachments) {
   // Use Site Studio
   $attachments['#attached']['drupalSettings']['cohesion']['use_dx8'] = \Drupal::service('cohesion.utils')
     ->usedx8Status();
-  // Url collection for js app
-  $event = new FrontendUrlsEvent();
-  $event_dispatcher = \Drupal::service('event_dispatcher');
-  $event_dispatcher->dispatch($event::EVENT_NAME, $event);
 
-  if($is_admin){
-    $attachments['#attached']['drupalSettings']['cohesion']['urls'] = $event->getUrls($event::ADMIN_TYPE);
-  }else {
-    $attachments['#attached']['drupalSettings']['cohesion']['urls'] = $event->getUrls($event::FRONTEND_TYPE);
-  }
   // View style.
   $attachments['#attached']['drupalSettings']['cohesion']['sidebar_view_style'] = \Drupal::config('cohesion.settings')
     ->get('sidebar_view_style') ?: 'titles';

@@ -6,6 +6,7 @@ use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\cohesion\Entity\ContentIntegrityInterface;
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\LayoutCanvas\ElementModel;
+use Drupal\cohesion\TemplateEntityTrait;
 use Drupal\cohesion\TemplateStorage\TemplateStorageBase;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -85,6 +86,8 @@ use Drupal\field\Entity\FieldConfig;
  * )
  */
 class Component extends CohesionElementEntityBase implements CohesionSettingsInterface, CohesionElementSettingsInterface, ContentIntegrityInterface {
+
+  use TemplateEntityTrait;
 
   const ASSET_GROUP_ID = 'component';
 
@@ -262,7 +265,7 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
   }
 
   /**
-   * {@inheritdoc }
+   * {@inheritdoc}
    */
   public function delete() {
 
@@ -270,44 +273,14 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
     $template_api->setEntity($this);
     $template_api->delete();
 
-    return parent::delete();
-  }
-
-  /**
-   * Return the URI of the twig template for this component.
-   *
-   * @return bool|string
-   */
-  protected function getTwigPath() {
-    return $this->get('twig_template') ? COHESION_TEMPLATE_PATH . '/' . $this->get('twig_template') . '.html.twig' : FALSE;
-  }
-
-  /**
-   *
-   */
-  public function getTwigFilename($theme_name = NULL) {
-    if ($this->get('twig_template')) {
-      if (!is_null($theme_name)) {
-        return $this->get('twig_template') . '--' . str_replace('_', '-', $theme_name);
-      }
-      return $this->get('twig_template');
-    }
-    return FALSE;
+    parent::delete();
   }
 
   /**
    * {@inheritdoc}
    */
   public function clearData() {
-    // Clear the global template entry if it exists
-    $theme_filename = $this->getTwigFilename() . '.html.twig';
-    \Drupal::service('cohesion.template_storage')->delete($theme_filename);
-
-    // Clear any theme specific themes
-    foreach (\Drupal::service('cohesion.utils')->getCohesionEnabledThemes() as $theme_info) {
-      $theme_filename = $this->getTwigFilename($theme_info->getName()) . '.html.twig';
-      \Drupal::service('cohesion.template_storage')->delete($theme_filename);
-    }
+    $this->removeAllTemplates();
   }
 
 }

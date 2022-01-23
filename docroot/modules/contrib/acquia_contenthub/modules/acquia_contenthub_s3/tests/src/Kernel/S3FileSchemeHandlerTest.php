@@ -25,6 +25,7 @@ class S3FileSchemeHandlerTest extends S3FileKernelTestBase {
    */
   protected static $modules = [
     'filter',
+    'system',
   ];
 
   /**

@@ -14,9 +14,7 @@
  * and publishing channels.
  */
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\acquia_contenthub\Plugin\Field\AcquiaContentHubGenerateNullFieldItemList;
-use Drupal\acquia_contenthub\Plugin\Field\AcquiaContentHubModerationStateFieldItemList;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 
@@ -38,9 +36,6 @@ function acquia_contenthub_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_entity_base_field_info_alter().
  */
 function acquia_contenthub_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
-  if (!empty($fields['moderation_state'])) {
-    $fields['moderation_state']->setClass(AcquiaContentHubModerationStateFieldItemList::class);
-  }
   if ($entity_type->id() === 'paragraph') {
     $fields['parent_id']->setClass(AcquiaContentHubGenerateNullFieldItemList::class);
     $fields['parent_type']->setClass(AcquiaContentHubGenerateNullFieldItemList::class);

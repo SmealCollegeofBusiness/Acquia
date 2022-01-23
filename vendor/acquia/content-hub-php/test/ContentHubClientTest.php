@@ -30,7 +30,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 /**
- * @covers \Acquia\ContentHubClient\ContentHubClient
+ * @coversDefaultClass  \Acquia\ContentHubClient\ContentHubClient
  *
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
@@ -280,13 +280,16 @@ class ContentHubClientTest extends TestCase {
       'base_uri' => $this->test_data['url'],
     ];
 
+    $response_code = SymfonyResponse::HTTP_ACCEPTED;
     $this->guzzle_client
       ->shouldReceive('get')
       ->once()
       ->with('ping')
-      ->andReturn($this->makeMockResponse(SymfonyResponse::HTTP_OK, [], json_encode($response_body)));
+      ->andReturn($this->makeMockResponse($response_code, [], json_encode($response_body)));
 
-    $this->assertSame($this->ch_client->ping(), $response_body);
+    $response = $this->ch_client->ping();
+    $this->assertSame($response->getStatusCode(), $response_code);
+    $this->assertSame($response_body, $this->ch_client::getResponseJson($response));
     $this->assertSame($this->guzzle_client->getConfig(), $config);
   }
 
@@ -2148,7 +2151,7 @@ class ContentHubClientTest extends TestCase {
           'suppressed_until' => 'some-timestamp',
         ],
       ],
-    ]);
+    ])->byDefault();
 
     return $client;
   }
@@ -2498,6 +2501,53 @@ class ContentHubClientTest extends TestCase {
       ->andReturn($this->makeMockResponse(SymfonyResponse::HTTP_OK, [], json_encode($response)));
 
     $this->assertSame($this->ch_client->cancelScroll($scroll_id), $response);
+  }
+
+  /**
+   * @covers ::getRemoteSettings
+   *
+   * @dataProvider isFeaturedDataProvider
+   */
+  public function testIsFeatured(array $remote_settings, bool $expectation): void {
+    $this->ch_client->shouldReceive('getRemoteSettings')
+      ->andReturn($remote_settings);
+    $this->assertTrue($this->ch_client->isFeatured() === $expectation);
+  }
+
+  /**
+   * Data provider for isFeatured test cases.
+   *
+   * @return array[]
+   *   Remote settings response and the expectation.
+   */
+  public function isFeaturedDataProvider(): array {
+    // A truncated response of /settings endpoint.
+    $response = [
+      'hostname' => $this->test_data['host-name'],
+      'api_key' => $this->test_data['api-key'],
+      'secret_key' => $this->test_data['secret-key'],
+      'shared_secret' => $this->test_data['shared-secret'],
+      'client_name' => 'client_name',
+    ];
+
+    return [
+      [
+        $response + ['featured' => TRUE],
+        TRUE,
+      ],
+      [
+        $response + ['featured' => FALSE],
+        FALSE,
+      ],
+      [
+        $response,
+        FALSE,
+      ],
+      [
+        [],
+        FALSE,
+      ],
+    ];
   }
 
 }

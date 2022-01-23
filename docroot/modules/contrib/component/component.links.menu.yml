@@ -1,0 +1,5 @@
+component.admin_form:
+  title: 'Components'
+  route_name: component.admin_form
+  description: 'Manage the components.'
+  parent: system.admin_config_development

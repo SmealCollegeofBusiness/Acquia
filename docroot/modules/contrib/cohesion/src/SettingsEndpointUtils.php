@@ -285,22 +285,23 @@ class SettingsEndpointUtils {
 
     /** @var \Drupal\cohesion_website_settings\Entity\Color $color_entity */
     foreach ($this->entityTypeManager->getStorage('cohesion_color')->loadMultiple() as $color_entity) {
-      $json_values = $color_entity->getDecodedJsonValues();
+      if ($json_values = $color_entity->getDecodedJsonValues()) {
+        // Reorder the colors by weight.
+        $weight = $color_entity->getWeight();
 
-      $weight = $color_entity->getWeight();
-
-      if (isset($color_values[$weight])) {
-        while (isset($color_values[$weight])) {
-          $weight++;
+        if (isset($color_values[$weight])) {
+          while (isset($color_values[$weight])) {
+            $weight++;
+          }
         }
-      }
 
-      if ($item == NULL || $item == $json_values['variable']) {
-        $color_values[$weight] = $json_values;
+        if ($item == NULL || $item == $json_values['variable']) {
+          $color_values[$weight] = $json_values;
+        }
+
       }
     }
 
-    // Reorder the colors by weight.
     ksort($color_values);
 
     return $color_values;

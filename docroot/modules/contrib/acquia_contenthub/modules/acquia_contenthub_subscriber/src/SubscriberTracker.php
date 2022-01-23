@@ -50,7 +50,7 @@ class SubscriberTracker {
    *   The uuid of an entity.
    *
    * @return bool
-   *   Whether or not the entity is tracked in the subscriber tables.
+   *   Whether the entity is tracked in the subscriber tables.
    */
   public function isTracked($uuids) {
     if (!is_array($uuids)) {
@@ -95,7 +95,7 @@ class SubscriberTracker {
   }
 
   /**
-   * Add tracking for an entity in a self::EXPORTED state.
+   * Add tracking for an entity in a self::IMPORTED state.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity for which to add tracking.
@@ -106,7 +106,7 @@ class SubscriberTracker {
    *
    * @throws \Exception
    */
-  public function track(EntityInterface $entity, string $hash, $remote_uuid = NULL) {
+  public function track(EntityInterface $entity, string $hash, ?string $remote_uuid = NULL) {
     $values = [
       'entity_uuid' => $remote_uuid ?? $entity->uuid(),
       'entity_type' => $entity->getEntityTypeId(),
@@ -124,7 +124,7 @@ class SubscriberTracker {
    *
    * @throws \Exception
    */
-  public function queue($uuid) {
+  public function queue(string $uuid): void {
     $values = [
       'entity_uuid' => $uuid,
     ];

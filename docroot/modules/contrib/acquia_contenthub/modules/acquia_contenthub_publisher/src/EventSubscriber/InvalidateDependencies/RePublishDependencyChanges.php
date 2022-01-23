@@ -2,6 +2,7 @@
 
 namespace Drupal\acquia_contenthub_publisher\EventSubscriber\InvalidateDependencies;
 
+use Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer;
 use Drupal\depcalc\DependencyCalculatorEvents;
 use Drupal\depcalc\Event\InvalidateDependenciesEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -12,6 +13,23 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * @package Drupal\acquia_contenthub_publisher\EventSubscriber\InvalidateDependendencies
  */
 class RePublishDependencyChanges implements EventSubscriberInterface {
+
+  /**
+   * The Content Hub Entity Enqueuer.
+   *
+   * @var \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer
+   */
+  protected $entityEnqueuer;
+
+  /**
+   * RePublishDependencyChanges constructor.
+   *
+   * @param \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer $entity_enqueuer
+   *   The Content Hub Entity Enqueuer.
+   */
+  public function __construct(ContentHubEntityEnqueuer $entity_enqueuer) {
+    $this->entityEnqueuer = $entity_enqueuer;
+  }
 
   /**
    * {@inheritdoc}
@@ -35,7 +53,7 @@ class RePublishDependencyChanges implements EventSubscriberInterface {
     foreach ($wrappers as $wrapper) {
       $entity = $wrapper->getEntity();
       if ($entity) {
-        _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+        $this->entityEnqueuer->enqueueEntity($entity, 'update');
       }
     }
   }

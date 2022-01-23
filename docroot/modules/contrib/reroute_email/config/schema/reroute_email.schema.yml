@@ -8,9 +8,15 @@ reroute_email.settings:
     address:
       type: string
       label: 'Rerouting email addresses.'
-    whitelist:
+    roles:
+      type: sequence
+      label: "An array of users' roles that need to be skipped from the rerouting."
+      sequence:
+        type: string
+        label: 'A role id.'
+    allowed:
       type: string
-      label: 'Whitelisted email addresses.'
+      label: 'A list of allowed email addresses.'
     description:
       type: boolean
       label: 'Show rerouting description in mail body.'
@@ -19,4 +25,7 @@ reroute_email.settings:
       label: 'Display a Drupal status message after rerouting.'
     mailkeys:
       type: string
-      label: 'Filter by mail keys.'
+      label: 'Filter emails FOR rerouting by their mail keys.'
+    mailkeys_skip:
+      type: string
+      label: 'Filter emails FROM rerouting by their mail keys.'

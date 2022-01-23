@@ -33,7 +33,8 @@
         "drupal/request_data_conditions": "Defines a set of conditions via the Drupal 8 Conditions Plugin API for use with the context module",
         "drupal/search_api": "Provides a framework for easily creating searches on any entity known to Drupal, using any kind of search engine.",
         "drupal/views_infinite_scroll": "Provides infinite scroll functionality to Views",
-        "drupal/webform": "This module allows you to use webforms."
+        "drupal/webform": "This module allows you to use webforms.",
+        "drupal/node_revision_delete": "Provides tools to help manage node revisions and keep your database to a reasonable size."
     },
     "extra": {
         "drush": {

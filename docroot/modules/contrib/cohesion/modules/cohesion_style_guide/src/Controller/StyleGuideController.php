@@ -254,6 +254,8 @@ class StyleGuideController extends ControllerBase {
             'formGroup' => 'style_guide',
             'formId' => 'preview',
             'drupalFormId' => 'cohPreviewForm',
+            'canvas_preview_css' => drupal_get_path('module', 'cohesion_elements') . '/css/canvas-preview.css',
+            'canvas_preview_js' => drupal_get_path('module', 'cohesion_elements') . '/js/canvas-preview.js',
           ],
           'cohOnInitForm' => \Drupal::service('settings.endpoint.utils')->getCohFormOnInit('style_guide', 'preview'),
         ],

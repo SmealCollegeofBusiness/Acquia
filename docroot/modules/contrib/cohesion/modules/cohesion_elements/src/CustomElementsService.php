@@ -80,11 +80,14 @@ class CustomElementsService {
 
     foreach ($this->getElementsFromManager() as $key => $element) {
       // If there is a key, label and form, add the element.
-      $fields = $element['plugin']->getFields();
+      /** @var \Drupal\cohesion_elements\CustomElementPluginInterface $plugin */
+      $plugin = $element['plugin'];
+      $fields = $plugin->getFields();
       if (isset($element['label']) && !empty($fields)) {
         $elements[] = [
           'value' => $key,
           'label' => $element['label'],
+          'container' => isset($plugin->getPluginDefinition()['container']) ? $plugin->getPluginDefinition()['container'] : FALSE,
         ];
       }
     }
@@ -136,7 +139,7 @@ class CustomElementsService {
       $children = [];
 
       foreach ($this->getElementsKeyLabel() as $element) {
-        $children[] = [
+        $item = [
           'type' => 'item',
           'uid' => $element['value'],
           'isCustom' => TRUE,
@@ -147,6 +150,15 @@ class CustomElementsService {
           ],
           'model' => $this->elements[$element['value']]['plugin']->buildDefaultModelSettings(),
         ];
+
+        // Set the custom element to a container if defined in its definition
+        if (isset($element['container']) && $element['container'] === TRUE) {
+            $item['type'] = 'container';
+            $item['children'] = [];
+            $item['status']['collapsed'] = FALSE;
+        }
+
+        $children[] = $item;
       }
 
       // Set up the wrapper.
@@ -574,12 +586,13 @@ class CustomElementsService {
    * @param $markup
    * @param $elementClassName
    * @param $elementContext
+   * @param $elementChildren
    *
    * @return array
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
    */
-  public function render($settings, $markup, $elementClassName, $elementContext) {
+  public function render($settings, $markup, $elementClassName, $elementContext, $elementChildren) {
     // Patch the settings.
     $settings = Json::decode($settings);
 
@@ -597,7 +610,7 @@ class CustomElementsService {
 
     // And call it.
     if (isset($elements[$settings['element']]) && $elements[$settings['element']]['plugin'] instanceof CustomElementPluginInterface) {
-      $build = $elements[$settings['element']]['plugin']->render($settings, $markup, $elementClassName, $elementContext);
+      $build = $elements[$settings['element']]['plugin']->render($settings, $markup, $elementClassName, $elementContext, $elementChildren);
     }
 
     return $build;

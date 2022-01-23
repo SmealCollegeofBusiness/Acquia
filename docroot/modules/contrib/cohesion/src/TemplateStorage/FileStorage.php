@@ -105,7 +105,7 @@ final class FileStorage extends TemplateStorageBase {
   }
 
   public function delete(string $name) {
-    $theme_filename = COHESION_TEMPLATE_PATH . '/' . $name . '.html.twig';
+    $theme_filename = COHESION_TEMPLATE_PATH . '/' . $name;
     if (file_exists($theme_filename)) {
       $this->fileSystem->delete($theme_filename);
     }

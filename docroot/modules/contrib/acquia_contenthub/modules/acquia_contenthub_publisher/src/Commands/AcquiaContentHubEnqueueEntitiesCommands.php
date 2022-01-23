@@ -2,6 +2,7 @@
 
 namespace Drupal\acquia_contenthub_publisher\Commands;
 
+use Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer;
 use Drupal\acquia_contenthub_publisher\PublisherTracker;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Database\Connection;
@@ -55,6 +56,13 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
   protected $depcalcCache;
 
   /**
+   * The Content Hub Entity Enqueuer.
+   *
+   * @var \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer
+   */
+  protected $entityEnqueuer;
+
+  /**
    * AcquiaContentHubEnqueueEntitiesByBundleCommands constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -67,13 +75,16 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
    *   The Publisher Tracker.
    * @param \Drupal\depcalc\Cache\DepcalcCacheBackend $depcalc_cache
    *   The Depcalc Cache Backend.
+   * @param \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer $entity_enqueuer
+   *   The Content Hub Entity Enqueuer.
    */
-  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entity_type_bundle_info, Connection $database, PublisherTracker $publisher_tracker, DepcalcCacheBackend $depcalc_cache) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager, EntityTypeBundleInfoInterface $entity_type_bundle_info, Connection $database, PublisherTracker $publisher_tracker, DepcalcCacheBackend $depcalc_cache, ContentHubEntityEnqueuer $entity_enqueuer) {
     $this->entityTypeManager = $entityTypeManager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->database = $database;
     $this->publisherTracker = $publisher_tracker;
     $this->depcalcCache = $depcalc_cache;
+    $this->entityEnqueuer = $entity_enqueuer;
   }
 
   /**
@@ -257,7 +268,7 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
       if ($track && $bundle && $bundle !== $entity->bundle()) {
         continue;
       }
-      _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+      $this->entityEnqueuer->enqueueEntity($entity, 'update');
       $count++;
 
     }
@@ -300,7 +311,7 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
 
     $count = 0;
     foreach ($entities as $entity) {
-      _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+      $this->entityEnqueuer->enqueueEntity($entity, 'update');
       $count++;
     }
 
@@ -349,7 +360,7 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
     // We are nullifying hashes for this UUID.
     $this->publisherTracker->nullifyHashes([], [], [$uuid]);
 
-    _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+    $this->entityEnqueuer->enqueueEntity($entity, 'update');
 
     $this->logger()->success(dt('Queued entity with UUID @uuid.', [
       '@uuid' => $uuid,

@@ -59,7 +59,7 @@ class OrphanedFilterHandler implements EventSubscriberInterface {
     foreach ($webhooks as $webhook) {
       if ($webhook->getUuid() === $event->getWebhookUuid()) {
         // Filters belong to webhook which will be deleted.
-        $deleted_webhook_filters = $webhook->getFilters();
+        $deleted_webhook_filters = $webhook->getFilters() ?? [];
         // Client name which belongs to webhook which will be deleted.
         $client_name = $webhook->getClientName();
         $event->setClientName($client_name);
@@ -67,7 +67,7 @@ class OrphanedFilterHandler implements EventSubscriberInterface {
       }
 
       // Filters list belong to other webhooks.
-      $other_webhook_filters = array_merge($webhook->getFilters(), $other_webhook_filters);
+      $other_webhook_filters = array_merge($webhook->getFilters() ?? [], $other_webhook_filters);
     }
 
     // Filters which belong only to deleted webhook.

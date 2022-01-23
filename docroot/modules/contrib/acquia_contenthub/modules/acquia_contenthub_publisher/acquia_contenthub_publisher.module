@@ -8,7 +8,6 @@
  */
 
 use Drupal\acquia_contenthub_publisher\ContentHubPublisherEvents;
-use Drupal\acquia_contenthub_publisher\Event\ContentHubEntityEligibilityEvent;
 use Drupal\acquia_contenthub_publisher\Event\NotConfirmedEntitiesFoundEvent;
 use Drupal\acquia_contenthub_publisher\PublisherTracker;
 use Drupal\Core\Entity\EntityInterface;
@@ -69,54 +68,9 @@ function acquia_contenthub_publisher_entity_delete(EntityInterface $entity) {
  * @throws \Exception
  */
 function _acquia_contenthub_publisher_enqueue_entity(EntityInterface $entity, string $op) {
-  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
-  $factory = \Drupal::service('acquia_contenthub.client.factory');
-  if (!$factory->isConfigurationSet()) {
-    return;
-  }
-  $logger = \Drupal::logger('acquia_contenthub_publisher');
-
-  $uuid = $entity->uuid();
-  $logger
-    ->info(
-      'Attempting to add entity with UUID @uuid to the export queue after operation: @op.',
-      ['@uuid' => $uuid, '@op' => $op]
-    );
-
-  $event = new ContentHubEntityEligibilityEvent($entity, $op);
-  /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-  $dispatcher = \Drupal::service('event_dispatcher');
-  $dispatcher->dispatch(ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY, $event);
-  if (!$event->getEligibility()) {
-    $logger
-      ->info('Entity with UUID @uuid not eligible to be added to the export queue.', ['@uuid' => $uuid]);
-    return;
-  }
-
-  /** @var \Drupal\Core\Queue\QueueFactory $queue_factory */
-  $queue_factory = \Drupal::service('queue');
-  $queue = $queue_factory->get('acquia_contenthub_publish_export');
-  $item = new \stdClass();
-  $item->type = $entity->getEntityTypeId();
-  $item->uuid = $entity->uuid();
-  if ($event->getCalculateDependencies() === FALSE) {
-    $item->calculate_dependencies = FALSE;
-  }
-  $queue_id = $queue->createItem($item);
-  /** @var \Drupal\acquia_contenthub_publisher\PublisherTracker $tracker */
-  $tracker = \Drupal::service('acquia_contenthub_publisher.tracker');
-  $tracker->queue($entity);
-  $tracker->setQueueItemByUuid($item->uuid, $queue_id);
-
-  // Reinitialize client cdf metrics data.
-  $factory->getClient();
-
-  $logger
-    ->info(
-      'Entity with UUID @uuid added to the export queue and to the tracking table.',
-      ['@uuid' => $uuid]
-    );
-
+  /** @var \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer $ch_entity_enqueuer */
+  $ch_entity_enqueuer = \Drupal::service('acquia_contenthub_publisher.entity_enqueuer');
+  $ch_entity_enqueuer->enqueueEntity($entity, $op);
 }
 
 /**

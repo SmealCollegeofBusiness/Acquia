@@ -1,0 +1,10 @@
+name: Component
+type: module
+description: 'Easily add JS components to Drupal as blocks, with only a single yml file.'
+package: Component
+core_version_requirement: ^8 || ^9
+
+# Information added by Drupal.org packaging script on 2021-01-28
+version: '1.0.0-rc3'
+project: 'component'
+datestamp: 1611794827

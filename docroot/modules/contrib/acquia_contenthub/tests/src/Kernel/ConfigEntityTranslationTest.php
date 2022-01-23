@@ -8,7 +8,6 @@ use Drupal\language\Entity\ConfigurableLanguage;
  * Tests that config entities are properly translated.
  *
  * @group acquia_contenthub
- * @group orca_ignore
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */

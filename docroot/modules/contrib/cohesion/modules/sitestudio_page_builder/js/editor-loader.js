@@ -21,10 +21,10 @@
   drupalSettings.cohesion.formId = 'frontendEditor';
   let localStorageLocation = 'Drupal.siteStudio.pageBuilderEnabled';
   let pageBuilderEnabled = isPageBuilderEnabled();
-  const $loader = $('<div class="coh-editor-loading-container"><div class="coh-editor-loading"><p class="visually-hidden">Loading</p></div></div>')
+  const $loader = $('<div class="coh-editor-loading-container"><div class="coh-editor-loading"><p class="visually-hidden">Loading</p></div></div>');
 
   function initLoader() {
-    $('body').append($loader)
+    $('body').append($loader);
   }
 
   function removeLoader() {
@@ -44,31 +44,26 @@
     toolbarBar.setAttribute('aria-hidden', 'true');
   }
 
-  function removeContextualEdit() {
-    $('[data-contextual-id], .contextual, .dx-contextual-region-mask, .dx-contextual-region').remove();
-  }
-
   function enablePageBuilder(ev) {
-    if(ev) {
+    if (ev) {
       ev.preventDefault();
     }
 
-    if(isDrupalInEditMode()) {
+    if (isDrupalInEditMode()) {
       // Come out of Drupal's edit mode by triggering a click of the edit button.
       $('#toolbar-bar .toolbar-icon-edit').click();
     }
 
-    removeContextualEdit();
     initLoader();
 
     $('#coh-builder-btn').attr('aria-pressed', 'true');
 
     // Init the Site Studio page builder
-    const appEl = document.getElementById('cohApp');
+    const appEl = document.getElementById('ssaApp');
     if (!appEl) {
       const domEl = document.createElement('div');
-      domEl.id = 'cohApp';
-      domEl.classList.add('coh-app');
+      domEl.id = 'ssaApp';
+      domEl.classList.add('ssa-app');
       document.body.appendChild(domEl);
       $.getScript(drupalSettings.cohesion.urls['frontend-builder-js'].url, function () {
         removeDrupalToolbar();
@@ -86,7 +81,7 @@
   }
 
   function isPageBuilderEnabled() {
-    return localStorage.getItem(localStorageLocation) === 'true'
+    return localStorage.getItem(localStorageLocation) === 'true';
   }
 
   /**
@@ -100,24 +95,28 @@
   // Attach the cohesion quick edit functionality to the page, binding the onclick function to toggle edit mode.
   Drupal.behaviors.siteStudioEditor = {
     attach: function attach(context) {
+      if(window.frameElement) {
+        // The page is embedded in an iframe on the same origin, so probably the style preview. Don't load vpb.
+        return;
+      }
       $('body', context)
           .once('initSiteStudio')
           .each(function() {
-            if($('[data-coh-canvas]').length > 0) {
+            if ($('[data-ssa-canvas]').length > 0) {
 
-              if(isPageBuilderEnabled()) {
-                enablePageBuilder()
+              if (isPageBuilderEnabled()) {
+                enablePageBuilder();
               }
 
               $('#coh-builder-btn').on('click', ()=> {
-                if(!isPageBuilderEnabled()) {
-                  enablePageBuilder()
+                if (!isPageBuilderEnabled()) {
+                  enablePageBuilder();
                 }
               });
 
-              $('#coh-builder-toggle').removeClass('hidden');
+              $('#ssa-builder-toggle').removeClass('hidden');
             } else {
-              $('#coh-builder-toggle').addClass('hidden');
+              $('#ssa-builder-toggle').addClass('hidden');
             }
           });
     }

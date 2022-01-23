@@ -1,0 +1,42 @@
+name: Example Config
+description: 'Example component showing the form config options available'
+enable_field: true
+js:
+  example_config.js: {}
+cache:
+  max-age: 60
+form_configuration:
+  name:
+    type: textfield
+    title: 'Name'
+    default_value: 'Leonard McCoy'
+  greeting:
+    type: select
+    title: "Greeting"
+    options:
+      'Other': 'Some other title'
+      'Dr': 'Dr'
+      'Mr': 'Mr'
+      'Ms': 'Ms'
+      'Mrs': 'Mrs'
+    default_value: 'Dr'
+  active:
+    type: radio
+    title: 'Active'
+  interests:
+    type: checkboxes
+    title: 'Interests'
+    options:
+      'music': 'Music'
+      'art': 'Art'
+      'sports': 'Sports'
+      'games': 'Games'
+      'books': 'Books'
+  favcolor:
+    type: color
+    title: 'Favorite color'
+    default_value: '#ccccff'
+  date:
+    type: date
+    title: 'Birthday'
+    default_value: '2227-01-20'

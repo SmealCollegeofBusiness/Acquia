@@ -54,18 +54,8 @@ class CategoryRelationshipsManager {
       $query = $element_storage->getQuery()->condition('category', $category_id, '=');
 
       if ($entity_ids = $query->execute()) {
-        // Does the uncategorized category exist?
-        // Create the uncategorized category.
-        if (!$category_storage->load($default_category_id)) {
-          $uncategorized = $category_storage->create([
-            'id' => $default_category_id,
-            'label' => t('Uncategorized'),
-            'class' => 'category-1',
-            'weight' => 999,
-          ]);
 
-          $uncategorized->save();
-        }
+        $this->createUncategorized($category_storage, $default_category_id);
 
         // Set all the elements to use this new category.
         foreach ($element_storage->loadMultiple($entity_ids) as $element_entity) {
@@ -74,6 +64,27 @@ class CategoryRelationshipsManager {
         }
       }
     }
+  }
+
+  /**
+   * If uncategorized doesn't exist create it.
+   *
+   * @param $category_storage
+   * @param $default_category_id
+   */
+  public function createUncategorized($category_storage, $default_category_id) {
+      // Does the uncategorized category exist?
+      // Create the uncategorized category.
+      if (!$category_storage->load($default_category_id)) {
+        $uncategorized = $category_storage->create([
+          'id' => $default_category_id,
+          'label' => t('Uncategorized'),
+          'class' => 'category-1',
+          'weight' => 999,
+        ]);
+
+        $uncategorized->save();
+      }
   }
 
 }

@@ -6,7 +6,6 @@ namespace Drupal\Tests\acquia_contenthub\Kernel;
  * Tests node imports and exports.
  *
  * @group acquia_contenthub
- * @group orca_ignore
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */

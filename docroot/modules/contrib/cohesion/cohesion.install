@@ -19,6 +19,19 @@ use Drupal\Core\Installer\InstallerKernel;
  */
 function cohesion_requirements($phase) {
   $requirements = [];
+  if (!\Drupal::moduleHandler()->moduleExists('node_revision_delete')) {
+    $settings = [
+      '@module_link' => 'https://www.drupal.org/project/node_revision_delete',
+      '@docs_link' => 'https://sitestudiodocs.acquia.com/user-guide/managing-revisions'
+    ];
+    $requirements['cohesion_node_delete'] = array(
+      'title' => t('Site Studio'),
+      'value' => t('It is recommended that the node revision delete module is installed to help manage revisions and keep your database to a reasonable size.'),
+      'description' => t('Please download and configure <a href="@module_link">node revision delete</a>. Find out more about <a href="@docs_link">managing revisions</a> in Site Studio.', $settings),
+      'severity' => REQUIREMENT_WARNING,
+    );
+  }
+
   if (\Drupal::moduleHandler()->moduleExists('acquia_lift') && !\Drupal::moduleHandler()->moduleExists('sitestudio_contenthub_publisher')) {
     $settings = ['@link' => 'https://github.com/acquia/sitestudio_contenthub'];
     $requirements['cohesion'] = array(
@@ -28,6 +41,7 @@ function cohesion_requirements($phase) {
       'severity' => REQUIREMENT_ERROR,
     );
   }
+
   return $requirements;
 }
 
@@ -1179,6 +1193,65 @@ function cohesion_update_8703() {
   if (\Drupal::moduleHandler()->moduleExists('acquia_lift')) {
     $settings = ['@link' => 'https://github.com/acquia/sitestudio_contenthub'];
     return t("Manual Action Required: the ContentHub integration required for Personalization & Site Studio has changed - please download and configure @link (composer require acquia/sitestudio_contenthub)", $settings);
+  }
+}
+
+/**
+ * Update cohesion_sync_package schema.
+ */
+function cohesion_update_8704() {
+  $packages = \Drupal::service('config.factory')->listAll('cohesion_sync.package');
+  foreach ($packages as $package) {
+    $name = explode('.', $package);
+    $name[1] = 'cohesion_sync_package';
+    $updated_package = implode('.', $name);
+    \Drupal::database()->update('config')
+      ->expression('name', 'replace(name, :old, :new)', array(
+        ':old' => $package,
+        ':new' =>  $updated_package,
+      ))
+      ->execute();
+  }
+
+  $entityDefinitionUpdateManager = \Drupal::entityDefinitionUpdateManager();
+  $definition = $entityDefinitionUpdateManager->getEntityType('cohesion_sync_package');
+  $definition->set('config_prefix', 'cohesion_sync_package');
+  $entityDefinitionUpdateManager->updateEntityType($definition);
+}
+
+/**
+ * Re-save all cohesion config to recalculate dependencies.
+ */
+function cohesion_update_8705() {
+  $dx8_no_send_to_api = &drupal_static('dx8_no_send_to_api');
+  $dx8_no_send_to_api = TRUE;
+  $cohesion_sync_lock = &drupal_static('running_dx8_batch');
+  $cohesion_sync_lock = TRUE;
+
+  $ignore_list = [
+    'cohesion.settings',
+    'cohesion.settings',
+    'cohesion.sync.settings',
+    'cohesion_amp.settings',
+    'cohesion_devel.settings',
+    'cohesion_theme.settings',
+  ];
+
+  $configFactory = \Drupal::service('config.factory');
+  foreach($configFactory->listAll('cohesion') as $name) {
+    if (in_array($name, $ignore_list)) {
+      continue;
+    }
+    $name_array = explode('.', $name);
+    if (isset($name_array[1]) && isset($name_array[2])) {
+      if ($name_array[1] == 'cohesion_custom_style_type') {
+        $entity = \Drupal::entityTypeManager()->getStorage('custom_style_type')->load($name_array[2]);
+      }
+      else {
+        $entity = \Drupal::entityTypeManager()->getStorage($name_array[1])->load($name_array[2]);
+      }
+      $entity->save();
+    }
   }
 }
 

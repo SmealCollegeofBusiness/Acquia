@@ -53,7 +53,7 @@ class DX8JsonFormUtils {
         $form = $element_properties->get(str_replace('-', '_', $key)) ?: $element_properties->get($key);
 
         unset($form['schema']);
-        if (($results = $this->getElementFieldGroupSelectOptions($form['form']))) {
+        if (isset($form['form']) && ($results = $this->getElementFieldGroupSelectOptions($form['form']))) {
           $data[$key] = [
           // Field groupd label.
             'title' => $option['title'],

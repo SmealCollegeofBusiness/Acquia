@@ -6,6 +6,7 @@ use Drupal\cohesion\EntityJsonValuesTrait;
 use Drupal\cohesion\EntityUpdateInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
@@ -255,7 +256,19 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
    * {@inheritdoc}
    */
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
-    parent::preDelete($storage, $entities);
+    foreach ($entities as $entity) {
+      if ($entity->isUninstalling() || $entity->isSyncing()) {
+        // During extension uninstall and configuration synchronization
+        // deletions are already managed.
+        break;
+      }
+      // Fix or remove any dependencies.
+      $config_entities = static::getConfigManager()->getConfigEntitiesToChangeOnDependencyRemoval('config', [$entity->getConfigDependencyName()], FALSE);
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $dependent_entity */
+      foreach ($config_entities['update'] as $dependent_entity) {
+        $dependent_entity->save();
+      }
+    }
 
     foreach ($entities as $entity) {
       // Clear all values if disable (remove css / template).
@@ -269,7 +282,20 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
   public static function postDelete(EntityStorageInterface $storage, array $entities) {
     parent::postDelete($storage, $entities);
     foreach ($entities as $entity) {
+      $config_entities = \Drupal::service('config.manager')
+        ->findConfigEntityDependentsAsEntities('config', [$entity->getConfigDependencyName()]);
       \Drupal::service('cohesion_usage.update_manager')->removeUsage($entity);
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $dependent_entity */
+      $dx8_no_send_to_api = &drupal_static('dx8_no_send_to_api');
+      $retain_value = $dx8_no_send_to_api;
+      $dx8_no_send_to_api = TRUE;
+      foreach ($config_entities as $dependent_entity) {
+        if ($dependent_entity instanceof CohesionConfigEntityBase) {
+          $dependent_entity->calculateDependencies();
+          $dependent_entity->save();
+        }
+      }
+      $dx8_no_send_to_api = $retain_value;
     }
   }
 
@@ -464,6 +490,29 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
    */
   public function canEditMachineName() {
     return $this->isNew();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    // All dependencies should be recalculated on every save apart from enforced
+    // dependencies. This ensures stale dependencies are never saved.
+    $this->dependencies = array_intersect_key($this->dependencies, ['enforced' => '']);
+
+    $dependencies = \Drupal::service('cohesion_usage.update_manager')->getDependencies($this);
+    foreach ($dependencies as $dependency) {
+      $plugin = \Drupal::entityTypeManager()->getDefinition($dependency['type']);
+      $entity = \Drupal::entityTypeManager()
+        ->getStorage($dependency['type'])
+        ->loadByProperties([$plugin->getKey('uuid') => $dependency['uuid']]);
+      $entity = reset($entity);
+      if ($entity instanceof EntityInterface) {
+        $this->addDependency($entity->getConfigDependencyKey(), $entity->getConfigDependencyName());
+      }
+    }
+
+    return $this;
   }
 
 }

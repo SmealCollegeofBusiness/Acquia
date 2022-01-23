@@ -1,0 +1,9 @@
+component.admin_form:
+  path: 'admin/config/development/component'
+  defaults:
+    _form: '\Drupal\component\Form\ComponentAdminForm'
+    _title: 'Components'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE

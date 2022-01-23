@@ -1,5 +1,6 @@
 # Acquia Site Studio
 
+[![Build Status](https://core.cloudbees.ais.acquia.io/devops-pipeline-jenkins/buildStatus/icon?job=SITESTUDIO-Cohesion-Dev-PIPELINE%2Fdevelop)](https://core.cloudbees.ais.acquia.io/devops-pipeline-jenkins/job/SITESTUDIO-Cohesion-Dev-PIPELINE/job/develop/)
 [![Coverage Status](https://coveralls.io/repos/github/acquia/cohesion-dev/badge.svg?branch=&t=UOU34W)](https://coveralls.io/github/acquia/cohesion-dev?branch=develop)
 
 ## Installation with composer
@@ -21,7 +22,7 @@ You can now enable the modules via drush with the following commands:
 
 ```
 drush cr
-drush pm-enable cohesion cohesion_base_styles cohesion_custom_styles cohesion_elements cohesion_style_helpers cohesion_sync cohesion_templates cohesion_website_settings -y
+drush pm-enable cohesion cohesion_base_styles cohesion_custom_styles cohesion_elements cohesion_style_helpers cohesion_sync cohesion_templates cohesion_website_settings sitestudio_page_builder -y
 ```  
 
 ## Upgrading Site Studio
@@ -148,6 +149,27 @@ Set organization key:
 ```
 $config['cohesion.settings']['organization_key'] = 'org-key';
 ```
+
+### Site Studio Events
+
+When certain Site Studio operations are taking place events are dispatched so that you can interact with it, but you must write your own event subscribers to subscribe to the relevant events.
+The main Site Studio module's events can be found within the ``\Drupal\cohesion\SiteStudioEvents`` class.
+
+Pre Site Studio Rebuild
+
+When a Site Studio rebuild operation is started the PreRebuildEvent will be dispatched.
+
+To subscribe: ``Drupal\cohesion\SiteStudioEvents::PRE_REBUILD``
+
+The dispatched event is ``Drupal\cohesion\Event\PreRebuildEvent``.
+
+Post Site Studio Rebuild
+
+When a Site Studio rebuild operation is complete the PostRebuildEvent will be dispatched.
+
+To subscribe: ``Drupal\cohesion\SiteStudioEvents::POST_REBUILD``
+
+The dispatched event is ``Drupal\cohesion\Event\PostRebuildEvent``.
 
 ## Using contextual links with component content
 

@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\reroute_email\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
-
 /**
  * Test Reroute Email's form for sending a test email.
  *
@@ -11,7 +9,7 @@ use Drupal\Component\Render\FormattableMarkup;
  *
  * @group reroute_email
  */
-class TestEmailFormTest extends RerouteEmailTestBase {
+class TestEmailFormTest extends RerouteEmailBrowserTestBase {
 
   /**
    * Basic tests for reroute_email Test Email form.
@@ -19,95 +17,182 @@ class TestEmailFormTest extends RerouteEmailTestBase {
    * Check if submitted form values are properly submitted and rerouted.
    * Test Subject, To, Cc, Bcc and Body submitted values, form validation,
    * default values, and submission with invalid email addresses.
+   *
+   * @throws \Behat\Mink\Exception\ResponseTextException
+   * @throws \Behat\Mink\Exception\ExpectationException
+   *
+   * @dataProvider testFormValuesProvider
    */
-  public function testFormTestEmail() {
+  public function testFormTestEmail($enabled, $allowlisted, $post, $rerouted): void {
 
-    // Configure to reroute to {$this->rerouteDestination}.
-    $this->configureRerouteEmail(TRUE, $this->rerouteDestination);
+    // Configure to reroute all outgoing emails.
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_ENABLE => $enabled,
+      REROUTE_EMAIL_ADDRESS => $this->rerouteDestination,
+      REROUTE_EMAIL_ALLOWLIST => $allowlisted,
+    ]);
 
     // Check Subject field default value.
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->assertSession()->fieldValueEquals('subject', t('Reroute Email Test'));
+    $this->drupalGet($this->rerouteTestFormPath);
+    $this->assertSession()->fieldValueEquals('subject', $this->rerouteFormDefaultSubject);
+    $this->assertSession()->fieldValueEquals('body', $this->rerouteFormDefaultBody);
 
-    // Submit the Test Email form to send an email to be rerouted.
-    $post = [
-      'to' => 'to@example.com',
-      'cc' => 'cc@example.com',
-      'bcc' => 'bcc@example.com',
-      'subject' => 'Test Reroute Email Test Email Form',
-      'body' => 'Testing email rerouting and the Test Email form',
+    $this->assertMailReroutedFromTestForm($post, $rerouted);
+  }
+
+  /**
+   * Data provider for ::testFormTestEmail().
+   */
+  public function testFormValuesProvider(): array {
+
+    // All fields are set correctly.
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => '',
+      'post' => [
+        'to' => $this->originalDestination,
+        'cc' => $this->randomMachineName() . '@not-allowed.com',
+        'bcc' => $this->randomMachineName() . '@not-allowed.com',
+        'subject' => 'Test Reroute Email Test Email Form',
+        'body' => 'Testing email rerouting and the Test Email form',
+      ],
+      'rerouted' => TRUE,
     ];
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->submitForm($post, t('Send email'));
-    $this->assertSession()->pageTextContains(t('Test email submitted for delivery from test form.'));
-    $mails = $this->getMails();
-    $mail = end($mails);
 
-    // Check rerouted email.
-    $this->assertMail('to', $this->rerouteDestination, new FormattableMarkup('To email address was rerouted to @address.', ['@address' => $this->rerouteDestination]));
-    $this->assertEmailOriginallyTo($post['to']);
-
-    // Check the Cc and Bcc headers are the ones submitted through the form.
-    $this->assertTrue($mail['headers']['X-Rerouted-Original-Cc'] == $post['cc'], new FormattableMarkup('X-Rerouted-Original-Cc is correctly set to submitted value: @address', ['@address' => $post['cc']]));
-    $this->assertTrue($mail['headers']['X-Rerouted-Original-Bcc'] == $post['bcc'], new FormattableMarkup('X-Rerouted-Original-Cc is correctly set to submitted value: @address', ['@address' => $post['bcc']]));
-
-    // Check that Cc and Bcc headers were added to the message body.
-    $copy_headers = [
-      'cc' => t('Originally cc: @cc', ['@cc' => $mail['headers']['X-Rerouted-Original-Cc']]),
-      'bcc' => t('Originally bcc: @bcc', ['@bcc' => $mail['headers']['X-Rerouted-Original-Bcc']]),
+    // A test with invalid emails and default values for subject and body.
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => '',
+      'post' => [
+        'to' => 'To address invalid format',
+        'cc' => 'Cc address invalid format',
+        'bcc' => 'Bcc address invalid format',
+      ],
+      'rerouted' => TRUE,
     ];
-    foreach ($copy_headers as $header => $message_line) {
-      $has_header = (bool) preg_match("/{$message_line}/", $mail['body']);
-      $this->assertTrue($has_header, new FormattableMarkup('Found the correct "@header" line in the body.', ['@header' => $header]));
-    }
-
-    // Check the Subject and Body field values can be found in rerouted email.
-    $this->assertMail('subject', $post['subject'], new FormattableMarkup('Subject is correctly set to submitted value: @subject', ['@subject' => $post['subject']]));
-    $this->assertFalse(strpos($mail['body'], $post['body']) === FALSE, 'Body contains the value submitted through the form.');
-
-    // Test form submission with email rerouting and invalid email addresses.
-    $post = [
-      'to' => 'To address invalid format',
-      'cc' => 'Cc address invalid format',
-      'bcc' => 'Bcc address invalid format',
+    $data[] = [
+      'enabled' => FALSE,
+      'allowlisted' => '',
+      'post' => [
+        'to' => 'To address invalid format',
+        'cc' => 'Cc address invalid format',
+        'bcc' => 'Bcc address invalid format',
+      ],
+      'rerouted' => FALSE,
     ];
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->submitForm($post, t('Send email'));
 
-    // Successful submission with email rerouting enabled.
-    $this->assertSession()->pageTextContains(t('Test email submitted for delivery from test form.'));
+    // Test a form with empty values for non-required fields.
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => '',
+      'post' => [
+        'to' => '',
+        'cc' => '',
+        'bcc' => '',
+        'subject' => '',
+        'body' => '',
+      ],
+      'rerouted' => TRUE,
+    ];
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => "{$this->originalDestination}, ",
+      'post' => [
+        'to' => $this->originalDestination,
+        'cc' => '',
+        'bcc' => '',
+        'subject' => '',
+        'body' => '',
+      ],
+      'rerouted' => FALSE,
+    ];
 
-    // Check rerouted email to.
-    $this->assertMail('to', $this->rerouteDestination, new FormattableMarkup('To email address was rerouted to @address.', ['@address' => $this->rerouteDestination]));
-    $this->assertEmailOriginallyTo($post['to']);
+    // Tests for partial emails amd domain wildcards in the allowed list.
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => 'some+*@allowlisted.com',
+      'post' => ['to' => 'email@allowlisted.com'],
+      'rerouted' => TRUE,
+    ];
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => 'some+*@allowlisted.com',
+      'post' => ['to' => 'some+partial@allowlisted.com'],
+      'rerouted' => FALSE,
+    ];
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => 'myname@*, *@great-company.com',
+      'post' => ['to' => 'myname@allowed.com, email@great-company.com'],
+      'rerouted' => FALSE,
+    ];
 
-    // Check the Cc and Bcc headers are the ones submitted through the form.
-    $mails = $this->getMails();
-    $mail = end($mails);
-    $this->assertTrue($mail['headers']['X-Rerouted-Original-Cc'] == $post['cc'], new FormattableMarkup('X-Rerouted-Original-Cc is correctly set to submitted value: @address', ['@address' => $post['cc']]));
-    $this->assertTrue($mail['headers']['X-Rerouted-Original-Bcc'] == $post['bcc'], new FormattableMarkup('X-Rerouted-Original-Cc is correctly set to submitted value: @address', ['@address' => $post['bcc']]));
+    // Check if recipient fields support an email with additional display name.
+    // like "Display Name <display.name@example.com>".
+    $email_allowlisted_one = $this->randomMachineName() . '@allowlisted.com';
+    $email_allowlisted_two = $this->randomMachineName() . '@allowlisted.com';
+    $email_allowlisted_three = $this->randomMachineName() . '@allowlisted.com';
+    $email_allowlisted_not = $this->randomMachineName() . '@not-allowlisted.com';
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => "{$email_allowlisted_one}, {$email_allowlisted_two}",
+      'post' => [
+        'to' => "Some Display Name <{$email_allowlisted_not}>",
+      ],
+      'rerouted' => TRUE,
+    ];
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => "{$email_allowlisted_one}, {$email_allowlisted_two}, {$email_allowlisted_three}",
+      'post' => [
+        'to' => "Display Name <{$email_allowlisted_one}>",
+        'cc' => "Display Name &*% (Test Special Chars) <{$email_allowlisted_two}>",
+        'bcc' => "Display Name @ <{$email_allowlisted_three}>",
+      ],
+      'rerouted' => FALSE,
+    ];
 
-    // Now change the configuration to disable reroute and submit the Test form
-    // with the same invalid email address values.
-    $this->configureRerouteEmail(FALSE);
+    // Check rerouting by `cc` and `bcc` with allowlisted `to` value.
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => '*@allowlisted.com',
+      'post' => [
+        'to' => $email_allowlisted_one,
+        'cc' => $email_allowlisted_two,
+        'bcc' => $email_allowlisted_three,
+      ],
+      'rerouted' => FALSE,
+    ];
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => '*@allowlisted.com',
+      'post' => [
+        'to' => $email_allowlisted_one,
+        'cc' => $email_allowlisted_not,
+      ],
+      'rerouted' => TRUE,
+    ];
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => '*@allowlisted.com',
+      'post' => [
+        'cc' => $email_allowlisted_one,
+        'bcc' => $email_allowlisted_not,
+      ],
+      'rerouted' => TRUE,
+    ];
+    $data[] = [
+      'enabled' => TRUE,
+      'allowlisted' => '*@allowlisted.com',
+      'post' => [
+        'to' => '',
+        'cc' => $email_allowlisted_not,
+        'bcc' => $email_allowlisted_not,
+      ],
+      'rerouted' => TRUE,
+    ];
 
-    // Submit the test email form again with previously used invalid addresses.
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->submitForm($post, t('Send email'));
-
-    // Check invalid email addresses are still passed to the mail system.
-    $mails = $this->getMails();
-    $mail = end($mails);
-
-    // Check rerouted email to.
-    $this->assertMail('to', $post['to'], new FormattableMarkup('To email address is correctly set to submitted value: @address.', ['@address' => $post['to']]));
-    $this->verbose(new FormattableMarkup('Sent email values: <pre>@mail</pre>', [
-      '@mail' => var_export($mail, TRUE),
-    ]));
-
-    // Check the Cc and Bcc headers are the ones submitted through the form.
-    $this->assertTrue($mail['headers']['Cc'] == $post['cc'], new FormattableMarkup('Cc is correctly set to submitted value: @address', ['@address' => $post['cc']]));
-    $this->assertTrue($mail['headers']['Bcc'] == $post['bcc'], new FormattableMarkup('Bcc is correctly set to submitted value: @address', ['@address' => $post['bcc']]));
+    return $data;
   }
 
 }

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8
+class ComposerStaticInitac7281ef4e352f5160c8b178ab10b627
 {
     public static $files = array (
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
@@ -291,8 +291,8 @@ class ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8
         'phpDocumentor\\Reflection\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
-            1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
-            2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+            1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
         ),
         'lsolesen\\pel\\' => 
         array (
@@ -6052,6 +6052,7 @@ class ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8
         'Psy\\CodeCleaner\\StrictTypesPass' => __DIR__ . '/..' . '/psy/psysh/src/CodeCleaner/StrictTypesPass.php',
         'Psy\\CodeCleaner\\UseStatementPass' => __DIR__ . '/..' . '/psy/psysh/src/CodeCleaner/UseStatementPass.php',
         'Psy\\CodeCleaner\\ValidClassNamePass' => __DIR__ . '/..' . '/psy/psysh/src/CodeCleaner/ValidClassNamePass.php',
+        'Psy\\CodeCleaner\\ValidConstantPass' => __DIR__ . '/..' . '/psy/psysh/src/CodeCleaner/ValidConstantPass.php',
         'Psy\\CodeCleaner\\ValidConstructorPass' => __DIR__ . '/..' . '/psy/psysh/src/CodeCleaner/ValidConstructorPass.php',
         'Psy\\CodeCleaner\\ValidFunctionNamePass' => __DIR__ . '/..' . '/psy/psysh/src/CodeCleaner/ValidFunctionNamePass.php',
         'Psy\\Command\\BufferCommand' => __DIR__ . '/..' . '/psy/psysh/src/Command/BufferCommand.php',
@@ -6635,10 +6636,11 @@ class ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8
         'Solarium\\Component\\FacetSetInterface' => __DIR__ . '/..' . '/solarium/solarium/src/Component/FacetSetInterface.php',
         'Solarium\\Component\\FacetSetTrait' => __DIR__ . '/..' . '/solarium/solarium/src/Component/FacetSetTrait.php',
         'Solarium\\Component\\Facet\\AbstractFacet' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/AbstractFacet.php',
-        'Solarium\\Component\\Facet\\AbstractField' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/AbstractField.php',
         'Solarium\\Component\\Facet\\AbstractRange' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/AbstractRange.php',
         'Solarium\\Component\\Facet\\FacetInterface' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/FacetInterface.php',
         'Solarium\\Component\\Facet\\Field' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/Field.php',
+        'Solarium\\Component\\Facet\\FieldValueParametersInterface' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/FieldValueParametersInterface.php',
+        'Solarium\\Component\\Facet\\FieldValueParametersTrait' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/FieldValueParametersTrait.php',
         'Solarium\\Component\\Facet\\Interval' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/Interval.php',
         'Solarium\\Component\\Facet\\JsonAggregation' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/JsonAggregation.php',
         'Solarium\\Component\\Facet\\JsonFacetInterface' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/JsonFacetInterface.php',
@@ -6648,6 +6650,7 @@ class ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8
         'Solarium\\Component\\Facet\\JsonTerms' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/JsonTerms.php',
         'Solarium\\Component\\Facet\\MultiQuery' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/MultiQuery.php',
         'Solarium\\Component\\Facet\\Pivot' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/Pivot.php',
+        'Solarium\\Component\\Facet\\PivotMinCountTrait' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/PivotMinCountTrait.php',
         'Solarium\\Component\\Facet\\Query' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/Query.php',
         'Solarium\\Component\\Facet\\Range' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Facet/Range.php',
         'Solarium\\Component\\Grouping' => __DIR__ . '/..' . '/solarium/solarium/src/Component/Grouping.php',
@@ -8918,7 +8921,6 @@ class ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8
         'lsolesen\\pel\\PelFormat' => __DIR__ . '/..' . '/lsolesen/pel/src/PelFormat.php',
         'lsolesen\\pel\\PelIfd' => __DIR__ . '/..' . '/lsolesen/pel/src/PelIfd.php',
         'lsolesen\\pel\\PelIfdException' => __DIR__ . '/..' . '/lsolesen/pel/src/PelIfdException.php',
-        'lsolesen\\pel\\PelIllegalFormatException' => __DIR__ . '/..' . '/lsolesen/pel/src/PelIllegalFormatException.php',
         'lsolesen\\pel\\PelInvalidArgumentException' => __DIR__ . '/..' . '/lsolesen/pel/src/PelInvalidArgumentException.php',
         'lsolesen\\pel\\PelInvalidDataException' => __DIR__ . '/..' . '/lsolesen/pel/src/PelInvalidDataException.php',
         'lsolesen\\pel\\PelJpeg' => __DIR__ . '/..' . '/lsolesen/pel/src/PelJpeg.php',
@@ -8984,11 +8986,15 @@ class ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8
         'phpDocumentor\\Reflection\\PseudoTypes\\CallableString' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/CallableString.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\False_' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/False_.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\HtmlEscapedString' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/HtmlEscapedString.php',
+        'phpDocumentor\\Reflection\\PseudoTypes\\IntegerRange' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/IntegerRange.php',
+        'phpDocumentor\\Reflection\\PseudoTypes\\List_' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/List_.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\LiteralString' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/LiteralString.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\LowercaseString' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/LowercaseString.php',
+        'phpDocumentor\\Reflection\\PseudoTypes\\NegativeInteger' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/NegativeInteger.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\NonEmptyLowercaseString' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/NonEmptyLowercaseString.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\NonEmptyString' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/NonEmptyString.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\NumericString' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/NumericString.php',
+        'phpDocumentor\\Reflection\\PseudoTypes\\Numeric_' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/Numeric_.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\PositiveInteger' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/PositiveInteger.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\TraitString' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/TraitString.php',
         'phpDocumentor\\Reflection\\PseudoTypes\\True_' => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src/PseudoTypes/True_.php',
@@ -9082,11 +9088,11 @@ class ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitea9a25c7405a10c5f485446f77b5d1a8::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitac7281ef4e352f5160c8b178ab10b627::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitac7281ef4e352f5160c8b178ab10b627::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitac7281ef4e352f5160c8b178ab10b627::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitac7281ef4e352f5160c8b178ab10b627::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitac7281ef4e352f5160c8b178ab10b627::$classMap;
 
         }, null, ClassLoader::class);
     }

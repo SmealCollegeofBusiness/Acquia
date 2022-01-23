@@ -101,7 +101,7 @@ function cohesion_elements_library_info_alter(&$libraries, $extension) {
  */
 function preprocess_cohesion_elements_component(&$variables) {
   foreach ($variables['parentContext'] as $key => $value) {
-    if ($key !== 'componentFieldsValues' && $key !== 'template' && !$value instanceof Attribute) {
+    if ($key !== 'componentFieldsValues' && $key !== 'template' && $key !== 'coh_repeater_val' && !$value instanceof Attribute) {
       $variables[$key] = $value;
     }
   }

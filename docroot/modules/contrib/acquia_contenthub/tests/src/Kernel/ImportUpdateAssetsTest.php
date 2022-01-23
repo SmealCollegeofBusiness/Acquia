@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * @coversDefaultClass \Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\ImportUpdateAssets
  *
+ * @group acquia_contenthub
+ *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class ImportUpdateAssetsTest extends KernelTestBase {

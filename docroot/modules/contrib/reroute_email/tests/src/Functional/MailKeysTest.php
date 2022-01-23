@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\reroute_email\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
-
 /**
  * Test Reroute Email with mail keys filter.
  *
@@ -11,46 +9,45 @@ use Drupal\Component\Render\FormattableMarkup;
  *
  * @group reroute_email
  */
-class MailKeysTest extends RerouteEmailTestBase {
+class MailKeysTest extends RerouteEmailBrowserTestBase {
 
   /**
    * Test Reroute Email with mail keys filter.
+   *
+   * @throws \Behat\Mink\Exception\ResponseTextException
    */
-  public function testMailKeysFilter() {
+  public function testMailKeysSettings(): void {
     // Configure to reroute all outgoing emails.
-    $this->configureRerouteEmail(TRUE, $this->rerouteDestination);
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_ENABLE => TRUE,
+      REROUTE_EMAIL_ADDRESS => $this->rerouteDestination,
+    ]);
+    $this->assertMailReroutedFromTestForm(['to' => $this->originalDestination]);
 
-    // Submit a test email (should be rerouted).
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->submitForm(['to' => $this->originalDestination], t('Send email'));
+    // Configure to NOT reroute all outgoing emails (not existed mail key).
+    $this->configureRerouteEmail([REROUTE_EMAIL_MAILKEYS => 'not_existed_module']);
+    $this->assertMailNotReroutedFromTestForm(['to' => $this->originalDestination]);
+    $this->assertMailHeader('X-Rerouted-Reason', 'MAILKEY-ALLOWED');
 
-    // Check if the email was rerouted properly.
-    $this->assertEmailOriginallyTo();
-    $this->assertMail('to', $this->rerouteDestination, new FormattableMarkup('Email was properly rerouted to the email address: @destination.', ['@destination' => $this->rerouteDestination]));
+    // Configure to reroute emails from our test form.
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_MAILKEYS => 'reroute_email_test_email_form',
+    ]);
+    $this->assertMailReroutedFromTestForm(['to' => $this->originalDestination]);
 
-    // Configure to reroute outgoing emails only from our test module.
-    $this->configureRerouteEmail(NULL, NULL, NULL, NULL, NULL, 'not_existed_module');
+    // Configure to reroute all outgoing emails (not existed mail key).
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_MAILKEYS => '',
+      REROUTE_EMAIL_MAILKEYS_SKIP => 'not_existed_module',
+    ]);
+    $this->assertMailReroutedFromTestForm(['to' => $this->originalDestination]);
 
-    // Submit a test email (should not be rerouted).
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->submitForm(['to' => $this->originalDestination], t('Send email'));
-
-    // Check if the email was not rerouted.
-    $this->assertMail('to', $this->originalDestination, new FormattableMarkup('Email was properly sent the email addresses: @destination.', ['@destination' => $this->originalDestination]));
-
-    // Configure to reroute only outgoing emails from our test form.
-    $this->configureRerouteEmail(NULL, NULL, NULL, NULL, NULL, 'reroute_email_test_email_form');
-
-    // Submit a test email (should be rerouted).
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->submitForm(['to' => $this->originalDestination], t('Send email'));
-
-    // Check if the email was rerouted properly.
-    $this->assertEmailOriginallyTo();
-    $this->assertMail('to', $this->rerouteDestination, new FormattableMarkup('Email was properly rerouted to the email address: @destination.', ['@destination' => $this->rerouteDestination]));
-
-    // Configure to reroute outgoing emails only from our test module.
-    $this->configureRerouteEmail(NULL, NULL, NULL, NULL, NULL, 'reroute_email_test');
+    // Configure to NOT reroute outgoing emails from our test form.
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_MAILKEYS_SKIP => 'reroute_email_test_email_form',
+    ]);
+    $this->assertMailNotReroutedFromTestForm(['to' => $this->originalDestination]);
+    $this->assertMailHeader('X-Rerouted-Reason', 'MAILKEY-SKIPPED');
   }
 
 }

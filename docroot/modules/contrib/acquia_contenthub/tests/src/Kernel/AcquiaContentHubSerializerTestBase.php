@@ -16,6 +16,8 @@ use Drupal\node\NodeInterface;
 /**
  * Base class for testing serialization.
  *
+ * @group acquia_contenthub
+ *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 abstract class AcquiaContentHubSerializerTestBase extends KernelTestBase {

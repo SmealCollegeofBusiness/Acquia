@@ -4,6 +4,9 @@
  * @file
  */
 
+use Drupal\cohesion\Event\SiteStudioEvents;
+use Drupal\cohesion\Event\PostRebuildEvent;
+
 /**
  * Copy temporary stylesheets to live.
  * Copy temporary templates to live.
@@ -33,6 +36,10 @@ function entity_rebuild_finished_callback($success, $results, $operations) {
     ));
 
   }
+
+  // Setup an event to be dispatched post rebuild.
+  $post_event = new PostRebuildEvent($results, $success);
+  \Drupal::service('event_dispatcher')->dispatch(SiteStudioEvents::POST_REBUILD, $post_event);
 }
 
 /**

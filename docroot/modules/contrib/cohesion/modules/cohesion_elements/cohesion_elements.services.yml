@@ -13,7 +13,7 @@ services:
     class: Drupal\cohesion_elements\CategoryRelationshipsManager
     arguments: ['@entity_type.manager']
 
-  cohesion_elements.eventsubscriber:
+  cohesion_elements.eventsubscriber.frontend_url:
     class: '\Drupal\cohesion_elements\EventSubscriber\CohesionElementsEventSubscriber'
     arguments:
       - '@current_user'

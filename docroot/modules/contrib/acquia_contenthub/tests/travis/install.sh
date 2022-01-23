@@ -72,27 +72,19 @@ fi
 
 if [[ "$DRUPAL_CORE" == "9" ]]; then
   echo "Adding modules for Drupal 9.x..."
-  # @TODO: Make sure to update beta version of webform to a released version once it is released.
-  # @TODO: Stop forcing Composer path. Doing it for now to prevent errors.
-  /home/travis/.phpenv/versions/7.3/bin/composer -d"$ORCA_FIXTURE_DIR" require --dev \
+  composer -d"$ORCA_FIXTURE_DIR" require --dev --with-all-dependencies \
     drupal/webform \
     drupal/paragraphs \
     drupal/focal_point \
     drupal/redirect \
     drupal/metatag \
-    drupal/entityqueue
-  # Determining PHPUnit version.
-  PHPUNIT_VERSION=`phpunit --version | cut -d ' ' -f 2`
-  if [[ $PHPUNIT_VERSION  =~ ^[8] ]]; then
-    /home/travis/.phpenv/versions/7.3/bin/composer -d"$ORCA_FIXTURE_DIR" require --dev dms/phpunit-arraysubset-asserts:0.1.1
-  else
-    /home/travis/.phpenv/versions/7.3/bin/composer -d"$ORCA_FIXTURE_DIR" require --dev dms/phpunit-arraysubset-asserts
-  fi
+    drupal/entityqueue \
+    dms/phpunit-arraysubset-asserts
 else
   echo "Adding modules for Drupal 8.x..."
   # Eliminating Warnings to avoid failing tests on deprecated functions:
   export SYMFONY_DEPRECATIONS_HELPER=disabled codecept run
-  /home/travis/.phpenv/versions/7.3/bin/composer -d"$ORCA_FIXTURE_DIR" require --dev \
+  composer -d"$ORCA_FIXTURE_DIR" require --dev --with-all-dependencies \
     drupal/webform \
     drupal/paragraphs \
     drupal/focal_point \

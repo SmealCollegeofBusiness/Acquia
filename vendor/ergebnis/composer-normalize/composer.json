@@ -21,7 +21,7 @@
     "source": "https://github.com/ergebnis/composer-normalize"
   },
   "require": {
-    "php": "^7.2 || ^8.0",
+    "php": "^7.3 || ^8.0",
     "composer-plugin-api": "^2.0.0",
     "ergebnis/json-normalizer": "^1.0.3",
     "ergebnis/json-printer": "^3.1.1",
@@ -29,14 +29,14 @@
     "localheinz/diff": "^1.1.1"
   },
   "require-dev": {
-    "composer/composer": "^2.1.14",
+    "composer/composer": "^2.2.1",
     "ergebnis/license": "^1.1.0",
-    "ergebnis/php-cs-fixer-config": "^2.14.0",
-    "ergebnis/test-util": "^1.5.0",
-    "phpunit/phpunit": "^8.5.21",
+    "ergebnis/php-cs-fixer-config": "^3.4.0",
+    "fakerphp/faker": "^1.17.0",
+    "phpunit/phpunit": "^9.5.11",
     "psalm/plugin-phpunit": "~0.16.1",
     "symfony/filesystem": "^5.4.0",
-    "vimeo/psalm": "^4.14.0"
+    "vimeo/psalm": "^4.16.1"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -51,8 +51,11 @@
     }
   },
   "config": {
+    "allow-plugins": {
+      "composer/package-versions-deprecated": true
+    },
     "platform": {
-      "php": "7.2.33"
+      "php": "7.3.32"
     },
     "preferred-install": "dist",
     "sort-packages": true

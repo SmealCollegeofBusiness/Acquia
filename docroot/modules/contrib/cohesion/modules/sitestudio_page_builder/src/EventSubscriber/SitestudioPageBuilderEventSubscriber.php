@@ -5,7 +5,7 @@ namespace Drupal\sitestudio_page_builder\EventSubscriber;
 use Drupal\cohesion\CohesionApiClient;
 use Drupal\cohesion\Services\CohesionUtils;
 use Drupal\cohesion_elements\Event\CohesionLayoutViewBuilderEvent;
-use Drupal\cohesion\Event\FrontendUrlsEvent;
+use Drupal\cohesion\Event\CohesionJsAppUrlsEvent;
 use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -150,7 +150,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
   public static function getSubscribedEvents() {
     return [
       // Static class constant => method on this class.
-      FrontendUrlsEvent::EVENT_NAME => 'registerUrls',
+      CohesionJsAppUrlsEvent::FRONTEND_URL => 'registerFrontendUrls',
       CohesionLayoutViewBuilderEvent::ALTER => 'alterViewBuilder',
     ];
   }
@@ -158,9 +158,9 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
   /**
    * Registers urls for frontend builder to work
    *
-   * @param \Drupal\cohesion\Event\FrontendUrlsEvent $event
+   * @param \Drupal\cohesion\Event\CohesionJsAppUrlsEvent $event
    */
-  public function registerUrls(FrontendUrlsEvent $event) {
+  public function registerFrontendUrls(CohesionJsAppUrlsEvent $event) {
     // Each build method has its own url derivating from the entity canonical url
     // @see \Drupal\sitestudio_page_builder\Routing\Route
     $query_param = $this->currentRequest->query->all();
@@ -171,22 +171,23 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
         'coh_clean_page' => 'true',
       ];
       $params += $query_param;
-      $event->addFrontEndUrl('sitestudio-page-builder.layout_canvas.build', [
+      $event->addUrl('sitestudio-page-builder.layout_canvas.build', [
         'url' => Url::fromRoute("entity.{$entity->getEntityTypeId()}.sitestudio_build", $params)->toString(),
         'method' => 'POST'
       ]);
     }
 
     // Builder save page
-    $event->addFrontEndUrl('frontend-builder-save', [
+    $event->addUrl('frontend-builder-save', [
       'url' => Url::fromRoute('sitestudio-page-builder.save')->toString(),
       'method' => 'POST'
     ]);
 
     // Get the react app library asset
     $lib = $this->libraryDiscovery->getLibraryByName('sitestudio_page_builder', 'cohesion-frontend-edit-scripts');
-    if (isset($lib['js'][0]['data'])) {
-      $event->addFrontEndUrl('frontend-builder-js', [
+
+    if(isset($lib['js'][0]['data'])) {
+      $event->addUrl('frontend-builder-js', [
         'url' => file_url_transform_relative(file_create_url($lib['js'][0]['data'])),
         'method' => 'GET'
       ]);
@@ -205,7 +206,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
         }
       }
 
-      $event->addFrontEndUrl('visual-page-builder-element-js-loader', $urls);
+      $event->addUrl('visual-page-builder-element-js-loader', $urls);
     }
   }
 

@@ -20,6 +20,7 @@ use Drupal\user\UserInterface;
  *     "access" = "Drupal\cohesion_elements\ComponentContentAccessControlHandler",
  *     "list_builder" = "Drupal\cohesion_elements\ComponentContentListBuilder",
  *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "views_data" = "Drupal\views\EntityViewsData",
  *     "route_provider" = {
  *       "html" = "Drupal\cohesion_elements\Entity\ComponentContentRouteProvider",
  *     },

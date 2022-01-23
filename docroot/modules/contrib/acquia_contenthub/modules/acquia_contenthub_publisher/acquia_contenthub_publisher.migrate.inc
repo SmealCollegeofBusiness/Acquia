@@ -10,6 +10,8 @@
  *
  * @param mixed $context
  *   The context object.
+ *
+ * @throws \Exception
  */
 function acquia_contenthub_publisher_enqueue_exported_entities(&$context) {
   if (!is_array($context) && !class_implements($context)['ArrayAccess']) {
@@ -32,13 +34,15 @@ function acquia_contenthub_publisher_enqueue_exported_entities(&$context) {
   $entity_type_manager = $entity = \Drupal::entityTypeManager();
   // Obtain the list of entities to enqueue.
   $results = $query->range($context['sandbox']['progress'], $limit)->execute();
+  /** @var \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer $entity_enqueuer */
+  $entity_enqueuer = \Drupal::service('acquia_contenthub_publisher.entity_enqueuer');
   foreach ($results as $result) {
     // Enqueue entity if it is not paragraphs.
     if ($result->entity_type !== 'paragraph') {
       $entity = $entity_type_manager->getStorage($result->entity_type)
         ->load($result->entity_id);
       if ($entity) {
-        _acquia_contenthub_publisher_enqueue_entity($entity, 'update');
+        $entity_enqueuer->enqueueEntity($entity, 'update');
         $logger->info('Enqueue-ing entity for export: @entity_type - @entity_id',
           [
             '@entity_type' => $result->entity_type,

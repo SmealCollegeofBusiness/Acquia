@@ -98,6 +98,21 @@ class CohesionEndpointHelper {
       // Create the entity object.
       $entity = $this->entityTypeManager->getStorage($entity_type_id)->create($payload);
 
+      // if no category
+      if (!isset($payload['category'])) {
+        // check no "default" category (uncategorized) is available.
+        $category_class = $this->entityTypeManager->getStorage($entity->getCategoryEntityTypeId())->getEntitytype()->getOriginalClass();
+        $default_category_id = $category_class::DEFAULT_CATEGORY_ID;
+        $query = $this->entityTypeManager->getStorage($entity_type_id)->getQuery()->condition('category', $default_category_id, '=');
+
+        // if "default" category (uncategorized) not available create & set category.
+        if (!$query->execute()) {
+          $category_storage = $this->entityTypeManager->getStorage($entity->getCategoryEntityTypeId());
+          \Drupal::service('cohesion_elements.category_relationships')->createUncategorized($category_storage, $default_category_id);
+          $entity->set('category', $default_category_id);
+        }
+
+      }
       // Set entity id.
       $entity->set('id', $machine_name);
 

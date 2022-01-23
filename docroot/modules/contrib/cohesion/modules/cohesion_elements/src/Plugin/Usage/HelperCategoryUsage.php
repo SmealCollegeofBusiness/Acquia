@@ -18,7 +18,8 @@ namespace Drupal\cohesion_elements\Plugin\Usage;
  *   exclude_from_package_requirements = FALSE,
  *   exportable = TRUE,
  *   config_type = "site_studio",
- *   scan_groups = {"site_studio"}
+ *   scan_groups = {"site_studio"},
+ *   can_be_excluded = TRUE
  * )
  */
 class HelperCategoryUsage extends ElementCategoryUsageBase {

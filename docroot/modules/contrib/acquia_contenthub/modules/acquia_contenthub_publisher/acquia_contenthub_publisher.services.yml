@@ -6,7 +6,7 @@ services:
 
   acquia_contenthub_publisher.actions:
     class: Drupal\acquia_contenthub_publisher\PublisherActions
-    arguments: ['@acquia_contenthub_publisher.tracker', '@acquia_contenthub_common_actions', '@cache.depcalc']
+    arguments: ['@acquia_contenthub_publisher.tracker', '@acquia_contenthub_common_actions', '@cache.depcalc', '@acquia_contenthub_publisher.entity_enqueuer']
 
   acquia_contenthub_publisher.entity_moderated_revision:
     class: Drupal\acquia_contenthub_publisher\EntityModeratedRevision
@@ -41,7 +41,7 @@ services:
 
   imported_entity.enqueue:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\EnqueueEligibility\ImportedEntity
-    arguments: ['@module_handler']
+    arguments: ['@module_handler', '@acquia_contenthub.stub.tracker']
     tags:
       - { name: event_subscriber }
 
@@ -75,6 +75,7 @@ services:
 
   requeue_dependency_changes.cache_invalidation:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\InvalidateDependencies\RePublishDependencyChanges
+    arguments: ['@acquia_contenthub_publisher.entity_enqueuer']
     tags:
       - { name: event_subscriber }
 
@@ -118,6 +119,10 @@ services:
     class: Drupal\acquia_contenthub_publisher\ContentHubExportQueue
     arguments: ['@queue', '@plugin.manager.queue_worker', '@messenger']
 
+  acquia_contenthub_publisher.entity_enqueuer:
+    class: Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer
+    arguments: [ '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@event_dispatcher', '@queue', '@acquia_contenthub_publisher.tracker']
+
   update_tracking.delete_remote_entity:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\DeleteRemoteEntity\UpdateTracking
     arguments: ['@acquia_contenthub_publisher.tracker', '@logger.factory']
@@ -126,6 +131,7 @@ services:
 
   acquia_contenthub_publisher.language_override_config_subscriber:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\Config\ConfigSubscriber
+    arguments: ['@acquia_contenthub_publisher.entity_enqueuer']
     tags:
       - { name: event_subscriber }
 

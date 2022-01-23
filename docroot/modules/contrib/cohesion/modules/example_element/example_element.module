@@ -44,5 +44,16 @@ function example_element_theme($existing, $type, $theme, $path) {
       ],
       'render element' => 'children',
     ],
+    'example_container_element' => [
+      'template' => 'example-container-element-template',
+      'variables' => [
+        'elementSettings' => NULL,
+        'elementMarkup' => NULL,
+        'elementContext' => NULL,
+        'elementClass' => NULL,
+        'elementChildren' => NULL,
+      ],
+      'render element' => 'children',
+    ],
   ];
 }

@@ -27,3 +27,11 @@
    box-sizing: border-box;
    animation: rotate 0.75s infinite linear;
  }
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg)
+  }
+  100% {
+    transform: rotate(360deg)
+  }
+}

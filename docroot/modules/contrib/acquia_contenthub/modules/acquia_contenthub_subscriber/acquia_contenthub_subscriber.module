@@ -28,7 +28,22 @@ function acquia_contenthub_subscriber_entity_delete(EntityInterface $entity) {
  * Implements hook_entity_insert().
  */
 function acquia_contenthub_subscriber_entity_insert(EntityInterface $entity) {
-  \Drupal::service('acquia_contenthub.stub.tracker')->track($entity);
+  /** @var \Drupal\acquia_contenthub\StubTracker $stub_tracker */
+  $stub_tracker = \Drupal::service('acquia_contenthub.stub.tracker');
+  $stub_tracker->track($entity);
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * Changes the order of hook_entity_insert in case both modules are installed.
+ */
+function acquia_contenthub_subscriber_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'entity_insert' && \Drupal::moduleHandler()->moduleExists('acquia_contenthub_publisher')) {
+    $group = $implementations['acquia_contenthub_publisher'];
+    unset($implementations['acquia_contenthub_publisher']);
+    $implementations['acquia_contenthub_publisher'] = $group;
+  }
 }
 
 /**

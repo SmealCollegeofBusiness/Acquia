@@ -2,6 +2,7 @@
 
 namespace Drupal\acquia_contenthub;
 
+use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
@@ -354,12 +355,12 @@ class ContentHubConnectionManager {
    */
   public function checkClient(): self {
     $this->initialize();
-    if (is_null($this->client)) {
+    if (!$this->client instanceof ContentHubClient) {
       throw new \RuntimeException('Client is not configured.');
     }
 
     $resp = $this->client->ping();
-    if (!empty($resp)) {
+    if ($resp->getStatusCode() !== 200) {
       throw new \RuntimeException('Client could not reach Content Hub.');
     }
 

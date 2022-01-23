@@ -3,11 +3,15 @@
 namespace Drupal\cohesion_sync\Form;
 
 use Drupal\cohesion_sync\PackagerManager;
+use Drupal\cohesion_sync\PackageSourceManager;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Uuid\UuidInterface;
+use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -84,18 +88,66 @@ class ImportFileForm extends FormBase {
   protected $uuidGenerator;
 
   /**
+   * The configuration storage.
+   *
+   * @var \Drupal\Core\Config\StorageInterface
+   */
+  protected $configStorage;
+
+  /**
+   * The file system service.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
+
+  /**
+   * The settings object.
+   *
+   * @var \Drupal\Core\Site\Settings
+   */
+  protected $settings;
+
+  /**
+   * Package Source Manager service.
+   *
+   * @var \Drupal\cohesion_sync\PackageSourceManager
+   */
+  protected $packageSourceManager;
+
+  /**
    * ImportForm constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    * @param \Drupal\cohesion_sync\PackagerManager $packager_manager
    * @param \Drupal\Core\TempStore\SharedTempStoreFactory $temp_shared_store_factory
    * @param \Drupal\Component\Uuid\UuidInterface $uuid
+   * @param \Drupal\Core\Config\StorageInterface $config_storage
+   *   The configuration storage.
+   * @param \Drupal\Core\File\FileSystemInterface $file_system
+   *   The file system service.
+   * @param \Drupal\Core\Site\Settings $settings
+   *   The settings object.
+   * @param \Drupal\cohesion_sync\PackageSourceManager $package_source_manager
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, PackagerManager $packager_manager, SharedTempStoreFactory $temp_shared_store_factory, UuidInterface $uuid) {
+  public function __construct(
+    EntityTypeManagerInterface $entity_type_manager,
+    PackagerManager $packager_manager,
+    SharedTempStoreFactory $temp_shared_store_factory,
+    UuidInterface $uuid,
+    StorageInterface $config_storage,
+    FileSystemInterface $file_system = NULL,
+    Settings $settings = NULL,
+    PackageSourceManager $package_source_manager
+  ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->packagerManager = $packager_manager;
     $this->sitestudioTempSharedStore = $temp_shared_store_factory->get('sitestudio');
     $this->uuidGenerator = $uuid;
+    $this->configStorage = $config_storage;
+    $this->fileSystem = $file_system;
+    $this->settings = $settings;
+    $this->packageSourceManager = $package_source_manager;
   }
 
   /**
@@ -106,7 +158,11 @@ class ImportFileForm extends FormBase {
       $container->get('entity_type.manager'),
       $container->get('cohesion_sync.packager'),
       $container->get('tempstore.shared'),
-      $container->get('uuid')
+      $container->get('uuid'),
+      $container->get('cohesion_sync.file_storage'),
+      $container->get('file_system'),
+      $container->get('settings'),
+      $container->get('cohesion_sync.package_source_manager')
     );
   }
 
@@ -121,9 +177,225 @@ class ImportFileForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+
     $form['help'] = [
       '#markup' => $this->t('Import an Site Studio package from a file uploaded from your local device.'),
     ];
+
+    if ($this->step == 1) {
+      $form = array_merge($form, $this->buildLegacyForm($form_state));
+    }
+    else {
+
+      $sync_path = $this->settings->get('site_studio_sync', COHESION_SYNC_DEFAULT_DIR);
+      $directory_is_writable = $this->fileSystem->prepareDirectory($sync_path, FileSystemInterface::CREATE_DIRECTORY);
+      if (!$directory_is_writable) {
+        $this->messenger()->addError($this->t('The directory %directory is not writable.', ['%directory' => $sync_path]));
+      }
+
+      $form['import'] = [
+        '#type' => 'details',
+        '#open' => TRUE,
+        '#title' => 'Import package',
+      ];
+
+      $form['import']['import_tarball'] = [
+        '#type' => 'file',
+        '#title' => $this->t('Configuration archive'),
+        '#description' => $this->t('Allowed types: @extensions.', ['@extensions' => 'tar.gz tgz tar.bz2']),
+      ];
+
+      $form['import']['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Upload'),
+        '#disabled' => !$directory_is_writable,
+        '#name' => 'import_submit',
+      ];
+
+      $form['legacy_import'] = [
+        '#type' => 'details',
+        '#open' => FALSE,
+        '#title' => 'Legacy import (single yml file)',
+      ];
+
+      $form['legacy_import'][] = $this->buildLegacyForm($form_state);
+    }
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $this->validateLegacyForm($form_state);
+
+    if ($form_state->getTriggeringElement()['#name'] == 'import_submit') {
+      $all_files = $this->getRequest()->files->get('files', []);
+      if (!empty($all_files['import_tarball'])) {
+        $file_upload = $all_files['import_tarball'];
+        if ($file_upload->isValid()) {
+          $form_state->setValue('import_tarball', $file_upload->getRealPath());
+          return;
+        }
+      }
+
+      $form_state->setErrorByName('import_tarball', $this->t('The file could not be uploaded.'));
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    if($form_state->getTriggeringElement()['#name'] == 'legacy_import') {
+      return $this->legacyFormSubmit($form_state);
+    }
+    elseif($form_state->getTriggeringElement()['#name'] == 'import_submit'){
+      if ($path = $form_state->getValue('import_tarball')) {
+        $this->configStorage->deleteAll();
+        try {
+          $packageSourceService = $this->packageSourceManager->getSourceService('tar_archive_package');
+          $source_metadata = [
+            'file_location' => $path,
+          ];
+          $sync_dir = $packageSourceService->preparePackage($source_metadata);
+
+          $this->messenger()->addStatus($this->t('Your configuration files were successfully uploaded to :sync_dir and are ready for import.', [':sync_dir' => $sync_dir]));
+          $form_state->setRedirect('cohesion_sync.sync');
+        }
+        catch (\Exception $e) {
+          $this->messenger()->addError($this->t('Could not extract the contents of the tar file. The error message is <em>@message</em>', ['@message' => $e->getMessage()]));
+        }
+      }
+    }
+
+  }
+
+  /**
+   * Build the form for entries that needs actions
+   *
+   * @param $action_data_entry
+   *
+   * @return array
+   */
+  private function buildActionForm(array $action_data_entry) {
+    $action_form = [];
+    $action_form['entity_label'] = [
+      '#markup' => $action_data_entry['entity_label'],
+    ];
+
+    $action_form['entity_type_label'] = [
+      '#markup' => $action_data_entry['entity_type_label'],
+    ];
+
+    $action_form['action'] = [
+      '#type' => 'select',
+      '#options' => [
+        TRUE => t('Overwrite existing'),
+        FALSE => t('Keep existing'),
+      ],
+    ];
+
+    //If the entry has broken linkage with content
+    if (isset($this->broken_entities[$action_data_entry['entry_uuid']])) {
+      $warning_markup = [];
+      $action_form['#attributes'] = ['class' => 'color-warning'];
+      $broken_entity = $this->broken_entities[$action_data_entry['entry_uuid']];
+      $warning_markup[] = [
+        '#markup' => $this->t('This entity is missing populated fields. If you choose to <strong>Overwrite existing</strong>, content in these fields will be lost.'),
+      ];
+      $warning_markup[] = [
+        '#markup' => '<br />' . $this->formatPlural(count($broken_entity['entities']), '1 entity affected.', '@count entities affected.'),
+      ];
+
+      $warning_markup[] = [
+        '#type' => 'link',
+        '#title' => ' ' . $this->t('See where this entity is in use.'),
+        '#url' => $broken_entity['in_use_url'],
+        '#options' => [
+          'attributes' => [
+            'class' => ['use-ajax'],
+            'data-dialog-type' => 'modal',
+            'data-dialog-options' => Json::encode([
+              'width' => 700,
+            ]),
+          ],
+        ],
+        '#attached' => ['library' => ['core/drupal.dialog.ajax']],
+      ];
+
+      $action_form['warning'] = $warning_markup;
+    }
+    return $action_form;
+  }
+
+  /**
+   * Build a form for entries that doesn't need action
+   *
+   * @param $action_data_entry
+   *
+   * @return array
+   */
+  private function buildNonActionForm($action_data_entry) {
+    $form = [];
+    $form['entity_label'] = [
+      '#markup' => $action_data_entry['entity_label'],
+    ];
+
+    $form['entity_type_label'] = [
+      '#markup' => $action_data_entry['entity_type_label'],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * Build the accordion container for each type of import status
+   *
+   * @param array $entry_form - the entries
+   * @param $name - the name of the section
+   * @param $message - the message for the section
+   * @param bool $open - is the section open by default
+   *
+   * @return array
+   */
+  private function buildAccordionActionForm(array $entry_form, $name, $message, $open = FALSE) {
+    $form = [
+      '#type' => 'details',
+      '#open' => $open,
+      '#title' => [
+        '#markup' => $name,
+      ],
+    ];
+
+    $form['information'] = [
+      '#markup' => '<p>' . $message . '</p>',
+    ];
+
+    $form['entries']['indexes'] = [
+      '#type' => 'table',
+      '#header' => [
+        ['data' => $this->t('Entity')],
+        ['data' => $this->t('Entity type')],
+      ],
+    ];
+
+    $form['entries']['indexes'] += $entry_form;
+    return $form;
+  }
+
+  /**
+   * The legacy form build.
+   *
+   * @param $form_state
+   *
+   * @return array
+   * @throws \Drupal\Core\TempStore\TempStoreException
+   */
+  private function buildLegacyForm($form_state) {
 
     // Set a unique identifier for this form
     $this->store_key = $this->store_key ?: 'sync_validation_' . $this->uuidGenerator->generate();
@@ -230,6 +502,7 @@ class ImportFileForm extends FormBase {
         '#button_type' => 'primary',
         // Don't disable the button if validation has completed otherwise the form won't submit.
         '#disabled' => !$form_state->isValidationComplete(),
+        '#name' => 'legacy_import',
       ],
     ];
 
@@ -237,9 +510,15 @@ class ImportFileForm extends FormBase {
   }
 
   /**
-   * {@inheritdoc}
+   * The legacy single file validate method
+   *
+   * @param $form_state
+   *
+   * @return false
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundExceptionT
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
+  private function validateLegacyForm($form_state) {
     if ($form_state->getTriggeringElement()['#name'] == 'package_yaml_upload_button') {
       // Get the uploaded file entity.
       $file_id = $form_state->getUserInput()['files']['package_yaml'];
@@ -251,14 +530,16 @@ class ImportFileForm extends FormBase {
         return FALSE;
       }
     }
-
-    return TRUE;
   }
 
   /**
-   * {@inheritdoc}
+   * The legacy single file submit method
+   *
+   * @param $form_state
+   *
+   * @return bool
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  private function legacyFormSubmit($form_state) {
 
     if($this->step == 0 && empty($this->action_data) && $this->file_uri) {
       $operations = $this->packagerManager->validatePackageBatch($this->file_uri, $this->store_key);
@@ -316,119 +597,6 @@ class ImportFileForm extends FormBase {
 
     batch_set($batch);
     return TRUE;
-  }
-
-  /**
-   * Build the form for entries that needs actions
-   *
-   * @param $action_data_entry
-   *
-   * @return array
-   */
-  private function buildActionForm($action_data_entry) {
-    $action_form = [];
-    $action_form['entity_label'] = [
-      '#markup' => $action_data_entry['entity_label'],
-    ];
-
-    $action_form['entity_type_label'] = [
-      '#markup' => $action_data_entry['entity_type_label'],
-    ];
-
-    $action_form['action'] = [
-      '#type' => 'select',
-      '#options' => [
-        TRUE => t('Overwrite existing'),
-        FALSE => t('Keep existing'),
-      ],
-    ];
-
-    //If the entry has broken linkage with content
-    if (isset($this->broken_entities[$action_data_entry['entry_uuid']])) {
-      $warning_markup = [];
-      $action_form['#attributes'] = ['class' => 'color-warning'];
-      $broken_entity = $this->broken_entities[$action_data_entry['entry_uuid']];
-      $warning_markup[] = [
-        '#markup' => $this->t('This entity is missing populated fields. If you choose to <strong>Overwrite existing</strong>, content in these fields will be lost.'),
-      ];
-      $warning_markup[] = [
-        '#markup' => '<br />' . $this->formatPlural(count($broken_entity['entities']), '1 entity affected.', '@count entities affected.'),
-      ];
-
-      $warning_markup[] = [
-        '#type' => 'link',
-        '#title' => ' ' . $this->t('See where this entity is in use.'),
-        '#url' => $broken_entity['in_use_url'],
-        '#options' => [
-          'attributes' => [
-            'class' => ['use-ajax'],
-            'data-dialog-type' => 'modal',
-            'data-dialog-options' => Json::encode([
-              'width' => 700,
-            ]),
-          ],
-        ],
-        '#attached' => ['library' => ['core/drupal.dialog.ajax']],
-      ];
-
-      $action_form['warning'] = $warning_markup;
-    }
-    return $action_form;
-  }
-
-  /**
-   * Build a form for entries that doesn't need action
-   *
-   * @param $action_data_entry
-   *
-   * @return array
-   */
-  private function buildNonActionForm($action_data_entry) {
-    $form = [];
-    $form['entity_label'] = [
-      '#markup' => $action_data_entry['entity_label'],
-    ];
-
-    $form['entity_type_label'] = [
-      '#markup' => $action_data_entry['entity_type_label'],
-    ];
-
-    return $form;
-  }
-
-  /**
-   * Build the accordion container for each type of import status
-   *
-   * @param array $entry_form - the entries
-   * @param $name - the name of the section
-   * @param $message - the message for the section
-   * @param false $open - is the section open by default
-   *
-   * @return array
-   */
-  private function buildAccordionActionForm($entry_form, $name, $message, $open = FALSE) {
-    $form = [
-      '#type' => 'details',
-      '#open' => $open,
-      '#title' => [
-        '#markup' => $name,
-      ],
-    ];
-
-    $form['information'] = [
-      '#markup' => '<p>' . $message . '</p>',
-    ];
-
-    $form['entries']['indexes'] = [
-      '#type' => 'table',
-      '#header' => [
-        ['data' => $this->t('Entity')],
-        ['data' => $this->t('Entity type')],
-      ],
-    ];
-
-    $form['entries']['indexes'] += $entry_form;
-    return $form;
   }
 
 }

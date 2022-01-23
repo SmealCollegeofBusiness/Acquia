@@ -2,6 +2,7 @@
 
 namespace Drupal\acquia_contenthub_subscriber\Plugin\QueueWorker;
 
+use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\Hmac\Key;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Client\ClientFactory;
@@ -31,7 +32,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
   /**
    * How long the scroll cursor will be retained inside memory.
    */
-  protected const SCROLL_TIME_WINDOW = '10m';
+  protected const SCROLL_TIME_WINDOW = '10';
 
   /**
    * Event dispatcher.
@@ -62,6 +63,15 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
   protected $loggerChannel;
 
   /**
+   * Whether the account in hand is featured or not.
+   *
+   * This flag is configured in Content Hub Service.
+   *
+   * @var bool
+   */
+  private $isFeatured;
+
+  /**
    * ContentHubFilterExecuteWorker constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -81,7 +91,6 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
     $this->dispatcher = $dispatcher;
     $this->factory = $factory;
     $this->loggerChannel = $logger_channel;
-    $this->client = $factory->getClient();
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -135,7 +144,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    *   If this is the final return TRUE, FALSE otherwise.
    */
   private function isFinalPage(array $filter_response): bool {
-    return empty($filter_response['hits']['hits']);
+    return empty($filter_response['hits']['hits']) || !isset($filter_response['_scroll_id']);
   }
 
   /**
@@ -147,34 +156,42 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    * @throws \Exception
    */
   public function processItem($data): void {
-    if (!isset($data->filter_uuid)) {
-      throw new \Exception('Filter uuid not found.');
+    if (empty($data->filter_uuid)) {
+      $this->loggerChannel->error('Filter uuid not found.');
+      return;
     }
-    $client = $this->client;
-    $settings = $client->getSettings();
+    $this->initialiseClient();
+
+    $settings = $this->client->getSettings();
     $webhook_uuid = $settings->getWebhook('uuid');
     if (!$webhook_uuid) {
       $this->loggerChannel->critical('Your webhook is not properly setup. ContentHub cannot execute filters without an active webhook. Please set your webhook up properly and try again.');
       return;
     }
 
+    $scroll_time_window = $this->getNormalizedScrollTimeWindowValue($this->client);
     $uuids = [];
-    $interest_list = $client->getInterestsByWebhook($webhook_uuid);
-    $matched_data = $this->client->startScrollByFilter($data->filter_uuid, self::SCROLL_TIME_WINDOW, self::SCROLL_SIZE);
+    $interest_list = $this->client->getInterestsByWebhook($webhook_uuid);
+    $matched_data = $this->client->startScrollByFilter($data->filter_uuid, $scroll_time_window, self::SCROLL_SIZE);
     $is_final_page = $this->isFinalPage($matched_data);
     $uuids = array_merge($uuids, $this->extractEntityUuids(array_merge($matched_data, $interest_list)));
 
-    $scroll_id = $matched_data['_scroll_id'];
+    $previous_scroll_id = $scroll_id = $matched_data['_scroll_id'];
     try {
       while (!$is_final_page) {
-        $matched_data = $this->client->continueScroll($scroll_id, self::SCROLL_TIME_WINDOW);
+        $matched_data = $this->client->continueScroll($scroll_id, $scroll_time_window);
         $uuids = array_merge($uuids, $this->extractEntityUuids(array_merge($matched_data, $interest_list)));
 
         $scroll_id = $matched_data['_scroll_id'];
+        if (!empty($scroll_id)) {
+          $previous_scroll_id = $scroll_id;
+        }
         $is_final_page = $this->isFinalPage($matched_data);
       }
     } finally {
-      $this->client->cancelScroll($scroll_id);
+      if (!empty($previous_scroll_id)) {
+        $this->client->cancelScroll($previous_scroll_id);
+      }
     }
 
     if (!$uuids) {
@@ -192,9 +209,50 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
 
       $request = new Request([], [], [], [], [], [], json_encode($payload));
       $key = new Key($settings->getApiKey(), $settings->getSecretKey());
-      $event = new HandleWebhookEvent($request, $payload, $key, $client);
+      $event = new HandleWebhookEvent($request, $payload, $key, $this->client);
       $this->dispatcher->dispatch(AcquiaContentHubEvents::HANDLE_WEBHOOK, $event);
     }
+  }
+
+  /**
+   * Returns the scroll window time value based on the account in hand.
+   *
+   * @return string
+   *   The correct value for scroll query param based on whether a given account
+   *   is featured.
+   *
+   * @throws \Exception
+   */
+  public function getNormalizedScrollTimeWindowValue(ContentHubClient $client): string {
+    return $this->accountIsFeatured($client) ? self::SCROLL_TIME_WINDOW . 'm' : self::SCROLL_TIME_WINDOW;
+  }
+
+  /**
+   * Initialises Content Hub client.
+   *
+   * @throws \Exception
+   */
+  protected function initialiseClient(): void {
+    if (empty($this->client)) {
+      $this->client = $this->factory->getClient();
+    }
+  }
+
+  /**
+   * Whether the account in hand is featured or not.
+   *
+   * This flag is configured in Content Hub Service.
+   *
+   * @return bool
+   *   True if account is featured.
+   *
+   * @throws \Exception
+   */
+  protected function accountIsFeatured(ContentHubClient $client): bool {
+    if (empty($this->isFeatured)) {
+      $this->isFeatured = $client->isFeatured();
+    }
+    return $this->isFeatured;
   }
 
 }

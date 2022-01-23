@@ -203,7 +203,7 @@ class PackageFormRefreshController extends ControllerBase {
      */
     $excluded_entity_types_form = [];
     foreach ($this->usagePluginManager->getDefinitions() as $item) {
-      if ($item['exportable']) {
+      if ($item['exportable'] && $item['can_be_excluded']) {
         try {
           $excluded_entity_types_form[$item['entity_type']] = [
             'label' => $this->entityTypeManager->getDefinition($item['entity_type'])->getPluralLabel()->__toString(),

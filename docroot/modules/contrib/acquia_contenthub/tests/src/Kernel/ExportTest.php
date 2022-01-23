@@ -26,7 +26,7 @@ use Drupal\user\Entity\User;
 /**
  * Tests entity exports.
  *
- * @group orca_ignore
+ * @group acquia_contenthub
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
@@ -49,6 +49,7 @@ class ExportTest extends EntityKernelTestBase {
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_publisher',
+    'acquia_contenthub_server_test',
   ];
 
   /**

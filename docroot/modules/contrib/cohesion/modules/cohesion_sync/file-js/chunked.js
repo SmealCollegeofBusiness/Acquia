@@ -36,11 +36,11 @@
   Drupal.behaviors.fileAutoUpload = {
     attach: function attach(context) {
       // Trigger the AJAX form validation.
-      $(context).find('input[type="file"]').once('auto-file-upload').on('change.autoFileUpload', Drupal.file.triggerUpload);
+      $(context).find('#edit-legacy-import input[type="file"]').once('auto-file-upload').on('change.autoFileUpload', Drupal.file.triggerUpload);
     },
     detach: function detach(context, settings, trigger) {
       if (trigger === 'unload') {
-        $(context).find('input[type="file"]').removeOnce('auto-file-upload').off('.autoFileUpload');
+        $(context).find('#edit-legacy-import input[type="file"]').removeOnce('auto-file-upload').off('.autoFileUpload');
       }
     }
   };

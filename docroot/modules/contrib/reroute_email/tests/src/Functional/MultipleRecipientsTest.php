@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\reroute_email\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
-
 /**
  * Test Reroute Email with multiple recipients.
  *
@@ -11,37 +9,34 @@ use Drupal\Component\Render\FormattableMarkup;
  *
  * @group reroute_email
  */
-class MultipleRecipientsTest extends RerouteEmailTestBase {
+class MultipleRecipientsTest extends RerouteEmailBrowserTestBase {
 
   /**
    * Test Reroute Email with multiple recipients.
+   *
+   * @throws \Behat\Mink\Exception\ResponseTextException
    */
-  public function testMultipleRecipients() {
-    // Set multiple whitelisted domain and rerouting emails. Multiple commas and
-    // semicolons are added for validation tests.
-    $this->configureRerouteEmail(TRUE, 'user1@example.com, user2@example.com,;;,,user@example.com', $this->whitelistedDomain);
+  public function testMultipleRecipients(): void {
+    // Set multiple rerouting emails and a domain to the allowed list.
+    // Multiple commas and semicolons are added for validation tests.
+    $emails_reroute_to_form = "user1@reroute-to.com, \nuser2@reroute-to.com,;;, ,\nuser3@reroute-to.com\n";
+    $emails_reroute_to_result = "user1@reroute-to.com,user2@reroute-to.com,user3@reroute-to.com";
+    $email_allow_domain = '*@allowlisted.com';
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_ENABLE => TRUE,
+      REROUTE_EMAIL_ADDRESS => $emails_reroute_to_form,
+      REROUTE_EMAIL_ALLOWLIST => $email_allow_domain,
+    ]);
 
     // Make sure configured emails were set properly.
-    $reroute_to = 'user1@example.com,user2@example.com,user@example.com';
-    $this->assertEquals($this->rerouteConfig->get(REROUTE_EMAIL_ADDRESS), $reroute_to, 'Reroute email address was set.');
-    $this->assertEquals($this->rerouteConfig->get(REROUTE_EMAIL_WHITELIST), $this->whitelistedDomain, 'Whitelisted value was set.');
+    $this->assertEquals($this->rerouteConfig->get(REROUTE_EMAIL_ADDRESS), $emails_reroute_to_result, 'Reroute email addresses was set.');
+    $this->assertEquals($this->rerouteConfig->get(REROUTE_EMAIL_ALLOWLIST), $email_allow_domain, 'Value was set to the allowed list.');
 
     // Submit a test email (should be rerouted).
-    $to = 'some@not-exist.domain, whitelisted@example.com';
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->submitForm(['to' => $to], t('Send email'));
-
-    // Check if the email was rerouted properly.
-    $this->assertEmailOriginallyTo($to);
-    $this->assertMail('to', $reroute_to, new FormattableMarkup('Email was properly rerouted to the email address: @destination.', ['@destination' => $reroute_to]));
+    $this->assertMailReroutedFromTestForm(['to' => 'email@not-allowlisted.com, email@allowlisted.com']);
 
     // Submit a test email (should not be rerouted).
-    $to = 'whitelisted@example.com, user2@example.com, allowed@example.com';
-    $this->drupalGet('admin/config/development/reroute_email/test');
-    $this->submitForm(['to' => $to], t('Send email'));
-
-    // Check if the email was not rerouted.
-    $this->assertMail('to', $to, new FormattableMarkup('Email was properly sent the email addresses: @destination.', ['@destination' => $to]));
+    $this->assertMailNotReroutedFromTestForm(['to' => 'user1@allowlisted.com, name2@allowlisted.com, allowed3@allowlisted.com']);
   }
 
 }

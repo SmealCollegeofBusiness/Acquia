@@ -19,6 +19,6 @@ services:
 
   acquia_contenthub_enqueue_entities.commands:
     class: Drupal\acquia_contenthub_publisher\Commands\AcquiaContentHubEnqueueEntitiesCommands
-    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@database', '@acquia_contenthub_publisher.tracker', '@cache.depcalc']
+    arguments: ['@entity_type.manager', '@entity_type.bundle.info', '@database', '@acquia_contenthub_publisher.tracker', '@cache.depcalc', '@acquia_contenthub_publisher.entity_enqueuer']
     tags:
       - { name: drush.command }

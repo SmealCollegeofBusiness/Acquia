@@ -2,9 +2,13 @@
 
 namespace Drupal\cohesion_sync\Controller;
 
+use Drupal\cohesion_sync\Config\CohesionFileStorage;
+use Drupal\cohesion_sync\Event\SiteStudioSyncFilesEvent;
 use Drupal\cohesion_website_settings\Controller\WebsiteSettingsController;
 use Drupal\config\StorageReplaceDataWrapper;
+use Drupal\Core\Config\StorageComparerInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -320,6 +324,110 @@ class BatchImportController extends ControllerBase {
       ];
 
       batch_set($batch);
+    }
+  }
+
+  public static function fileImport(CohesionFileStorage $file_storage, string $path, &$context) {
+    $files = $file_storage->getFilesJson();
+    $file_sync_event = new SiteStudioSyncFilesEvent($files, $path);
+    /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher */
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event_dispatcher->dispatch($file_sync_event::IMPORT, $file_sync_event);
+  }
+
+  /**
+   * Handles rebuild during package import.
+   *
+   * @param \Drupal\Core\Config\StorageComparerInterface $storage_comparer
+   *   Storage Comparer service.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public static function handleRebuilds(StorageComparerInterface $storage_comparer) {
+    $sync_import = \Drupal::service('cohesion_sync.sync_import');
+    $change_list = $sync_import->buildChangeList($storage_comparer->getChangelist());
+
+    if ($sync_import->needsCompleteRebuild($change_list)) {
+      $batch = WebsiteSettingsController::batch(TRUE);
+      batch_set($batch);
+    }
+    else {
+      $rebuild_list = $sync_import->findAffectedEntities($change_list, $storage_comparer);
+      if (!empty($rebuild_list)) {
+        \Drupal::service('cohesion.rebuild_inuse_batch')->run($rebuild_list);
+      }
+    }
+  }
+
+  /**
+   * Rebuild the in-use table for each entity that is using a deleted config
+   *
+   * @param \Drupal\Core\Config\StorageComparerInterface $storage_comparer
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public static function handleInuse($in_use_to_rebuild) {
+
+    /** @var \Drupal\cohesion\UsageUpdateManager $usage_update_manager */
+    $usage_update_manager = \Drupal::service('cohesion_usage.update_manager');
+    /** @var \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager */
+    $entity_type_manager = \Drupal::service('entity_type.manager');
+
+    foreach ($in_use_to_rebuild as $uuid => $entity_type) {
+      $entities = $entity_type_manager
+        ->getStorage($entity_type)
+        ->loadByProperties(['uuid' => $uuid]);
+      $entity = reset($entities);
+      $usage_update_manager->buildRequires($entity);
+    }
+
+  }
+
+  /**
+   * Finish batch.
+   *
+   * This function is a static function to avoid serializing the ConfigSync
+   * object unnecessarily.
+   *
+   * @param bool $success
+   *   Indicate that the batch API tasks were all completed successfully.
+   * @param array $results
+   *   An array of all the results that were updated in update_do_one().
+   * @param array $operations
+   *   A list of the operations that had not been completed by the batch API.
+   */
+  public static function finish($success, $results, $operations) {
+    $messenger = \Drupal::messenger();
+    $cohesion_file_sync_messages = &drupal_static('cohesion_file_sync_messages');
+
+    if ($success) {
+      if (!empty($results['errors'])) {
+        $logger = \Drupal::logger('config_sync');
+        foreach ($results['errors'] as $error) {
+          $messenger->addError($error);
+          $logger->error($error);
+        }
+        $messenger->addWarning(t('Package configuration was imported with errors.'));
+      }
+      elseif (!InstallerKernel::installationAttempted()) {
+        // Display a success message when not installing Drupal.
+        $messenger->addStatus(t('Package configuration was imported successfully.'));
+        if (is_array($cohesion_file_sync_messages) && !empty($cohesion_file_sync_messages)) {
+          $messenger->addStatus(t('Package files were processed successfully. In total :new new files imported and :updated existing files updated.', [
+            ':new' => $cohesion_file_sync_messages['new_files'],
+            ':updated' => $cohesion_file_sync_messages['updated_files'],
+          ]));
+        }
+      }
+    }
+    else {
+      // An error occurred.
+      // $operations contains the operations that remained unprocessed.
+      $error_operation = reset($operations);
+      $message = t('An error occurred while processing %error_operation with arguments: @arguments', ['%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)]);
+      $messenger->addError($message);
     }
   }
 

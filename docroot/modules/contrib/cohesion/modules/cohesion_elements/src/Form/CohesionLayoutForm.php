@@ -66,11 +66,12 @@ class CohesionLayoutForm extends EntityForm {
     $this->cohesion_layout_revision_id = \Drupal::request()->attributes->get('cohesion_layout_revision');
     $langcode = \Drupal::languageManager()->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId();
 
-    // Load the entity.
-    if ($this->cohesion_layout_revision_id && (!$this->entity = \Drupal::service('entity_type.manager')
+    $current_entity = \Drupal::service('entity_type.manager')
       ->getStorage('cohesion_layout')
-      ->loadRevision($this->cohesion_layout_revision_id)->getTranslation($langcode))) {
-      return FALSE;
+      ->loadRevision($this->cohesion_layout_revision_id);
+    // Load the entity.
+    if ($this->cohesion_layout_revision_id && !($current_entity->hasTranslation($langcode) && $this->entity = $current_entity->getTranslation($langcode))) {
+      $this->entity = $current_entity;
     }
 
     // Load the component JSON.

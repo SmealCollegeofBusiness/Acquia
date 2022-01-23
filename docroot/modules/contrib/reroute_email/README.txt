@@ -52,7 +52,7 @@ Path: /admin/config/development/reroute_email
 empty and no value is provided for rerouted email addresses, all outgoing
 emails would be aborted and recorded in the recent log entries, with a full
 dump of the email variables, which could provide an additional debugging
-method. The whitelist section allows setting up lists of email address and
+method. The allowed list section allows setting up lists of email address and
 domain name exceptions for which outgoing emails would not be rerouted.
 
 --------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ implementations. This header will force enable or disable email rerouting by
 ignoring default settings.
 
 --------------------------------------------------------------------------------
-                            SETTINGS CODE SNIPPET
+                            SETTINGS.PHP CODE SNIPPET
 --------------------------------------------------------------------------------
 
 Configuration and all the settings variables can be overridden in the
@@ -93,31 +93,44 @@ the values:
  * disabled, change the values below accordingly for your site.
  */
 
-// Enable email rerouting.
+// Force enable/disable email rerouting.
 $config['reroute_email.settings']['enable'] = TRUE;
 
-// Space, comma, semicolon, or newline-delimited list of email addresses. Every
-// destination email address which is not on "Whitelisted email addresses" list
-// will be rerouted to these addresses. If the field is empty and no value is
-// provided, all outgoing emails would be aborted and the email would be
-// recorded in the recent log entries (if enabled).
+// A comma-delimited list of email addresses. Every destination email address
+// which is not fit with "Skip email rerouting for" lists will be rerouted to
+// these addresses. If the field is empty and no value is provided, all outgoing
+// emails would be aborted and the email would be recorded in the recent log
+// entries (if enabled).
 $config['reroute_email.settings']['address'] = 'your.email@example.com';
 
-// Space, comma, semicolon, or newline-delimited list of email addresses to pass
-// through. Every destination email address which is not on this list will be
-// rerouted. If the field is empty and no value is provided, all outgoing emails
-// would be rerouted. We can use wildcard email "*@example.com" to whitelist all
-// emails by the domain.
-$config['reroute_email.settings']['whitelist'] = '*@example.com, foo@bar.com';
+// A comma-delimited list of email addresses to pass through. All emails to
+// addresses from this list will not be rerouted. A patterns like
+// "*@example.com" and "myname+*@example.com" can be used to add all emails by
+// its domain or the pattern.
+$config['reroute_email.settings']['allowed'] = 'foo@bar.com, myname+*@example.com';
 
-// Space, comma, semicolon, or newline-delimited list of message keys to be
-// rerouted. Either module machine name or specific mail key can be used for
-// that. Only matching messages will be rerouted. If left empty (as default),
-// all emails will be selected for rerouting.
+// An array of users' roles that need to be skipped from the rerouting. All
+// emails that belong to users with those roles won't be rerouted.
+$config['reroute_email.settings']['roles'] = ["some_role", "administrator"];
+
+// A line-delimited list of message keys to be rerouted. Either module machine
+// name or specific mail key can be used for that. Use case: we need to reroute
+// only a few specific mail keys (specified mail keys will be rerouted, all
+// other emails will NOT be rerouted).
 $config['reroute_email.settings']['mailkeys'] = 'somemodule, mymodule_mykey';
 
-// Enable inserting a message into the email body when the mail is being
-// rerouted.
+// A line-delimited list of message keys to be rerouted. Either module machine
+// name or specific mail key can be used for that. Use case: we need to reroute
+// all outgoing emails except a few mail keys (specified mail keys will NOT be
+// rerouted, all other emails will be rerouted).
+$config['reroute_email.settings']['mailkeys_skip'] = 'somemodule, mymodule_mykey';
+
+// Force enable/disable displaying a Drupal status message when the mail is
+// being rerouted.
+$config['reroute_email.settings']['description'] = TRUE;
+
+// Force enable/disable inserting a message into the email body when the mail
+// is being rerouted.
 $config['reroute_email.settings']['message'] = TRUE;
 
 --------------------------------------------------------------------------------

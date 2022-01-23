@@ -11,7 +11,7 @@ use Drupal\Component\Render\FormattableMarkup;
  *
  * @group reroute_email
  */
-class ContactTest extends RerouteEmailTestBase {
+class ContactTest extends RerouteEmailBrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -23,7 +23,7 @@ class ContactTest extends RerouteEmailTestBase {
    *
    * @var string
    */
-  protected $confirmationMessage;
+  protected $confirmationMessage = 'Your message has been sent.';
 
   /**
    * Enable modules and create user with specific permissions.
@@ -36,8 +36,6 @@ class ContactTest extends RerouteEmailTestBase {
     // Add more permissions to be able to manipulate the contact forms.
     $this->permissions[] = 'administer contact forms';
     $this->permissions[] = 'access site-wide contact form';
-    $this->confirmationMessage = 'Your message has been sent.';
-
     parent::setUp();
 
     // Create a "feedback" contact form. Note that the 'message' was added in
@@ -63,17 +61,20 @@ class ContactTest extends RerouteEmailTestBase {
    *
    * The Core Contact email form is submitted several times with different
    * Email Rerouting settings: Rerouting enabled or disabled, Body injection
-   * enabled or disabled, several recipients with or without whitelist.
+   * enabled or disabled, recipients from the allowed list and not.
    *
    * @throws \Behat\Mink\Exception\ExpectationException
    *   Thrown when the requested page status code is a different one.
    */
-  public function testBasicNotification() {
-    // Additional destination email address used for testing the whitelist.
+  public function testBasicNotification(): void {
+    // Additional destination email address used for testing the allowed list.
     $additional_destination = 'additional@example.com';
 
     // Configure to reroute to {$this->rerouteDestination}.
-    $this->configureRerouteEmail(TRUE, $this->rerouteDestination);
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_ENABLE => TRUE,
+      REROUTE_EMAIL_ADDRESS => $this->rerouteDestination,
+    ]);
 
     // Configure the contact settings to send to $original_destination.
     $this->drupalGet('admin/structure/contact/manage/feedback');
@@ -91,12 +92,18 @@ class ContactTest extends RerouteEmailTestBase {
 
     // Check rerouted email.
     $this->assertMail('to', $this->rerouteDestination, new FormattableMarkup('Email was rerouted to @address.', ['@address' => $this->rerouteDestination]));
-    $this->assertEmailOriginallyTo();
+
+    // Destination address can contain display name with symbols "<" and ">".
+    // So, we can't use $this->t() or FormattableMarkup here.
+    $search_originally_to = sprintf('Originally to: %s', $this->originalDestination);
+    $this->assertMailString('body', $search_originally_to, 1, 'Found the correct "Originally to" line in the body.');
 
     // Now try sending to one of the additional email addresses that should
     // not be rerouted. Configure two email addresses in reroute form.
     // Body injection is still turned on.
-    $this->configureRerouteEmail(NULL, $this->rerouteDestination, "{$this->rerouteDestination}, {$additional_destination}");
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_ALLOWLIST => "{$this->rerouteDestination}, {$additional_destination}",
+    ]);
 
     // Configure the contact settings to point to the additional recipient.
     $this->drupalGet('admin/structure/contact/manage/feedback');
@@ -106,11 +113,11 @@ class ContactTest extends RerouteEmailTestBase {
     $this->drupalGet('contact');
     $this->submitForm($post, t('Send message'));
     $this->assertSession()->pageTextContains($this->confirmationMessage);
-    $this->assertMail('to', $additional_destination, 'Email was not rerouted because destination was in whitelist.');
+    $this->assertMail('to', $additional_destination, 'Email was not rerouted because destination was in the allowed list.');
 
     // Now change the configuration to disable reroute and set the default
     // email recipients (from system.site.mail)
-    $this->configureRerouteEmail(FALSE);
+    $this->configureRerouteEmail([REROUTE_EMAIL_ENABLE => FALSE]);
 
     // Set the contact form to send to original_destination.
     $this->drupalGet('admin/structure/contact/manage/feedback');
@@ -125,7 +132,11 @@ class ContactTest extends RerouteEmailTestBase {
     $this->assertMail('to', $this->originalDestination, 'Mail not rerouted - sent to original destination.');
 
     // Configure to reroute without body injection.
-    $this->configureRerouteEmail(TRUE, $this->rerouteDestination, '', FALSE);
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_ENABLE => TRUE,
+      REROUTE_EMAIL_ALLOWLIST => '',
+      REROUTE_EMAIL_DESCRIPTION => FALSE,
+    ]);
 
     // Go to the contact page and send an email.
     $this->drupalGet('contact');
@@ -136,8 +147,8 @@ class ContactTest extends RerouteEmailTestBase {
 
     // There should be nothing in the body except the contact message - no
     // body injection like 'Originally to'.
-    $this->assertTrue(strpos($mail['body'], 'Originally to') === FALSE, 'Body does not contain "Originally to".');
-    $this->assertEquals($mail['headers']['X-Rerouted-Original-To'], $this->originalDestination, 'X-Rerouted-Original-To is correctly set to the original destination email.');
+    $this->assertStringNotContainsString('Originally to', $mail['body'], 'Body does not contain "Originally to".');
+    $this->assertEquals($mail['headers']['X-Rerouted-Original-to'], $this->originalDestination, 'X-Rerouted-Original-to is correctly set to the original destination email.');
   }
 
 }

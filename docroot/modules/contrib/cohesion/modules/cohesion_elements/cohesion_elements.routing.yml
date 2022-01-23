@@ -38,25 +38,6 @@ cohesion_elements.endpoints.component_content_save:
     _permission: 'administer component content'
     _content_type_format: json
 
-# In-context component edit.
-cohesion_elements.components.settings_tray_iframe:
-  path: '/admin/cohesion/cohesion_layout_modal/{entity_type_id}/{id}/{revision_id}/{uuid}/{component_id}/{randomizer}'
-  defaults:
-    _controller: '\Drupal\cohesion_elements\Controller\CohesionLayoutModalController::iframe'
-    _title: 'Edit component'
-  requirements:
-    _permission: 'access components'
-
-cohesion_elements.layout_canvas.edit_revision:
-  path: '/admin/cohesion/components/cohesion_layout_revision/{cohesion_layout_revision}/{component_instance_uuid}/{component_id}/edit'
-  defaults:
-    _form: '\Drupal\cohesion_elements\Form\CohesionLayoutForm'
-    _title: 'Edit cohesion layout'
-  requirements:
-    _permission: 'access components'
-  options:
-    no_cache: 'TRUE'
-
 # Preview
 cohesion_elements.component.preview_post:
   path: '/cohesionapi/component/preview_post'

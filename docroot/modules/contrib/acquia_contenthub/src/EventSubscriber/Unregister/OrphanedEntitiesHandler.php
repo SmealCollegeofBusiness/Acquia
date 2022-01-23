@@ -52,9 +52,9 @@ class OrphanedEntitiesHandler implements EventSubscriberInterface {
     $origin = !empty($event->getOriginUuid()) ? $event->getOriginUuid() : $client->getSettings()->getUuid();
 
     $list_entities = $client->listEntities(['origin' => $origin]);
-
-    $orphaned_entites = $list_entities['total'] <= 1 ? 0 : $list_entities['total'];
-    $event->setOrphanedEntitiesAmount($orphaned_entites);
+    $list_entities['data'] = $list_entities['data'] ?? [];
+    $orphaned_entities = $list_entities['total'] <= 1 ? 0 : $list_entities['total'];
+    $event->setOrphanedEntitiesAmount($orphaned_entities);
     $event->setOrphanedEntities($list_entities['data']);
   }
 

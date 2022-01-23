@@ -43,6 +43,13 @@ class StubTracker {
   protected $dispatcher;
 
   /**
+   * Array of uuids being imported.
+   *
+   * @var array
+   */
+  protected $importedEntities = [];
+
+  /**
    * StubTracker constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -79,6 +86,7 @@ class StubTracker {
    *   A potential stub entity to track.
    */
   public function track(EntityInterface $entity) {
+    $this->importedEntities[] = $entity->uuid();
     if ($this->isTracking()) {
       $this->stubs[$entity->getEntityTypeId()][] = $entity->id();
     }
@@ -124,6 +132,7 @@ class StubTracker {
     }
     $this->stack = [];
     $this->stubs = [];
+    $this->importedEntities = [];
   }
 
   /**
@@ -166,6 +175,16 @@ class StubTracker {
   public function hasStub($entity_type, $entity_id): bool {
     return isset($this->stubs[$entity_type]) &&
       in_array($entity_id, $this->stubs[$entity_type]);
+  }
+
+  /**
+   * Returns list of uuids of imported entities.
+   *
+   * @return array
+   *   Array of imported uuids.
+   */
+  public function getImportedEntities(): array {
+    return $this->importedEntities;
   }
 
 }

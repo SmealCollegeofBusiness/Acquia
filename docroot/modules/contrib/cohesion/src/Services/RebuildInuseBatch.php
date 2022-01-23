@@ -221,6 +221,8 @@ class RebuildInuseBatch {
    * @param $operations
    */
   public static function finishedCallback($success, $results, $operations) {
+    $messenger = \Drupal::messenger();
+
     // The 'success' parameter means no fatal PHP errors were detected. All
     // other error management should be handled using 'results'.
     if ($success) {
@@ -233,7 +235,16 @@ class RebuildInuseBatch {
       $local_file_manager = \Drupal::service('cohesion.local_files_manager');
       $local_file_manager->tempToLive();
       \Drupal::service('cohesion.template_storage')->commit();
+
+      // Workaround for cache flush clearing existing messages.
+      $all = $messenger->all();
       drupal_flush_all_caches();
+      foreach ($all as $status => $messages) {
+        foreach ($messages as $markup) {
+          $messenger->addMessage($markup, $status);
+        }
+      }
+
       Cache::invalidateTags(['dx8-form-data-tag']);
       $message = t('Entities in use have been rebuilt.');
     }
@@ -241,7 +252,7 @@ class RebuildInuseBatch {
       $message = t('Entities in use rebuild failed to complete.');
     }
 
-    \Drupal::messenger()->addMessage($message);
+    $messenger->addMessage($message);
   }
 
   /**

@@ -14,7 +14,7 @@ use Drupal\Component\Render\FormattableMarkup;
  *
  * @group reroute_email
  */
-class DefaultAddressesTest extends RerouteEmailTestBase {
+class DefaultAddressesTest extends RerouteEmailBrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -38,8 +38,10 @@ class DefaultAddressesTest extends RerouteEmailTestBase {
    * system variable are properly used as fallbacks. Additionally, check that
    * emails are aborted and a watchdog entry logged if reroute email address is
    * set to an empty string.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function testRerouteDefaultAddress() {
+  public function testRerouteDefaultAddress(): void {
 
     // Check default value for reroute_email_address when not configured.
     // If system.site's 'mail' is not empty, it should be the default value.
@@ -49,7 +51,7 @@ class DefaultAddressesTest extends RerouteEmailTestBase {
     // Programmatically enable email rerouting.
     $this->rerouteConfig->set(REROUTE_EMAIL_ENABLE, TRUE)->save();
 
-    // Load the Reroute Email Settings form page. Ensure rerouting is enabled.
+    // Load Reroute Email Settings form page. Ensure rerouting is enabled.
     $this->drupalGet('admin/config/development/reroute_email');
     $this->assertSession()->checkboxChecked('edit-enable');
     $this->assertTrue($this->rerouteConfig->get(REROUTE_EMAIL_ENABLE), 'Rerouting is enabled.');
@@ -61,11 +63,10 @@ class DefaultAddressesTest extends RerouteEmailTestBase {
     $this->assertNull($this->rerouteConfig->get(REROUTE_EMAIL_ADDRESS), 'Reroute email destination address is not configured.');
 
     // Submit a test email, check if it is rerouted to system.site.mail address.
-    $this->drupalGet('admin/config/development/reroute_email/test');
+    $this->drupalGet($this->rerouteTestFormPath);
     $this->submitForm(['to' => 'to@example.com'], 'Send email');
     $this->assertSession()->pageTextContains(t('Test email submitted for delivery from test form.'));
-    $this->assertTrue(count($this->getMails()) === 1, 'Exactly one email captured.');
-    $this->verboseEmail();
+    $this->assertCount(1, $this->getMails(), 'Exactly one email captured.');
 
     // Check rerouted email is the site email address.
     $this->assertMail('to', $site_mail, new FormattableMarkup('Email was properly rerouted to site email address: @default_destination.', ['@default_destination' => $site_mail]));
@@ -76,24 +77,27 @@ class DefaultAddressesTest extends RerouteEmailTestBase {
       ->set('mail', NULL)
       ->save();
 
-    // Configure whitelisted  addresses as an empty string to about all emails.
-    $this->configureRerouteEmail(TRUE, '', '');
+    // Configure the allowed list of addresses as an empty string to abort all
+    // emails.
+    $this->configureRerouteEmail([
+      REROUTE_EMAIL_ENABLE => TRUE,
+      REROUTE_EMAIL_ALLOWLIST => '',
+    ]);
 
     // Make sure configured emails values are an empty string.
-    $this->assertTrue($this->rerouteConfig->get(REROUTE_EMAIL_ADDRESS) === '', 'Reroute email destination address is an empty string.');
-    $this->assertTrue($this->rerouteConfig->get(REROUTE_EMAIL_WHITELIST) === '', 'Whitelisted email address is an empty string.');
+    $this->assertSame($this->rerouteConfig->get(REROUTE_EMAIL_ADDRESS), '', 'Reroute email destination address is an empty string.');
+    $this->assertSame($this->rerouteConfig->get(REROUTE_EMAIL_ALLOWLIST), '', 'Allowed email address is an empty string.');
 
     // Flush the Test Mail collector to ensure it is empty for this tests.
     \Drupal::state()->set('system.test_mail_collector', []);
 
     // Submit a test email to check if it is aborted.
-    $this->drupalGet('admin/config/development/reroute_email/test');
+    $this->drupalGet($this->rerouteTestFormPath);
     $this->submitForm(['to' => 'to@example.com'], t('Send email'));
-    $mails = $this->getMails();
-    $this->assertTrue(count($mails) == 0, 'Email sending was properly aborted because rerouting email address is an empty string.');
+    $this->assertCount(0, $this->getMails(), 'Email sending was properly aborted because rerouting email address is an empty string.');
 
     // Check status message is displayed properly after email form submission.
-    $this->assertSession()->responseMatches(t('/@message_id.*was aborted by reroute email/', ['@message_id' => 'reroute_email_test_email_form']));
+    $this->assertSession()->pageTextContains($this->t('An email (ID: @message_id) either aborted or rerouted to the configured address.', ['@message_id' => 'reroute_email_test_email_form']));
 
     // Check the watchdog entry logged with aborted email message.
     $this->drupalGet('admin/reports/dblog');
@@ -107,7 +111,7 @@ class DefaultAddressesTest extends RerouteEmailTestBase {
     $this->clickLink($link_label);
 
     // Ensure the correct email is logged with default 'to' placeholder.
-    $this->assertSession()->responseMatches(t('/Aborted email sending for.*@message_id.*Detailed email data/', ['@message_id' => 'reroute_email_test_email_form']));
+    $this->assertSession()->pageTextContains($this->t('An email (ID: @message_id) was either rerouted or aborted.Detailed email data: Array $message', ['@message_id' => 'reroute_email_test_email_form']));
   }
 
 }

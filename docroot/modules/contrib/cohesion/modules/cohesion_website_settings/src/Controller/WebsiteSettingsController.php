@@ -3,6 +3,8 @@
 namespace Drupal\cohesion_website_settings\Controller;
 
 use Drupal\cohesion\CohesionJsonResponse;
+use Drupal\cohesion\Event\SiteStudioEvents;
+use Drupal\cohesion\Event\PreRebuildEvent;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
@@ -228,23 +230,22 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
   }
 
   /**
+   * Endpoint to return one of the website settings library, color - font - icon
+   *
    * GET: /cohesionapi/main/{type}.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *
    * @return \Symfony\Component\HttpFoundation\Response json response data
-   *   Endpoint to return one of the website settings library, color - font - icon
+   *
    */
   public function libraryAction(Request $request) {
     // Get the type of website setting from the request.
-    $type = ($request->get('type')) ? $request->get('type') : NULL;
-    $item = ($request->get('item')) ? $request->get('item') : NULL;
+    $type = $request->get('type');
 
     $error = FALSE;
-    $content = [];
     $status = 200;
 
-    // Get the content.
     switch ($type) {
       case 'icon_libraries':
       case 'font_libraries':
@@ -254,15 +255,26 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
         break;
 
       case 'color_palette':
-        $content = \Drupal::service('settings.endpoint.utils')->getColorsList($item);
-
-        $content = $item ? array_pop($content) : array_values($content);
+        // A second parameter can be passed for color palette to retrieve a specific color.
+        $item = $request->get('item');
+        $colors = \Drupal::service('settings.endpoint.utils')->getColorsList($item);
+        if ($item) {
+          $content = array_pop($colors);
+          if(empty($content)) {
+            $status = 400;
+            $error = TRUE;
+            $content = ['error' => $this->t('Color %color cannot be found. Please make sure this color exists in your color palette before continuing', ['%color' => $item])];
+          }
+        } else {
+          $content = array_values($colors);
+        }
 
         break;
 
       default:
         $status = 400;
         $error = TRUE;
+        $content = ['error' => $this->t('Unknown asset type: %type', ["%type" => $type])];
         break;
     }
 
@@ -520,6 +532,11 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public static function batch($cron = FALSE, $verbose = FALSE, $no_cache_clear = FALSE) {
+
+    // Setup an event to be dispatched pre rebuild.
+    $pre_event = new PreRebuildEvent();
+    \Drupal::service('event_dispatcher')->dispatch(SiteStudioEvents::PRE_REBUILD, $pre_event);
+
     // Reset temporary template list.
     \Drupal::keyValue('cohesion.temporary_template')->set('temporary_templates', []);
 

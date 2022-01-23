@@ -36,6 +36,13 @@ class PublisherActions {
   protected $backend;
 
   /**
+   * The Content Hub Entity Enqueuer.
+   *
+   * @var \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer
+   */
+  protected $entityEnqueuer;
+
+  /**
    * PublisherActions constructor.
    *
    * @param \Drupal\acquia_contenthub_publisher\PublisherTracker $publisher_tracker
@@ -44,11 +51,14 @@ class PublisherActions {
    *   The Content Hub Common Actions Service.
    * @param \Drupal\depcalc\Cache\DepcalcCacheBackend $depcalc_cache
    *   The Depcalc Cache Backend.
+   * @param \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer $entity_enqueuer
+   *   The Content Hub Entity Enqueuer.
    */
-  public function __construct(PublisherTracker $publisher_tracker, ContentHubCommonActions $common_actions, DepcalcCacheBackend $depcalc_cache) {
+  public function __construct(PublisherTracker $publisher_tracker, ContentHubCommonActions $common_actions, DepcalcCacheBackend $depcalc_cache, ContentHubEntityEnqueuer $entity_enqueuer) {
     $this->publisherTracker = $publisher_tracker;
     $this->commonActions = $common_actions;
     $this->backend = $depcalc_cache;
+    $this->entityEnqueuer = $entity_enqueuer;
   }
 
   /**
@@ -87,7 +97,7 @@ class PublisherActions {
 
     $this->publisherTracker->nullifyHashes([], [], $uuids);
 
-    _acquia_contenthub_publisher_enqueue_entity($entity, $op);
+    $this->entityEnqueuer->enqueueEntity($entity, $op);
   }
 
 }

@@ -421,7 +421,7 @@ class CohesionUtils {
           if (isset($entity_data[1])) {
             $entity_type_id = $entity_data[0];
             $entity_id = $entity_data[1];
-            if ($entity_type = \Drupal::service('entity_type.manager')
+            if ($entity_type = $this->entityTypeManager
               ->getStorage($entity_type_id)) {
               if ($entity = $entity_type->load($entity_id)) {
                 $language = $this->languageManager->getCurrentLanguage()->getId();

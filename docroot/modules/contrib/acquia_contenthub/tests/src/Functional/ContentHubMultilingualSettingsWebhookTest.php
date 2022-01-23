@@ -75,8 +75,9 @@ class ContentHubMultilingualSettingsWebhookTest extends BrowserTestBase {
    * Tests the webhook path is not changed if multilingual settings are enabled.
    */
   public function testContentHubWebhookPath() {
+    $base_path = \Drupal::request()->getBasePath();
     $webhook_path = Url::fromRoute('acquia_contenthub.webhook')->toString();
-    $this->assertEqual($webhook_path, '/acquia-contenthub/webhook');
+    $this->assertEqual($webhook_path, $base_path . '/acquia-contenthub/webhook');
   }
 
 }

@@ -13,6 +13,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 /**
  * @coversDefaultClass \Drupal\acquia_contenthub_subscriber\Plugin\QueueWorker\ContentHubFilterExecuteWorker
  *
+ * @group acquia_contenthub
+ *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class ContentHubFilterExecuteWorkerTest extends KernelTestBase {
@@ -25,6 +27,13 @@ class ContentHubFilterExecuteWorkerTest extends KernelTestBase {
    * @var \Drupal\acquia_contenthub_subscriber\Plugin\QueueWorker\ContentHubFilterExecuteWorker
    */
   protected $filterExecuteWorker;
+
+  /**
+   * Mocked ContentHubClient.
+   *
+   * @var \Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $client;
 
   /**
    * Modules to enable.
@@ -51,13 +60,13 @@ class ContentHubFilterExecuteWorkerTest extends KernelTestBase {
 
     $dispatcher = $this->prophesize(EventDispatcher::class);
     $client_factory = $this->prophesize(ClientFactory::class);
-    $client = $this->prophesize(ContentHubClient::class);
+    $this->client = $this->prophesize(ContentHubClient::class);
     $settings = $this->prophesize(Settings::class);
 
     $logger_channel = $this->container->get('acquia_contenthub_subscriber.logger_channel');
 
-    $client->getSettings()->willReturn($settings->reveal());
-    $client_factory->getClient()->willReturn($client->reveal());
+    $this->client->getSettings()->willReturn($settings->reveal());
+    $client_factory->getClient()->willReturn($this->client->reveal());
 
     $this->filterExecuteWorker = new ContentHubFilterExecuteWorker(
       $dispatcher->reveal(),
@@ -87,12 +96,41 @@ class ContentHubFilterExecuteWorkerTest extends KernelTestBase {
    */
   public function testProcessItemLogginMsgWithEmptyWebhookUuuid() {
     $this->installSchema('dblog', 'watchdog');
+    $this->client->isFeatured()->willReturn(FALSE);
 
     $data = new \stdClass();
     $data->filter_uuid = 'some-filter-uuid';
     $this->filterExecuteWorker->processItem($data);
 
     $this->assertLogMessage('acquia_contenthub_subscriber', 'Your webhook is not properly setup. ContentHub cannot execute filters without an active webhook. Please set your webhook up properly and try again.');
+  }
+
+  /**
+   * Tests the scroll time window in case of featured accounts.
+   *
+   * @throws \Exception
+   */
+  public function testGetNormalizedScrollTimeWindowValueWhenAccountIsFeatured(): void {
+    $this->installSchema('dblog', 'watchdog');
+
+    $this->client->isFeatured()->willReturn(TRUE);
+
+    $scroll_time_window = $this->filterExecuteWorker->getNormalizedScrollTimeWindowValue($this->client->reveal());
+    $this->assertTrue($scroll_time_window === '10m');
+  }
+
+  /**
+   * Tests the scroll time window in case of non-featured accounts.
+   *
+   * @throws \Exception
+   */
+  public function testGetNormalizedScrollTimeWindowValueWhenAccountIsNonFeatured(): void {
+    $this->installSchema('dblog', 'watchdog');
+
+    $this->client->isFeatured()->willReturn(FALSE);
+
+    $scroll_time_window = $this->filterExecuteWorker->getNormalizedScrollTimeWindowValue($this->client->reveal());
+    $this->assertTrue($scroll_time_window === '10');
   }
 
 }

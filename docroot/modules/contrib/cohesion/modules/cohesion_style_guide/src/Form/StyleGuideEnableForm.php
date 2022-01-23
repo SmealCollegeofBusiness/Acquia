@@ -59,9 +59,9 @@ class StyleGuideEnableForm extends CohesionEnableForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $in_use_list = $this->usageUpdateManager->getInUseEntitiesList($this->entity);
     parent::submitForm($form, $form_state);
 
-    $in_use_list = $this->usageUpdateManager->getInUseEntitiesList($this->entity);
     if (!empty($in_use_list)) {
       $this->rebuildInUseBatch->run($in_use_list);
     }

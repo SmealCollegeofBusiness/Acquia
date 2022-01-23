@@ -11,6 +11,7 @@ use Drupal\acquia_contenthub_test\MockDataProvider;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -77,8 +78,13 @@ class ContentHubClientMock extends ContentHubClient {
   /**
    * {@inheritdoc}
    */
-  public function ping() {
-    return [];
+  public function ping(): ResponseInterface {
+    $response_body = [
+      'success' => TRUE,
+      'request_id' => 'some-uuid',
+    ];
+
+    return new Response(200, [], json_encode($response_body));
   }
 
   /**

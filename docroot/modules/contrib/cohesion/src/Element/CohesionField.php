@@ -3,6 +3,7 @@
 namespace Drupal\cohesion\Element;
 
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Event\CohesionJsAppUrlsEvent;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\Component\Utility\Environment;
 use Drupal\cohesion\Entity\EntityJsonValuesInterface;
@@ -101,7 +102,7 @@ class CohesionField extends FormElement {
 
     // Prevent progress spinning wheel from loading if form is field config form.
     $is_loading = ($form_state->getFormObject()
-      ->getFormId() == 'field_config_edit_form') ? '' : 'coh-is-loading';
+      ->getFormId() == 'field_config_edit_form') ? '' : 'ssa-is-loading';
 
     // Add the entity style.
     $matches = [
@@ -216,7 +217,7 @@ class CohesionField extends FormElement {
       '#parents' => [],
     ];
 
-    $classes = ['coh-form-is-loading'];
+    $classes = ['ssa-form', 'ssa-form-is-loading'];
     if (isset($element['#classes']) && is_array($element['#classes'])) {
       $classes = array_merge($classes, $element['#classes']);
     }
@@ -235,12 +236,12 @@ class CohesionField extends FormElement {
     }
 
     // Define field.
-    $class_name_canvas = 'cohApp';
+    $class_name_canvas = 'ssaApp';
     $model_class_name = '_modelAsJson';
     $mapper_class_name = '_mapperAsJson';
     if (isset($element['#canvas_name'])) {
       $complete_form['react_router'] = [
-        '#markup' => '<div id="' . $class_name_canvas . '"></div>',
+        '#markup' => '<div id="' . $class_name_canvas . '" class="ssa-app"></div>',
         '#parents' => [],
         // Suppresses https://www.drupal.org/project/drupal/issues/3027240
       ];
@@ -251,7 +252,7 @@ class CohesionField extends FormElement {
     }
 
     $element['react_app'] = [
-      '#markup' => '<div class="coh-form coh-is-loading coh-preloader-large" id="' . $class_name_canvas . '"></div>',
+      '#markup' => '<div class="coh-form ssa-app ssa-is-loading coh-preloader-large" id="' . $class_name_canvas . '"></div>',
       '#weight' => 1,
     ];
 
@@ -270,6 +271,11 @@ class CohesionField extends FormElement {
       // Attach the bootstrap fix to the form element.
       $element['#attached']['library'][] = 'cohesion/cohesion_token';
     }
+
+    $event = new CohesionJsAppUrlsEvent($form_state);
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event_dispatcher->dispatch($event::ADMIN_URL, $event);
+    $element['#attached']['drupalSettings']['cohesion']['urls'] = $event->getUrls();
 
     $element['json_values'] = [
       '#type' => 'hidden',

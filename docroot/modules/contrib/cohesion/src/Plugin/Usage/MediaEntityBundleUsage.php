@@ -21,7 +21,8 @@ use Drupal\Core\Entity\EntityInterface;
  *   exclude_from_package_requirements = FALSE,
  *   exportable = FALSE,
  *   config_type = "core",
- *   scan_groups = {"core"}
+ *   scan_groups = {"core"},
+ *   can_be_excluded = FALSE
  * )
  */
 class MediaEntityBundleUsage extends UsagePluginBase {
