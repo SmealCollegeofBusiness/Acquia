@@ -5,18 +5,18 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '201a2fc92433cbe43c30e12f1457186120097ce3',
+        'reference' => 'aebe0232e98c774aad5b7645a5afa3b5ba334c20',
         'name' => 'acquia/sf_acms',
         'dev' => false,
     ),
     'versions' => array(
         'acquia/acquia_cms' => array(
-            'pretty_version' => 'v1.4.2',
-            'version' => '1.4.2.0',
+            'pretty_version' => 'v1.4.3',
+            'version' => '1.4.3.0',
             'type' => 'drupal-profile',
             'install_path' => __DIR__ . '/../../docroot/profiles/contrib/acquia_cms',
             'aliases' => array(),
-            'reference' => 'be3c7f8677f376e65a55955bb804716a003a3572',
+            'reference' => 'c68f07a655488e0876d388317b3d2fd6db2b7d65',
             'dev_requirement' => false,
         ),
         'acquia/acsf-contenthub-console' => array(
@@ -139,7 +139,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '201a2fc92433cbe43c30e12f1457186120097ce3',
+            'reference' => 'aebe0232e98c774aad5b7645a5afa3b5ba334c20',
             'dev_requirement' => false,
         ),
         'asm89/stack-cors' => array(
@@ -1361,6 +1361,15 @@
             'replaced' => array(
                 0 => '9.3.6',
             ),
+        ),
+        'drupal/node_revision_delete' => array(
+            'pretty_version' => '1.0.0-rc3',
+            'version' => '1.0.0.0-RC3',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../docroot/modules/contrib/node_revision_delete',
+            'aliases' => array(),
+            'reference' => '8.x-1.0-rc3',
+            'dev_requirement' => false,
         ),
         'drupal/olivero' => array(
             'dev_requirement' => false,
