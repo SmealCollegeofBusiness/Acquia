@@ -148,13 +148,13 @@ class AcsfCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
 
     // Avoid collisions between the Factory and site users when scrubbing.
     $connection->update('users_field_data')
-      ->expression('mail', "CONCAT('user', uid, '@', MD5(mail), '.example.com')")
-      ->expression('init', "CONCAT('user', uid, '@', MD5(init), '.example.com')")
+      ->expression('mail', "CONCAT('user', uid, '@', SHA2(mail, 256), '.example.com')")
+      ->expression('init', "CONCAT('user', uid, '@', SHA2(init, 256), '.example.com')")
       ->condition('uid', $preserved_users, 'NOT IN')
       ->execute();
 
     // Reset the cron key.
-    \Drupal::state()->set('system.cron_key', md5(mt_rand()));
+    \Drupal::state()->set('system.cron_key', hash('sha256', mt_rand()));
 
     // Reset the drupal private key.
     \Drupal::service('private_key')->set('');

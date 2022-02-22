@@ -1,0 +1,62 @@
+type: default
+team: acsf
+service: acsf-8.x-2.x
+
+environment_image:
+  file: ".acquia/Dockerfile.ci"
+  context: "."
+  build_args:
+    - secrets:
+        - type: vault
+          key: SSH_KEY
+          value: GIT_SSH_KEY
+          path: secret/pipeline-default/GIT_SSH_KEY
+
+_orca_steps: &orca_steps
+  - steps:
+      - |
+        cd $ORCA_WORKSPACE
+        # Insert custom scripts here.
+        ../orca/bin/ci/before_install.sh
+        # Create the test fixture and place the SUT.
+        ../orca/bin/ci/install.sh
+        ./tests/travis/install.sh
+        # Display details about the fixture.
+        ../orca/bin/ci/before_script.sh
+        # Run the test script.
+        ../orca/bin/ci/script.sh
+
+pre_build:
+  static_code_analysis:
+    - args: --env ORCA_JOB=STATIC_CODE_ANALYSIS
+      <<: *orca_steps
+  strict_deprecated_code_scan:
+    - args: --env ORCA_JOB=STRICT_DEPRECATED_CODE_SCAN
+      <<: *orca_steps
+  isolated_test_on_current:
+    - args: --env ORCA_JOB=ISOLATED_TEST_ON_CURRENT
+      <<: *orca_steps
+  integrated_test_on_current:
+    - args: --env ORCA_JOB=INTEGRATED_TEST_ON_CURRENT
+      <<: *orca_steps
+  integrated_test_on_prev_minor:
+    - args: --env ORCA_JOB=INTEGRATED_TEST_ON_PREVIOUS_MINOR
+      <<: *orca_steps
+
+  security_composition_analysis:
+    required: true
+
+after_success:
+  - steps:
+      - echo "Running after success.";
+      - cd $ORCA_WORKSPACE && ../orca/bin/travis/after_success.sh
+
+after_failure:
+  - steps:
+      - echo "Running after failure.";
+      - cd $ORCA_WORKSPACE && ../orca/bin/travis/after_failure.sh
+
+notify:
+  channel: acsf-team
+  on_success: change
+  on_failure: change

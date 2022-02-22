@@ -160,7 +160,6 @@ function acsf_get_registry($include_interrupt = FALSE, $handler = NULL) {
     $handlers[] = [
       'type' => 'unit_test',
       'class' => $class,
-      'path' => 'tests',
     ];
   }
   return ['events' => $handlers];

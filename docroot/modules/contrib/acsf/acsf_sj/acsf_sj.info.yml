@@ -7,7 +7,7 @@ package: Acquia Cloud Site Factory
 dependencies:
   - drupal:system (>=8.5.0)
 
-# Information added by Drupal.org packaging script on 2021-02-10
-version: '8.x-2.69'
+# Information added by Drupal.org packaging script on 2022-02-09
+version: '8.x-2.71'
 project: 'acsf'
-datestamp: 1612957030
+datestamp: 1644404681

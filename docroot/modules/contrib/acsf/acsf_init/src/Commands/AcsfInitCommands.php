@@ -201,7 +201,7 @@ class AcsfInitCommands extends DrushCommands {
           // acsf.legacy.default.settings.php then this file can be rewritten
           // according to the new approach. A simple strict equality check
           // should be enough since the acsf-init-verify checked the deployed
-          // files by comparing md5 hashes, so even a single character
+          // files by comparing their hashes, so even a single character
           // difference would have caused an error in the code deployment
           // process.
           $current_default_settings_php = file_get_contents($default_settings_php_path);
@@ -279,7 +279,7 @@ class AcsfInitCommands extends DrushCommands {
             '!file' => $file,
           ]));
         }
-        elseif (md5_file($source) != md5_file($dest)) {
+        elseif (hash_file('sha256', $source) != hash_file('sha256', $dest)) {
           $error = TRUE;
           $this->logger()->error(dt('The file !file is out of date.', [
             '!file' => $file,

@@ -1,0 +1,79 @@
+ARG BASE_IMAGE=php:7.4-cli
+
+ARG REPO_LOCATION
+FROM ${REPO_LOCATION}composer:latest as composer
+FROM ${REPO_LOCATION}${BASE_IMAGE}
+
+ENV CI=true
+ENV CHROMEDRIVER_VERSION 93.0.4577.63
+ENV CHROMEDRIVER_DIR /chromedriver
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ORCA_SUT_DIR=/acquia/acsf
+ENV ORCA_WORKSPACE=/acquia/acsf
+ENV ORCA_SUT_NAME=drupal/acsf
+ENV ORCA_SUT_BRANCH=8.x-2.x
+ENV ORCA_VERSION=^3
+
+RUN apt-get update && apt-get upgrade -y
+
+RUN apt-get install -y \
+        lsb-release \
+        wget \
+        unzip \
+        gnupg2 \
+        ca-certificates \
+        apt-transport-https \
+        software-properties-common \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://deb.nodesource.com/setup_12.x | bash -
+
+RUN rm /etc/apt/preferences.d/no-debian-php
+RUN wget -q -O - https://packages.sury.org/php/apt.gpg | apt-key add -
+RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" >> /etc/apt/sources.list.d/php.list
+RUN apt-get update && apt-get install -y php8.0 php8.0-cli php8.0-common \
+     php8.0-zip php8.0-gd php8.0-mbstring php8.0-tokenizer \
+     php8.0-curl php8.0-xml php8.0-bcmath php8.0-xml \
+     php8.0-intl php8.0-sqlite3 \
+     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y \
+        git \
+        libzip-dev \
+        libsqlite3-dev \
+        libssl-dev libreadline-dev \
+        libyaml-dev \
+        nodejs \
+        yarn \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+        libicu-dev \
+    && docker-php-ext-install zip pdo_mysql \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install intl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN echo 'memory_limit = 1024M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini
+
+WORKDIR $ORCA_WORKSPACE
+
+COPY composer.* ./
+
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+RUN apt-get update && apt-get install -y google-chrome-stable \
+       && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN mkdir $CHROMEDRIVER_DIR
+RUN wget -q --continue -P $CHROMEDRIVER_DIR "http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+RUN unzip $CHROMEDRIVER_DIR/chromedriver* -d $CHROMEDRIVER_DIR
+ENV PATH $CHROMEDRIVER_DIR:$PATH
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+RUN composer create-project --no-dev --ignore-platform-req=php acquia/orca ../orca "$ORCA_VERSION"
+RUN composer self-update
+
+COPY . ./

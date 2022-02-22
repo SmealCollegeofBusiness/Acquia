@@ -110,5 +110,16 @@
             "@composer clearcache --ansi",
             "@composer install --ansi"
         ]
+    },
+    "config": {
+        "allow-plugins": {
+            "cweagans/composer-patches": true,
+            "drupal/core-composer-scaffold": true,
+            "composer/installers": true,
+            "ergebnis/composer-normalize": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "acquia/blt": true,
+            "oomphinc/composer-installers-extender": true
+        }
     }
 }
