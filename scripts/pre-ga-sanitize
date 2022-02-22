@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 
@@ -6,7 +6,7 @@ set -e
 # when creating an artifact unless a github oauth token is configured, which is
 # a little dangerous in a travis file. Manually delete unti ACMS goes GA and the
 # repos are public.
-if [ "$TRAVIS" ]; then
+if [ "$CI" ]; then
   echo "Removing files that should have been excluded by Composer."
   cat scripts/sanitize-list.txt | xargs rm
 fi

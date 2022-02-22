@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 
@@ -8,16 +8,16 @@ sleep 3
 export PATH=${COMPOSER_BIN}:$PATH
 
 # Create fake mailer.
-echo 'max_execution_time = 120' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-echo 'sendmail_path = /bin/true' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+echo "max_execution_time = 120" >> /usr/local/etc/php/conf.d/docker-php-maxexecutiontime.ini
+echo "sendmail_path=/usr/sbin/sendmail -t -i" >> /usr/local/etc/php/conf.d/sendmail.ini
 
 # Ensure that always_populate_raw_post_data PHP setting: Not set to -1 does not happen.
-echo "always_populate_raw_post_data = -1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+echo "always_populate_raw_post_data = -1" >> /usr/local/etc/php/conf.d/docker-php-rawpostdata.ini
 # Set PHP memory limit to appease ACMS' sadistic appetites.
-echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+echo 'memory_limit = 2G' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini
 
 # Set git info.
-git config --global user.name "Travis-CI"
-git config --global user.email "noreply@travis-ci.com"
+git config --global user.name "Acquia CI"
+git config --global user.email "noreply@acquia-ci.com"
 
 set +e

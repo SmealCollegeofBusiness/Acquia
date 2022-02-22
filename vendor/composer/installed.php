@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'ea5a217fd9b714f7fe9492d2971d0c128b8a5c31',
+        'reference' => '2c8f7d5a68f96b639e70de4064b16de65ee61381',
         'name' => 'acquia/sf_acms',
         'dev' => false,
     ),
@@ -139,7 +139,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'ea5a217fd9b714f7fe9492d2971d0c128b8a5c31',
+            'reference' => '2c8f7d5a68f96b639e70de4064b16de65ee61381',
             'dev_requirement' => false,
         ),
         'asm89/stack-cors' => array(

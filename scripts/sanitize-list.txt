@@ -10,4 +10,4 @@ docroot/profiles/contrib/acquia_cms/grumphp.yml
 docroot/profiles/contrib/acquia_cms/phpcs.xml.dist
 docroot/profiles/contrib/acquia_cms/phpunit.xml
 -rf docroot/profiles/contrib/acquia_cms/tests
-docroot/profiles/contrib/acquia_cms/.travis.yml
+-rf docroot/profiles/contrib/acquia_cms/.acquia

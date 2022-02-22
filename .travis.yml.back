@@ -1,0 +1,81 @@
+language: php
+
+# Adjust the version of PHP to match your production environment.
+# Making this version number greater than the production environment can have unintended consequences
+# including a non-functional prod environment.
+php: "7.3"
+
+git:
+  quiet: true
+
+env:
+  global:
+    - COMPOSER_BIN=$TRAVIS_BUILD_DIR/vendor/bin
+    - BLT_DIR=$TRAVIS_BUILD_DIR/vendor/acquia/blt
+    - ACMS_DIR=$TRAVIS_BUILD_DIR/docroot/profiles/contrib/acquia_cms
+
+cache:
+  bundler: true
+  apt: true
+  directories:
+    - "$HOME/.composer/cache"
+    - "$HOME/.drush/cache"
+    - "$HOME/.npm"
+    - "$HOME/.nvm"
+    # Cache front end dependencies to dramatically improve build time.
+    - "$ACMS_DIR/themes/acquia_claro/node_modules"
+
+services:
+  - mysql
+
+addons:
+  ssh_known_hosts:
+    - svn-2398.enterprise-g1.hosting.acquia.com
+  chrome: stable
+
+# @see https://docs.travis-ci.com/user/notifications
+# notifications:
+#   - hipchat: [api token]@[room id or name]
+#   - slack: '<account>:<token>#[channel]'
+
+matrix:
+  fast_finish: true
+  include:
+    # Validation stage should contain quick checks that don't require a bootstrapped Drupal.
+    - stage: validate
+      name: "Code validation"
+      script: ${COMPOSER_BIN}/blt validate --no-interaction
+
+    - stage: update
+      name: "Scheduled update"
+      if: type = cron AND branch in (develop)
+      script: "${TRAVIS_BUILD_DIR}/scripts/scheduled_update"
+
+    - stage: push
+      name: "Push branch to ACSF"
+      if: type = push AND branch in (develop, staging, main)
+      script: "${TRAVIS_BUILD_DIR}/scripts/deploy_branch"
+
+    - stage: redeploy
+      name: "Re-deploy develop branch on ACSF"
+      if: type = push AND branch in (develop)
+      script: "php ${TRAVIS_BUILD_DIR}/blt/ci/scripts/redeploy.php dev"
+
+before_install:
+  # Disable xdebug.
+  - phpenv config-rm xdebug.ini
+  - composer self-update --preview
+  - composer install --prefer-dist
+  - export PATH="$COMPOSER_BIN:$PATH"
+  # Exit build early if only documentation was changed in a Pull Request.
+  - source scripts/exit_early
+
+install:
+  - source scripts/setup_environment
+  - source scripts/setup_project
+
+script:
+  # This doesn't do anything, we're overriding with an empty run_tests script
+  # so phpunit doesn't run. All our unit tests run on the parent 'acquia_cms'
+  # repository.
+  - source scripts/run_tests

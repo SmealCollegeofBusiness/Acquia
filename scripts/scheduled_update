@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -e
 
-# Travis checks out the branch in a detached state, so we have to explicitly
+# Acquia CI checks out the branch in a detached state, so we have to explicitly
 # checkout the branch.
-git checkout ${TRAVIS_BRANCH}
+git checkout ${GIT_BRANCH}
 yes | composer update --prefer-dist
 
 if [[ `git status --porcelain` ]]; then
@@ -12,8 +12,8 @@ if [[ `git status --porcelain` ]]; then
   # we need to commit them. We also need to check for acsf-init changes.
   ./vendor/bin/drush --include=docroot/modules/contrib/acsf/acsf_init acsf-init -y
   git add -A
-  git commit -m "Scheduled ACMS update commit by Travis CI for Build ${TRAVIS_BUILD_ID}" .
-  git push origin ${TRAVIS_BRANCH}
+  git commit -m "Scheduled ACMS update commit by Acquia CI for Build ${BUILD_NUMBER}" .
+  git push origin ${GIT_BRANCH}
   echo "Scheduled update complete."
 else
   echo "No changes detected."
