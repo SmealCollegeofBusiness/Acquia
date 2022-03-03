@@ -125,5 +125,8 @@ function sitestudio_page_builder_page_attachments(array &$attachments) {
     $event_dispatcher = \Drupal::service('event_dispatcher');
     $event_dispatcher->dispatch($event::FRONTEND_URL, $event);
     $attachments['#attached']['drupalSettings']['cohesion']['urls'] = $event->getUrls();
+
+    // Image browser page attachments.
+    \Drupal::service('cohesion_image_browser.update_manager')->sharedPageAttachments($attachments['#attached'], 'content');
   }
 }

@@ -91,6 +91,10 @@ class SyncImport implements SyncImportInterface {
       if (str_starts_with($name, self::CONFIG_PREFIX)) {
         $uuid = $storageComparer->getSourceStorage()->read($name)['uuid'];
         $type = explode('.', $name)[1];
+        // Skip package entities.
+        if ($type === self::COHESION_PACKAGE_TYPE) {
+          continue;
+        }
         $rebuild_list[$uuid] = $type;
 
         foreach (self::ENTITY_WITH_DEPENDENCY as $entity_type) {

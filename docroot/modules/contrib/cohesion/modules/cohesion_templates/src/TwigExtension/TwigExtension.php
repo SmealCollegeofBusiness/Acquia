@@ -511,7 +511,7 @@ class TwigExtension extends \Twig_Extension {
       }
 
       foreach ($_context as $context_item) {
-        if ($current_route_entity === $context_item) {
+        if ($current_route_entity === $context_item && (!isset($_context['parentContext']) || !in_array($current_route_entity, $_context['parentContext']))) {
           $is_parent_content = TRUE;
           break;
         }

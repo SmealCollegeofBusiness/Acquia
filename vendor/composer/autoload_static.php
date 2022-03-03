@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb
+class ComposerStaticInit337f3d43e9b67c52d5baea9dc96f926a
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -2863,6 +2863,7 @@ class ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb
         'Drupal\\Core\\Entity\\Exception\\EntityTypeIdLengthException' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Entity/Exception/EntityTypeIdLengthException.php',
         'Drupal\\Core\\Entity\\Exception\\FieldStorageDefinitionUpdateForbiddenException' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Entity/Exception/FieldStorageDefinitionUpdateForbiddenException.php',
         'Drupal\\Core\\Entity\\Exception\\InvalidLinkTemplateException' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Entity/Exception/InvalidLinkTemplateException.php',
+        'Drupal\\Core\\Entity\\Exception\\MissingBundleClassException' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Entity/Exception/MissingBundleClassException.php',
         'Drupal\\Core\\Entity\\Exception\\NoCorrespondingEntityClassException' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Entity/Exception/NoCorrespondingEntityClassException.php',
         'Drupal\\Core\\Entity\\Exception\\UndefinedLinkTemplateException' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Entity/Exception/UndefinedLinkTemplateException.php',
         'Drupal\\Core\\Entity\\Exception\\UnsupportedEntityTypeDefinitionException' => __DIR__ . '/../..' . '/docroot/core/lib/Drupal/Core/Entity/Exception/UnsupportedEntityTypeDefinitionException.php',
@@ -6454,10 +6455,7 @@ class ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb
         'SebastianBergmann\\CliParser\\UnknownOptionException' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/UnknownOptionException.php',
         'SebastianBergmann\\CodeCoverage\\BranchAndPathCoverageNotSupportedException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/BranchAndPathCoverageNotSupportedException.php',
         'SebastianBergmann\\CodeCoverage\\CodeCoverage' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/CodeCoverage.php',
-        'SebastianBergmann\\CodeCoverage\\CrapIndex' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/CrapIndex.php',
         'SebastianBergmann\\CodeCoverage\\DeadCodeDetectionNotSupportedException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/DeadCodeDetectionNotSupportedException.php',
-        'SebastianBergmann\\CodeCoverage\\Directory' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Directory.php',
-        'SebastianBergmann\\CodeCoverage\\DirectoryCouldNotBeCreatedException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/DirectoryCouldNotBeCreatedException.php',
         'SebastianBergmann\\CodeCoverage\\Driver\\Driver' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Driver/Driver.php',
         'SebastianBergmann\\CodeCoverage\\Driver\\PathExistsButIsNotDirectoryException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/PathExistsButIsNotDirectoryException.php',
         'SebastianBergmann\\CodeCoverage\\Driver\\PcovDriver' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Driver/PcovDriver.php',
@@ -6479,11 +6477,11 @@ class ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb
         'SebastianBergmann\\CodeCoverage\\NoCodeCoverageDriverWithPathCoverageSupportAvailableException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/NoCodeCoverageDriverWithPathCoverageSupportAvailableException.php',
         'SebastianBergmann\\CodeCoverage\\Node\\AbstractNode' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Node/AbstractNode.php',
         'SebastianBergmann\\CodeCoverage\\Node\\Builder' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Node/Builder.php',
+        'SebastianBergmann\\CodeCoverage\\Node\\CrapIndex' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Node/CrapIndex.php',
         'SebastianBergmann\\CodeCoverage\\Node\\Directory' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Node/Directory.php',
         'SebastianBergmann\\CodeCoverage\\Node\\File' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Node/File.php',
         'SebastianBergmann\\CodeCoverage\\Node\\Iterator' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Node/Iterator.php',
         'SebastianBergmann\\CodeCoverage\\ParserException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/ParserException.php',
-        'SebastianBergmann\\CodeCoverage\\Percentage' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Percentage.php',
         'SebastianBergmann\\CodeCoverage\\ProcessedCodeCoverageData' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/ProcessedCodeCoverageData.php',
         'SebastianBergmann\\CodeCoverage\\RawCodeCoverageData' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/RawCodeCoverageData.php',
         'SebastianBergmann\\CodeCoverage\\ReflectionException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/ReflectionException.php',
@@ -6521,6 +6519,9 @@ class ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb
         'SebastianBergmann\\CodeCoverage\\StaticAnalysis\\ParsingFileAnalyser' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/StaticAnalysis/ParsingFileAnalyser.php',
         'SebastianBergmann\\CodeCoverage\\TestIdMissingException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/TestIdMissingException.php',
         'SebastianBergmann\\CodeCoverage\\UnintentionallyCoveredCodeException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/UnintentionallyCoveredCodeException.php',
+        'SebastianBergmann\\CodeCoverage\\Util\\DirectoryCouldNotBeCreatedException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/DirectoryCouldNotBeCreatedException.php',
+        'SebastianBergmann\\CodeCoverage\\Util\\Filesystem' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Util/Filesystem.php',
+        'SebastianBergmann\\CodeCoverage\\Util\\Percentage' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Util/Percentage.php',
         'SebastianBergmann\\CodeCoverage\\Version' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Version.php',
         'SebastianBergmann\\CodeCoverage\\XmlException' => __DIR__ . '/..' . '/phpunit/php-code-coverage/src/Exception/XmlException.php',
         'SebastianBergmann\\CodeUnitReverseLookup\\Wizard' => __DIR__ . '/..' . '/sebastian/code-unit-reverse-lookup/src/Wizard.php',
@@ -8658,6 +8659,7 @@ class ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb
         'Symfony\\Component\\VarDumper\\Caster\\IntlCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/IntlCaster.php',
         'Symfony\\Component\\VarDumper\\Caster\\LinkStub' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/LinkStub.php',
         'Symfony\\Component\\VarDumper\\Caster\\MemcachedCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/MemcachedCaster.php',
+        'Symfony\\Component\\VarDumper\\Caster\\MysqliCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/MysqliCaster.php',
         'Symfony\\Component\\VarDumper\\Caster\\PdoCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/PdoCaster.php',
         'Symfony\\Component\\VarDumper\\Caster\\PgSqlCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/PgSqlCaster.php',
         'Symfony\\Component\\VarDumper\\Caster\\ProxyManagerCaster' => __DIR__ . '/..' . '/symfony/var-dumper/Caster/ProxyManagerCaster.php',
@@ -9394,11 +9396,11 @@ class ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit1b445ac886bdc5d0ae0708d20f2d7ddb::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit337f3d43e9b67c52d5baea9dc96f926a::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit337f3d43e9b67c52d5baea9dc96f926a::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit337f3d43e9b67c52d5baea9dc96f926a::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit337f3d43e9b67c52d5baea9dc96f926a::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit337f3d43e9b67c52d5baea9dc96f926a::$classMap;
 
         }, null, ClassLoader::class);
     }

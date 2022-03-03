@@ -1,5 +1,133 @@
 # Release notes
 
+## 6.8.1
+
+### Field Repeater - Deleting an item in the Component form deletes the wrong item
+
+#### What is it?
+
+When deleting an item with a WYSIWYG in a Field repeater deletes the wrong item.
+
+#### What impact will there be?
+
+Components that have a Field repeater with a WYSIWYG, will now delete the correct item.
+
+#### What actions do I need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Field Repeater - When Minimum repeatable fields is set it doesn't show the Minimum number of pattern repeats
+
+#### What is it?
+
+When creating a Component with the Minimum repeatable fields set to more than 1 the minimum number is not being rendered.
+
+#### What impact will there be?
+
+When using a Component the Minimum repeatable fields will match what is rendered.
+
+#### What actions do I need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Field repeater - number of fields getting out of sync
+
+#### What is it?
+
+When first adding a Component to the Layout canvas and not changing any settings before saving the page, when you then come back to the Component on the Layout canvas and Edit the Component the default Minimum number of fields is incorrect.
+
+#### What impact will there be?
+
+The minimum number of fields will now be shown correct when saving the page and then editing the Component settings.
+
+#### What actions do I need to take?
+
+`drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Unable to use the Visual page builder with nested components
+
+#### What is it?
+
+Fixes a bug where a component dropped on the Visual page builder that would also contain a component would return an error ("Cannot read property of undefined (reading 'uuid'))
+
+#### What impact will there be?
+
+Components containing components can now be used in the Visual page builder
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Visual page builder warning "no image browser defined"
+
+#### What is it?
+
+Fixes a bug where "no image browser defined" warning message would appear on the visual page builder, although an image browser had been defined.
+
+#### What impact will there be?
+
+This will resolve the warning appearing incorrectly, allowing the user to select an image as expected.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Unable to add components to a layout canvas on path based multi-site
+
+#### What is it?
+
+Fixes a bug where users were experiencing errors when attempting to add components to a layout canvas on a path base multi-site.
+
+#### What impact will there be?
+
+Components can now be added the to layout canvas without error.
+
+#### What actions do I need to take?
+
+A Site Studio API import should be run as part of the upgrade: `drush cohesion:import`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Prevent Package entities from being processed during rebuild
+
+#### What is it?
+
+Fixes a bug where Package entities would be processed during partial rebuild after package import.
+
+#### What impact will there be?
+
+This will resolve errors that were happening during package imports, if Package entities would be imported and partial rebuild triggered.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
 ## 6.8.0
 
 ### Layout canvas undo and redo

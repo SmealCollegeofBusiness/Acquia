@@ -439,6 +439,7 @@ drupal_data_endpoint.helper_model:
   defaults:
     _controller: '\Drupal\cohesion\Controller\CohesionEndpointController::getCanvasUpdateHelper'
     _title: "Helper model"
+    uid: ''
   methods:  [GET]
   requirements:
     _user_is_logged_in: 'TRUE'

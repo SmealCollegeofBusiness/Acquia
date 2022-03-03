@@ -12,6 +12,7 @@ use Drupal\Core\Config\StorageComparerInterface;
 interface SyncImportInterface {
 
   const CONFIG_PREFIX = 'cohesion_';
+  const COHESION_PACKAGE_TYPE = 'cohesion_sync_package';
 
   const COMPLETE_REBUILD = [
     'base_unit_settings' => 'cohesion_website_settings.cohesion_website_settings.base_unit_settings',
