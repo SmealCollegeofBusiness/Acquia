@@ -195,7 +195,7 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
 
     $paths = $this->getPaths();
     foreach ($paths as $item) {
-      list($config_path, $rendered_path, $save_message) = $item;
+      [$config_path, $rendered_path, $save_message] = $item;
 
       // Load the config page.
       $this->drupalGet($config_path);
@@ -228,9 +228,7 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
 
         // Rewrite the test values to match the way the form elements are
         // structured.
-        // @TODO There is probably some way to write this as a recursive
-        // function that will go more than three levels deep, but for now this
-        // is enough.
+        // @todo Refactor as a recursive function with unlimited depth.
         if (!is_array($test_value)) {
           $form_values[$tag_name] = $test_value;
         }

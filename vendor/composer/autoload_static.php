@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit721bb4664cbb6334653939f43bdeefdf
+class ComposerStaticInit7c3f23b3b5fb1e1c38e7c24bac68300b
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -5978,6 +5978,7 @@ class ComposerStaticInit721bb4664cbb6334653939f43bdeefdf
         'PhpParser\\Parser\\Tokens' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Parser/Tokens.php',
         'PhpParser\\PrettyPrinterAbstract' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/PrettyPrinterAbstract.php',
         'PhpParser\\PrettyPrinter\\Standard' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/PrettyPrinter/Standard.php',
+        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'Prophecy\\Argument' => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy/Argument.php',
         'Prophecy\\Argument\\ArgumentsWildcard' => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy/Argument/ArgumentsWildcard.php',
         'Prophecy\\Argument\\Token\\AnyValueToken' => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy/Argument/Token/AnyValueToken.php',
@@ -8767,6 +8768,7 @@ class ComposerStaticInit721bb4664cbb6334653939f43bdeefdf
         'Symfony\\Polyfill\\Php72\\Php72' => __DIR__ . '/..' . '/symfony/polyfill-php72/Php72.php',
         'Symfony\\Polyfill\\Php73\\Php73' => __DIR__ . '/..' . '/symfony/polyfill-php73/Php73.php',
         'Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
+        'Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/PhpToken.php',
         'Symfony\\Polyfill\\Php81\\Php81' => __DIR__ . '/..' . '/symfony/polyfill-php81/Php81.php',
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
         'TYPO3\\PharStreamWrapper\\Assertable' => __DIR__ . '/..' . '/typo3/phar-stream-wrapper/src/Assertable.php',
@@ -9396,11 +9398,11 @@ class ComposerStaticInit721bb4664cbb6334653939f43bdeefdf
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit721bb4664cbb6334653939f43bdeefdf::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit721bb4664cbb6334653939f43bdeefdf::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit721bb4664cbb6334653939f43bdeefdf::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit721bb4664cbb6334653939f43bdeefdf::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit721bb4664cbb6334653939f43bdeefdf::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit7c3f23b3b5fb1e1c38e7c24bac68300b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit7c3f23b3b5fb1e1c38e7c24bac68300b::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit7c3f23b3b5fb1e1c38e7c24bac68300b::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit7c3f23b3b5fb1e1c38e7c24bac68300b::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit7c3f23b3b5fb1e1c38e7c24bac68300b::$classMap;
 
         }, null, ClassLoader::class);
     }

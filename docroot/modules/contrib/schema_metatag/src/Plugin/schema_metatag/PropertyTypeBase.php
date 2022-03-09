@@ -370,8 +370,8 @@ class PropertyTypeBase extends PluginBase implements PropertyTypeInterface, Sche
   public function testDefaultValue($count = NULL, $delimiter = NULL) {
     $items = [];
     $min = 1;
-    $max = isset($count) ? $count : 2;
-    $delimiter = isset($delimiter) ? $delimiter : ' ';
+    $max = $count ?? 2;
+    $delimiter = $delimiter ?? ' ';
     for ($i = $min; $i <= $max; $i++) {
       $items[] = $this->schemaMetatagManager()->randomMachineName();
     }

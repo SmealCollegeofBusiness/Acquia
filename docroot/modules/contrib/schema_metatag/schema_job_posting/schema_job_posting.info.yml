@@ -8,7 +8,7 @@ dependencies:
   - schema_metatag:schema_metatag
   - schema_metatag:schema_organization
 
-# Information added by Drupal.org packaging script on 2021-04-28
-version: '8.x-2.2'
+# Information added by Drupal.org packaging script on 2022-03-04
+version: '8.x-2.3'
 project: 'schema_metatag'
-datestamp: 1619640199
+datestamp: 1646399480
