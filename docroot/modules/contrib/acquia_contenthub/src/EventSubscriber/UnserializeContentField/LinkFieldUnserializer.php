@@ -4,6 +4,7 @@ namespace Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent;
+use Drupal\Core\Entity\EntityInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -29,67 +30,119 @@ class LinkFieldUnserializer implements EventSubscriberInterface {
    *
    * @param \Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent $event
    *   The unserialize event.
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
    */
-  public function onUnserializeContentField(UnserializeCdfEntityFieldEvent $event) {
-    // Get field meta data.
+  public function onUnserializeContentField(UnserializeCdfEntityFieldEvent $event): void {
     $meta = $event->getFieldMetadata();
-
-    // Make sure the field type is link.
     if ($meta['type'] !== 'link') {
       return;
     }
 
-    // Get field and init values array to set later.
     $field = $event->getField();
-    $values = [];
-
-    // Return early if no attr values are set.
     if (empty($field['value'])) {
       return;
     }
 
-    // Loop through field values.
-    foreach ($field['value'] as $langcode => $fieldValues) {
-      foreach ($fieldValues as $value) {
-        if ($value['uri_type'] === 'entity') {
-          // Get the entity from event stack.
-          $uuid = $value['uri'];
-          $uri_entity = $event->getStack()->getDependency($uuid)->getEntity();
-
-          // Construct the entity link.
-          // Format: entity:<ENT_TYPE>/<ENT_ID>.
-          $entity_link = "entity:{$uri_entity->getEntityTypeId()}/{$uri_entity->id()}";
-
-          // Set entity link as target.
-          $value['uri'] = $entity_link;
-        }
-        if ($value['uri_type'] === 'internal') {
-          $internal_type = array_key_exists('internal_type', $value) ? $value['internal_type'] : '';
-          if ($internal_type === 'internal_entity') {
-            $uuid = $value['uri'];
-            $uri_entity = $event->getStack()->getDependency($uuid)->getEntity();
-
-            // Construct the internal link.
-            // Format: internal:/<ENT_TYPE>/<ENT_ID>.
-            if ($uri_entity->getEntityType()->hasLinkTemplate('canonical') && $uri_entity->toUrl('canonical')->isRouted()) {
-              $internal_link = "internal:/" . $uri_entity->toUrl('canonical')->getInternalPath();
-            }
-            else {
-              $internal_link = "internal:/{$uri_entity->getEntityTypeId()}/{$uri_entity->id()}";
-            }
-            $value['uri'] = $internal_link;
-          }
-          if (!empty($internal_type)) {
-            unset($value['internal_type']);
-          }
-        }
-        unset($value['uri_type']);
-        $values[$langcode][$event->getFieldName()][] = $value;
+    $values = [];
+    foreach ($field['value'] as $langcode => $field_values) {
+      foreach ($field_values as $value) {
+        $values[$langcode][$event->getFieldName()][] = $this->getUnserializedValue($value, $event);
       }
     }
     // Set updated event values.
     $event->setValue($values);
     $event->stopPropagation();
+  }
+
+  /**
+   * Returns the unserialized link field array.
+   *
+   * @param array|null $value
+   *   The value of the unserializeable link field.
+   * @param \Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent $event
+   *   The event to get the data from.
+   *
+   * @return array
+   *   The unserialized link field array.
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   */
+  protected function getUnserializedValue(?array $value, UnserializeCdfEntityFieldEvent $event): array {
+    if ($value === NULL) {
+      return [];
+    }
+
+    if ($value['uri_type'] === 'entity') {
+      $value['uri'] = $this->constructEntityUri($value['uri'], $event);
+    }
+
+    if ($value['uri_type'] === 'internal') {
+      $internal_type = $value['internal_type'] ?? '';
+
+      if ($internal_type === 'internal_entity') {
+        $entity = $this->getEntityFromDependencyStack($value['uri'], $event);
+        $value['uri'] = $this->constructInternalUri($entity);
+      }
+
+      if ($internal_type !== '') {
+        unset($value['internal_type']);
+      }
+    }
+
+    unset($value['uri_type']);
+    return $value;
+  }
+
+  /**
+   * Constructs an entity uri based on the provided uuid using event data.
+   *
+   * @param string $uuid
+   *   The uuid of the entity.
+   * @param \Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent $event
+   *   The event to get the corresponding entity from.
+   *
+   * @return string
+   *   The constructed uri.
+   */
+  protected function constructEntityUri(string $uuid, UnserializeCdfEntityFieldEvent $event): string {
+    $entity = $this->getEntityFromDependencyStack($uuid, $event);
+    return sprintf('entity:%s/%s', $entity->getEntityTypeId(), $entity->id());
+  }
+
+  /**
+   * Returns an entity from the dependency stack by uuid.
+   *
+   * @param string $uuid
+   *   The uuid of the entity.
+   * @param \Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent $event
+   *   The event which holds a reference to the dependency stack.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   The found entity.
+   */
+  protected function getEntityFromDependencyStack(string $uuid, UnserializeCdfEntityFieldEvent $event): EntityInterface {
+    return $event->getStack()->getDependency($uuid)->getEntity();
+  }
+
+  /**
+   * Returns the internal link of en entity.
+   *
+   * Format: internal:/<ENT_TYPE>/<ENT_ID>.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to resolve the internal link of.
+   *
+   * @return string
+   *   The internal link.
+   *
+   * @throws \Drupal\Core\Entity\EntityMalformedException
+   */
+  protected function constructInternalUri(EntityInterface $entity): string {
+    if ($entity->getEntityType()->hasLinkTemplate('canonical') && $entity->toUrl('canonical')->isRouted()) {
+      return sprintf('internal:/%s', $entity->toUrl('canonical')->getInternalPath());
+    }
+    return sprintf('internal:/%s/%s', $entity->getEntityTypeId(), $entity->id());
   }
 
 }

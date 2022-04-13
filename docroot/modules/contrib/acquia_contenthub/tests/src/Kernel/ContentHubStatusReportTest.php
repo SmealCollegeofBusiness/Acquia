@@ -8,6 +8,7 @@ use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub_publisher\Controller\StatusReportController;
 use Drupal\acquia_contenthub_test\MockDataProvider;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\MetricsUpdateTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -16,6 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
  * @group acquia_contenthub
  */
 class ContentHubStatusReportTest extends EntityKernelTestBase {
+
+  use MetricsUpdateTrait;
 
   /**
    * Modules to enable.
@@ -55,11 +58,15 @@ class ContentHubStatusReportTest extends EntityKernelTestBase {
     $settings->getUrl()->willReturn('http://www.example.com');
     $settings->getApiKey()->willReturn('apikey');
     $settings->getSecretKey()->willReturn('apisecret');
+    $settings->toArray()->willReturn(['name' => 'foo']);
 
     $this->client = $this->prophesize(ContentHubClient::class);
+
+    $this->mockMetricsCalls($this->client);
+
     $clientFactory = $this->prophesize(ClientFactory::class);
-    $clientFactory->getSettings()->willReturn($settings->reveal());
-    $this->client->getSettings()->willReturn($settings->reveal());
+    $clientFactory->getSettings()->willReturn($settings);
+    $this->client->getSettings()->willReturn($settings);
     $this->clientFactory = $clientFactory;
   }
 
@@ -87,7 +94,7 @@ class ContentHubStatusReportTest extends EntityKernelTestBase {
     $this->clientFactory->getClient()->willReturn($this->client->reveal());
     $this->container->set('acquia_contenthub.client.factory',
       $this->clientFactory->reveal());
-    $controller = new StatusReportController($this->container->get('acquia_contenthub.client.factory'), $this->container->has('pager.manager') ? $this->container->get('pager.manager') : NULL);
+    $controller = new StatusReportController($this->container->get('acquia_contenthub.client.factory'), $this->container->get('acquia_contenthub.cdf_metrics_manager'), $this->container->has('pager.manager') ? $this->container->get('pager.manager') : NULL);
     $request = new Request();
     $build = $controller->statusReportPage($request);
 
@@ -124,7 +131,7 @@ class ContentHubStatusReportTest extends EntityKernelTestBase {
 
     $this->clientFactory->getClient()->willReturn($this->client->reveal());
     $this->container->set('acquia_contenthub.client.factory', $this->clientFactory->reveal());
-    $controller = new StatusReportController($this->container->get('acquia_contenthub.client.factory'), $this->container->has('pager.manager') ? $this->container->get('pager.manager') : NULL);
+    $controller = new StatusReportController($this->container->get('acquia_contenthub.client.factory'), $this->container->get('acquia_contenthub.cdf_metrics_manager'), $this->container->has('pager.manager') ? $this->container->get('pager.manager') : NULL);
     $request = new Request();
     $build = $controller->statusReportPage($request);
 

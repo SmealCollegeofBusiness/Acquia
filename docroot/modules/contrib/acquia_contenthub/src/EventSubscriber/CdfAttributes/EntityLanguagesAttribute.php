@@ -32,9 +32,14 @@ class EntityLanguagesAttribute implements EventSubscriberInterface {
   public function onPopulateAttributes(CdfAttributesEvent $event) {
     $entity = $event->getEntity();
     if ($entity instanceof TranslatableInterface) {
-      $values = [];
+      $default_language_id = $entity->language()->getId();
+      $values = [$default_language_id];
       foreach ($entity->getTranslationLanguages() as $language) {
-        $values[] = $language->getId();
+        $language_id = $language->getId();
+        if ($language_id === $default_language_id) {
+          continue;
+        }
+        $values[] = $language_id;
       }
       $cdf = $event->getCdf();
       $metadata = $cdf->getMetadata();

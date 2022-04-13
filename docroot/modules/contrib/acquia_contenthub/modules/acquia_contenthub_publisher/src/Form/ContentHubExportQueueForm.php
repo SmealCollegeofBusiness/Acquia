@@ -3,6 +3,7 @@
 namespace Drupal\acquia_contenthub_publisher\Form;
 
 use Drupal\acquia_contenthub_publisher\ContentHubExportQueue;
+use Drupal\acquia_contenthub_publisher\PublisherTracker;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -17,7 +18,14 @@ class ContentHubExportQueueForm extends FormBase {
    *
    * @var \Drupal\acquia_contenthub_publisher\ContentHubExportQueue
    */
-  protected $contentHubExportQueue;
+  protected $exportQueue;
+
+  /**
+   * The Publisher Tracker Service.
+   *
+   * @var \Drupal\acquia_contenthub_publisher\PublisherTracker
+   */
+  protected $tracker;
 
   /**
    * {@inheritdoc}
@@ -27,10 +35,16 @@ class ContentHubExportQueueForm extends FormBase {
   }
 
   /**
-   * {@inheritdoc}
+   * ContentHubExportQueueForm constructor.
+   *
+   * @param \Drupal\acquia_contenthub_publisher\ContentHubExportQueue $export_queue
+   *   The Import Queue Service.
+   * @param \Drupal\acquia_contenthub_publisher\PublisherTracker $tracker
+   *   Acquia Content Hub Publisher Tracker.
    */
-  public function __construct(ContentHubExportQueue $export_queue) {
-    $this->contentHubExportQueue = $export_queue;
+  public function __construct(ContentHubExportQueue $export_queue, PublisherTracker $tracker) {
+    $this->exportQueue = $export_queue;
+    $this->tracker = $tracker;
   }
 
   /**
@@ -38,7 +52,8 @@ class ContentHubExportQueueForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('acquia_contenthub_publisher.acquia_contenthub_export_queue')
+      $container->get('acquia_contenthub_publisher.acquia_contenthub_export_queue'),
+      $container->get('acquia_contenthub_publisher.tracker')
     );
   }
 
@@ -50,13 +65,13 @@ class ContentHubExportQueueForm extends FormBase {
       '#markup' => $this->t('Instruct the content hub module to manage content export with a queue.'),
     ];
 
-    $queue_count = intval($this->contentHubExportQueue->getQueueCount());
+    $queue_count = $this->exportQueue->getQueueCount();
 
     $form['run_export_queue'] = [
       '#type' => 'details',
       '#title' => $this->t('Run Export Queue'),
-      '#description' => '<strong>For development & testing use only!</strong><br /> Running the export queue from the UI can cause php timeouts for large datasets.
-                         A cronjob to run the queue should be used instead.',
+      '#description' => $this->t('<strong>For development & testing use only!</strong><br /> Running the export queue from the UI can cause php timeouts for large datasets.
+                         A cronjob to run the queue should be used instead.'),
       '#open' => TRUE,
     ];
     $form['run_export_queue']['queue-list'] = [
@@ -69,18 +84,18 @@ class ContentHubExportQueueForm extends FormBase {
     ];
     $form['run_export_queue']['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Export Items'),
+      '#value' => $this->t('Export Items'),
       '#name' => 'run_export_queue',
     ];
     if ($queue_count > 0) {
       $form['run_export_queue']['purge_queue'] = [
         '#type' => 'item',
         '#title' => $this->t('Purge existing queues'),
-        '#description' => $this->t('It is possible an existing queue has becomed orphaned, use this function to wipe all existing queues'),
+        '#description' => $this->t('In case there are stale / stuck items in the queue press Purge button to clear the Export Queue.'),
       ];
       $form['run_export_queue']['purge'] = [
         '#type' => 'submit',
-        '#value' => t('Purge'),
+        '#value' => $this->t('Purge'),
         '#name' => 'purge_export_queue',
       ];
     }
@@ -91,12 +106,12 @@ class ContentHubExportQueueForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $queue_count = intval($this->contentHubExportQueue->getQueueCount());
+    $queue_count = $this->exportQueue->getQueueCount();
     $trigger = $form_state->getTriggeringElement();
     switch ($trigger['#name']) {
       case 'run_export_queue':
         if (!empty($queue_count)) {
-          $this->contentHubExportQueue->processQueueItems();
+          $this->exportQueue->processQueueItems();
         }
         else {
           $this->messenger()->addWarning($this->t('You cannot run the export queue because it is empty.'));
@@ -104,7 +119,8 @@ class ContentHubExportQueueForm extends FormBase {
         break;
 
       case 'purge_export_queue':
-        $this->contentHubExportQueue->purgeQueues();
+        $this->exportQueue->purgeQueues();
+        $this->tracker->delete('status', PublisherTracker::QUEUED);
         $this->messenger()->addMessage($this->t('Purged all contenthub export queues.'));
         break;
 

@@ -11,7 +11,7 @@ services:
 
   acquia_contenthub_subscriber.handle_webhook.import_assets:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\ImportUpdateAssets
-    arguments: ['@queue', '@event_dispatcher', '@acquia_contenthub_subscriber.tracker', '@acquia_contenthub_subscriber.logger_channel', '@config.factory']
+    arguments: ['@queue', '@event_dispatcher', '@acquia_contenthub_subscriber.tracker', '@acquia_contenthub_subscriber.logger_channel', '@config.factory', '@acquia_contenthub.cdf_metrics_manager']
     tags:
       - { name: event_subscriber }
 
@@ -70,11 +70,11 @@ services:
 
   acquia_contenthub_subscriber.acquia_contenthub_import_queue:
     class: Drupal\acquia_contenthub_subscriber\ContentHubImportQueue
-    arguments: ['@queue', '@plugin.manager.queue_worker']
+    arguments: ['@queue', '@plugin.manager.queue_worker', '@messenger']
 
   acquia_contenthub_subscriber.acquia_contenthub_import_queue_by_filter:
     class: Drupal\acquia_contenthub_subscriber\ContentHubImportQueueByFilter
-    arguments: ['@queue', '@plugin.manager.queue_worker']
+    arguments: ['@queue', '@plugin.manager.queue_worker', '@messenger']
 
   acquia_contenthub_subscriber.promote_entity_status_tracking.tracking_totals:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\PromoteEntityStatusTrack\TrackTotals

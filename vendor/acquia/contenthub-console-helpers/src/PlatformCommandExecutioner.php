@@ -4,8 +4,10 @@ namespace Acquia\Console\Helpers;
 
 use Acquia\Console\Helpers\Command\CommandOptionsDefinitionTrait;
 use EclipseGc\CommonConsole\PlatformInterface;
+use EclipseGc\CommonConsole\ProcessRunner;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 
 /**
@@ -25,13 +27,23 @@ class PlatformCommandExecutioner {
   protected $application;
 
   /**
+   * The input object.
+   *
+   * @var \Symfony\Component\Console\Input\InputInterface
+   */
+  protected $input;
+
+  /**
    * PlatformCommandExecutioner constructor.
    *
    * @param \Symfony\Component\Console\Application $application
    *   Current application.
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *   The input object.
    */
-  public function __construct(Application $application) {
+  public function __construct(Application $application, InputInterface $input) {
     $this->application = $application;
+    $this->input = $input;
   }
 
   /**
@@ -64,9 +76,12 @@ class PlatformCommandExecutioner {
     $command = $this->getApplication()->find($cmd_name);
     $remote_output = new StreamOutput(fopen('php://memory', 'r+', FALSE));
     // @todo LCH-4538 added this solution for fix the highlighting
-    //   It fixes highlighting but PlatformCmdOutputFormatterTrait functions will work incorrectly
-    //  $remote_output->setDecorated(TRUE);
+    // It fixes highlighting but PlatformCmdOutputFormatterTrait functions will
+    // work incorrectly
+    // $remote_output->setDecorated(TRUE);
     $input['--bare'] = NULL;
+    $input = $this->extendInputWithGlobalOptions($input);
+
     $bind_input = new ArrayInput($input);
     $bind_input->bind($this->getDefinitions($command));
     if ($platform) {
@@ -102,8 +117,11 @@ class PlatformCommandExecutioner {
     $command = $this->getApplication()->find($cmd_name);
     $remote_output = new StreamOutput(fopen('php://memory', 'r+', FALSE));
     // @todo LCH-4538 added this solution for fix the highlighting
-    //   It fixes highlighting but PlatformCmdOutputFormatterTrait functions will work incorrectly
-    //  $remote_output->setDecorated(TRUE);
+    // It fixes highlighting but PlatformCmdOutputFormatterTrait functions will
+    // work incorrectly
+    // $remote_output->setDecorated(TRUE);
+    $input = $this->extendInputWithGlobalOptions($input);
+
     $bind_input = new ArrayInput($input);
     $bind_input->bind($this->getDefinitions($command));
     $command->addPlatform($platform->getAlias(), $platform);
@@ -150,6 +168,49 @@ class PlatformCommandExecutioner {
       }
 
     };
+  }
+
+  /**
+   * Extends input list with global options if set.
+   *
+   * @param array $input
+   *   The input list to extend.
+   *
+   * @return array
+   *   Extended input list.
+   */
+  protected function extendInputWithGlobalOptions(array $input): array {
+    if ($this->input->hasOption('group') && !empty($this->input->getOption('group'))) {
+      $input['--group'] = $this->input->getOption('group');
+    }
+
+    $input['--timeout'] = $this->getTimeoutOption($input);
+
+    if (empty($input['--uri']) && $this->input->hasOption('uri') && !empty($this->input->getOption('uri'))) {
+      $input['--uri'] = $this->input->getOption('uri');
+    }
+
+    return $input;
+  }
+
+  /**
+   * Returns timeout option value.
+   *
+   * If not set returns a default value.
+   *
+   * @param array $input
+   *   The input array to get already set timeout value.
+   *
+   * @return int
+   *   Timeout value.
+   */
+  protected function getTimeoutOption(array $input): int {
+    if (!empty($input['--timeout'])) {
+      return $input['--timeout'];
+    }
+
+    return $this->input->hasOption('timeout') ?
+      (int) $this->input->getOption('timeout') : 0;
   }
 
 }

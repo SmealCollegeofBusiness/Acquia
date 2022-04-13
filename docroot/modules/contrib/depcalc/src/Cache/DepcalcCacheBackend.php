@@ -160,6 +160,14 @@ class DepcalcCacheBackend implements CacheBackendInterface, CacheTagsInvalidator
    * {@inheritdoc}
    */
   public function deleteAll() {
+    // This cache doesn't need to be deleted when doing cache rebuild.
+    // We do nothing here.
+  }
+
+  /**
+   * Deletes all cache items in a bin when explicitly called.
+   */
+  public function deleteAllPermanent(): void {
     $this->backend->deleteAll();
   }
 

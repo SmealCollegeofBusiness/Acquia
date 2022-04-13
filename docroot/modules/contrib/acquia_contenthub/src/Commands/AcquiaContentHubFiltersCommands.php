@@ -105,7 +105,8 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
       return;
     }
 
-    if (in_array($uuid, $webhook->getFilters())) {
+    $webhook_filters = $webhook->getFilters();
+    if (!empty($webhook_filters) && in_array($uuid, $webhook_filters)) {
       $this->logger->log(LogLevel::CANCEL, 'Filter already attached to {url}.', ['url' => $url]);
       return;
     }

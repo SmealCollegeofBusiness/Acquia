@@ -4,6 +4,7 @@ namespace Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\UnserializeCdfEntityFieldEvent;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -22,6 +23,23 @@ class EntityReferenceField implements EventSubscriberInterface {
     'entity_reference',
     'entity_reference_revisions',
   ];
+
+  /**
+   * Acquia ContentHub logger channel.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $logger;
+
+  /**
+   * EntityReferenceField constructor.
+   *
+   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
+   *   Acquia ContentHub logger channel.
+   */
+  public function __construct(LoggerChannelInterface $logger) {
+    $this->logger = $logger;
+  }
 
   /**
    * {@inheritdoc}
@@ -54,12 +72,22 @@ class EntityReferenceField implements EventSubscriberInterface {
         }
         if (!is_array($value)) {
           $entity = $this->getEntity($value, $event);
+          if (!$entity) {
+            $values[$langcode][$event->getFieldName()] = [];
+            $this->log($value);
+            return;
+          }
           $values[$langcode][$event->getFieldName()] = $entity->id();
           // @todo handle single value ERR fields.
         }
         else {
           foreach ($value as $delta => $item) {
             $entity = $this->getEntity($item, $event);
+            if (!$entity) {
+              $values[$langcode][$event->getFieldName()][]['target_id'] = [];
+              $this->log($item);
+              return;
+            }
             if ($event->getFieldMetadata()['type'] == 'entity_reference_revisions') {
               /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
               $values[$langcode][$event->getFieldName()][] = [
@@ -77,6 +105,18 @@ class EntityReferenceField implements EventSubscriberInterface {
 
     $event->setValue($values);
     $event->stopPropagation();
+  }
+
+  /**
+   * Log exception.
+   *
+   * @param string $uuid
+   *   Entity uuid.
+   */
+  protected function log(string $uuid): void {
+    $this->logger->error('No entity found with uuid @uuid.', [
+      '@uuid' => $uuid,
+    ]);
   }
 
 }

@@ -58,6 +58,7 @@ class RevisionIsCurrent implements EventSubscriberInterface {
     if (!$this->entityModeratedRevision->isPublishedRevision($entity)) {
       // This revision has no published translation then do not syndicate.
       $event->setEligibility(FALSE);
+      $event->setReason('Entity has not been published yet.');
       $event->stopPropagation();
     }
   }

@@ -35,6 +35,7 @@ class IsNotParagraph implements EventSubscriberInterface {
     $entity = $event->getEntity();
     if ($entity instanceof ParagraphInterface) {
       $event->setEligibility(FALSE);
+      $event->setReason('Entity is of type paragraph.');
       $event->stopPropagation();
     }
   }

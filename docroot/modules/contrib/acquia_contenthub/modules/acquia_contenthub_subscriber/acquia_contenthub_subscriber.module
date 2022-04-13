@@ -62,7 +62,7 @@ function _acquia_contenthub_subscriber_delete_entity(EntityInterface $entity, Co
   /** @var \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker */
   $tracker = \Drupal::service('acquia_contenthub_subscriber.tracker');
   if ($uuid && $tracker->isTracked($uuid)) {
-    $tracker->delete($uuid);
+    $tracker->delete('entity_uuid', $uuid);
 
     \Drupal::logger('acquia_contenthub_subscriber')
       ->info(sprintf("Removed tracking for entity with UUID = \"%s\".", $uuid));

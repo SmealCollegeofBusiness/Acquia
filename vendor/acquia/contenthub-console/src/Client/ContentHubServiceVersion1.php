@@ -56,7 +56,14 @@ class ContentHubServiceVersion1 implements ContentHubServiceInterface {
    * {@inheritDoc}
    */
   public function getClients(): array {
-    return \Drupal::service('acquia_contenthub.acquia_contenthub_subscription')->getClients();
+    $clients = [];
+    foreach (\Drupal::service('acquia_contenthub.acquia_contenthub_subscription')->getSettings()->getWebhooks() as $webhook) {
+      $path = parse_url($webhook['url']);
+      $url = $path['scheme'] . "://" . $path['host'];
+      $clients[$webhook['client_name']] = $url;
+    }
+
+    return $clients;
   }
 
   /**
@@ -133,10 +140,10 @@ class ContentHubServiceVersion1 implements ContentHubServiceInterface {
    * {@inheritDoc}
    */
   public function purge(): array {
-    $response = \Drupal::service('acquia_contenthub.client_manager')->createRequest('purge');
+    $response = $this->client->purge();
     if (!isset($response['success']) || $response['success'] !== TRUE) {
-      $error_message = isset($response['error']['message']) ? $response['error']['message'] : $response['error'];
-      throw new \Exception("Purge failed. Reason: {$error_message}");
+      $error_message = $response['error']['message'] ?? $response['error'] ?? $response;
+      throw new \Exception('Purge failed. Reason: ' . print_r($error_message, TRUE));
     }
     return $response;
   }

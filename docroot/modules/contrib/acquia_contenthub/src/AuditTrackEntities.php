@@ -34,12 +34,13 @@ class AuditTrackEntities {
 
     /** @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
     $factory = \Drupal::service('acquia_contenthub.client.factory');
-    if (!$factory->getClient()) {
+    $client = $factory->getClient();
+    if (!$client) {
       throw new \Exception(dt('The Content Hub client is not connected so no operations could be performed.'));
     }
 
     /** @var \Acquia\ContentHubClient\CDF\CDFObject[] $cdfs */
-    $cdfs = $factory->getClient()->getEntities($uuids)->getEntities();
+    $cdfs = $client->getEntities($uuids)->getEntities();
 
     foreach ($entities as $entity) {
       $out_of_sync = FALSE;

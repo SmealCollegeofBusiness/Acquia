@@ -103,6 +103,9 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
     $session->fieldExists('Send updates to Content Hub Service.');
     $session->fieldDisabled('Send updates to Content Hub Service.');
     $session->fieldValueEquals('Send updates to Content Hub Service.', TRUE);
+    $session->fieldExists('Send Client metrics updates to Content Hub Service.');
+    $session->fieldDisabled('Send Client metrics updates to Content Hub Service.');
+    $session->fieldValueEquals('Send Client metrics updates to Content Hub Service.', TRUE);
     $session->fieldExists('Publicly Accessible URL');
     $session->pageTextContains('Site\'s Origin UUID');
     $session->buttonExists('Register Site');

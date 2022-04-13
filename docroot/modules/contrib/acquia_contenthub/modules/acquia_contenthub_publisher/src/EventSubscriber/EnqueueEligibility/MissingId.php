@@ -36,6 +36,7 @@ class MissingId implements EventSubscriberInterface {
 
     if (empty($entity->id())) {
       $event->setEligibility(FALSE);
+      $event->setReason('Missing entity id.');
       $event->stopPropagation();
     }
   }

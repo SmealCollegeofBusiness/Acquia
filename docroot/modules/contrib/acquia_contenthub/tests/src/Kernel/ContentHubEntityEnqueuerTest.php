@@ -184,15 +184,16 @@ class ContentHubEntityEnqueuerTest extends EntityKernelTestBase {
       ->willReturn(TRUE);
 
     $this->enqueueEntity($this->clientFactory->reveal());
-
+    $uuid = $this->node->uuid();
+    $entity_type_id = $this->node->getEntityTypeId();
     $log_messages = $this->logger->getLogMessages();
     $this->assertEquals(
-      'Attempting to add entity with UUID ' . $this->node->uuid() . ' to the export queue after operation: update.',
+      "Attempting to add entity with (UUID: {$uuid}, Entity type: {$entity_type_id}) to the export queue after operation: update.",
       $log_messages[RfcLogLevel::INFO][0]
     );
 
     $this->assertEquals(
-      'Entity with UUID ' . $this->node->uuid() . ' added to the export queue and to the tracking table.',
+      "Entity with (UUID: {$uuid}, Entity type: {$entity_type_id}) added to the export queue and to the tracking table.",
       $log_messages[RfcLogLevel::INFO][1]
     );
   }
@@ -213,13 +214,15 @@ class ContentHubEntityEnqueuerTest extends EntityKernelTestBase {
     $this->enqueueEntity($this->clientFactory->reveal());
 
     $log_messages = $this->logger->getLogMessages();
+    $uuid = $this->node->uuid();
+    $entity_type_id = $this->node->getEntityTypeId();
     $this->assertEquals(
-      'Attempting to add entity with UUID ' . $this->node->uuid() . ' to the export queue after operation: update.',
+      "Attempting to add entity with (UUID: {$uuid}, Entity type: {$entity_type_id}) to the export queue after operation: update.",
       $log_messages[RfcLogLevel::INFO][0]
     );
 
     $this->assertEquals(
-      'Entity with UUID d12da227 not eligible to be added to the export queue.',
+      "Entity with (UUID: {$uuid}, Entity type: {$entity_type_id}) not eligible to be added to the export queue. Reason: Missing entity uuid.",
       $log_messages[RfcLogLevel::INFO][1]
     );
   }

@@ -2,7 +2,6 @@
 
 namespace Drupal\acquia_contenthub_subscriber\Plugin\QueueWorker;
 
-use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\Hmac\Key;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Client\ClientFactory;
@@ -40,13 +39,6 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
    */
   protected $dispatcher;
-
-  /**
-   * Acquia Content Hub Client factory.
-   *
-   * @var \Drupal\acquia_contenthub\Client\ClientFactory
-   */
-  protected $factory;
 
   /**
    * Acquia Content Hub client.
@@ -87,9 +79,16 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    */
-  public function __construct(EventDispatcherInterface $dispatcher, ClientFactory $factory, LoggerChannelInterface $logger_channel, array $configuration, string $plugin_id, $plugin_definition) {
+  public function __construct(
+    EventDispatcherInterface $dispatcher,
+    ClientFactory $factory,
+    LoggerChannelInterface $logger_channel,
+    array $configuration,
+    string $plugin_id,
+    $plugin_definition
+  ) {
     $this->dispatcher = $dispatcher;
-    $this->factory = $factory;
+    $this->client = $factory->getClient();
     $this->loggerChannel = $logger_channel;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -160,7 +159,6 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
       $this->loggerChannel->error('Filter uuid not found.');
       return;
     }
-    $this->initialiseClient();
 
     $settings = $this->client->getSettings();
     $webhook_uuid = $settings->getWebhook('uuid');
@@ -223,19 +221,8 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    *
    * @throws \Exception
    */
-  public function getNormalizedScrollTimeWindowValue(ContentHubClient $client): string {
-    return $this->accountIsFeatured($client) ? self::SCROLL_TIME_WINDOW . 'm' : self::SCROLL_TIME_WINDOW;
-  }
-
-  /**
-   * Initialises Content Hub client.
-   *
-   * @throws \Exception
-   */
-  protected function initialiseClient(): void {
-    if (empty($this->client)) {
-      $this->client = $this->factory->getClient();
-    }
+  public function getNormalizedScrollTimeWindowValue(): string {
+    return $this->accountIsFeatured() ? self::SCROLL_TIME_WINDOW . 'm' : self::SCROLL_TIME_WINDOW;
   }
 
   /**
@@ -248,9 +235,9 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
    *
    * @throws \Exception
    */
-  protected function accountIsFeatured(ContentHubClient $client): bool {
+  protected function accountIsFeatured(): bool {
     if (empty($this->isFeatured)) {
-      $this->isFeatured = $client->isFeatured();
+      $this->isFeatured = $this->client->isFeatured();
     }
     return $this->isFeatured;
   }

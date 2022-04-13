@@ -10,7 +10,6 @@ use Acquia\Hmac\KeyLoader;
 use Acquia\Hmac\RequestAuthenticator;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubSettingsEvent;
-use Drupal\acquia_contenthub\Event\BuildClientCdfEvent;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
@@ -149,7 +148,6 @@ class ClientFactory {
    *   The ContentHub Client
    */
   public function getClient(Settings $settings = NULL) {
-    $validate = (bool) !$settings;
     if (!$settings) {
       if (isset($this->client)) {
         return $this->client;
@@ -179,15 +177,6 @@ class ClientFactory {
       $this->dispatcher
     );
 
-    $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
-
-    // Only send Client CDF updates, if send update flag is TRUE.
-    if ($validate && $send_update && $this->client->getRemoteSettings()) {
-      $event = new BuildClientCdfEvent(ClientCDFObject::create($settings->getUuid(), ['settings' => $settings->toArray()]));
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
-      $this->clientCDFObject = $event->getCdf();
-      $this->updateClientCdf();
-    }
     return $this->client;
   }
 
@@ -271,37 +260,6 @@ class ClientFactory {
     }
 
     return FALSE;
-  }
-
-  /**
-   * Update Client CDF.
-   *
-   * @return bool
-   *   TRUE if successful; FALSE otherwise.
-   *
-   * @throws \ReflectionException
-   */
-  public function updateClientCdf() {
-    /** @var \Acquia\ContentHubClient\CDF\ClientCDFObject $remote_cdf */
-    $remote_cdf = $this->client->getEntity($this->settings->getUuid());
-    // Don't update the ClientCDF if the remote object matches the local one.
-    if ($remote_cdf instanceof ClientCDFObject &&
-      $remote_cdf->getAttribute('hash') &&
-      $remote_cdf->getAttribute('hash')->getValue()['und'] === $this->clientCDFObject->getAttribute('hash')->getValue()['und']) {
-      return TRUE;
-    }
-    // Send the clientCDFObject because it doesn't exist in CH yet or doesn't
-    // match what exists in CH today.
-    $response = $this->client->putEntities($this->clientCDFObject);
-    if ($response->getStatusCode() === 202) {
-      return TRUE;
-    }
-    else {
-      $this->loggerFactory->get('acquia_contenthub')->debug('Updating clientCDF failed with http status %error', [
-        '%error' => $response->getStatusCode(),
-      ]);
-      return FALSE;
-    }
   }
 
   /**

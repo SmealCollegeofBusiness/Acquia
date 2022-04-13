@@ -112,7 +112,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
    * @throws \Exception
    */
   public function testDelete() {
-    $this->publisherTracker->delete($this->node->uuid());
+    $this->publisherTracker->delete('entity_uuid', $this->node->uuid());
 
     $is_deleted = $this->getTrackingTableColByUuid($this->node->uuid());
     $this->assertEmpty($is_deleted);

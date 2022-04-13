@@ -52,6 +52,7 @@ class FileSchemeIsSupported implements EventSubscriberInterface {
     $entity = $event->getEntity();
     if ($entity instanceof FileInterface && !$this->fileSchemeHandler->isSupportedFileScheme($entity)) {
       $event->setEligibility(FALSE);
+      $event->setReason('File scheme is not supported.');
       $event->stopPropagation();
     }
   }

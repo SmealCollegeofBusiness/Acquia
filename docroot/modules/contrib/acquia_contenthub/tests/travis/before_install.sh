@@ -12,7 +12,14 @@ fi
 if [[ "$DRUPAL_CORE" == "9" ]]; then
   rm -Rf "$ORCA_SUT_DIR/modules/acquia_contenthub_s3"
 fi
+if [[ "$DRUPAL_CORE" == "9" && "$ACQUIACI" == TRUE ]]; then
+  rm -Rf "/ramfs$ORCA_SUT_DIR/modules/acquia_contenthub_s3"
+fi
+
 
 if [[ "$ORCA_JOB" == "STATIC_CODE_ANALYSIS" ]]; then
   rm -Rf "$ORCA_SUT_DIR/modules/acquia_contenthub_curation/ember"
+fi
+if [[ "$ORCA_JOB" == "STATIC_CODE_ANALYSIS" && "$ACQUIACI" == TRUE ]]; then
+  rm -Rf "/ramfs$ORCA_SUT_DIR/modules/acquia_contenthub_curation/ember"
 fi

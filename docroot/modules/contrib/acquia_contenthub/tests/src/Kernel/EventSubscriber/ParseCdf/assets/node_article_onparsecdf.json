@@ -1,0 +1,167 @@
+{
+  "uuid": "5d1ba3c3-d527-4328-8fce-a6b714c5ef79",
+  "type": "drupal8_content_entity",
+  "created": "2020-03-28T11:22:21+00:00",
+  "modified": "2020-03-28T11:22:21+00:00",
+  "origin": false,
+  "attributes": {
+    "label": {
+      "type": "array<string>",
+      "value": {
+        "en": "Test English Page",
+        "und": "Test English Page"
+      }
+    },
+    "entity_type": {
+      "type": "keyword",
+      "value": {
+        "und": "node"
+      }
+    },
+    "entity_type_label": {
+      "type": "string",
+      "value": {
+        "und": "Content"
+      }
+    },
+    "bundle": {
+      "type": "keyword",
+      "value": {
+        "und": "page"
+      }
+    },
+    "bundle_label": {
+      "type": "string",
+      "value": {
+        "und": "Page"
+      }
+    },
+    "channels": {
+      "type": "array<reference>",
+      "value": {
+        "und": []
+      }
+    },
+    "hash": {
+      "type": "string",
+      "value": {
+        "und": "f5923ae5e53f991cd23b5f87c6763e7ddadcea94"
+      }
+    },
+    "base_url": {
+      "type": "string",
+      "value": {
+        "und": "http:\\\/\\\/publisher.dd:8083\\\/"
+      }
+    }
+  },
+  "metadata": {
+    "additional_data": "Change label to this one",
+    "default_language": "en",
+    "dependencies": {
+      "entity": {
+        "b7b40bf9-97b4-4c60-873e-0602135a4861": "9ee493296682a8a51c31bac411fe001728ef6d2d",
+        "995f955b-08a9-4436-a0c7-1cde093ee174": "f89a723c7d5ce258870aca7329d9b7535a41ab82",
+        "7afc1efc-0f60-42a2-be36-8eb8ee64bc06": "e93a4014b24cbc40803e786c69d458f15081bff3",
+        "87af579b-b339-414c-a5b5-df6109d2ae14": "b528d71e26eb98cf2cf51d743bc4e8a664f6ec2c",
+        "71fbf8f1-1b1e-491f-87a6-6bf7ec9a1c7d": "44b86ec90125a46e1ba866efb8ee0eb71e492fc7",
+        "3c29e210-a45e-44fa-8639-6643920484df": "fa916dd5ccbf02689f0b289ed2a473cc037ba771",
+        "be574fe8-4427-4915-90e3-f1451ab12bb3": "be654e5002b18a3678869e68215fa1c566d1d9f6",
+        "666ad48d-c47e-4638-a6eb-c1925303405c": "fffdc892842b6668f9e922bf985774df029fb56a",
+        "10f721d6-26c6-4fe8-845d-e55cf1bacf3a": "bd93c81b05dcbc2d858cdb331f9d19271fbdee1e",
+        "31b7d630-160e-4775-96c0-902b633ad13e": "b2e1f1e820c2f51ce4d6c476b1659179d192d2b3",
+        "e78d57b6-bd17-48f4-9453-e37e1ac0b576": "cf3c9c7a7422f461ae36679ac7f077e5accfb50b",
+        "7ea66b88-3e29-4c8e-87f6-e44d075a1e7f": "896a0b107e5c46d9878f2519b48de5b3bddf3b7a",
+        "106befd6-df8e-43a2-97f6-7348f3ebf013": "5dbde53f9cd8c939bdf3fc2ebf307281d12c6c02",
+        "80afbb4b-c93d-405b-a5b1-d646a0fee474": "ddc599d52e14d3670986e2ebf53ec1c5eb8f01ac",
+        "8e8e1c22-c435-4adb-ad88-144a64af630c": "eedb48b306ace3cadfa77b582d5f762dd68c4c2d",
+        "48b9e63b-f46f-4a77-8d04-00c06e37d9d5": "b72e279a94196cfaea4592c305ab0add78954a65",
+        "86ee7cc2-8791-416f-9537-23c1423308b3": "3d8d3edef89e58d6d0ec4289df631698bfab7948",
+        "9dd0dd60-4ef9-44e9-9c3d-322e6bad44d7": "3d250dfe56a4381d93a4ce00a3e3296841a45e44"
+      },
+      "module": [
+        "user",
+        "file",
+        "image",
+        "editor",
+        "ckeditor",
+        "node",
+        "text",
+        "path",
+        "language",
+        "content_translation"
+      ]
+    },
+    "field": {
+      "uuid": {
+        "type": "uuid"
+      },
+      "langcode": {
+        "type": "language"
+      },
+      "type": {
+        "type": "entity_reference",
+        "target": "node_type"
+      },
+      "revision_timestamp": {
+        "type": "created"
+      },
+      "revision_uid": {
+        "type": "entity_reference",
+        "target": "user"
+      },
+      "revision_log": {
+        "type": "string_long"
+      },
+      "status": {
+        "type": "boolean"
+      },
+      "uid": {
+        "type": "entity_reference",
+        "target": "user"
+      },
+      "title": {
+        "type": "string"
+      },
+      "created": {
+        "type": "created"
+      },
+      "changed": {
+        "type": "changed"
+      },
+      "content_translation_outdated": {
+        "type": "boolean"
+      },
+      "content_translation_source": {
+        "type": "language"
+      },
+      "promote": {
+        "type": "boolean"
+      },
+      "sticky": {
+        "type": "boolean"
+      },
+      "default_langcode": {
+        "type": "boolean"
+      },
+      "revision_default": {
+        "type": "boolean"
+      },
+      "revision_translation_affected": {
+        "type": "boolean"
+      },
+      "path": {
+        "type": "path"
+      },
+      "body": {
+        "type": "text_with_summary"
+      }
+    },
+    "data": "ewoJInV1aWQiOiB7CgkJInZhbHVlIjogewoJCQkiZW4iOiB7CgkJCQkidmFsdWUiOiAiNWQxYmEzYzMtZDUyNy00MzI4LThmY2UtYTZiNzE0YzVlZjc5IgoJCQl9LAoJCQkiaHUiOiB7CgkJCQkidmFsdWUiOiAiNWQxYmEzYzMtZDUyNy00MzI4LThmY2UtYTZiNzE0YzVlZjc5IgoJCQl9CgkJfQoJfSwKCSJ0eXBlIjogewoJCSJ2YWx1ZSI6IHsKCQkJImVuIjogImI3YjQwYmY5LTk3YjQtNGM2MC04NzNlLTA2MDIxMzVhNDg2MSIsCgkJCSJodSI6ICJiN2I0MGJmOS05N2I0LTRjNjAtODczZS0wNjAyMTM1YTQ4NjEiCgkJfQoJfSwKCSJyZXZpc2lvbl90aW1lc3RhbXAiOiB7CgkJInZhbHVlIjogewoJCQkiZW4iOiB7CgkJCQkidmFsdWUiOiAiMTU4NTM5NDQ3NSIKCQkJfSwKCQkJImh1IjogewoJCQkJInZhbHVlIjogIjE1ODUzOTQ0NzUiCgkJCX0KCQl9Cgl9LAoJInJldmlzaW9uX3VpZCI6IHsKCQkidmFsdWUiOiB7CgkJCSJlbiI6IFsiOTk1Zjk1NWItMDhhOS00NDM2LWEwYzctMWNkZTA5M2VlMTc0Il0sCgkJCSJodSI6IFsiOTk1Zjk1NWItMDhhOS00NDM2LWEwYzctMWNkZTA5M2VlMTc0Il0KCQl9Cgl9LAoJInJldmlzaW9uX2xvZyI6IFtdLAoJInN0YXR1cyI6IHsKCQkidmFsdWUiOiB7CgkJCSJlbiI6ICIxIiwKCQkJImh1IjogIjEiCgkJfQoJfSwKCSJ1aWQiOiB7CgkJInZhbHVlIjogewoJCQkiZW4iOiBbIjk5NWY5NTViLTA4YTktNDQzNi1hMGM3LTFjZGUwOTNlZTE3NCJdLAoJCQkiaHUiOiBbIjk5NWY5NTViLTA4YTktNDQzNi1hMGM3LTFjZGUwOTNlZTE3NCJdCgkJfQoJfSwKCSJ0aXRsZSI6IHsKCQkidmFsdWUiOiB7CgkJCSJlbiI6ICJUZXN0IEVuZ2xpc2ggUGFnZSIsCgkJCSJodSI6ICJUZXN0IEh1bmdhcmlhbiBQYWdlIgoJCX0KCX0sCgkiY3JlYXRlZCI6IHsKCQkidmFsdWUiOiB7CgkJCSJlbiI6IHsKCQkJCSJ2YWx1ZSI6ICIxNTg1Mzk0NDM4IgoJCQl9LAoJCQkiaHUiOiB7CgkJCQkidmFsdWUiOiAiMTU4NTM5NDQzOCIKCQkJfQoJCX0KCX0sCgkiY2hhbmdlZCI6IHsKCQkidmFsdWUiOiB7CgkJCSJlbiI6IHsKCQkJCSJ2YWx1ZSI6ICIxNTg1Mzk0NDc1IgoJCQl9LAoJCQkiaHUiOiB7CgkJCQkidmFsdWUiOiAiMTU4NTM5NDQ3NSIKCQkJfQoJCX0KCX0sCgkicHJvbW90ZSI6IHsKCQkidmFsdWUiOiB7CgkJCSJlbiI6ICIxIiwKCQkJImh1IjogIjEiCgkJfQoJfSwKCSJzdGlja3kiOiB7CgkJInZhbHVlIjogewoJCQkiZW4iOiAiMCIsCgkJCSJodSI6ICIwIgoJCX0KCX0sCgkiZGVmYXVsdF9sYW5nY29kZSI6IHsKCQkidmFsdWUiOiB7CgkJCSJlbiI6ICIxIiwKCQkJImh1IjogIjAiCgkJfQoJfSwKCSJyZXZpc2lvbl9kZWZhdWx0IjogewoJCSJ2YWx1ZSI6IHsKCQkJImVuIjogIjEiLAoJCQkiaHUiOiAiMSIKCQl9Cgl9LAoJInJldmlzaW9uX3RyYW5zbGF0aW9uX2FmZmVjdGVkIjogewoJCSJ2YWx1ZSI6IHsKCQkJImVuIjogIjEiLAoJCQkiaHUiOiAiMSIKCQl9Cgl9LAoJImNvbnRlbnRfdHJhbnNsYXRpb25fc291cmNlIjogewoJCSJ2YWx1ZSI6IHsKCQkJImVuIjogInVuZCIsCgkJCSJodSI6ICJlbiIKCQl9Cgl9LAoJImNvbnRlbnRfdHJhbnNsYXRpb25fb3V0ZGF0ZWQiOiB7CgkJInZhbHVlIjogewoJCQkiZW4iOiAiMCIsCgkJCSJodSI6ICIwIgoJCX0KCX0KfQ==",
+    "languages": [
+      "en",
+      "hu"
+    ],
+    "version": 2
+  }
+}

@@ -47,8 +47,14 @@ services:
       - { name: event_subscriber }
 
   content_entity.cdf.handler:
-    class: Drupal\acquia_contenthub\EventSubscriber\Cdf\ContentEntityHandler
-    arguments: ['@entity.dependency.calculator', '@config.factory', '@event_dispatcher', '@acquia_contenthub.client.factory']
+    class: Drupal\acquia_contenthub\EventSubscriber\CreateCdfObject\ContentEntityCreateCdfHandler
+    arguments: ['@event_dispatcher', '@acquia_contenthub.client.factory']
+    tags:
+      - { name: event_subscriber }
+
+  content_entity.cdf.parser_handler:
+    class: Drupal\acquia_contenthub\EventSubscriber\ParseCdf\ContentEntityParseCdfHandler
+    arguments: ['@event_dispatcher']
     tags:
       - { name: event_subscriber }
 
@@ -290,6 +296,7 @@ services:
 
   entity_reference.field.cdf.unserializer:
     class: Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField\EntityReferenceField
+    arguments: ['@acquia_contenthub.logger_channel']
     tags:
       - { name: event_subscriber }
 
@@ -407,9 +414,15 @@ services:
     tags:
       - { name: event_subscriber }
 
-  file_entity.remove.non_public.filter:
-    class: Drupal\acquia_contenthub\EventSubscriber\FilterDeps\RemoveNonPublicFiles
+  acquia_contenthub.filter_deps.remove_non_pub_files_deps:
+    class: Drupal\acquia_contenthub\EventSubscriber\FilterFields\RemoveNonPublicFilesDependencies
     arguments: ['@acquia_contenthub.file_scheme_handler.manager']
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub.filter_deps.remove_non_pub_files:
+    class: Drupal\acquia_contenthub\EventSubscriber\ExcludeContentField\RemoveNonPublicFiles
+    arguments: [ '@acquia_contenthub.file_scheme_handler.manager' ]
     tags:
       - { name: event_subscriber }
 
@@ -477,3 +490,7 @@ services:
   acquia_contenthub.project_version_client:
     class: Drupal\acquia_contenthub\Client\ProjectVersionClient
     arguments: ['@http_client', '@acquia_contenthub.logger_channel']
+
+  acquia_contenthub.cdf_metrics_manager:
+    class: Drupal\acquia_contenthub\Client\CdfMetricsManager
+    arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.config', '@acquia_contenthub.logger_channel', '@event_dispatcher' ]

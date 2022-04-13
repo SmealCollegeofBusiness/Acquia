@@ -34,7 +34,7 @@ class WebhookEnableForm extends ConfirmFormBase {
   protected $uuid;
 
   /**
-   * SubscriptionManagerController constructor.
+   * WebhookEnableForm constructor.
    *
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The client factory.

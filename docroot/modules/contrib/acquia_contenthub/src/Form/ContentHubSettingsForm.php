@@ -178,11 +178,21 @@ class ContentHubSettingsForm extends ConfigFormBase {
     $form['settings']['send_contenthub_updates'] = [
       '#type' => 'checkbox',
       '#title' => 'Send updates to Content Hub Service.',
-      '#description' => 'Disable this flag with drush in case of Service degradation.',
+      '#description' => 'Set this flag with drush to False in case of service degradation to disable sending Content Hub Service related updates temporarily. Turning it off will prevent any performance hits for the site for the duration of the event.',
       '#disabled' => TRUE,
       '#default_value' => $this
         ->config('acquia_contenthub.admin_settings')
         ->get('send_contenthub_updates') ?? TRUE,
+    ];
+
+    $form['settings']['send_clientcdf_updates'] = [
+      '#type' => 'checkbox',
+      '#title' => 'Send Client metrics updates to Content Hub Service.',
+      '#description' => 'Set this flag with drush to false in case of service degradation to disable sending Metrics updates to Content Hub Service.',
+      '#disabled' => TRUE,
+      '#default_value' => $this
+        ->config('acquia_contenthub.admin_settings')
+        ->get('send_clientcdf_updates') ?? TRUE,
     ];
 
     $form['settings']['hostname'] = [

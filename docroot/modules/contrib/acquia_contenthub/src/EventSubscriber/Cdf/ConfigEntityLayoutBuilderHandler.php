@@ -46,7 +46,7 @@ class ConfigEntityLayoutBuilderHandler implements EventSubscriberInterface {
   public function onParseCdf(ParseCdfEntityEvent $event) {
     /** @var \Drupal\Core\Entity\Display\EntityViewDisplayInterface $entity */
     $entity = $event->getEntity();
-    if ($entity->getEntityTypeId() !== 'entity_view_display') {
+    if (!$entity || $entity->getEntityTypeId() !== 'entity_view_display') {
       return;
     }
     $sections = $entity->getThirdPartySetting('layout_builder', 'sections', []);

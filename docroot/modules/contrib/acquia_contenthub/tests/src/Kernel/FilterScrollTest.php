@@ -7,6 +7,7 @@ use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub_test\MockDataProvider;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\MetricsUpdateTrait;
 use Prophecy\Argument;
 
 /**
@@ -17,6 +18,8 @@ use Prophecy\Argument;
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class FilterScrollTest extends EntityKernelTestBase {
+
+  use MetricsUpdateTrait;
 
   /**
    * {@inheritdoc}
@@ -109,6 +112,8 @@ class FilterScrollTest extends EntityKernelTestBase {
       ->cancelScroll(Argument::any())
       ->willReturn([]);
 
+    $this->mockMetricsCalls($content_hub_client);
+
     $this->contentHubClientMock = $content_hub_client;
     $this->queueWorkerManager = $this->container->get('plugin.manager.queue_worker');
   }
@@ -178,6 +183,8 @@ class FilterScrollTest extends EntityKernelTestBase {
       ->contentHubClientMock
       ->continueScroll(Argument::any(), Argument::any())
       ->willReturn(...$responses);
+
+    $client_factory->getSettings()->willReturn($this->contentHubClientMock->reveal()->getSettings());
 
     $client_factory->getClient()->willReturn($this->contentHubClientMock->reveal());
 

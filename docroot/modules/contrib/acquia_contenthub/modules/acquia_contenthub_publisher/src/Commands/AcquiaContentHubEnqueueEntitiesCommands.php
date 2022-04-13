@@ -174,7 +174,7 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
     }
 
     // Clear the depcalc cache table.
-    $this->depcalcCache->deleteAll();
+    $this->depcalcCache->deleteAllPermanent();
 
     // We are nullifying hashes for ALL entities to make sure
     // all dependencies are re-exported.
@@ -256,7 +256,7 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
       if (!$entity) {
         // Entity cannot be loaded, it must have been deleted.
         // Delete it from the tracking table too.
-        $this->publisherTracker->delete($enqueue_entity['entity_uuid']);
+        $this->publisherTracker->delete('entity_uuid', $enqueue_entity['entity_uuid']);
         $this->logger()->warning(dt('Could not load entity (@entity_type, @entity_id) : "@entity_uuid". Deleted from Tracking Table.', [
           '@entity_type' => $enqueue_entity['entity_type'],
           '@entity_id' => $enqueue_entity['entity_id'],

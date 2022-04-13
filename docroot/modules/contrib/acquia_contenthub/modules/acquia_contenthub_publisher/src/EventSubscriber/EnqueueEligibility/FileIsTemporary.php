@@ -35,6 +35,7 @@ class FileIsTemporary implements EventSubscriberInterface {
     $entity = $event->getEntity();
     if ($entity instanceof FileInterface && $entity->isTemporary()) {
       $event->setEligibility(FALSE);
+      $event->setReason('File is temporary.');
       $event->stopPropagation();
     }
   }

@@ -36,9 +36,8 @@ class ClientDeleteConfirmForm extends ContentHubDeleteClientConfirmForm {
    * {@inheritdoc}
    */
   public function getWebhookUuid(): string {
-    $client = $this->clientFactory->getClient();
 
-    $remote_settings = $client->getRemoteSettings();
+    $remote_settings = $this->client->getRemoteSettings();
     $client_name = '';
 
     foreach ($remote_settings['clients'] as $client) {

@@ -1,5 +1,9 @@
 # Change Log
 
+### 4.5.3 - 1 April 2022
+
+- Check the type of the reflection object before attempting to call isBuiltin(). (#265)
+
 ### 4.5.2 - 20 February 2022
 
 - Do not pass null to Symfony Command methods (#262)
@@ -218,7 +222,7 @@ DEPRECATED RELEASE. Do not use.
 
 ### 2.1.0 - 14 November 2016
 
-- Add support for output formatter wordwrapping
+- Add support for output formatter wordwrapping 
 - Fix version requirement for output-formatters in composer.json
 - Use output-formatters ~3
 - Move php_codesniffer back to require-dev (moved to require by mistake)

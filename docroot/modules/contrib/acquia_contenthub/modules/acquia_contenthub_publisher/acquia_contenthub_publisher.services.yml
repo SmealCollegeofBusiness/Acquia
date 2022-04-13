@@ -117,7 +117,7 @@ services:
 
   acquia_contenthub_publisher.acquia_contenthub_export_queue:
     class: Drupal\acquia_contenthub_publisher\ContentHubExportQueue
-    arguments: ['@queue', '@plugin.manager.queue_worker', '@messenger']
+    arguments: ['@queue', '@plugin.manager.queue_worker', '@messenger', '@renderer']
 
   acquia_contenthub_publisher.entity_enqueuer:
     class: Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer

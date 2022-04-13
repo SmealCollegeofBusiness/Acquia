@@ -30,7 +30,7 @@ abstract class ClientFormBase extends FormBase {
   protected $uuid;
 
   /**
-   * SubscriptionManagerController constructor.
+   * ClientFormBase constructor.
    *
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The client factory.

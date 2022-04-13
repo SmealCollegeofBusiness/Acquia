@@ -125,17 +125,19 @@ class PublisherTracker {
   /**
    * Remove tracking for an entity.
    *
-   * @param string $uuid
-   *   The uuid for which to remove tracking.
+   * @param string $field_name
+   *   The field used in filter condition.
+   * @param string $field_value
+   *   The dynamic field value for which to remove tracking.
    *
    * @return \Drupal\Core\Database\StatementInterface|int|null
    *   Database statement
    *
    * @throws \Exception
    */
-  public function delete(string $uuid) {
+  public function delete(string $field_name, string $field_value) {
     $query = $this->database->delete(self::EXPORT_TRACKING_TABLE);
-    $query->condition('entity_uuid', $uuid);
+    $query->condition($field_name, $field_value);
     return $query->execute();
   }
 

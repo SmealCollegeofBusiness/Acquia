@@ -37,6 +37,7 @@ class MissingUuid implements EventSubscriberInterface {
 
     if (!Uuid::isValid($entity->uuid())) {
       $event->setEligibility(FALSE);
+      $event->setReason('Missing entity uuid.');
       $event->stopPropagation();
     }
   }

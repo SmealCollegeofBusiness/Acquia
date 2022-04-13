@@ -8,6 +8,7 @@ use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubConnectionManager;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Config\Config;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -47,11 +48,11 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
   protected $event;
 
   /**
-   * The client factory.
+   * The Acquia ContentHub Client object.
    *
-   * @var \Drupal\acquia_contenthub\Client\ClientFactory
+   * @var \Acquia\ContentHubClient\ContentHubClient
    */
-  protected $clientFactory;
+  protected $client;
 
   /**
    * ContentHubDeleteClientConfirmForm constructor.
@@ -65,7 +66,7 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
    */
   public function __construct(ContentHubConnectionManager $ch_connection_manager, ClientFactory $client_factory, EventDispatcherInterface $eventDispatcher) {
     $this->chConnectionManager = $ch_connection_manager;
-    $this->clientFactory = $client_factory;
+    $this->client = $client_factory->getClient();
     $this->eventDispatcher = $eventDispatcher;
   }
 
@@ -95,7 +96,15 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
     $webhook_uuid = $this->getWebhookUuid();
 
     if (empty($webhook_uuid)) {
-      $this->messenger()->addError($this->t('Cannot find webhook uuid.'));
+      $form['warning_message'] = [
+        '#markup' => $this->t('Webhook not found for this client. Proceed?'),
+      ];
+      $form['delete_client_without_webhook'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Yes'),
+        '#button_type' => 'primary',
+        '#name' => 'delete_client_without_webhook',
+      ];
       return $form;
     }
 
@@ -198,17 +207,70 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
    * @throws \Exception
    */
   public function getWebhookUuid(): string {
-    $client = $this->clientFactory->getClient();
-    $settings = $client->getSettings();
-    $remote_settings = $client->getRemoteSettings();
+    $logger = $this->logger('acquia_contenthub');
+    $settings = $this->client->getSettings();
+    $remote_settings = $this->client->getRemoteSettings();
 
-    foreach ($remote_settings['webhooks'] as $webhook) {
-      if ($webhook['client_name'] === $settings->getName()) {
-        return $webhook['uuid'];
+    $webhook_uuid = $settings->getWebhook('uuid');
+    if (!$webhook_uuid) {
+      $logger->info('Webhook was not registered.');
+      return '';
+    }
+
+    $remote_webhook = $this->getSelectedWebhookByUuid($remote_settings['webhooks'], $webhook_uuid);
+    if (empty($remote_webhook)) {
+      $logger->info(sprintf('Local configurations is out of sync, %s (%s) was not registered to Content Hub, but remained in configuration.', $settings->getWebhook(), $webhook_uuid));
+      return '';
+    }
+
+    // Standard case. The webhook is registered and is associated with the
+    // client and stored in local configuration as well.
+    if ($remote_webhook['client_name'] === $settings->getName()) {
+      return $remote_webhook['uuid'];
+    }
+
+    // The webhook is found in local configuration, but the client_name
+    // didn't match with the registered, remote information of the webhook.
+    foreach ($remote_settings['clients'] as $remote_client) {
+      if ($remote_client['name'] === $remote_webhook['client_name']) {
+        $logger->info('The webhook is registered to other client. The configuration was outdated');
+        return '';
       }
     }
 
-    return '';
+    // If it doesn't belong to any of the clients it needs to be deleted.
+    $logger->info(sprintf('The webhook %s was orphaned (was registered to a non-existent client).', $remote_webhook['uuid']));
+    return $remote_webhook['uuid'];
+  }
+
+  /**
+   * Returns the desired webhook from the array by uuid.
+   *
+   * @param array $webhooks
+   *   The list of webhooks returned from /settings endpoint.
+   * @param string $webhook_uuid
+   *   The selected webhook uuid.
+   *
+   * @return array
+   *   The selected webhook array or an empty array if it wasn't found.
+   */
+  protected function getSelectedWebhookByUuid(array $webhooks, string $webhook_uuid): array {
+    foreach ($webhooks as $webhook) {
+      if ($webhook['uuid'] === $webhook_uuid) {
+        return $webhook;
+      }
+    }
+    return [];
+  }
+
+  /**
+   * Obtains the Content Hub Admin Settings Configuration.
+   *
+   * @return \Drupal\Core\Config\Config
+   *   The Editable Content Hub Admin Settings Configuration.
+   */
+  protected function getContentHubConfig(): Config {
+    return $this->configFactory()->getEditable('acquia_contenthub.admin_settings');
   }
 
   /**
@@ -225,9 +287,14 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
       return;
     }
 
-    $client = $this->clientFactory->getClient();
-    if (!$client) {
+    if (!$this->client) {
       $this->messenger()->addError("Couldn't instantiate client. Please check connection settings.");
+      $form_state->setRedirect('acquia_contenthub.admin_settings');
+      return;
+    }
+
+    if ($form_state->getTriggeringElement()['#name'] === 'delete_client_without_webhook') {
+      $this->unregisterClientNoWebhook();
       $form_state->setRedirect('acquia_contenthub.admin_settings');
       return;
     }
@@ -244,10 +311,24 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
   }
 
   /**
+   * Unregister local client and configurations when no webhook registered.
+   */
+  protected function unregisterClientNoWebhook(): void {
+    $client_settings = $this->client->getSettings();
+    $resp = $this->client->deleteClient($client_settings->getUuid());
+    if ($resp && $resp->getStatusCode() === 202) {
+      $this->logger('acquia_contenthub')->info(
+        sprintf('Client %s has been removed, no webhook was registered.', $client_settings->getName())
+      );
+    }
+    $this->getContentHubConfig()->delete();
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
-    return "contenthub_delete_client_confirmation";
+    return 'contenthub_delete_client_confirmation';
   }
 
 }

@@ -32,11 +32,12 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
    */
   protected $config;
   /**
-   * Content Hub Client Factory.
+   * The Content Hub Client.
    *
-   * @var \Drupal\acquia_contenthub\Client\ClientFactory
+   * @var \Acquia\ContentHubClient\ContentHubClient
    */
-  protected $clientFactory;
+  protected $client;
+
   /**
    * Logger Service.
    *
@@ -75,7 +76,7 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
   public function __construct(Connection $database, ConfigFactoryInterface $config_factory, ClientFactory $client_factory, LoggerChannelFactoryInterface $logger, StateInterface $state, ModuleHandlerInterface $module_handler) {
     $this->database = $database;
     $this->config = $config_factory->get('acquia_contenthub.admin_settings');
-    $this->clientFactory = $client_factory;
+    $this->client = $client_factory->getClient();
     $this->logger = $logger->get('acquia_contenthub_publisher');
     $this->state = $state;
     $this->moduleHandler = $module_handler;
@@ -96,14 +97,12 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
       return;
     }
     // Make sure webhook stored is actually registered for this site in Plexus.
-    $settings = $this->clientFactory->getSettings();
-    $client = $this->clientFactory->getClient($settings);
-    if (!$client->getSettings()->getWebhook()) {
+    if (!$this->client->getSettings()->getWebhook()) {
       // Proceed to register a webhook in HMAC v2.
       $webhook_url = Url::fromUri('internal:' . '/acquia-contenthub/webhook', [
         'absolute' => TRUE,
       ])->toString();
-      $webhook = $client->getWebHook($webhook_url);
+      $webhook = $this->client->getWebHook($webhook_url);
       if (empty($webhook)) {
         $connection_manager = \Drupal::service('acquia_contenthub.connection_manager');
         $response = $connection_manager->registerWebhook($webhook_url);

@@ -1,0 +1,6 @@
+services:
+  depcalc.commands:
+    class: Drupal\depcalc\Commands\DepcalcCommands
+    arguments: ['@depcalc.logger_channel', '@cache.depcalc']
+    tags:
+      - { name: drush.command }

@@ -155,10 +155,10 @@ class AcquiaContentHubUnregisterEvent extends Event {
   /**
    * Returns default filter UUID.
    *
-   * @return string
+   * @return string|null
    *   Default filter UUID.
    */
-  public function getDefaultFilter(): string {
+  public function getDefaultFilter(): ?string {
     return $this->defaultFilter;
   }
 
@@ -175,10 +175,10 @@ class AcquiaContentHubUnregisterEvent extends Event {
   /**
    * Returns orphaned filters UUIDs.
    *
-   * @return array
+   * @return array|null
    *   Array containing orphaned filters.
    */
-  public function getOrphanedFilters(): array {
+  public function getOrphanedFilters(): ?array {
     return $this->orphanedFilters;
   }
 

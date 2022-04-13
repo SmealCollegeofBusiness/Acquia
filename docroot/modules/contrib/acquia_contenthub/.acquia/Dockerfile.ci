@@ -31,6 +31,7 @@ FROM ${REPO_LOCATION}composer:latest as composer
 FROM ${REPO_LOCATION}${BASE_IMAGE}
 
 ENV CI=true
+ENV ACQUIACI=TRUE
 ENV CHROMEDRIVER_VERSION 93.0.4577.63
 ENV CHROMEDRIVER_DIR /chromedriver
 ENV DEBIAN_FRONTEND=noninteractive
@@ -98,7 +99,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_12.x | bash -
 # configuration.
 RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections \
 && echo "mysql-apt-config mysql-apt-config/select-product select Apply" | debconf-set-selections \
-&& curl -L https://dev.mysql.com/get/mysql-apt-config_0.8.18-1_all.deb -o mysql-apt-config.deb \
+&& curl -L https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb -o mysql-apt-config.deb \
 && dpkg -i mysql-apt-config.deb \
 && rm mysql-apt-config.deb
 
@@ -134,7 +135,7 @@ libicu-dev \
 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Increase PHP memory limit to avoid memory exhausted issue during site install.
-RUN echo 'memory_limit = 1024M' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini
+RUN echo 'memory_limit = -1' >> /usr/local/etc/php/conf.d/docker-php-memlimit.ini
 
 # Provide PHP the default mysql socket location. (This fixes issue: Can't connect to local MySQL server through socket).
 RUN echo "pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock" >> /usr/local/etc/php/conf.d/pdo_mysql.ini

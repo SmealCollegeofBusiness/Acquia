@@ -2,6 +2,7 @@
 
 namespace Drupal\acquia_contenthub_publisher\Controller;
 
+use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
@@ -39,16 +40,26 @@ class StatusReportController extends ControllerBase {
   protected $pagerManager;
 
   /**
+   * Cdf Metrics Manager.
+   *
+   * @var \Drupal\acquia_contenthub\Client\CdfMetricsManager
+   */
+  protected $cdfMetricsManager;
+
+  /**
    * StatusReportController constructor.
    *
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The client factory.
-   * @param \Drupal\Core\Pager\PagerManagerInterface $pager_manager
+   * @param \Drupal\acquia_contenthub\Client\CdfMetricsManager $cdf_metrics_manager
+   *   Cdf metrics manager.
+   * @param \Drupal\Core\Pager\PagerManagerInterface|null $pager_manager
    *   The pager manager.
    */
-  public function __construct(ClientFactory $client_factory, PagerManagerInterface $pager_manager = NULL) {
+  public function __construct(ClientFactory $client_factory, CdfMetricsManager $cdf_metrics_manager, PagerManagerInterface $pager_manager = NULL) {
     $this->client = $client_factory->getClient();
     $this->pagerManager = $pager_manager;
+    $this->cdfMetricsManager = $cdf_metrics_manager;
   }
 
   /**
@@ -57,6 +68,7 @@ class StatusReportController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('acquia_contenthub.client.factory'),
+      $container->get('acquia_contenthub.cdf_metrics_manager'),
       $container->has('pager.manager') ? $container->get('pager.manager') : NULL
     );
   }
@@ -70,6 +82,7 @@ class StatusReportController extends ControllerBase {
    * @throws \Exception
    */
   public function statusReportPage(Request $request) {
+    $this->cdfMetricsManager->sendClientCdfUpdates();
     $page = $request->query->has('page') ? $request->query->get('page') : 0;
     return [
       $this->getWebhooksPageSection($page),

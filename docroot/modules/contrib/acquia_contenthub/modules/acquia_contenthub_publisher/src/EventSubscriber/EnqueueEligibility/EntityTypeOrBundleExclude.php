@@ -61,6 +61,7 @@ class EntityTypeOrBundleExclude implements EventSubscriberInterface {
       in_array(self::formatTypeBundle($entity_type_id, $bundle_id), $exclude_bundles)
     ) {
       $event->setEligibility(FALSE);
+      $event->setReason('Manually excluded.');
       $event->stopPropagation();
     }
   }

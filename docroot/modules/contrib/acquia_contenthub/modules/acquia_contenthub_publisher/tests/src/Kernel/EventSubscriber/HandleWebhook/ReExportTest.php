@@ -113,6 +113,9 @@ class ReExportTest extends EntityKernelTestBase {
     'node',
   ];
 
+  /**
+   * {@inheritDoc}
+   */
   public function setUp(): void {
     parent::setUp();
 
@@ -295,7 +298,7 @@ class ReExportTest extends EntityKernelTestBase {
         $this->publisherQueue->deleteItem($item);
       }
     }
-    $this->tracker->delete($uuid);
+    $this->tracker->delete('entity_uuid', $uuid);
   }
 
 }

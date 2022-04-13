@@ -49,13 +49,6 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
   protected $common;
 
   /**
-   * The client factory.
-   *
-   * @var \Drupal\acquia_contenthub\Client\ClientFactory
-   */
-  protected $factory;
-
-  /**
    * The published entity tracker.
    *
    * @var \Drupal\acquia_contenthub_publisher\PublisherTracker
@@ -110,7 +103,18 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
    *
    * @throws \Exception
    */
-  public function __construct(EventDispatcherInterface $dispatcher, EntityTypeManagerInterface $entity_type_manager, ContentHubCommonActions $common, ClientFactory $factory, PublisherTracker $tracker, ConfigFactoryInterface $config_factory, LoggerChannelFactoryInterface $logger_factory, array $configuration, $plugin_id, $plugin_definition) {
+  public function __construct(
+    EventDispatcherInterface $dispatcher,
+    EntityTypeManagerInterface $entity_type_manager,
+    ContentHubCommonActions $common,
+    ClientFactory $factory,
+    PublisherTracker $tracker,
+    ConfigFactoryInterface $config_factory,
+    LoggerChannelFactoryInterface $logger_factory,
+    array $configuration,
+    $plugin_id,
+    $plugin_definition
+  ) {
     $this->dispatcher = $dispatcher;
     $this->common = $common;
     if (!empty($this->common->getUpdateDbStatus())) {
@@ -118,7 +122,7 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
     }
 
     $this->entityTypeManager = $entity_type_manager;
-    $this->factory = $factory;
+    $this->client = $factory->getClient();
     $this->tracker = $tracker;
     $this->configFactory = $config_factory;
     $this->achLoggerChannel = $logger_factory->get('acquia_contenthub_publisher');
@@ -144,15 +148,6 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
   }
 
   /**
-   * Initializes the Connection Manager.
-   */
-  public function initializeClient(): void {
-    if (empty($this->client)) {
-      $this->client = $this->factory->getClient();
-    }
-  }
-
-  /**
    * {@inheritdoc}
    *
    * This method return values will be used within ContentHubExportQueue.
@@ -164,7 +159,6 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
    *      Entities processed and queue item will be deleted.
    */
   public function processItem($data) {
-    $this->initializeClient();
     if (!$this->client) {
       $this->achLoggerChannel->error('Acquia Content Hub client cannot be initialized because connection settings are empty.');
       return FALSE;
@@ -175,7 +169,7 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
 
     // Entity missing so remove it from the tracker and stop processing.
     if (!$entity) {
-      $this->tracker->delete($data->uuid);
+      $this->tracker->delete('entity_uuid', $data->uuid);
       $this->achLoggerChannel->warning(
         sprintf(
           'Entity ("%s", "%s") being exported no longer exists on the publisher. Deleting item from the publisher queue.',
@@ -234,8 +228,6 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
       $entity_uuids[] = $item->getUuid();
     }
 
-    // Reinitialize client cdf metrics data.
-    $this->client = $this->factory->getClient();
     $webhook = $config->get('webhook.uuid');
     $exported_entities = implode(', ', $entity_uuids);
 

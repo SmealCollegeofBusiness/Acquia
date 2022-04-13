@@ -1,0 +1,90 @@
+{
+  "uuid": {
+    "value": {
+      "en": {
+        "value": "###"
+      }
+    }
+  },
+  "type": {
+    "value": {
+      "en": "node"
+    }
+  },
+  "revision_timestamp": {
+    "value": {
+      "en": {
+        "value": "###"
+      }
+    }
+  },
+  "revision_uid": [],
+  "revision_log": {
+    "value": {
+      "en": []
+    }
+  },
+  "status": {
+    "value": {
+      "en": true
+    }
+  },
+  "uid": [],
+  "title": {
+    "value": {
+      "en": "###"
+    }
+  },
+  "created": {
+    "value": {
+      "en": {
+        "value": 1646155560
+      }
+    }
+  },
+  "changed": {
+    "value": {
+      "en": {
+        "value": 1646155560
+      }
+    }
+  },
+  "promote": {
+    "value": {
+      "en": true
+    }
+  },
+  "sticky": {
+    "value": {
+      "en": false
+    }
+  },
+  "default_langcode": {
+    "value": {
+      "en": true
+    }
+  },
+  "revision_default": {
+    "value": {
+      "en": true
+    }
+  },
+  "revision_translation_affected": {
+    "value": {
+      "en": true
+    }
+  },
+  "body": {
+    "field_type": "text_with_summary"
+  },
+  "field_text": {
+    "field_type": "text",
+    "value": {
+      "en": [
+        {
+          "value": "###"
+        }
+      ]
+    }
+  }
+}

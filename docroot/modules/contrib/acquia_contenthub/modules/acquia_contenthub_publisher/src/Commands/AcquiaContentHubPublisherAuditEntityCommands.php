@@ -57,13 +57,6 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
   protected $commonActions;
 
   /**
-   * The Content Hub Client Factory.
-   *
-   * @var \Drupal\acquia_contenthub\Client\ClientFactory
-   */
-  protected $factory;
-
-  /**
    * Sets the Result of the evaluation.
    *
    * @var string[]
@@ -96,7 +89,7 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
     $this->tracker = $tracker;
     $this->publisherActions = $publisher_actions;
     $this->commonActions = $common_actions;
-    $this->factory = $factory;
+    $this->client = $factory->getClient();
   }
 
   /**
@@ -138,8 +131,6 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
       throw new \Exception(sprintf("The entity (%s, %s) does not exist.", $entity_type, $id));
     }
 
-    // Obtaining Client Connection to Acquia Content Hub.
-    $this->client = $this->factory->getClient();
     if (empty($this->client)) {
       throw new \Exception("This site is not Connected to Acquia Content Hub. Please check your configuration settings.");
     }

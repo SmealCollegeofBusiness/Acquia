@@ -2,9 +2,8 @@
 
 namespace Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook;
 
-use Acquia\ContentHubClient\CDF\ClientCDFObject;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
-use Drupal\acquia_contenthub\Event\BuildClientCdfEvent;
+use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -63,6 +62,13 @@ class ImportUpdateAssets implements EventSubscriberInterface {
   protected $clientCDFObject;
 
   /**
+   * Cdf Metrics Manager.
+   *
+   * @var \Drupal\acquia_contenthub\Client\CdfMetricsManager
+   */
+  protected $cdfMetricsManager;
+
+  /**
    * ImportUpdateAssets constructor.
    *
    * @param \Drupal\Core\Queue\QueueFactory $queue
@@ -75,18 +81,23 @@ class ImportUpdateAssets implements EventSubscriberInterface {
    *   The logger channel factory.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The configuration factory.
+   * @param \Drupal\acquia_contenthub\Client\CdfMetricsManager $cdf_metrics_manager
+   *   Cdf metrics manager.
    */
   public function __construct(
     QueueFactory $queue,
     EventDispatcherInterface $dispatcher,
     SubscriberTracker $tracker,
     LoggerChannelInterface $logger_channel,
-    ConfigFactoryInterface $config_factory) {
+    ConfigFactoryInterface $config_factory,
+    CdfMetricsManager $cdf_metrics_manager
+  ) {
     $this->queue = $queue->get('acquia_contenthub_subscriber_import');
     $this->dispatcher = $dispatcher;
     $this->tracker = $tracker;
     $this->channel = $logger_channel;
     $this->config = $config_factory->get('acquia_contenthub.admin_settings');
+    $this->cdfMetricsManager = $cdf_metrics_manager;
   }
 
   /**
@@ -177,18 +188,12 @@ class ImportUpdateAssets implements EventSubscriberInterface {
       $this->channel
         ->info('Entities with UUIDs @uuids added to the import queue and to the tracking table.',
           ['@uuids' => print_r($uuids, TRUE)]);
-      if (!($this->config->get('send_contenthub_updates') ?? TRUE)) {
-        return;
+      $send_contenthub_updates = $this->config->get('send_contenthub_updates') ?? TRUE;
+      if ($send_contenthub_updates) {
+        $client->addEntitiesToInterestList($client->getSettings()->getWebhook('uuid'), $uuids);
       }
-      // Add entities to interest list.
-      $client->addEntitiesToInterestList($client->getSettings()->getWebhook('uuid'), $uuids);
 
-      // Update Client CDF metrics.
-      $settings = $client->getSettings();
-      $event = new BuildClientCdfEvent(ClientCDFObject::create($settings->getUuid(), ['settings' => $settings->toArray()]));
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
-      $this->clientCDFObject = $event->getCdf();
-      $client->putEntities($this->clientCDFObject);
+      $this->cdfMetricsManager->sendClientCdfUpdates();
     }
   }
 

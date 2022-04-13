@@ -17,6 +17,8 @@ use Prophecy\Argument;
  * @group acquia_contenthub
  * @coversDefaultClass \Drupal\acquia_contenthub\EventSubscriber\UnserializeContentField\LinkFieldUnserializer
  *
+ * @requires module depcalc
+ *
  * @package Drupal\Tests\acquia_contenthub\Kernel\EventSubscriber\UnserializeContentField
  */
 class LinkFieldUnserializerTest extends KernelTestBase {
@@ -87,6 +89,9 @@ class LinkFieldUnserializerTest extends KernelTestBase {
             'internal_type' => 'internal_entity',
           ],
         ],
+        'hu' => [
+          0 => NULL,
+        ],
       ],
     ];
 
@@ -102,6 +107,11 @@ class LinkFieldUnserializerTest extends KernelTestBase {
             'title' => 'test',
             'options' => [],
           ],
+        ],
+      ],
+      'hu' => [
+        'link' => [
+          0 => [],
         ],
       ],
     ];

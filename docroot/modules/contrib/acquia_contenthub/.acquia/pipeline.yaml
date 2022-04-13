@@ -1,3 +1,9 @@
+---
+type: default
+team: content-hub
+group: drupal-cloud
+service: acquia_contenthub
+
 # Example Acquia CI configuration.
 #
 # The configuration files in the .acquia directory will cover ORCA integration for most packages almost
@@ -21,16 +27,16 @@
 # For advanced needs,
 # @see https://github.com/acquia/orca/blob/main/docs/advanced-usage.md
 
----
-type: default
-team: LCH
-service: acquia_contenthub
+
+# Validate the formatting of the pipeline.yaml file.
+validate_config: true
 
 # The environment container image is used to prepare code versions
 # and tooling for tests during pre, post and build stages.
 environment_image:
   file: ".acquia/Dockerfile.ci"
   context: "."
+  cache_from: acquia_contenthub-environment:7.4-cli-buster
   # The build_matrix is only required for testing multiple versions.
   build_matrix:
     base_images:
@@ -39,24 +45,37 @@ environment_image:
 _orca_steps: &orca_steps
   - steps:
       - |
-        cd $CI_WORKSPACE
+        cp -ar /acquia /ramfs && df -hT
+        export CI_WORKSPACE=/ramfs${CI_WORKSPACE}
+        cd ${CI_WORKSPACE}
         ../orca/bin/ci/before_install.sh && error=false || error=true
-        ./tests/travis/before_install.sh && error=false || error=true
+        if [ "$error" = "false" ]; then
+          ./tests/travis/before_install.sh && error=false || error=true
+        fi
         # Switch to PHP8. The version will depend on the version(s) installed in your Dockerfile.
         # The template provides version 8.0.
-        if [ "$JENKINS_PHP_VERSION" = 8.0 ]; then
+        if [ "$error" = "false" && "$JENKINS_PHP_VERSION" = 8.0 ]; then
           update-alternatives --install /usr/local/bin/php php /usr/bin/php8.0 80
           php -v
         fi
         # Create the test fixture and place the SUT.
-        ../orca/bin/ci/install.sh && error=false || error=true
-        ./tests/travis/install.sh && error=false || error=true
-        # Display details about the fixture.
-        ../orca/bin/ci/before_script.sh && error=false || error=true
-        # Run the test script.
-        ../orca/bin/ci/script.sh && error=false || error=true
-        ./tests/travis/script.sh && error=false || error=true
-        ../orca/bin/ci/before_cache.sh && error=false || error=true
+        if [ "$error" = "false" ]; then
+          ../orca/bin/ci/install.sh && error=false || error=true
+        fi
+        if [ "$error" = "false" ]; then
+          ./tests/travis/install.sh && error=false || error=true
+        fi
+        if [ "$error" = "false" ]; then
+          # Display details about the fixture.
+          ../orca/bin/ci/before_script.sh && error=false || error=true
+        fi
+        if [ "$error" = "false" ]; then
+          # Run the test script.
+          ../orca/bin/ci/script.sh && error=false || error=true
+        fi
+        if [ "$error" = "false" ]; then
+          ./tests/travis/script.sh && error=false || error=true
+        fi
         if [ "$error" = "true" ]; then
           echo "Running after failure";
           ../orca/bin/ci/after_failure.sh;
@@ -114,7 +133,7 @@ pre_build:
     - args: --env ORCA_JOB=LOOSE_DEPRECATED_CODE_SCAN --env ALLOWED_FAILURE=true
       <<: *orca_steps
   strict_deprecated_code_scan:
-    - args: --env ORCA_JOB=STRICT_DEPRECATED_CODE_SCAN
+    - args: --env ORCA_JOB=STRICT_DEPRECATED_CODE_SCAN --env ALLOWED_FAILURE=true
       <<: *orca_steps
   deprecated_code_scan_w_contrib:
     - args: --env ORCA_JOB=DEPRECATED_CODE_SCAN_W_CONTRIB --env ALLOWED_FAILURE=true
@@ -155,6 +174,22 @@ pre_build:
 
   security_composition_analysis:
     required: true
+  # Unit test cases are already ran using ORCA job, so we don't need to run them again seperately.
+  # unit_tests is commented until we figure out how to get reports of testcases from ORCA.
+  # unit_tests:
+  # - steps:
+  #  - XDEBUG_MODE=coverage $CI_WORKSPACE/phpunit --coverage-clover=phpunit-coverage-result.xml --log-junit=phpunit-execution-result.xml
+
+  # code_analysis is option for sonarqube if you have group and team name added on top of pipeline.yaml
+  # https://github.com/acquia/devops-pipeline/commit/b707527f72a56e352e0975ac9482504e34603b7c
+  # keeping it commented for future reference in case we need to override the default values provided by sonarqube.
+  # code_analysis:
+  #  required: true
+  #  project_key: acquia.drupal-cloud.content-hub:acquia_contenthub
+  #  quality_gate:
+  #    wait_for_quality_gate: true
+  #    max_time_limit: 2
+  #    abort_pipeline: true
 
 # -- Slack Bot Integration --
 notify:

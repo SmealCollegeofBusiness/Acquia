@@ -92,6 +92,8 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
         'put',
         'delete',
         'getSettings',
+        'getRemoteSettings',
+        'getEntity',
         'isFeatured',
         'listFiltersForWebhook',
         'getInterestsByWebhook',
@@ -321,7 +323,13 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
    *   Filter Uuids.
    */
   protected function processFilterQueue(ContentHubImportQueueByFilter $filterQueue, array $filtersUuids): void {
-    $filterQueue->process($filtersUuids);
+    $queue = $filterQueue->getQueue();
+    foreach ($filtersUuids as $filter_uuid) {
+      $data = new \stdClass();
+      $data->filter_uuid = $filter_uuid;
+      $queue->createItem($data);
+    }
+    $filterQueue->processQueueItems();
 
     $batch =& batch_get();
     $batch['progressive'] = FALSE;

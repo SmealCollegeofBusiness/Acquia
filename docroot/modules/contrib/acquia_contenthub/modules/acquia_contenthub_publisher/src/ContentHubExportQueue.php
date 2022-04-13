@@ -2,171 +2,99 @@
 
 namespace Drupal\acquia_contenthub_publisher;
 
-use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use Drupal\acquia_contenthub\Libs\Common\ContentHubQueueBase;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Queue\QueueFactory;
 use Drupal\Core\Queue\QueueWorkerManager;
 use Drupal\Core\Queue\SuspendQueueException;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Render\RendererInterface;
 
 /**
  * Implements an Export Queue for Content Hub.
  */
-class ContentHubExportQueue {
-
-  use StringTranslationTrait;
-  use DependencySerializationTrait;
+class ContentHubExportQueue extends ContentHubQueueBase {
 
   /**
-   * The Publisher Exporting Queue.
-   *
-   * @var \Drupal\Core\Queue\QueueInterface
+   * Name of the export queue.
    */
-  protected $queue;
+  public const QUEUE_NAME = 'acquia_contenthub_publish_export';
 
   /**
-   * The Queue Worker.
+   * The renderer service.
    *
-   * @var \Drupal\Core\Queue\QueueWorkerManager
+   * @var \Drupal\Core\Render\RendererInterface
    */
-  protected $queueManager;
-
-  /**
-   * The messenger object.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
+  protected $renderer;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(QueueFactory $queue_factory, QueueWorkerManager $queue_manager, MessengerInterface $messenger) {
-    $this->queue = $queue_factory->get('acquia_contenthub_publish_export');
-    $this->queueManager = $queue_manager;
-    $this->messenger = $messenger;
+  public function __construct(QueueFactory $queue_factory, QueueWorkerManager $queue_manager, MessengerInterface $messenger, RendererInterface $renderer) {
+    parent::__construct($queue_factory, $queue_manager, $messenger);
+    $this->renderer = $renderer;
   }
 
   /**
-   * Obtains the number of items in the export queue.
-   *
-   * @return mixed
-   *   The number of items in the export queue.
+   * {@inheritdoc}
    */
-  public function getQueueCount() {
-    return $this->queue->numberOfItems();
-  }
-
-  /**
-   * Remove all the publish export queues.
-   */
-  public function purgeQueues() {
-    $this->queue->deleteQueue();
-  }
-
-  /**
-   * Process all queue items with batch API.
-   */
-  public function processQueueItems() {
-    // Create batch which collects all the specified queue items and process
-    // them one after another.
-    $batch = [
-      'title' => $this->t("Process Content Hub Export Queue"),
-      'operations' => [],
-      'finished' => [[$this, 'batchFinished'], []],
-    ];
-
-    // Count number of the items in this queue, create enough batch operations.
-    for ($i = 0; $i < $this->getQueueCount(); $i++) {
-      // Create batch operations.
-      $batch['operations'][] = [[$this, 'batchProcess'], []];
+  public function batchProcess(&$context): void {
+    $queue_worker = $this->queueManager->createInstance($this->getQueueName());
+    $item = $this->queue->claimItem();
+    if (!$item) {
+      return;
     }
 
-    // Adds the batch sets.
-    batch_set($batch);
-  }
+    try {
+      // Generating a list of entities.
+      $msg_label = $this->t('(@entity_type, @entity_id)', [
+        '@entity_type' => $item->data->type,
+        '@entity_id' => $item->data->uuid,
+      ]);
 
-  /**
-   * Common batch processing callback for all operations.
-   *
-   * @param mixed $context
-   *   The context array.
-   */
-  public function batchProcess(&$context) {
-    $queueWorker = $this->queueManager->createInstance('acquia_contenthub_publish_export');
-
-    // Get a queued item.
-    if ($item = $this->queue->claimItem()) {
-      try {
-        // Generating a list of entities.
-        $msg_label = $this->t('(@entity_type, @entity_id)', [
-          '@entity_type' => $item->data->type,
-          '@entity_id' => $item->data->uuid,
-        ]);
-
-        // Process item.
-        $entities_processed = $queueWorker->processItem($item->data);
-        if ($entities_processed == FALSE) {
-          // Indicate that the item could not be processed.
-          if ($entities_processed === FALSE) {
-            $message = $this->t('There was an error processing entities: @entities and their dependencies. The item has been sent back to the queue to be processed again later. Check your logs for more info.', [
-              '@entities' => $msg_label,
-            ]);
-          }
-          else {
-            $message = $this->t('No processing was done for entities: @entities and their dependencies. The item has been sent back to the queue to be processed again later. Check your logs for more info.', [
-              '@entities' => $msg_label,
-            ]);
-          }
-          $context['message'] = $message->jsonSerialize();
-          $context['results'][] = $message->jsonSerialize();
+      // Process item.
+      $entities_processed = $queue_worker->processItem($item->data);
+      if ($entities_processed == FALSE) {
+        // Indicate that the item could not be processed.
+        if ($entities_processed === FALSE) {
+          $message = $this->t('There was an error processing entities: @entities and their dependencies. The item has been sent back to the queue to be processed again later. Check your logs for more info.', [
+            '@entities' => $msg_label,
+          ]);
         }
         else {
-          // If everything was correct, delete processed item from the queue.
-          $this->queue->deleteItem($item);
-
-          // Creating a text message to present to the user.
-          $message = $this->t('Processed entities: @entities and their dependencies (@count @label sent).', [
+          $message = $this->t('No processing was done for entities: @entities and their dependencies. The item has been sent back to the queue to be processed again later. Check your logs for more info.', [
             '@entities' => $msg_label,
-            '@count' => $entities_processed,
-            '@label' => $entities_processed == 1 ? $this->t('entity') : $this->t('entities'),
           ]);
-          $context['message'] = $message->jsonSerialize();
-          $context['results'][] = $message->jsonSerialize();
         }
+        $context['message'] = $message->jsonSerialize();
+        $context['results'][] = $message->jsonSerialize();
+      }
+      else {
+        // If everything was correct, delete processed item from the queue.
+        $this->queue->deleteItem($item);
 
+        // Creating a text message to present to the user.
+        $message = $this->t('Processed entities: @entities and their dependencies (@count @label sent).', [
+          '@entities' => $msg_label,
+          '@count' => $entities_processed,
+          '@label' => $entities_processed == 1 ? $this->t('entity') : $this->t('entities'),
+        ]);
+        $context['message'] = $message->jsonSerialize();
+        $context['results'][] = $message->jsonSerialize();
       }
-      catch (SuspendQueueException $e) {
-        // If there was an Exception thrown because of an error
-        // Releases the item that the worker could not process.
-        // Another worker can come and process it.
-        $this->queue->releaseItem($item);
-      }
+    }
+    catch (SuspendQueueException $e) {
+      // If there was an Exception thrown because of an error
+      // Releases the item that the worker could not process.
+      // Another worker can come and process it.
+      $this->queue->releaseItem($item);
     }
   }
 
   /**
-   * Batch finished callback.
-   *
-   * @param bool $success
-   *   Whether the batch process succeeded or not.
-   * @param array $results
-   *   The results array.
-   * @param array $operations
-   *   An array of operations.
+   * {@inheritdoc}
    */
-  public function batchFinished($success, array $results, array $operations) {
-    if ($success) {
-      $this->messenger->addMessage(t("The contents are successfully exported."));
-    }
-    else {
-      $error_operation = reset($operations);
-      $this->messenger->addMessage(t('An error occurred while processing @operation with arguments : @args', [
-        '@operation' => $error_operation[0],
-        '@args' => print_r($error_operation[0], TRUE),
-      ]
-      ));
-    }
+  public function batchFinished(bool $success, array $results, array $operations): void {
+    parent::batchFinished($success, $results, $operations);
 
     // Providing a report on the items processed by the queue.
     $elements = [
@@ -174,8 +102,15 @@ class ContentHubExportQueue {
       '#type' => 'ul',
       '#items' => $results,
     ];
-    $queue_report = \Drupal::service('renderer')->render($elements);
+    $queue_report = $this->renderer->render($elements);
     $this->messenger->addMessage($queue_report);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getQueueName(): string {
+    return self::QUEUE_NAME;
   }
 
 }

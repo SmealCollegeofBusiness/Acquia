@@ -16,6 +16,7 @@ use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\acquia_contenthub\Kernel\Stubs\DrupalVersion;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\MetricsUpdateTrait;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
 
@@ -29,6 +30,7 @@ use Prophecy\Argument;
 class UnserializationTest extends EntityKernelTestBase {
 
   use DrupalVersion;
+  use MetricsUpdateTrait;
 
   /**
    * Sample View Mode UUID.
@@ -96,8 +98,11 @@ class UnserializationTest extends EntityKernelTestBase {
     $this->settings->getWebhook('uuid')->willReturn('foo');
     $this->settings->getName()->willReturn('foo');
     $this->settings->getUuid()->willReturn(self::CLIENT_UUID_1);
+    $this->settings->toArray()->willReturn(['name' => 'foo']);
 
     $client_factory_mock = $this->prophesize(ClientFactory::class);
+    $this->contentHubClient->getSettings()->willReturn($this->settings->reveal());
+    $this->mockMetricsCalls($this->contentHubClient);
     $client_factory_mock->getClient()->willReturn($this->contentHubClient);
     $client_factory_mock->getSettings()->willReturn($this->settings->reveal());
     $this->container->set('acquia_contenthub.client.factory', $client_factory_mock->reveal());
@@ -127,6 +132,7 @@ class UnserializationTest extends EntityKernelTestBase {
         $this->container->get('acquia_contenthub_subscriber.tracker'),
         $this->container->get('logger.factory'),
         $this->container->get('config.factory'),
+        $this->container->get('acquia_contenthub.cdf_metrics_manager'),
         [],
         NULL,
         NULL,

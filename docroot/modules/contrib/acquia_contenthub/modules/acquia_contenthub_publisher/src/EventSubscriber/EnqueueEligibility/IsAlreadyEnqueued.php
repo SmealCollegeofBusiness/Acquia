@@ -70,6 +70,7 @@ class IsAlreadyEnqueued implements EventSubscriberInterface {
     if (!empty($item_id)) {
       // This entity is already in the export queue. Log about it?
       $event->setEligibility(FALSE);
+      $event->setReason('Entity has already been enqueued for export.');
       $event->stopPropagation();
     }
 

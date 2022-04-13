@@ -47,11 +47,13 @@ function acquia_contenthub_subscriber_track_imported_linked_entities(&$context) 
   $subscriber_tracker = \Drupal::service('acquia_contenthub_subscriber.tracker');
   $entity_repository = \Drupal::service('entity.repository');
   foreach ($results as $result) {
+    $context['sandbox']['progress']++;
     $entity = $entity_repository->loadEntityByUuid($result->entity_type, $result->entity_uuid);
+    if (!$entity) {
+      continue;
+    }
     $subscriber_tracker->track($entity, '');
     $uuids[] = $result->entity_uuid;
-    // Updating progress.
-    $context['sandbox']['progress']++;
   }
 
   /** @var \Drupal\acquia_contenthub\Client\ClientFactory $client_factory */

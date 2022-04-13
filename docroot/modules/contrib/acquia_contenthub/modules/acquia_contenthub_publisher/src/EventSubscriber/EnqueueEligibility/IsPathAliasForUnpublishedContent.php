@@ -83,6 +83,7 @@ class IsPathAliasForUnpublishedContent implements EventSubscriberInterface {
           $entity_dependency = $params[$parameter];
           if ($entity_dependency instanceof EntityInterface && !$this->entityModeratedRevision->isPublishedRevision($entity_dependency)) {
             $event->setEligibility(FALSE);
+            $event->setReason("Path alias's matching entity is unpublished.");
             $event->stopPropagation();
           }
         }
@@ -98,6 +99,7 @@ class IsPathAliasForUnpublishedContent implements EventSubscriberInterface {
       );
       // Set the eligibility false as this path alias is a problematic entity.
       $event->setEligibility(FALSE);
+      $event->setReason('Error occurred while trying to get the matching entity for path alias.');
       $event->stopPropagation();
     }
   }

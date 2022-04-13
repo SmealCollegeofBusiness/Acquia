@@ -40,6 +40,13 @@ class ContentHubEntityEligibilityEvent extends Event {
   protected $eligibility = TRUE;
 
   /**
+   * The reason of ineligibility.
+   *
+   * @var string
+   */
+  protected $reason = 'Not set.';
+
+  /**
    * Whether the entity should go through a full dependency calculation.
    *
    * @var bool
@@ -57,6 +64,26 @@ class ContentHubEntityEligibilityEvent extends Event {
   public function __construct(EntityInterface $entity, $op) {
     $this->entity = $entity;
     $this->operation = $op;
+  }
+
+  /**
+   * Sets the reason of ineligibility.
+   *
+   * @param string $reason
+   *   The reason of ineligibility.
+   */
+  public function setReason(string $reason): void {
+    $this->reason = $reason;
+  }
+
+  /**
+   * Returns the reason of ineligibility.
+   *
+   * @return string
+   *   Ineligibility reason.
+   */
+  public function getReason(): string {
+    return $this->reason;
   }
 
   /**

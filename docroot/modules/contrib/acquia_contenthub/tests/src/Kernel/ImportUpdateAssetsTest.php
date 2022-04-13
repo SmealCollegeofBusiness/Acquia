@@ -56,6 +56,7 @@ class ImportUpdateAssetsTest extends KernelTestBase {
     'acquia_contenthub',
     'acquia_contenthub_subscriber',
     'acquia_contenthub_server_test',
+    'acquia_contenthub_test',
     'system',
     'user',
     'node',
@@ -69,18 +70,22 @@ class ImportUpdateAssetsTest extends KernelTestBase {
 
     $this->installSchema('acquia_contenthub_subscriber', 'acquia_contenthub_subscriber_import_tracking');
 
+    $this->createAcquiaContentHubAdminSettings();
+
     $dispatcher = $this->prophesize(EventDispatcher::class);
     $this->loggerChannel = new LoggerMock();
     $this->subTracker = $this->container->get('acquia_contenthub_subscriber.tracker');
     $config_factory = $this->container->get('config.factory');
     $queue_factory = $this->container->get('queue');
+    $cdf_metrics_manager = $this->container->get('acquia_contenthub.cdf_metrics_manager');
 
     $this->importUpdateAssets = new ImportUpdateAssets(
       $queue_factory,
       $dispatcher->reveal(),
       $this->subTracker,
       $this->loggerChannel,
-      $config_factory
+      $config_factory,
+      $cdf_metrics_manager
     );
   }
 
@@ -109,7 +114,6 @@ class ImportUpdateAssetsTest extends KernelTestBase {
       'initiator' => $uuid,
     ];
 
-    $this->createAcquiaContentHubAdminSettings();
     $client_factory = $this->container->get('acquia_contenthub.client.factory');
 
     $event = new HandleWebhookEvent($request, $payload, $key, $client_factory->getClient());

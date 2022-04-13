@@ -41,3 +41,6 @@ acquia_contenthub.admin_settings:
     send_contenthub_updates:
       type: boolean
       label: 'Send Updates to Content Hub Service'
+    send_clientcdf_updates:
+      type: boolean
+      label: 'Send Client CDF Updates to Content Hub Service'

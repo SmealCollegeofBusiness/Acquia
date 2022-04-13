@@ -1,2 +1,3 @@
 is_suppressed: TRUE
 send_contenthub_updates: TRUE
+send_clientcdf_updates: TRUE

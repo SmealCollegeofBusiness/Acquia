@@ -77,7 +77,7 @@ class DeleteAssets implements EventSubscriberInterface {
       $entity = $this->tracker->getEntityByRemoteIdAndHash($asset['uuid']);
       if (!$entity) {
         // Clean up the tracker. The entity was deleted before import.
-        $this->tracker->delete($asset['uuid']);
+        $this->tracker->delete('entity_uuid', $asset['uuid']);
 
         // Clean up the interest list. The entity was deleted before import.
         if ($settings && $send_update) {
@@ -90,7 +90,7 @@ class DeleteAssets implements EventSubscriberInterface {
 
       // If entity updating is disabled, delete tracking but not the entity.
       if ($status === SubscriberTracker::AUTO_UPDATE_DISABLED) {
-        $this->tracker->delete($asset['uuid']);
+        $this->tracker->delete('entity_uuid', $asset['uuid']);
         continue;
       }
       $entity->delete();

@@ -90,17 +90,29 @@ class ContentHubEntityEnqueuer {
    * @throws \Exception
    */
   public function enqueueEntity(EntityInterface $entity, string $op): void {
-    $this->clientFactory->getClient();
     if (!$this->clientFactory->isConfigurationSet()) {
       return;
     }
 
+    $entity_type_id = $entity->getEntityTypeId();
     $uuid = $entity->uuid();
-    $this->logger->info("Attempting to add entity with UUID $uuid to the export queue after operation: $op.");
+    $this->logger->info(
+      'Attempting to add entity with (UUID: @uuid, Entity type: @entity_type) to the export queue after operation: @op.',
+      [
+        '@uuid' => $uuid,
+        '@entity_type' => $entity_type_id,
+        '@op' => $op,
+      ]
+    );
 
     $event = $this->dispatchEvent($entity, $op);
     if (!$event->getEligibility()) {
-      $this->logger->info("Entity with UUID $uuid not eligible to be added to the export queue.");
+      $reason = $event->getReason();
+      $this->logger->info('Entity with (UUID: @uuid, Entity type: @entity_type) not eligible to be added to the export queue. Reason: @reason', [
+        '@uuid' => $uuid,
+        '@entity_type' => $entity_type_id,
+        '@reason' => $reason,
+      ]);
       return;
     }
 
@@ -108,9 +120,13 @@ class ContentHubEntityEnqueuer {
     $this->publisherTracker->queue($entity);
     $this->publisherTracker->setQueueItemByUuid($uuid, $queue_id);
 
-    // Reinitialise client cdf with updated publisher export count metrics.
-    $this->clientFactory->getClient();
-    $this->logger->info("Entity with UUID $uuid added to the export queue and to the tracking table.");
+    $this->logger->info(
+      'Entity with (UUID: @uuid, Entity type: @entity_type) added to the export queue and to the tracking table.',
+      [
+        '@uuid' => $uuid,
+        '@entity_type' => $entity_type_id,
+      ]
+    );
   }
 
   /**

@@ -3,6 +3,8 @@
 namespace Acquia\Console\Acsf\Command;
 
 use Acquia\Console\Acsf\Client\ResponseHandlerTrait;
+use Acquia\Console\Acsf\Libs\Task\Task;
+use Acquia\Console\Acsf\Libs\Task\TaskException;
 use Acquia\Console\Helpers\Command\PlatformCmdOutputFormatterTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -40,29 +42,34 @@ class AcsfDatabaseBackupCreate extends AcsfCommandBase {
    * {@inheritdoc}
    */
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    if (!$sites = $this->getAcsfSites()) {
+    $sites = $this->getAcsfSites();
+    if (!$sites) {
       $output->writeln('<error>No sites found.</error>');
       return 1;
     }
 
-    if (!$input->getOption('all') && !$input->getOption('silent')) {
-      do {
-        $output->writeln('You are about to create a site backup for one of your ACSF sties.');
-        $helper = $this->getHelper('question');
-        $question = new ChoiceQuestion('Pick one of the following sites:', $sites);
-        $site = $helper->ask($input, $output, $question);
-
-        $output->writeln("Create database backup for site: $site");
-        $quest = new ConfirmationQuestion('Do you want to proceed?');
-        $answer = $helper->ask($input, $output, $quest);
-      } while ($answer !== TRUE);
-
-      $site_id = array_search($site, $sites, TRUE);
-      $sites = [$site_id => $site];
+    $sites = $this->filterSites($input, $output, $sites);
+    if (empty($sites)) {
+      $output->writeln('<error>No sites found.</error>');
+      return 1;
     }
 
     $task_ids = [];
+    try {
+      $already_running_tasks = $this->collectAlreadyRunningBackups(array_keys($sites));
+    }
+    catch (TaskException $e) {
+      $output->writeln("<warning>[{$e->getCode()}] {$e->getMessage()}</warning>");
+    }
+
     foreach ($sites as $site_id => $site) {
+      if (isset($already_running_tasks[$site_id])) {
+        $task_id = $already_running_tasks[$site_id];
+        $output->writeln("There is already a running backup for $site. Adding (id: $task_id) to the list of tasks...");
+        $task_ids[] = $task_id;
+        continue;
+      }
+
       $output->writeln("Create database backup for site: $site...");
       $task_id = $this->createAcsfSiteBackup($site_id, $site);
       if (!$task_id) {
@@ -103,6 +110,48 @@ class AcsfDatabaseBackupCreate extends AcsfCommandBase {
     }
 
     return 0;
+  }
+
+  /**
+   * Filter platform sites via groups and other options.
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *   The input object.
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   *   Output.
+   * @param array $sites
+   *   Sites list.
+   *
+   * @return array
+   *   List of sites after filtering.
+   */
+  protected function filterSites(InputInterface $input, OutputInterface $output, array $sites): array {
+    $group_name = $input->hasOption('group') ? $input->getOption('group') : '';
+    if ($group_name) {
+      $platform_id = self::getExpectedPlatformOptions()['source'];
+      $alias = $this->getPlatform('source')->getAlias();
+
+      $filter_sites = $this->filterSitesByGroup($group_name, array_keys($sites), $output, $alias, $platform_id);
+      return empty($filter_sites) ? [] : array_intersect_key($sites, array_flip($filter_sites));
+    }
+
+    if (!$input->getOption('all') && !$input->getOption('silent')) {
+      do {
+        $output->writeln('You are about to create a site backup for one of your ACSF sties.');
+        $helper = $this->getHelper('question');
+        $question = new ChoiceQuestion('Pick one of the following sites:', $sites);
+        $site = $helper->ask($input, $output, $question);
+
+        $output->writeln("Create database backup for site: $site");
+        $quest = new ConfirmationQuestion('Do you want to proceed?');
+        $answer = $helper->ask($input, $output, $quest);
+      } while ($answer !== TRUE);
+
+      $site_id = array_search($site, $sites, TRUE);
+      return [$site_id => $site];
+    }
+
+    return $sites;
   }
 
   /**
@@ -202,6 +251,30 @@ class AcsfDatabaseBackupCreate extends AcsfCommandBase {
     }
 
     return $wait_time < 0 ? FALSE : TRUE;
+  }
+
+  /**
+   * Returns running database backup tasks filtered by site ids.
+   *
+   * @param array $site_ids
+   *   The list of site ids to filter by.
+   *
+   * @return array
+   *   The list of running tasks: site id => task id.
+   *
+   * @throws \Acquia\Console\Acsf\Libs\Task\TaskException
+   */
+  protected function collectAlreadyRunningBackups(array $site_ids): array {
+    $backup_tasks = $this->acsfClient->getTasks()
+      ->getTasks(Task::TYPE_BACKUP);
+    $running_backups = [];
+    foreach ($backup_tasks as $task) {
+      if (!in_array($task->getSiteId(), $site_ids) || !$task->isRunning()) {
+        continue;
+      }
+      $running_backups[$task->getSiteId()] = $task->getTaskId();
+    }
+    return $running_backups;
   }
 
 }

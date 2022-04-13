@@ -206,12 +206,14 @@ class SubscriberTracker {
   /**
    * Delete an entry by its uuid.
    *
-   * @param string $uuid
-   *   UUID of the entity.
+   * @param string $field_name
+   *   The field used in filter condition.
+   * @param string $field_value
+   *   The dynamic field value for which to remove tracking.
    */
-  public function delete(string $uuid): void {
+  public function delete(string $field_name, string $field_value) : void {
     $query = $this->database->delete(self::IMPORT_TRACKING_TABLE);
-    $query->condition('entity_uuid', $uuid);
+    $query->condition($field_name, $field_value);
 
     $query->execute();
   }

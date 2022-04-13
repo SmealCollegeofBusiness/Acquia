@@ -29,3 +29,5 @@ acquia_contenthub.admin_settings:
       type: boolean
     send_contenthub_updates:
       type: boolean
+    send_clientcdf_updates:
+      type: boolean

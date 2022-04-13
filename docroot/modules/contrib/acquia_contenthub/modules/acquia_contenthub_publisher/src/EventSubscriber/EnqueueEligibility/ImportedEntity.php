@@ -70,6 +70,7 @@ class ImportedEntity implements EventSubscriberInterface {
     $imported_entities = $this->stubTracker->getImportedEntities();
     if ($this->subscriberTracker->isTracked($entity_uuid) || in_array($entity_uuid, $imported_entities, TRUE)) {
       $event->setEligibility(FALSE);
+      $event->setReason('Entity has already been imported.');
       $event->stopPropagation();
     }
   }

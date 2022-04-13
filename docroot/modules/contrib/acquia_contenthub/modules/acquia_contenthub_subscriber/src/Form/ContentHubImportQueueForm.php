@@ -5,6 +5,7 @@ namespace Drupal\acquia_contenthub_subscriber\Form;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub_subscriber\ContentHubImportQueue;
 use Drupal\acquia_contenthub_subscriber\ContentHubImportQueueByFilter;
+use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,14 +22,7 @@ class ContentHubImportQueueForm extends FormBase {
    *
    * @var \Drupal\acquia_contenthub_subscriber\ContentHubImportQueue
    */
-  protected $contentHubImportQueue;
-
-  /**
-   * Acquia Content Hub Client factory.
-   *
-   * @var \Drupal\acquia_contenthub\Client\ClientFactory
-   */
-  protected $clientFactory;
+  protected $importQueue;
 
   /**
    * Content Hub import queue by filter service.
@@ -36,6 +30,20 @@ class ContentHubImportQueueForm extends FormBase {
    * @var \Drupal\acquia_contenthub_subscriber\ContentHubImportQueueByFilter
    */
   protected $importByFilter;
+
+  /**
+   * The Subscriber Tracker Service.
+   *
+   * @var \Drupal\acquia_contenthub_subscriber\SubscriberTracker
+   */
+  protected $tracker;
+
+  /**
+   * Client factory.
+   *
+   * @var \Drupal\acquia_contenthub\Client\ClientFactory
+   */
+  protected $clientFactory;
 
   /**
    * ContentHubImportQueueForm constructor.
@@ -46,11 +54,14 @@ class ContentHubImportQueueForm extends FormBase {
    *   Acquia Content Hub Client factory.
    * @param \Drupal\acquia_contenthub_subscriber\ContentHubImportQueueByFilter $import_by_filter
    *   Content Hub import queue by filter service.
+   * @param \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker
+   *   Acquia Content Hub Subscriber Tracker.
    */
-  public function __construct(ContentHubImportQueue $import_queue, ClientFactory $client_factory, ContentHubImportQueueByFilter $import_by_filter) {
-    $this->contentHubImportQueue = $import_queue;
+  public function __construct(ContentHubImportQueue $import_queue, ClientFactory $client_factory, ContentHubImportQueueByFilter $import_by_filter, SubscriberTracker $tracker) {
+    $this->importQueue = $import_queue;
     $this->clientFactory = $client_factory;
     $this->importByFilter = $import_by_filter;
+    $this->tracker = $tracker;
   }
 
   /**
@@ -60,7 +71,8 @@ class ContentHubImportQueueForm extends FormBase {
     return new static(
       $container->get('acquia_contenthub_subscriber.acquia_contenthub_import_queue'),
       $container->get('acquia_contenthub.client.factory'),
-      $container->get('acquia_contenthub_subscriber.acquia_contenthub_import_queue_by_filter')
+      $container->get('acquia_contenthub_subscriber.acquia_contenthub_import_queue_by_filter'),
+      $container->get('acquia_contenthub_subscriber.tracker')
     );
   }
 
@@ -82,16 +94,17 @@ class ContentHubImportQueueForm extends FormBase {
     $form['run_import_queue'] = [
       '#type' => 'details',
       '#title' => $this->t('Run the import queue'),
-      '#description' => '<strong>For development & testing use only!</strong><br /> Running the import queue from the UI can cause php timeouts for large datasets.
-                         A cronjob to run the queue should be used instead.',
+      '#description' => $this->t('<strong>For development & testing use only!</strong><br /> Running the import queue from the UI can cause php timeouts for large datasets.
+                         A cronjob to run the queue should be used instead.'),
       '#open' => TRUE,
     ];
 
     $form['run_import_queue']['actions'] = [
-      '#type' => 'actions',
+      '#type' => 'action',
+      '#weight' => 24,
     ];
 
-    $queue_count = $this->contentHubImportQueue->getQueueCount();
+    $queue_count = $this->importQueue->getQueueCount();
 
     $form['run_import_queue']['queue_list'] = [
       '#type' => 'item',
@@ -105,15 +118,33 @@ class ContentHubImportQueueForm extends FormBase {
     $form['run_import_queue']['actions']['run'] = [
       '#type' => 'submit',
       '#name' => 'run_import_queue',
-      '#value' => $this->t('Run import queue'),
+      '#value' => $this->t('Import Items'),
       '#op' => 'run',
     ];
 
-    $title = $this->t('Queue from filters');
+    if ($queue_count > 0) {
+      $form['run_import_queue']['purge'] = [
+        '#type' => 'container',
+        '#weight' => 25,
+      ];
+
+      $form['run_import_queue']['purge']['details'] = [
+        '#type' => 'item',
+        '#title' => $this->t('Purge existing queues'),
+        '#description' => $this->t('In case there are stale / stuck items in the queue, press Purge button to clear the Import Queue.'),
+      ];
+      $form['run_import_queue']['purge']['action'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Purge'),
+        '#name' => 'purge_import_queue',
+      ];
+    }
+
+    $title = $this->t('Enqueue from filters');
     $form['queue_from_filters'] = [
       '#type' => 'details',
       '#title' => $title,
-      '#description' => 'Queue entities for import based on your custom filters',
+      '#description' => $this->t('Queue entities for import based on your custom filters'),
       '#open' => TRUE,
     ];
 
@@ -134,7 +165,7 @@ class ContentHubImportQueueForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $queue_count = intval($this->contentHubImportQueue->getQueueCount());
+    $queue_count = $this->importQueue->getQueueCount();
     $trigger = $form_state->getTriggeringElement();
     $messenger = $this->messenger();
 
@@ -145,18 +176,23 @@ class ContentHubImportQueueForm extends FormBase {
           $messenger->addMessage('No filters found!', 'warning');
           break;
         }
-
-        $this->importByFilter->process($filter_uuids);
+        $this->createAndProcessFilterQueueItems($filter_uuids);
         $messenger->addMessage('Entities got queued for import.', 'status');
         break;
 
       case 'run_import_queue':
         if (!empty($queue_count)) {
-          $this->contentHubImportQueue->process();
+          $this->importQueue->processQueueItems();
         }
         else {
           $messenger->addMessage('You cannot run the import queue because it is empty.', 'warning');
         }
+        break;
+
+      case 'purge_import_queue':
+        $this->importQueue->purgeQueues();
+        $this->tracker->delete('status', SubscriberTracker::QUEUED);
+        $this->messenger()->addMessage($this->t('Successfully purged Content Hub import queue.'));
         break;
     }
   }
@@ -182,6 +218,24 @@ class ContentHubImportQueueForm extends FormBase {
     $filters = $client->listFiltersForWebhook($webhook_uuid);
 
     return $filters['data'] ?? [];
+  }
+
+  /**
+   * Creates queue items from passed filter uuids and starts the processing.
+   *
+   * @param array $filter_uuids
+   *   The list of filter uuids to process.
+   */
+  protected function createAndProcessFilterQueueItems(array $filter_uuids): void {
+    $queue = $this->importByFilter->getQueue();
+
+    foreach ($filter_uuids as $filter_uuid) {
+      $data = new \stdClass();
+      $data->filter_uuid = $filter_uuid;
+      $queue->createItem($data);
+    }
+
+    $this->importByFilter->processQueueItems();
   }
 
 }

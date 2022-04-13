@@ -24,6 +24,7 @@ trait FieldEntityDependencyTrait {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Exception
    */
   protected function getEntity($uuid, UnserializeCdfEntityFieldEvent $event) {
     // Check stack first because uuids are referenced from origin, not local.

@@ -126,7 +126,7 @@ class DeleteAssetsTest extends UnitTestCase {
     $this->request = $this->prophesize(Request::class)->reveal();
 
     $this->tracker = $this->prophesize(SubscriberTracker::class);
-    $this->tracker->delete(Argument::type('string'));
+    $this->tracker->delete(Argument::type('string'), Argument::type('string'));
     $this->tracker->getEntityByRemoteIdAndHash(Argument::type('string'))
       ->will(function ($uuid) use ($entity) {
         switch (current($uuid)) {
@@ -278,7 +278,7 @@ class DeleteAssetsTest extends UnitTestCase {
       ],
     ];
 
-    $this->tracker->delete(self::NON_EXISTING_ENTITY_UUID)->shouldBeCalledTimes(1);
+    $this->tracker->delete('entity_uuid', self::NON_EXISTING_ENTITY_UUID)->shouldBeCalledTimes(1);
     $this->contentHubClient->deleteInterest(self::NON_EXISTING_ENTITY_UUID, self::WEBHOOK_UUID)->shouldBeCalledTimes(1);
     $this->entity->delete()->shouldNotBeCalled();
 
@@ -328,7 +328,7 @@ class DeleteAssetsTest extends UnitTestCase {
       ],
     ];
 
-    $this->tracker->delete(self::EXISTING_DISCONNECTED_ENTITY_UUID)->shouldBeCalledTimes(1);
+    $this->tracker->delete('entity_uuid', self::EXISTING_DISCONNECTED_ENTITY_UUID)->shouldBeCalledTimes(1);
 
     $this->triggerEvent(
       $this->createEvent($payload)

@@ -58,7 +58,7 @@ class UpdateTracking implements EventSubscriberInterface {
    */
   public function onDeleteRemoteEntity(DeleteRemoteEntityEvent $event) {
     if ($this->tracker->get($event->getUuid())) {
-      $this->tracker->delete($event->getUuid());
+      $this->tracker->delete('entity_uuid', $event->getUuid());
       $this->channel
         ->info(sprintf("Removed tracking for entity with UUID = \"%s\".", $event->getUuid()));
     }

@@ -402,7 +402,7 @@ class ContentHubCommonActions {
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
    */
-  public function requestToRepublishEntity(string $origin, string $type, string $uuid, array $dependencies) {
+  public function requestToRepublishEntity(string $origin, string $type, string $uuid, array $dependencies): void {
     $client = $this->getClient();
     $webhook_url = $this->getWebhookUrlFromClientOrigin($origin);
     if (!$webhook_url) {
@@ -428,9 +428,20 @@ class ContentHubCommonActions {
       'initiator' => $settings->getUuid(),
       'cdf' => $cdf,
     ];
-    $response = $client->request('post', $webhook_url, [
-      'body' => json_encode($payload),
-    ]);
+    try {
+      $response = $client->request('post', $webhook_url, [
+        'body' => json_encode($payload),
+      ]);
+    }
+    catch (\Exception $e) {
+      $this->channel->error('An error occurred while connecting to Publisher. Webhook Url: @webhook_url, Error: @error',
+        [
+          '@webhook_url' => $webhook_url,
+          '@error' => $e->getMessage(),
+        ]
+      );
+      return;
+    }
 
     $message = $response->getBody()->getContents();
     $code = $response->getStatusCode();

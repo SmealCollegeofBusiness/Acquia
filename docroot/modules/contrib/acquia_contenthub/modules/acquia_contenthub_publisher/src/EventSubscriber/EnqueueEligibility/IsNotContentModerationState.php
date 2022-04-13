@@ -34,6 +34,7 @@ class IsNotContentModerationState implements EventSubscriberInterface {
     $entity = $event->getEntity();
     if ($entity instanceof ContentModerationState) {
       $event->setEligibility(FALSE);
+      $event->setReason('Entity is of type content moderation.');
       $event->stopPropagation();
     }
   }

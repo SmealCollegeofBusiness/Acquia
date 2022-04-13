@@ -126,6 +126,8 @@ class ImportTrackingTest extends EntityKernelTestBase {
       ->getMock();
     $client_factory->method('getClient')->willReturn($content_hub_client);
     $this->clientFactory = $client_factory;
+    $this->container->set('acquia_contenthub.client.factory',
+      $client_factory);
   }
 
   /**

@@ -107,9 +107,8 @@ class ContentHubDeleteClientConfirmFormTest extends BrowserTestBase {
     $session = $this->assertSession();
 
     $this->drupalGet(self::CH_DELETE_CLIENT_CONFIRM_FORM_PATH);
-    $session->pageTextContains("Everything is in order, safe to proceed");
-    $session->buttonExists('Unregister');
-    $session->buttonExists('Cancel');
+    $session->pageTextContains("Webhook not found for this client. Proceed?");
+    $session->buttonExists('Yes');
   }
 
 }

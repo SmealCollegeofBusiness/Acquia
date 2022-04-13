@@ -59,12 +59,22 @@ function acquia_contenthub_update_82001() {
 }
 
 /**
- * Updates ACH configuration with default value of send_contenthub_update.
+ * Updates ACH configuration with default value of send_contenthub_updates.
  */
 function acquia_contenthub_update_82002(&$sandbox) {
   $config_factory = \Drupal::configFactory();
   $config = $config_factory->getEditable('acquia_contenthub.admin_settings');
   $config->set('send_contenthub_updates', TRUE);
+  $config->save();
+}
+
+/**
+ * Updates ACH configuration with default value of send_clientcdf_updates.
+ */
+function acquia_contenthub_update_82003(&$sandbox) {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('acquia_contenthub.admin_settings');
+  $config->set('send_clientcdf_updates', TRUE);
   $config->save();
 }
 
