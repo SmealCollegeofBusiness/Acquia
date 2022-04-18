@@ -16,6 +16,7 @@ use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Access\AccessResultAllowed;
 use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Link;
@@ -511,7 +512,11 @@ class TwigExtension extends \Twig_Extension {
       }
 
       foreach ($_context as $context_item) {
-        if ($current_route_entity === $context_item && (!isset($_context['parentContext']) || !in_array($current_route_entity, $_context['parentContext']))) {
+        if ($context_item instanceof EntityInterface &&
+          $current_route_entity->getEntityTypeId() === $context_item->getEntityTypeId() &&
+          $current_route_entity->id() === $context_item->id() &&
+          $current_route_entity->getRevisionId() === $current_route_entity->getRevisionId() &&
+          (!isset($_context['parentContext']) || !in_array($current_route_entity, $_context['parentContext']))) {
           $is_parent_content = TRUE;
           break;
         }
@@ -1118,7 +1123,7 @@ class TwigExtension extends \Twig_Extension {
             $id = 'ssa-view-filter-' . $id;
         }
       });
-
+      unset($markup[$filter_identifier]['#id']);
     }
 
     // If it's a list of items, possibly change the theme type (<ul><li></ul> style).

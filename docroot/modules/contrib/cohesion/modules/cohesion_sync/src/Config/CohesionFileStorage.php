@@ -99,7 +99,7 @@ class CohesionFileStorage extends FileStorage {
       $data['json_mapper'] = $this->minifyJson($data['json_mapper']);
     }
 
-    if (isset($data['type']) && $data['type'] == 'cohesion_sync_package' && isset($data['settings']) && is_string($data['settings'])) {
+    if (isset($data['settings']) && is_string($data['settings'])) {
       $data['settings'] = $this->minifyJson($data['settings']);
     }
   }

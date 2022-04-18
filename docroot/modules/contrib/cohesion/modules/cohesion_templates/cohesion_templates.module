@@ -556,45 +556,50 @@ function cohesion_templates_theme_suggestions_comment_alter(array &$suggestions,
  * Generate list of entities for content templates per content type & view mode.
  */
 function _cohesion_templates_generate_content_template_entities() {
-  if (!\Drupal::service('config.installer')->isSyncing()) {
-    // Get a list of fieldable entities with view display support
-    // (same as view modes list).
-    $storage = \Drupal::service('entity_type.manager')
-      ->getStorage('entity_view_mode');
-    $view_mode_ids = $storage->getQuery()->execute();
-    /** @var \Drupal\Core\Entity\Entity\EntityViewMode[] $entities */
-    $view_modes = $storage->loadMultiple($view_mode_ids);
-    $entity_types = \Drupal::service('entity_type.manager')->getDefinitions();
-    $bundle_info = \Drupal::service('entity_type.bundle.info');
-
-    $entities = [];
-    foreach ($view_modes as $view_mode) {
-      $entities[$view_mode->getTargetType()]['view_modes'][] = [
-        'id' => $view_mode->id(),
-        'label' => $view_mode->label(),
-      ];
-    }
-
-    // We want to create a content template entry for each combination of
-    // entity type and view mode, with global category for each entity type.
-    foreach ($entities as $entity_type => &$entity) {
-      $field_route = $entity_types[$entity_type]->get('field_ui_base_route');
-      $view_builder = $entity_types[$entity_type]->hasHandlerClass('view_builder');
-      if (!($field_route && $view_builder)) {
-        unset($entities[$entity_type]);
-        continue;
-      }
-
-      // Look up bundles.
-      $entity['bundles'] = $bundle_info->getBundleInfo($entity_type);
-    }
-
-    if ($entities) {
-      ContentTemplates::importEntities($entities);
-    }
-
-    return t('Generated content template entities.');
+  // Return early if Site Studio settings are not initialised.
+  if (\Drupal::getContainer()->has('cohesion.utils') && \Drupal::service('cohesion.utils')->usedx8Status() === FALSE) {
+    return;
   }
+
+  // Get a list of fieldable entities with view display support
+  // (same as view modes list).
+  $storage = \Drupal::service('entity_type.manager')
+    ->getStorage('entity_view_mode');
+  $view_mode_ids = $storage->getQuery()->execute();
+  /** @var \Drupal\Core\Entity\Entity\EntityViewMode[] $entities */
+  $view_modes = $storage->loadMultiple($view_mode_ids);
+  $entity_types = \Drupal::service('entity_type.manager')->getDefinitions();
+  $bundle_info = \Drupal::service('entity_type.bundle.info');
+
+  $entities = [];
+  foreach ($view_modes as $view_mode) {
+    $entities[$view_mode->getTargetType()]['view_modes'][] = [
+      'id' => $view_mode->id(),
+      'label' => $view_mode->label(),
+    ];
+  }
+
+  // We want to create a content template entry for each combination of
+  // entity type and view mode, with global category for each entity type.
+  foreach ($entities as $entity_type => &$entity) {
+    $field_route = $entity_types[$entity_type]->get('field_ui_base_route');
+    $view_builder = $entity_types[$entity_type]->hasHandlerClass('view_builder');
+    if (!($field_route && $view_builder)) {
+      unset($entities[$entity_type]);
+      continue;
+    }
+
+    // Look up bundles.
+    $entity['bundles'] = $bundle_info->getBundleInfo($entity_type);
+  }
+
+  if ($entities) {
+    ContentTemplates::importEntities($entities);
+  }
+
+  return t('Generated @count content template entities.', [
+    '@count' => count($entities),
+    ]);
 }
 
 /**

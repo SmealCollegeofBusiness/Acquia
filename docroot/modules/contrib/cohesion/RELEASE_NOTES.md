@@ -1,5 +1,169 @@
 # Release notes
 
+## 6.8.2
+
+### WYSIWYG used with hide if no data adds extra <br> 
+
+#### What is it?
+
+When using WYSIWYG field on a component and linking to both a WYSIWYG element and a hide if not data field, it would add extra <br> for each line break
+
+#### What impact will there be?
+
+Rendered WYSIWYG will not longer output extra <br>
+
+#### What actions do I need to take?
+
+You need to re-save effected entities or perform a rebuild
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Compatibility with the Select2 module
+
+#### What is it?
+
+When exposing filters on a view and utilising a module/library such as [Select2](https://www.drupal.org/project/select2) the select2 library was not attaching as expected on page load
+
+#### What impact will there be?
+
+Following a cache rebuild the select2 library will attach to select elements as expected
+
+#### What actions do I need to take?
+
+Cache rebuild
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Modal element autoload functionality not working
+
+#### What is it?
+
+Fixes a bug where a modal that had the autoload functionality enabled was not autoloading as expected and a browser console error was displayed.
+
+#### What impact will there be?
+
+Modals that should autoload will now automatically load as expected.
+
+#### What actions do I need to take?
+
+Run an API import `drush cohesion:import` when upgrading.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Visual page builder edit controls not showing on translated page
+
+#### What is it?
+
+When editing a translated page, the edit buttons would not show when using the Visual page builder
+
+#### What impact will there be?
+
+You can now edit component on translated pages
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Single entity exports fix
+
+#### What is it?
+
+When exporting single entities (like components) via UI, full package settings for entity type restrictions were applied. This has been fixed and full package export settings now only apply to full package exports.
+
+#### What impact will there be?
+
+Individually exported entities will no longer follow full package export settings. This will resolve some unexpected behaviour, such as files with zero bytes content being exported when single entity packages export would contain items restricted by full packace export settings.
+
+#### What actions do I need to take?
+
+If you have single entity packages exported with zero bytes content, exporting the same entities again
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Unable to upload fonts on a path based multi-site setup
+
+#### What is it?
+
+Fixes a bug when attempting to upload font and icon font files would produce an error.
+
+#### What impact will there be?
+
+Fonts and icon fonts can be uploaded correctly without error on a path based multi-site.
+
+#### What actions do I need to take?
+
+Run a cohesion API import `drush cohesion:import` when upgrading.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Enabled template generation during drupal config import
+
+#### What is it?
+
+When importing Drupal config, if the Site Studio module has been initialised, templates generation will occur if relevant content types are imported.
+
+#### What impact will there be?
+
+Templates will be generated when Drupal config is imported.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+If templates are generated during deployments, CLI output will have additional output - we recommend additional testing of automation tools that rely on such output.
+
+### Add a drush command that manually triggers regeneration of templates
+
+#### What is it?
+
+We have added new drush command `sitestudio:templates:regenerate` that will trigger templates regeneration manually. This is useful in case a non-standard workflow was used to introduce content type changes (for example direct database manipulation) or if Drupal is in a state of templates misalignment due to config import completed prior to Site Studio 6.8.2.
+
+#### What impact will there be?
+
+None.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+If templates are generated during deployments, there will be additional CLI output - we recommend additional testing of automation tools that rely on such output.
+
+### New Package Management permissions fix
+
+#### What is it?
+
+When exporting packages via UI using the new package management non super-admin role users would encounter "access denied" screen when trying to download generated package, even if they would have "access coheison_sync" permission assigned to their role.
+
+#### What impact will there be?
+
+Only users with "access cohesion_sync" permissions will be able to export packages via UI.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
 ## 6.8.1
 
 ### Field Repeater - Deleting an item in the Component form deletes the wrong item

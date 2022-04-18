@@ -32,13 +32,15 @@ function cohesion_requirements($phase) {
     );
   }
 
-  if (\Drupal::moduleHandler()->moduleExists('acquia_lift') && !\Drupal::moduleHandler()->moduleExists('sitestudio_contenthub_publisher')) {
+  $moduleHandler = \Drupal::moduleHandler();
+
+  $submodule_installed = $moduleHandler->moduleExists('sitestudio_contenthub_publisher') || $moduleHandler->moduleExists('sitestudio_contenthub_subscriber');
+  if ($moduleHandler->moduleExists('acquia_contenthub') && !$submodule_installed) {
     $settings = ['@link' => 'https://github.com/acquia/sitestudio_contenthub'];
     $requirements['cohesion'] = array(
       'title' => t('Site Studio'),
-      'value' => t('The ContentHub integration required for Personalization & Site Studio has changed'),
-      'description' => t('Please download and configure <a href="@link">sitestudio_contenthub</a>', $settings),
-      'severity' => REQUIREMENT_ERROR,
+      'description' => t('The Acquia ContentHub integration with Site Studio has changed, please download and configure <a href="@link">sitestudio_contenthub</a>', $settings),
+      'severity' => REQUIREMENT_WARNING,
     );
   }
 

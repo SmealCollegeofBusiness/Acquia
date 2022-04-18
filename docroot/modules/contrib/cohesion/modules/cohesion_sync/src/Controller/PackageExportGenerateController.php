@@ -250,9 +250,9 @@ class PackageExportGenerateController extends ControllerBase {
   /**
    * Handles fle download from temporary storage.
    *
-   * @param string $type
+   * @param string $entity_type
    *   Entity type.
-   * @param string $uuid
+   * @param string $entity_uuid
    *   Entity uuid.
    */
   public function exportSingleEntityPackage(string $entity_type, string $entity_uuid) {
@@ -284,7 +284,7 @@ class PackageExportGenerateController extends ControllerBase {
       if ($file instanceof FileInterface) {
         $entry = $this->buildFileExportEntry($file);
         $index[$file->getConfigDependencyName()] = $entry;
-        if(!file_exists($file->getFileUri())) {
+        if (!file_exists($file->getFileUri())) {
           $this->deleteFile($this->getPackageFileUri($entity->id()));
           $this->messenger()->addError($this->t('Cannot export %entity_label entity. File %filename does not exists or is not readable.', [
             '%entity_label' => $entity->label(),
@@ -299,7 +299,7 @@ class PackageExportGenerateController extends ControllerBase {
       }
     }
     foreach ($config as $name) {
-      $config_item = $this->cohesionFullPackageStorage->read($name);
+      $config_item = $this->cohesionIndividualEntityPackageStorage->read($name);
       $archiver->addString("$name.yml", $this->cohesionFileStorage->encode($config_item));
     }
 

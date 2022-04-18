@@ -35,14 +35,10 @@ class PackageExportDownloadController extends ControllerBase {
         }
       }
 
-      if (count($headers)) {
-        $response = new BinaryFileResponse($uri, 200, $headers);
-        $response->setContentDisposition('inline', $filename);
+      $response = new BinaryFileResponse($uri, 200, $headers);
+      $response->setContentDisposition('inline', $filename);
 
-        return $response;
-      }
-
-      throw new AccessDeniedHttpException();
+      return $response;
     }
     throw new NotFoundHttpException();
   }

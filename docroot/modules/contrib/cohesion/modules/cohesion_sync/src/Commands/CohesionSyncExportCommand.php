@@ -191,9 +191,9 @@ class CohesionSyncExportCommand extends DrushCommands {
    */
   protected function getTargetStorage(): FileStorage {
     $target_storage = new CohesionFileStorage($this->destinationDir);
-
-    if (count(glob($this->destinationDir . '*')) > 0) {
-      if (!$this->io()->confirm(t('The .yml files in your export directory (@target) will be deleted and replaced with the package config and files.', ['@target' => $this->destinationDir]))) {
+    $destination_dir = is_dir($this->destinationDir) ? new \FilesystemIterator($this->destinationDir) : FALSE;
+    if (is_iterable($destination_dir) && iterator_count($destination_dir) > 0) {
+      if (!$this->io()->confirm(t('Files in your export directory (@target) will be deleted and replaced with the package config and files.', ['@target' => $this->destinationDir]))) {
         throw new UserAbortException();
       }
 
