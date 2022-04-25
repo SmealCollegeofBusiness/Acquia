@@ -23,22 +23,16 @@ use Localheinz\Diff;
 
 final class NormalizePlugin implements Plugin\Capability\CommandProvider, Plugin\Capable, Plugin\PluginInterface
 {
-    public function activate(
-        Composer $composer,
-        IO\IOInterface $io
-    ): void {
+    public function activate(Composer $composer, IO\IOInterface $io): void
+    {
     }
 
-    public function deactivate(
-        Composer $composer,
-        IO\IOInterface $io
-    ): void {
+    public function deactivate(Composer $composer, IO\IOInterface $io): void
+    {
     }
 
-    public function uninstall(
-        Composer $composer,
-        IO\IOInterface $io
-    ): void {
+    public function uninstall(Composer $composer, IO\IOInterface $io): void
+    {
     }
 
     public function getCapabilities(): array
@@ -55,13 +49,13 @@ final class NormalizePlugin implements Plugin\Capability\CommandProvider, Plugin
                 new Factory(),
                 new Normalizer\Vendor\Composer\ComposerJsonNormalizer(\sprintf(
                     'file://%s',
-                    \realpath(__DIR__ . '/../resource/schema.json'),
+                    \realpath(__DIR__ . '/../resource/schema.json')
                 )),
                 new Normalizer\Format\Formatter(new Printer\Printer()),
                 new Diff\Differ(new Diff\Output\StrictUnifiedDiffOutputBuilder([
                     'fromFile' => 'original',
                     'toFile' => 'normalized',
-                ])),
+                ]))
             ),
         ];
     }

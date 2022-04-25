@@ -17,7 +17,6 @@ use Composer\Command;
 use Composer\Console\Application;
 use Composer\Factory;
 use Composer\IO;
-use Composer\Package;
 use Ergebnis\Composer\Normalize\Exception;
 use Ergebnis\Composer\Normalize\Version;
 use Ergebnis\Json\Normalizer;
@@ -30,8 +29,11 @@ use Symfony\Component\Console;
 final class NormalizeCommand extends Command\BaseCommand
 {
     private $factory;
+
     private $normalizer;
+
     private $formatter;
+
     private $differ;
 
     public function __construct(
@@ -55,25 +57,25 @@ final class NormalizeCommand extends Command\BaseCommand
             new Console\Input\InputArgument(
                 'file',
                 Console\Input\InputArgument::OPTIONAL,
-                'Path to composer.json file',
+                'Path to composer.json file'
             ),
             new Console\Input\InputOption(
                 'diff',
                 null,
                 Console\Input\InputOption::VALUE_NONE,
-                'Show the results of normalizing',
+                'Show the results of normalizing'
             ),
             new Console\Input\InputOption(
                 'dry-run',
                 null,
                 Console\Input\InputOption::VALUE_NONE,
-                'Show the results of normalizing, but do not modify any files',
+                'Show the results of normalizing, but do not modify any files'
             ),
             new Console\Input\InputOption(
                 'indent-size',
                 null,
                 Console\Input\InputOption::VALUE_REQUIRED,
-                'Indent size (an integer greater than 0); should be used with the --indent-style option',
+                'Indent size (an integer greater than 0); should be used with the --indent-style option'
             ),
             new Console\Input\InputOption(
                 'indent-style',
@@ -81,34 +83,32 @@ final class NormalizeCommand extends Command\BaseCommand
                 Console\Input\InputOption::VALUE_REQUIRED,
                 \sprintf(
                     'Indent style (one of "%s"); should be used with the --indent-size option',
-                    \implode('", "', \array_keys(Normalizer\Format\Indent::CHARACTERS)),
-                ),
+                    \implode('", "', \array_keys(Normalizer\Format\Indent::CHARACTERS))
+                )
             ),
             new Console\Input\InputOption(
                 'no-check-lock',
                 null,
                 Console\Input\InputOption::VALUE_NONE,
-                'Do not check if lock file is up to date',
+                'Do not check if lock file is up to date'
             ),
             new Console\Input\InputOption(
                 'no-update-lock',
                 null,
                 Console\Input\InputOption::VALUE_NONE,
-                'Do not update lock file if it exists',
+                'Do not update lock file if it exists'
             ),
         ]);
     }
 
-    protected function execute(
-        Console\Input\InputInterface $input,
-        Console\Output\OutputInterface $output
-    ): int {
+    protected function execute(Console\Input\InputInterface $input, Console\Output\OutputInterface $output): int
+    {
         $io = $this->getIO();
 
         $io->write([
             \sprintf(
                 'Running %s.',
-                Version::long(),
+                Version::long()
             ),
             '',
         ]);
@@ -120,7 +120,7 @@ final class NormalizeCommand extends Command\BaseCommand
         } catch (\RuntimeException $exception) {
             $io->writeError(\sprintf(
                 '<error>%s</error>',
-                $exception->getMessage(),
+                $exception->getMessage()
             ));
 
             return 1;
@@ -138,7 +138,7 @@ final class NormalizeCommand extends Command\BaseCommand
 
         $composer = $this->factory->createComposer(
             $io,
-            $composerFile,
+            $composerFile
         );
 
         try {
@@ -146,7 +146,7 @@ final class NormalizeCommand extends Command\BaseCommand
         } catch (\RuntimeException $exception) {
             $io->writeError(\sprintf(
                 '<error>%s</error>',
-                $exception->getMessage(),
+                $exception->getMessage()
             ));
 
             return 1;
@@ -156,20 +156,14 @@ final class NormalizeCommand extends Command\BaseCommand
             $indent = $indentFromExtra;
         }
 
-        if (
-            null !== $indentFromInput
-            && null !== $indentFromExtra
-        ) {
+        if (null !== $indentFromInput && null !== $indentFromExtra) {
             $io->write('<warning>Configuration provided via options and composer extra. Using configuration from composer extra.</warning>');
         }
 
-        if (
-            false === $input->getOption('dry-run')
-            && !\is_writable($composerFile)
-        ) {
+        if (false === $input->getOption('dry-run') && !\is_writable($composerFile)) {
             $io->writeError(\sprintf(
                 '<error>%s is not writable.</error>',
-                $composerFile,
+                $composerFile
             ));
 
             return 1;
@@ -177,12 +171,7 @@ final class NormalizeCommand extends Command\BaseCommand
 
         $locker = $composer->getLocker();
 
-        if (
-            false === $input->getOption('no-check-lock')
-            && $locker instanceof Package\Locker
-            && $locker->isLocked()
-            && !$locker->isFresh()
-        ) {
+        if (false === $input->getOption('no-check-lock') && $locker->isLocked() && !$locker->isFresh()) {
             $io->writeError('<error>The lock file is not up to date with the latest changes in composer.json, it is recommended that you run `composer update --lock`.</error>');
 
             return 1;
@@ -200,7 +189,7 @@ final class NormalizeCommand extends Command\BaseCommand
 
             self::showValidationErrors(
                 $io,
-                ...$exception->errors(),
+                ...$exception->errors()
             );
 
             return 1;
@@ -209,14 +198,14 @@ final class NormalizeCommand extends Command\BaseCommand
 
             self::showValidationErrors(
                 $io,
-                ...$exception->errors(),
+                ...$exception->errors()
             );
 
             return 1;
         } catch (\RuntimeException $exception) {
             $io->writeError(\sprintf(
                 '<error>%s</error>',
-                $exception->getMessage(),
+                $exception->getMessage()
             ));
 
             return 1;
@@ -230,30 +219,27 @@ final class NormalizeCommand extends Command\BaseCommand
 
         $formatted = $this->formatter->format(
             $normalized,
-            $format,
+            $format
         );
 
         if ($json->encoded() === $formatted->encoded()) {
             $io->write(\sprintf(
                 '<info>%s is already normalized.</info>',
-                $composerFile,
+                $composerFile
             ));
 
             return 0;
         }
 
-        if (
-            true === $input->getOption('diff')
-            || true === $input->getOption('dry-run')
-        ) {
+        if (true === $input->getOption('diff') || true === $input->getOption('dry-run')) {
             $io->writeError(\sprintf(
                 '<error>%s is not normalized.</error>',
-                $composerFile,
+                $composerFile
             ));
 
             $diff = $this->differ->diff(
                 $json->encoded(),
-                $formatted->encoded(),
+                $formatted->encoded()
             );
 
             $io->write([
@@ -269,21 +255,14 @@ final class NormalizeCommand extends Command\BaseCommand
             return 1;
         }
 
-        \file_put_contents(
-            $composerFile,
-            $formatted->encoded(),
-        );
+        \file_put_contents($composerFile, $formatted);
 
         $io->write(\sprintf(
             '<info>Successfully normalized %s.</info>',
-            $composerFile,
+            $composerFile
         ));
 
-        if (
-            true === $input->getOption('no-update-lock')
-            || !$locker instanceof Package\Locker
-            || false === $locker->isLocked()
-        ) {
+        if (true === $input->getOption('no-update-lock') || false === $locker->isLocked()) {
             return 0;
         }
 
@@ -296,7 +275,7 @@ final class NormalizeCommand extends Command\BaseCommand
         return self::updateLockerInWorkingDirectory(
             $application,
             $output,
-            \dirname($composerFile),
+            \dirname($composerFile)
         );
     }
 
@@ -311,10 +290,7 @@ final class NormalizeCommand extends Command\BaseCommand
         /** @var null|string $indentStyle */
         $indentStyle = $input->getOption('indent-style');
 
-        if (
-            null === $indentSize
-            && null === $indentStyle
-        ) {
+        if (null === $indentSize && null === $indentStyle) {
             return null;
         }
 
@@ -325,17 +301,14 @@ final class NormalizeCommand extends Command\BaseCommand
         if (null === $indentStyle) {
             throw new \RuntimeException(\sprintf(
                 'When using the indent-size option, an indent style (one of "%s") needs to be specified using the indent-style option.',
-                \implode('", "', \array_keys(Normalizer\Format\Indent::CHARACTERS)),
+                \implode('", "', \array_keys(Normalizer\Format\Indent::CHARACTERS))
             ));
         }
 
-        if (
-            (string) (int) $indentSize !== $indentSize
-            || 1 > $indentSize
-        ) {
+        if ((string) (int) $indentSize !== $indentSize || 1 > $indentSize) {
             throw new \RuntimeException(\sprintf(
                 'Indent size needs to be an integer greater than 0, but "%s" is not.',
-                $indentSize,
+                $indentSize
             ));
         }
 
@@ -343,13 +316,13 @@ final class NormalizeCommand extends Command\BaseCommand
             throw new \RuntimeException(\sprintf(
                 'Indent style needs to be one of "%s", but "%s" is not.',
                 \implode('", "', \array_keys(Normalizer\Format\Indent::CHARACTERS)),
-                $indentStyle,
+                $indentStyle
             ));
         }
 
         return Normalizer\Format\Indent::fromSizeAndStyle(
             (int) $indentSize,
-            $indentStyle,
+            $indentStyle
         );
     }
 
@@ -372,31 +345,31 @@ final class NormalizeCommand extends Command\BaseCommand
         if (!\is_array($configuration)) {
             throw new \RuntimeException(\sprintf(
                 'Configuration in composer extra requires keys "%s" with corresponding values."',
-                \implode('", "', $requiredKeys),
+                \implode('", "', $requiredKeys)
             ));
         }
 
         $missingKeys = \array_diff(
             $requiredKeys,
-            \array_keys($configuration),
+            \array_keys($configuration)
         );
 
         if ([] !== $missingKeys) {
             throw new \RuntimeException(\sprintf(
                 'Configuration in composer extra requires keys "%s" with corresponding values."',
-                \implode('", "', $requiredKeys),
+                \implode('", "', $requiredKeys)
             ));
         }
 
         $extraKeys = \array_diff(
             \array_keys($configuration),
-            $requiredKeys,
+            $requiredKeys
         );
 
         if ([] !== $extraKeys) {
             throw new \RuntimeException(\sprintf(
                 'Configuration in composer extra does not allow extra keys "%s"."',
-                \implode('", "', $extraKeys),
+                \implode('", "', $extraKeys)
             ));
         }
 
@@ -405,14 +378,14 @@ final class NormalizeCommand extends Command\BaseCommand
         if (!\is_int($indentSize)) {
             throw new \RuntimeException(\sprintf(
                 'Indent size needs to be an integer, got %s instead.',
-                \gettype($indentSize),
+                \gettype($indentSize)
             ));
         }
 
         if (1 > $indentSize) {
             throw new \RuntimeException(\sprintf(
                 'Indent size needs to be an integer greater than 0, but %d is not.',
-                $indentSize,
+                $indentSize
             ));
         }
 
@@ -421,7 +394,7 @@ final class NormalizeCommand extends Command\BaseCommand
         if (!\is_string($indentStyle)) {
             throw new \RuntimeException(\sprintf(
                 'Indent style needs to be a string, got %s instead.',
-                \gettype($indentStyle),
+                \gettype($indentStyle)
             ));
         }
 
@@ -429,24 +402,22 @@ final class NormalizeCommand extends Command\BaseCommand
             throw new \RuntimeException(\sprintf(
                 'Indent style needs to be one of "%s", but "%s" is not.',
                 \implode('", "', \array_keys(Normalizer\Format\Indent::CHARACTERS)),
-                $indentStyle,
+                $indentStyle
             ));
         }
 
         return Normalizer\Format\Indent::fromSizeAndStyle(
             $indentSize,
-            $indentStyle,
+            $indentStyle
         );
     }
 
-    private static function showValidationErrors(
-        IO\IOInterface $io,
-        string ...$errors
-    ): void {
+    private static function showValidationErrors(IO\IOInterface $io, string ...$errors): void
+    {
         foreach ($errors as $error) {
             $io->writeError(\sprintf(
                 '<error>- %s</error>',
-                $error,
+                $error
             ));
         }
 
@@ -457,7 +428,7 @@ final class NormalizeCommand extends Command\BaseCommand
     {
         $lines = \explode(
             "\n",
-            $diff,
+            $diff
         );
 
         $formatted = \array_map(static function (string $line): string {
@@ -470,7 +441,7 @@ final class NormalizeCommand extends Command\BaseCommand
                     '<fg=green>$1</>',
                     '<fg=red>$1</>',
                 ],
-                $line,
+                $line
             );
 
             if (!\is_string($replaced)) {
@@ -482,7 +453,7 @@ final class NormalizeCommand extends Command\BaseCommand
 
         return \implode(
             "\n",
-            $formatted,
+            $formatted
         );
     }
 
@@ -506,7 +477,7 @@ final class NormalizeCommand extends Command\BaseCommand
                 '--no-scripts' => true,
                 '--working-dir' => $workingDirectory,
             ]),
-            $output,
+            $output
         );
     }
 }

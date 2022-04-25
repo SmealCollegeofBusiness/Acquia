@@ -6,52 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
-For a full diff see [`2.20.0...main`][2.20.0...main].
-
-## [`2.20.0`][2.20.0]
-
-For a full diff see [`2.19.0...2.20.0`][2.19.0...2.20.0].
-
-### Changed
-
-- Dropped support for PHP 7.2 ([#845]), by [@localheinz]
-
-## [`2.19.0`][2.19.0]
-
-For a full diff see [`2.18.0...2.19.0`][2.18.0...2.19.0].
-
-### Changed
-
-- Required `composer/composer:2.2.1` for compiling `composer-normalize.phar` ([#842]), by [@localheinz]
-
-## [`2.18.0`][2.18.0]
-
-For a full diff see [`2.17.0...2.18.0`][2.17.0...2.18.0].
-
-### Changed
-
-- Updated `schema.json` ([#829]), by [@ergebnis-bot]
-
-## [`2.17.0`][2.17.0]
-
-For a full diff see [`2.16.0...2.17.0`][2.16.0...2.17.0].
-
-### Changed
-
-- Updated `schema.json` ([#816]), by [@ergebnis-bot]
-
-### Fixed
-
-- Required `composer/composer:2.1.14` for compiling `composer-normalize.phar` ([#825]), by [@localheinz]
-
-## [`2.16.0`][2.16.0]
-
-For a full diff see [`2.15.0...2.16.0`][2.15.0...2.16.0].
-
-### Changed
-
-- Required `composer/composer:2.1.12` for compiling `composer-normalize.phar` ([#804]), by [@localheinz]
-- Dropped support for `composer/composer:^1.0.0` ([#807]), by [@localheinz]
+For a full diff see [`2.15.0...main`][2.15.0...main].
 
 ## [`2.15.0`][2.15.0]
 
@@ -59,7 +14,7 @@ For a full diff see [`2.14.0...2.15.0`][2.14.0...2.15.0].
 
 ### Changed
 
-- Updated `schema.json` ([#754]), by [@ergebnis-bot]
+* Updated `schema.json` ([#754]), by [@ergebnis-bot]
 
 ## [`2.14.0`][2.14.0]
 
@@ -67,11 +22,11 @@ For a full diff see [`2.13.4...2.14.0`][2.13.4...2.14.0].
 
 ### Changed
 
-- Updated `schema.json` ([#744]), by [@ergebnis-bot]
+* Updated `schema.json` ([#744]), by [@ergebnis-bot]
 
 ### Fixed
 
-- Updated `composer/composer` ([#750]), by [@localheinz]
+* Updated `composer/composer` ([#750]), by [@localheinz]
 
 ## [`2.13.4`][2.13.4]
 
@@ -79,7 +34,7 @@ For a full diff see [`2.13.3...2.13.4`][2.13.3...2.13.4].
 
 ### Fixed
 
-- Required `composer/composer:2.0.13` for compiling `composer-normalize.phar` ([#743]), by [@localheinz]
+* Required `composer/composer:2.0.13` for compiling `composer-normalize.phar` ([#743]), by [@localheinz]
 
 ## [`2.13.3`][2.13.3]
 
@@ -87,7 +42,7 @@ For a full diff see [`2.13.2...2.13.3`][2.13.2...2.13.3].
 
 ### Fixed
 
-- Required `ergebnis/json-normalizer:^1.0.3` which correctly sorts `composer-plugin-api` ([#707]), by [@dependabot]
+* Required `ergebnis/json-normalizer:^1.0.3` which correctly sorts `composer-plugin-api` ([#707]), by [@dependabot]
 
 ## [`2.13.2`][2.13.2]
 
@@ -95,13 +50,13 @@ For a full diff see [`2.13.1...2.13.2`][2.13.1...2.13.2].
 
 ### Fixed
 
-- Required `ergebnis/json-normalizer:^1.0.2` which ignores the `config.preferred-install` hash only instead of all properties with the name `preferred-install` ([#647]), by [@localheinz]
+* Required `ergebnis/json-normalizer:^1.0.2` which ignores the `config.preferred-install` hash only instead of all properties with the name `preferred-install` ([#647]), by [@localheinz]
 
 ## [`2.13.1`][2.13.1]
 
 For a full diff see [`2.13.0...2.13.1`][2.13.0...2.13.1].
 
-:clown_face: Made a mistake tagging this release *before- pulling changes merged into `main`.
+:clown_face: Made a mistake tagging this release *before* pulling changes merged into `main`.
 
 ## [`2.13.0`][2.13.0]
 
@@ -109,7 +64,7 @@ For a full diff see [`2.12.2...2.13.0`][2.12.2...2.13.0].
 
 ### Changed
 
-- Brought back support for `composer/composer:^1.0.0` ([#644]), by [@localheinz]
+* Brought back support for `composer/composer:^1.0.0` ([#644]), by [@localheinz]
 
 ## [`2.12.2`][2.12.2]
 
@@ -117,7 +72,7 @@ For a full diff see [`2.12.1...2.12.2`][2.12.1...2.12.2].
 
 ### Fixed
 
-- Required `ergebnis/json-normalizer:^1.0.1` which ignores the `preferred-install` hash when sorting configuration hashes by key ([#646]), by [@dependabot]
+* Required `ergebnis/json-normalizer:^1.0.1` which ignores the `preferred-install` hash when sorting configuration hashes by key ([#646]), by [@dependabot]
 
 ## [`2.12.1`][2.12.1]
 
@@ -125,7 +80,7 @@ For a full diff see [`2.12.0...2.12.1`][2.12.0...2.12.1].
 
 ### Fixed
 
-- Show version of plugin instead of version of `Composer\Console\Application` when running as development dependency ([#643]), by [@localheinz]
+* Show version of plugin instead of version of `Composer\Console\Application` when running as development dependency ([#643]), by [@localheinz]
 
 ## [`2.12.0`][2.12.0]
 
@@ -133,15 +88,15 @@ For a full diff see [`2.11.0...2.12.0`][2.11.0...2.12.0].
 
 ### Added
 
-- Started showing plugin and author name when running `composer normalize` ([#641]), by [@localheinz]
+* Started showing plugin and author name when running `composer normalize` ([#641]), by [@localheinz]
 
 ### Changed
 
-- Required `ergebnis/json-normalizer:^1.0.0` which allows recursively sorting config hashes ([#634]), by [@dependabot]
+* Required `ergebnis/json-normalizer:^1.0.0` which allows recursively sorting config hashes ([#634]), by [@dependabot]
 
 ### Fixed
 
-- Required `composer/composer:2.0.8` for `composer-normalize.phar` ([#640]), by [@localheinz]
+* Required `composer/composer:2.0.8` for `composer-normalize.phar` ([#640]), by [@localheinz]
 
 ## [`2.11.0`][2.11.0]
 
@@ -149,7 +104,7 @@ For a full diff see [`2.10.0...2.11.0`][2.10.0...2.11.0].
 
 ### Changed
 
-- Updated `schema.json` ([#615]), by [@ergebnis-bot]
+* Updated `schema.json` ([#615]), by [@ergebnis-bot]
 
 ## [`2.10.0`][2.10.0]
 
@@ -157,7 +112,7 @@ For a full diff see [`2.9.1...2.10.0`][2.9.1...2.10.0].
 
 ### Added
 
-- Allowed configuration via composer extra ([#608]), by [@localheinz]
+* Allowed configuration via composer extra ([#608]), by [@localheinz]
 
 ## [`2.9.1`][2.9.1]
 
@@ -165,8 +120,8 @@ For a full diff see [`2.9.0...2.9.1`][2.9.0...2.9.1].
 
 ### Fixed
 
-- Required at least `composer/composer:^1.10.17` and used `composer/composer:1.10.17` for `composer-normalize.phar` ([#596]), by [@localheinz]
-- Dropped support for `composer/composer:^1.0.0` ([#597]), by [@localheinz]
+* Required at least `composer/composer:^1.10.17` and used `composer/composer:1.10.17` for `composer-normalize.phar` ([#596]), by [@localheinz]
+* Dropped support for `composer/composer:^1.0.0` ([#597]), by [@localheinz]
 
 ## [`2.9.0`][2.9.0]
 
@@ -174,11 +129,11 @@ For a full diff see [`2.8.2...2.9.0`][2.8.2...2.9.0].
 
 ### Changed
 
-- Updated `schema.json` ([#572]), by [@ergebnis-bot]
+* Updated `schema.json` ([#572]), by [@ergebnis-bot]
 
 ### Fixed
 
-- Required at least `composer/composer:^1.10.15` and used `composer/composer:1.10.15` for `composer-normalize.phar` ([#582]), by [@localheinz]
+* Required at least `composer/composer:^1.10.15` and used `composer/composer:1.10.15` for `composer-normalize.phar` ([#582]), by [@localheinz]
 
 ## [`2.8.2`][2.8.2]
 
@@ -186,7 +141,7 @@ For a full diff see [`2.8.1...2.8.2`][2.8.1...2.8.2].
 
 ### Changed
 
-- Require at least `composer/composer:^1.10.13` ([#554]), by [@localheinz]
+* Require at least `composer/composer:^1.10.13` ([#554]), by [@localheinz]
 
 ## [`2.8.1`][2.8.1]
 
@@ -194,7 +149,7 @@ For a full diff see [`2.8.0...2.8.1`][2.8.0...2.8.1].
 
 ### Changed
 
-- Dropped support for PHP 7.1 ([#529]), by [@localheinz]
+* Dropped support for PHP 7.1 ([#529]), by [@localheinz]
 
 ## [`2.8.0`][2.8.0]
 
@@ -202,7 +157,7 @@ For a full diff see [`2.7.0...2.8.0`][2.7.0...2.8.0].
 
 ### Changed
 
-- Updated `schema.json` ([#526]), by [@ergebnis-bot]
+* Updated `schema.json` ([#526]), by [@ergebnis-bot]
 
 ## [`2.7.0`][2.7.0]
 
@@ -210,11 +165,11 @@ For a full diff see [`2.6.1...2.7.0`][2.6.1...2.7.0].
 
 ### Added
 
-- Added `--no-check-lock` option which allows skipping validation of `composer.lock` ([#515]), by [@localheinz]
+* Added `--no-check-lock` option which allows skipping validation of `composer.lock` ([#515]), by [@localheinz]
 
 ### Changed
 
-- Updated `schema.json` ([#512]), by [@ergebnis-bot]
+* Updated `schema.json` ([#512]), by [@ergebnis-bot]
 
 ## [`2.6.1`][2.6.1]
 
@@ -222,7 +177,7 @@ For a full diff see [`2.6.0...2.6.1`][2.6.0...2.6.1].
 
 ### Fixed
 
-- Added support for PHP 8.0, for real ([#484], [#485], [#487]), by [@dependabot]
+* Added support for PHP 8.0, for real ([#484], [#485], [#487]), by [@dependabot]
 
 ## [`2.6.0`][2.6.0]
 
@@ -230,7 +185,7 @@ For a full diff see [`2.5.2...2.6.0`][2.5.2...2.6.0].
 
 ### Added
 
-- Added support for PHP 8.0 ([#465]), by [@core23]
+* Added support for PHP 8.0 ([#465]), by [@core23]
 
 ## [`2.5.2`][2.5.2]
 
@@ -238,7 +193,7 @@ For a full diff see [`2.5.1...2.5.2`][2.5.1...2.5.2].
 
 ### Fixed
 
-- Started ignoring platform requirements when updating the lock file ([#481]), by [@localheinz]
+* Started ignoring platform requirements when updating the lock file ([#481]), by [@localheinz]
 
 ## [`2.5.1`][2.5.1]
 
@@ -246,9 +201,9 @@ For a full diff see [`2.5.0...2.5.1`][2.5.0...2.5.1].
 
 ### Fixed
 
-- Started updating lock files with a new `Composer\Console\Application` instead of reusing the current instance ([#420]), by [@localheinz]
-- Stopped using the deprecated `--no-suggest` option when updating the lock file ([#422]), by [@localheinz]
-- Started relaxing schema in place to avoid issues resolving references and the like on Windows ([#424]), by [@localheinz]
+* Started updating lock files with a new `Composer\Console\Application` instead of reusing the current instance ([#420]), by [@localheinz]
+* Stopped using the deprecated `--no-suggest` option when updating the lock file ([#422]), by [@localheinz]
+* Started relaxing schema in place to avoid issues resolving references and the like on Windows ([#424]), by [@localheinz]
 
 ## [`2.5.0`][2.5.0]
 
@@ -256,7 +211,7 @@ For a full diff see [`2.4.0...2.5.0`][2.4.0...2.5.0].
 
 ### Changed
 
-- Apply lax validation to `composer.json` ([#416]), by [@localheinz]
+* Apply lax validation to `composer.json` ([#416]), by [@localheinz]
 
 ## [`2.4.0`][2.4.0]
 
@@ -264,8 +219,8 @@ For a full diff see [`2.3.2...2.4.0`][2.3.2...2.4.0].
 
 ### Changed
 
-- Started showing validation error messages as obtained from validation instead of relying on on executing composer validate ([#406]), by [@localheinz]
-- Made plugin compatible with `composer/composer:^2.0.0`  ([#412]), by [@localheinz]
+* Started showing validation error messages as obtained from validation instead of relying on on executing composer validate ([#406]), by [@localheinz]
+* Made plugin compatible with `composer/composer:^2.0.0`  ([#412]), by [@localheinz]
 
 ## [`2.3.2`][2.3.2]
 
@@ -273,7 +228,7 @@ For a full diff see [`2.3.1...2.3.2`][2.3.1...2.3.2].
 
 ### Fixed
 
-- Fixed a reference that prevented an upload of release assets ([#380]), by [@localheinz]
+* Fixed a reference that prevented an upload of release assets ([#380]), by [@localheinz]
 
 ## [`2.3.1`][2.3.1]
 
@@ -281,7 +236,7 @@ For a full diff see [`2.3.0...2.3.1`][2.3.0...2.3.1].
 
 ### Fixed
 
-- Updated `composer/composer` ([#379]), by [@localheinz]
+* Updated `composer/composer` ([#379]), by [@localheinz]
 
 ## [`2.3.0`][2.3.0]
 
@@ -289,7 +244,7 @@ For a full diff see [`2.2.4...2.3.0`][2.2.4...2.3.0].
 
 ### Changed
 
-- Updated `schema.json` ([#374]), by [@ergebnis-bot]
+* Updated `schema.json` ([#374]), by [@ergebnis-bot]
 
 ## [`2.2.4`][2.2.4]
 
@@ -297,7 +252,7 @@ For a full diff see [`2.2.3...2.2.4`][2.2.3...2.2.4].
 
 ### Fixed
 
-- Use real path to `schema.json` ([#364]), by [@localheinz]
+* Use real path to `schema.json` ([#364]), by [@localheinz]
 
 ## [`2.2.3`][2.2.3]
 
@@ -305,7 +260,7 @@ For a full diff see [`2.2.2...2.2.3`][2.2.2...2.2.3].
 
 ### Changed
 
-- Updated `schema.json` ([#354]), by [@ergebnis-bot]
+* Updated `schema.json` ([#354]), by [@ergebnis-bot]
 
 ## [`2.2.2`][2.2.2]
 
@@ -313,7 +268,7 @@ For a full diff see [`2.2.1...2.2.2`][2.2.1...2.2.2].
 
 ### Changed
 
-- Updated `schema.json` ([#322]), by [@localheinz]
+* Updated `schema.json` ([#322]), by [@localheinz]
 
 ## [`2.2.1`][2.2.1]
 
@@ -321,7 +276,7 @@ For a full diff see [`2.2.0...2.2.1`][2.2.0...2.2.1].
 
 ### Changed
 
-- Removed dependency on `ergebnis/composer-json-normalizer` ([#316]), by [@localheinz]
+* Removed dependency on `ergebnis/composer-json-normalizer` ([#316]), by [@localheinz]
 
 ## [`2.2.0`][2.2.0]
 
@@ -329,7 +284,7 @@ For a full diff see [`2.1.2...2.2.0`][2.1.2...2.2.0].
 
 ### Added
 
-- Added `--diff` option ([#303]), by [@localheinz]
+* Added `--diff` option ([#303]), by [@localheinz]
 
 ## [`2.1.2`][2.1.2]
 
@@ -337,7 +292,7 @@ For a full diff see [`2.1.1...2.1.2`][2.1.1...2.1.2].
 
 ### Fixed
 
-- Allow passing argument and options to the command ([#301]), by [@localheinz]
+* Allow passing argument and options to the command ([#301]), by [@localheinz]
 
 ## [`2.1.1`][2.1.1]
 
@@ -345,7 +300,7 @@ For a full diff see [`2.1.0...2.1.1`][2.1.0...2.1.1].
 
 ### Fixed
 
-- Actually run `composer validate` to show validation errors when `composer.json` is not valid according to its schema ([#297]), by [@localheinz]
+* Actually run `composer validate` to show validation errors when `composer.json` is not valid according to its schema ([#297]), by [@localheinz]
 
 ## [`2.1.0`][2.1.0]
 
@@ -353,7 +308,7 @@ For a full diff see [`2.0.2...2.1.0`][2.0.2...2.1.0].
 
 ### Added
 
-- Started compiling, signing, and uploading `composer-normalize.phar` and `composer-normalize.phar.asc` to release assets when a tag is pushed ([#292]), by [@localheinz]
+* Started compiling, signing, and uploading `composer-normalize.phar` and `composer-normalize.phar.asc` to release assets when a tag is pushed ([#292]), by [@localheinz]
 
 ## [`2.0.2`][2.0.2]
 
@@ -361,7 +316,7 @@ For a full diff see [`2.0.1...2.0.2`][2.0.1...2.0.2].
 
 ### Fixed
 
-- Brought back support for PHP 7.1 ([#280]), by [@localheinz]
+* Brought back support for PHP 7.1 ([#280]), by [@localheinz]
 
 ## [`2.0.1`][2.0.1]
 
@@ -369,7 +324,7 @@ For a full diff see [`2.0.0...2.0.1`][2.0.0...2.0.1]
 
 ## Changed
 
-- Removed `Ergebnis\Composer\Normalize\Command\SchemaUriResolver` and checked in `schema.json` instead ([#273]), by [@localheinz]
+* Removed `Ergebnis\Composer\Normalize\Command\SchemaUriResolver` and checked in `schema.json` instead ([#273]), by [@localheinz]
 
 ## [`2.0.0`][2.0.0]
 
@@ -377,9 +332,9 @@ For a full diff see [`1.3.1...2.0.0`][1.3.1...2.0.0].
 
 ## Changed
 
-- Started using `ergebnis/composer-json-normalizer` instead of `localheinz/composer-json-normalizer`, `ergebnis/json-normalizer` instead of `localheinz/json-normalizer`, and `ergebnis/json-printer` instead of `localheinz/json-printer` ([#261]), by [@localheinz]
-- Removed default values for parameters `$formatter` and `$differ` of constructor of `Ergebnis\Composer\Normalize\Command\NormalizeCommand`  ([#262]), by [@localheinz]
-- Renamed vendor namespace `Localheinz` to `Ergebnis` after move to [@ergebnis] ([#267]), by [@localheinz]
+* Started using `ergebnis/composer-json-normalizer` instead of `localheinz/composer-json-normalizer`, `ergebnis/json-normalizer` instead of `localheinz/json-normalizer`, and `ergebnis/json-printer` instead of `localheinz/json-printer` ([#261]), by [@localheinz]
+* Removed default values for parameters `$formatter` and `$differ` of constructor of `Ergebnis\Composer\Normalize\Command\NormalizeCommand`  ([#262]), by [@localheinz]
+* Renamed vendor namespace `Localheinz` to `Ergebnis` after move to [@ergebnis] ([#267]), by [@localheinz]
 
   Run
 
@@ -410,11 +365,11 @@ For a full diff see [`1.3.1...2.0.0`][1.3.1...2.0.0].
   ```
 
   to delete backup files created in the previous step.
-- Marked `Ergebnis\Composer\Normalize\Command\NormalizeCommand` and `Ergebnis\Composer\Normalize\Command\SchemaUriResolver` as internal to allow modifications without the need for major releases ([#270]), by [@localheinz]
+* Marked `Ergebnis\Composer\Normalize\Command\NormalizeCommand` and `Ergebnis\Composer\Normalize\Command\SchemaUriResolver` as internal to allow modifications without the need for major releases ([#270]), by [@localheinz]
 
 ### Fixed
 
-- Dropped support for PHP 7.1 ([#235]), by [@localheinz]
+* Dropped support for PHP 7.1 ([#235]), by [@localheinz]
 
 ## [`1.3.1`][1.3.1]
 
@@ -422,7 +377,7 @@ For a full diff see [`1.3.0...1.3.1`][1.3.0...1.3.1].
 
 ### Fixed
 
-- Started using `localheinz/diff` to avoid issues using `sebastian/diff` ([#207]), by [@localheinz]
+* Started using `localheinz/diff` to avoid issues using `sebastian/diff` ([#207]), by [@localheinz]
 
 ## [`1.3.0`][1.3.0]
 
@@ -430,7 +385,7 @@ For a full diff see [`1.2.0...1.3.0`][1.2.0...1.3.0].
 
 ### Changed
 
-- Resolve local and fall back to remote schema so that command works offline and behind proxies ([#190]), by [@localheinz]
+* Resolve local and fall back to remote schema so that command works offline and behind proxies ([#190]), by [@localheinz]
 
 ## [`1.2.0`][1.2.0]
 
@@ -438,7 +393,7 @@ For a full diff see [`1.1.4...1.2.0`][1.1.4...1.2.0].
 
 ### Changed
 
-- Started using the `StrictUnifiedDiffOutputBuilder` when available to create more condensed diffs when using the `--dry-run` option ([#80]), by [@localheinz]
+* Started using the `StrictUnifiedDiffOutputBuilder` when available to create more condensed diffs when using the `--dry-run` option ([#80]), by [@localheinz]
 
 ## [`1.1.4`][1.1.4]
 
@@ -446,7 +401,7 @@ For a full diff see [`1.1.3...1.1.4`][1.1.3...1.1.4].
 
 ### Fixed
 
-- Removed requirement for `composer.json` to be writable when using the `--dry-run` option ([#177]), by [@localheinz]
+* Removed requirement for `composer.json` to be writable when using the `--dry-run` option ([#177]), by [@localheinz]
 
 ## [`1.1.3`][1.1.3]
 
@@ -454,7 +409,7 @@ For a full diff see [`1.1.2...1.1.3`][1.1.2...1.1.3].
 
 ### Fixed
 
-- Reversed use of red and green for rendering diff when using the `--dry-run` option ([#173]), by [@TravisCarden]
+* Reversed use of red and green for rendering diff when using the `--dry-run` option ([#173]), by [@TravisCarden]
 
 ## [`1.1.2`][1.1.2]
 
@@ -462,7 +417,7 @@ For a full diff see [`1.1.1...1.1.2`][1.1.1...1.1.2].
 
 ### Fixed
 
-- Reverted deprecation of the `file` argument of the `NormalizeCommand` as it turns out that the same functionality can _not_ be achieved using the `--working-dir` option ([#166]), by [@localheinz]
+* Reverted deprecation of the `file` argument of the `NormalizeCommand` as it turns out that the same functionality can _not_ be achieved using the `--working-dir` option ([#166]), by [@localheinz]
 
 ## [`1.1.1`][1.1.1]
 
@@ -470,7 +425,7 @@ For a full diff see [`1.1.0...1.1.1`][1.1.0...1.1.1].
 
 ### Removed
 
-- Updated [`localheinz/composer-json-normalizer`](http://github.com/localheinz/composer-json-normalizer), which effectively removed a dependency on [`composer/composer`](https://github.com/composer/composer) ([#157]), by [@localheinz]
+* Updated [`localheinz/composer-json-normalizer`](http://github.com/localheinz/composer-json-normalizer), which effectively removed a dependency on [`composer/composer`](https://github.com/composer/composer) ([#157]), by [@localheinz]
 
 ## [`1.1.0`][1.1.0]
 
@@ -478,11 +433,11 @@ For a full diff see [`1.0.0...1.1.0`][1.0.0...1.1.0].
 
 ### Deprecated
 
-- Deprecated the `file` argument of the `NormalizeCommand` as the same functionality can be achieved using the `--working-dir` option ([#145]), by [@localheinz]
+* Deprecated the `file` argument of the `NormalizeCommand` as the same functionality can be achieved using the `--working-dir` option ([#145]), by [@localheinz]
 
 ### Fixed
 
-- Force reading `composer.json` and `composer.lock` after normalization to ensure `composer.lock` is updated when not fresh after normalization ([#139]), by [@localheinz]
+* Force reading `composer.json` and `composer.lock` after normalization to ensure `composer.lock` is updated when not fresh after normalization ([#139]), by [@localheinz]
 
 ## [`1.0.0`][1.0.0]
 
@@ -490,11 +445,11 @@ For a full diff see [`0.9.0...1.0.0`][0.9.0...1.0.0].
 
 ### Added
 
-- Added this changelog ([#94]), by [@localheinz]
+* Added this changelog ([#94]), by [@localheinz]
 
 ### Removed
 
-- Removed normalizers after extracting package [`localheinz/composer-json-normalizer`](https://github.com/localheinz/composer-json-normalizer) ([#106]), by [@localheinz]
+* Removed normalizers after extracting package [`localheinz/composer-json-normalizer`](https://github.com/localheinz/composer-json-normalizer) ([#106]), by [@localheinz]
 
 ## [`0.9.0`][0.9.0]
 
@@ -502,11 +457,11 @@ For a full diff see [`0.8.0...0.9.0`][0.8.0...0.9.0].
 
 ### Changed
 
-- The `ConfigHashNormalizer` now also sorts the `scripts-descriptions` section ([#89]), by [@localheinz]
+* The `ConfigHashNormalizer` now also sorts the `scripts-descriptions` section ([#89]), by [@localheinz]
 
 ### Fixed
 
-- When validation of `composer.lock` fails prior to normalization, it is now recommended to update the lock file only ([#86]), by [@svenluijten]
+* When validation of `composer.lock` fails prior to normalization, it is now recommended to update the lock file only ([#86]), by [@svenluijten]
 
 ## [`0.8.0`][0.8.0]
 
@@ -514,7 +469,7 @@ For a full diff see [`0.7.0...0.8.0`][0.7.0...0.8.0].
 
 ### Changed
 
-- The `ConfigHashNormalizer` now also sorts the `extra` section ([#60]), by [@localheinz]
+* The `ConfigHashNormalizer` now also sorts the `extra` section ([#60]), by [@localheinz]
 
 ## [`0.7.0`][0.7.0]
 
@@ -522,7 +477,7 @@ For a full diff see [`0.6.0...0.7.0`][0.6.0...0.7.0].
 
 ### Changed
 
-- Updated `localheinz/json-normalizer`, which now sniffs the new-line character and uses it for printing instead of using `PHP_EOL` ([#62]), by [@localheinz]
+* Updated `localheinz/json-normalizer`, which now sniffs the new-line character and uses it for printing instead of using `PHP_EOL` ([#62]), by [@localheinz]
 
 ## [`0.6.0`][0.6.0]
 
@@ -530,7 +485,7 @@ For a full diff see [`0.5.0...0.6.0`][0.5.0...0.6.0].
 
 ### Added
 
-- Added a `file` argument to the `NormalizeCommand`, so the path to `composer.json` can be specified now, ([#51]), by [@localheinz]
+* Added a `file` argument to the `NormalizeCommand`, so the path to `composer.json` can be specified now, ([#51]), by [@localheinz]
 
 ## [`0.5.0`][0.5.0]
 
@@ -538,7 +493,7 @@ For a full diff see [`0.4.0...0.5.0`][0.4.0...0.5.0].
 
 ### Changed
 
-- Updated `localheinz/json-normalizer`, which significantly improves the `SchemaNormalizer` employed to do the major normalization of `composer.json` ([#42]), by [@localheinz]
+* Updated `localheinz/json-normalizer`, which significantly improves the `SchemaNormalizer` employed to do the major normalization of `composer.json` ([#42]), by [@localheinz]
 
 ## [`0.4.0`][0.4.0]
 
@@ -546,7 +501,7 @@ For a full diff see [`0.3.0...0.4.0`][0.3.0...0.4.0].
 
 ### Added
 
-- Added `--dry-run` option, which allows usage in Continuous Integration systems, as it renders a diff and exits with a non-zero exit code ([#38]), by [@localheinz]
+* Added `--dry-run` option, which allows usage in Continuous Integration systems, as it renders a diff and exits with a non-zero exit code ([#38]), by [@localheinz]
 
 ## [`0.3.0`][0.3.0]
 
@@ -554,7 +509,7 @@ For a full diff see [`0.2.0...0.3.0`][0.2.0...0.3.0].
 
 ### Fixed
 
-- Dropped support for PHP 7.0, which allows proper handling of empty PSR-4 namespace prefixes ([#30]), by [@localheinz]
+* Dropped support for PHP 7.0, which allows proper handling of empty PSR-4 namespace prefixes ([#30]), by [@localheinz]
 
 ## [`0.2.0`][0.2.0]
 
@@ -562,12 +517,12 @@ For a full diff see [`0.1.0...0.2.0`][0.1.0...0.2.0].
 
 ### Added
 
-- Added `--no-update-lock` option, which allows skipping the update of `composer.lock` after normalization ([#28]), by [@localheinz]
-- Added the `VersionConstraintNormalizer`, which normalizes version constraints ([#18]), by [@localheinz]
+* Added `--no-update-lock` option, which allows skipping the update of `composer.lock` after normalization ([#28]), by [@localheinz]
+* Added the `VersionConstraintNormalizer`, which normalizes version constraints ([#18]), by [@localheinz]
 
 ### Fixed
 
-- Using the `--no-scripts` option when invoking the `UpdateCommand` to update `composer.lock` ([#19]), by [@localheinz]
+* Using the `--no-scripts` option when invoking the `UpdateCommand` to update `composer.lock` ([#19]), by [@localheinz]
 
 ## [`0.1.0`][0.1.0]
 
@@ -575,12 +530,12 @@ For a full diff see [`81bc3a8...0.1.0`][81bc3a8...0.1.0].
 
 ### Added
 
-- Added `NormalizeCommand` ([#1]), by [@localheinz]
-- Added `ConfigHashNormalizer`, which sorts entries in the `config` section by key ([#2]), by [@localheinz]
-- Added the `NormalizePlugin`, which provides the `NormalizeCommand` ([#3]), by [@localheinz]
-- Added the `PackageHashNormalizer` which sorts packages in the `conflict`, `provide`, `replaces`, `require`, `require-dev`, and `suggest` sections using the same algorithm that is used by the `sort-packages` option of composer itself ([#6]), by [@localheinz]
-- Added the `BinNormalizer`, which sorts entries in the `bin` section by
-- Added the `ComposerJsonNormalizer`, which composes all of the above normalizers along with the `SchemaNormalizer`, to normalize `composer.json` according to its underlying JSON schema ([#8] and [#10]), by [@localheinz]
+* Added `NormalizeCommand` ([#1]), by [@localheinz]
+* Added `ConfigHashNormalizer`, which sorts entries in the `config` section by key ([#2]), by [@localheinz]
+* Added the `NormalizePlugin`, which provides the `NormalizeCommand` ([#3]), by [@localheinz]
+* Added the `PackageHashNormalizer` which sorts packages in the `conflict`, `provide`, `replaces`, `require`, `require-dev`, and `suggest` sections using the same algorithm that is used by the `sort-packages` option of composer itself ([#6]), by [@localheinz]
+* Added the `BinNormalizer`, which sorts entries in the `bin` section by
+* Added the `ComposerJsonNormalizer`, which composes all of the above normalizers along with the `SchemaNormalizer`, to normalize `composer.json` according to its underlying JSON schema ([#8] and [#10]), by [@localheinz]
 
 [0.1.0]: https://github.com/ergebnis/composer-normalize/releases/tag/0.1.0
 [0.2.0]: https://github.com/ergebnis/composer-normalize/releases/tag/0.2.0
@@ -638,11 +593,6 @@ For a full diff see [`81bc3a8...0.1.0`][81bc3a8...0.1.0].
 [2.13.4]: https://github.com/ergebnis/composer-normalize/releases/tag/2.13.4
 [2.14.0]: https://github.com/ergebnis/composer-normalize/releases/tag/2.14.0
 [2.15.0]: https://github.com/ergebnis/composer-normalize/releases/tag/2.15.0
-[2.16.0]: https://github.com/ergebnis/composer-normalize/releases/tag/2.16.0
-[2.17.0]: https://github.com/ergebnis/composer-normalize/releases/tag/2.17.0
-[2.18.0]: https://github.com/ergebnis/composer-normalize/releases/tag/2.18.0
-[2.19.0]: https://github.com/ergebnis/composer-normalize/releases/tag/2.19.0
-[2.20.0]: https://github.com/ergebnis/composer-normalize/releases/tag/2.20.0
 
 [81bc3a8...0.1.0]: https://github.com/ergebnis/composer-normalize/compare/81bc3a8...0.1.0
 [0.1.0...0.2.0]: https://github.com/ergebnis/composer-normalize/compare/0.1.0...0.2.0
@@ -700,12 +650,7 @@ For a full diff see [`81bc3a8...0.1.0`][81bc3a8...0.1.0].
 [2.13.3...2.13.4]: https://github.com/ergebnis/composer-normalize/compare/2.13.3...2.13.4
 [2.13.4...2.14.0]: https://github.com/ergebnis/composer-normalize/compare/2.13.4...2.14.0
 [2.14.0...2.15.0]: https://github.com/ergebnis/composer-normalize/compare/2.14.0...2.15.0
-[2.15.0...2.16.0]: https://github.com/ergebnis/composer-normalize/compare/2.15.0...2.16.0
-[2.16.0...2.17.0]: https://github.com/ergebnis/composer-normalize/compare/2.16.0...2.17.0
-[2.17.0...2.18.0]: https://github.com/ergebnis/composer-normalize/compare/2.17.0...2.18.0
-[2.18.0...2.19.0]: https://github.com/ergebnis/composer-normalize/compare/2.18.0...2.19.0
-[2.19.0...2.20.0]: https://github.com/ergebnis/composer-normalize/compare/2.19.0...2.20.0
-[2.20.0...main]: https://github.com/ergebnis/composer-normalize/compare/2.20.0...main
+[2.15.0...main]: https://github.com/ergebnis/composer-normalize/compare/2.15.0...main
 
 [#1]: https://github.com/ergebnis/composer-normalize/pull/1
 [#2]: https://github.com/ergebnis/composer-normalize/pull/2
@@ -787,13 +732,6 @@ For a full diff see [`81bc3a8...0.1.0`][81bc3a8...0.1.0].
 [#744]: https://github.com/ergebnis/composer-normalize/pull/744
 [#750]: https://github.com/ergebnis/composer-normalize/pull/750
 [#754]: https://github.com/ergebnis/composer-normalize/pull/754
-[#804]: https://github.com/ergebnis/composer-normalize/pull/804
-[#807]: https://github.com/ergebnis/composer-normalize/pull/807
-[#816]: https://github.com/ergebnis/composer-normalize/pull/816
-[#825]: https://github.com/ergebnis/composer-normalize/pull/825
-[#829]: https://github.com/ergebnis/composer-normalize/pull/829
-[#842]: https://github.com/ergebnis/composer-normalize/pull/842
-[#845]: https://github.com/ergebnis/composer-normalize/pull/845
 
 [@core23]: https://github.com/core23
 [@dependabot]: https://github.com/dependabot
