@@ -14,7 +14,7 @@ Use [Composer](http://getcomposer.org) and add it as a dependency to your projec
 ```json
 {
     "require": {
-        "acquia/http-hmac-php": "^4.0"
+        "acquia/http-hmac-php": "^5.0"
     }
 }
 ```
@@ -187,7 +187,7 @@ PHPUnit testing a controller using HMAC HTTP authentication in Symfony:
 
 services:
     test.client.hmac:
-        class: Acquia\Hmac\Test\Mocks\Symfony\HmacClientlient
+        class: Acquia\Hmac\Test\Mocks\Symfony\HmacClient
         arguments: ['@kernel', '%test.client.parameters%', '@test.client.history', '@test.client.cookiejar']
 
 ```

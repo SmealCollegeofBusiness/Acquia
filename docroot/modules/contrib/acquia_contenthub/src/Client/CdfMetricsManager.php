@@ -4,6 +4,7 @@ namespace Drupal\acquia_contenthub\Client;
 
 use Acquia\ContentHubClient\CDF\CDFObject;
 use Acquia\ContentHubClient\CDF\ClientCDFObject;
+use Acquia\ContentHubClient\ContentHubClient;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\BuildClientCdfEvent;
 use Drupal\Core\Config\Config;
@@ -78,13 +79,21 @@ class CdfMetricsManager {
   /**
    * Sends client cdf metrics updates.
    *
+   * @param \Acquia\ContentHubClient\ContentHubClient|null $client
+   *   (Optional) The Content Hub client.
+   *
    * @throws \Exception
    */
-  public function sendClientCdfUpdates(): void {
-    if (!$this->client || !$this->settings) {
-      $this->logger->error('Couldn\'t instantiate Content Hub Client or Content Hub settings.');
+  public function sendClientCdfUpdates(?ContentHubClient $client = NULL): void {
+    if ($client !== NULL) {
+      $this->client = $client;
+      $this->settings = $client->getSettings();
+    }
+
+    if (!$this->isStableConnection()) {
       return;
     }
+
     $send_clientcdf_update = $this->config->get('send_clientcdf_updates') ?? TRUE;
     $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
 
@@ -100,6 +109,26 @@ class CdfMetricsManager {
       $local_cdf = $event->getCdf();
       $this->updateClientCdf($local_cdf);
     }
+  }
+
+  /**
+   * Checks if the client and the settings are properly set.
+   *
+   * @return bool
+   *   True if both are set.
+   */
+  protected function isStableConnection(): bool {
+    if (!$this->client) {
+      $this->logger->error('Could not instantiate Content Hub Client.');
+      return FALSE;
+    }
+
+    if (!$this->settings) {
+      $this->logger->error('Could not retrieve Content Hub settings.');
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
   /**
@@ -149,7 +178,7 @@ class CdfMetricsManager {
    */
   protected function compareHashes(ClientCDFObject $remote_cdf, ClientCDFObject $local_cdf): bool {
     return $remote_cdf->getAttribute('hash') &&
-    $this->getClientCdfHash($remote_cdf) === $this->getClientCdfHash($local_cdf);
+      $this->getClientCdfHash($remote_cdf) === $this->getClientCdfHash($local_cdf);
   }
 
   /**

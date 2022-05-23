@@ -151,13 +151,14 @@ class EntityCdfSerializer {
     // Install required modules.
     $this->handleModules($cdf, $stack);
 
+    $original_stack_size = count($stack->getDependencies());
     // Organize the entities into a dependency chain.
     // Use a while loop to prevent memory expansion due to recursion.
     while (!$stack->hasDependencies(array_keys($cdf->getEntities()))) {
       // @todo add tracking to break out of the while loop when dependencies cannot be further processed.
       $count = count($stack->getDependencies());
       $this->processCdf($cdf, $stack);
-      $this->handleImportFailure($count, $cdf, $stack);
+      $this->handleImportFailure($count, $original_stack_size, $cdf, $stack);
     }
     $this->tracker->cleanUp();
   }
@@ -421,15 +422,20 @@ class EntityCdfSerializer {
    *
    * @param int $count
    *   The previous count from the dependency stack.
+   * @param int $original_stack_size
+   *   The original dependency stack size.
    * @param \Acquia\ContentHubClient\CDFDocument $cdf
    *   The CDF document.
    * @param \Drupal\depcalc\DependencyStack $stack
    *   The dependency stack.
    *
-   * @throws \Exception
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function handleImportFailure(int $count, CDFDocument $cdf, DependencyStack $stack) {
-    $import_failed = $count === count($stack->getDependencies()) && $count < count($cdf->getEntities());
+  protected function handleImportFailure(int $count, int $original_stack_size, CDFDocument $cdf, DependencyStack $stack) {
+    $actual_processed_stack_count = $count - $original_stack_size;
+    $import_failed = $count === count($stack->getDependencies()) && $actual_processed_stack_count < count($cdf->getEntities());
     if (!$import_failed) {
       return;
     }

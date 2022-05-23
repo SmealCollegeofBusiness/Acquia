@@ -20,7 +20,7 @@ trait MetricsUpdateTrait {
   protected function mockMetricsCalls(ObjectProphecy $client): void {
     $client
       ->getRemoteSettings()
-      ->willReturn(new \stdClass());
+      ->willReturn([]);
     $client
       ->putEntities(Argument::any())
       ->willReturn(new Response('', 202));

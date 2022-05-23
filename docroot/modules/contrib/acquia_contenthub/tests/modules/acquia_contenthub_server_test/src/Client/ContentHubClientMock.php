@@ -189,7 +189,7 @@ class ContentHubClientMock extends ContentHubClient {
   /**
    * {@inheritdoc}
    */
-  public function getRemoteSettings() {
+  public function getRemoteSettings(): array {
     $this->options = $this->getSettings()->toArray();
     return [
       'clients' => [

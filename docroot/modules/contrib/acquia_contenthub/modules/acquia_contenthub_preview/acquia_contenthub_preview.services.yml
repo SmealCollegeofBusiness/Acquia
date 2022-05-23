@@ -5,7 +5,7 @@ services:
       - { name: event_subscriber }
   acquia_contenthub_preview.webhook.preview:
     class: Drupal\acquia_contenthub_preview\EventSubscriber\HandleWebhook\PreviewEntity
-    arguments: ['@acquia_contenthub_common_actions', '@bare_html_page_renderer', '@entity.repository', '@class_resolver']
+    arguments: ['@acquia_contenthub_subscriber.cdf_importer']
     tags:
       - { name: event_subscriber }
   acquia_contenthub_preview.settings.preview:

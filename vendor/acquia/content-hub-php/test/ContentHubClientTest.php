@@ -966,7 +966,7 @@ class ContentHubClientTest extends TestCase {
     $this->ch_client
       ->shouldReceive('get')
       ->once()
-      ->with('settings/clients/' . $this->test_data['name'])
+      ->with('settings/client/name/' . $this->test_data['name'])
       ->andReturn($this->makeMockResponse(SymfonyResponse::HTTP_OK, [], json_encode($response)));
 
     $api_response = $this->ch_client->getClientByName($this->test_data['name']);
@@ -990,10 +990,33 @@ class ContentHubClientTest extends TestCase {
     $this->ch_client
       ->shouldReceive('get')
       ->once()
-      ->with('settings/clients/' . $this->test_data['name'])
+      ->with('settings/client/name/' . $this->test_data['name'])
       ->andReturn($this->makeMockResponse(SymfonyResponse::HTTP_NOT_FOUND, [], json_encode($response)));
 
     $this->assertSame($this->ch_client->getClientByName($this->test_data['name']), $response);
+  }
+
+  /**
+   * @covers \Acquia\ContentHubClient\ContentHubClient::getClientByUuid
+   * @throws \Exception
+   */
+  public function testGetClientByUuidReturnsClientInfoIfSuccessful(): void {
+    $response = [
+      'name' => 'client-2',
+      'uuid' => 'client-2-uuid',
+    ];
+    $api_response = $this->ch_client->getClientByUuid('client-2-uuid');
+    $this->assertSame($api_response, $response);
+  }
+
+  /**
+   * @covers \Acquia\ContentHubClient\ContentHubClient::getClientByUuid
+   * @throws \Exception
+   */
+  public function testGetClientByUuidReturnsUnsuccessfulIfClientIsNotFound(): void {
+    $response = [];
+    $api_response = $this->ch_client->getClientByUuid('client-3-uuid');
+    $this->assertSame($api_response, $response);
   }
 
   /**
@@ -2548,6 +2571,39 @@ class ContentHubClientTest extends TestCase {
         FALSE,
       ],
     ];
+  }
+
+  /**
+   * Tests cachable remote settings.
+   *
+   * @throws \Exception
+   */
+  public function testCacheRemoteSettings(): void {
+    $response1 = [
+      'remote' => 'data',
+      'settings' => 'test',
+    ];
+    $response2 = [
+      'remote' => 'different data',
+      'settings' => 'another test',
+    ];
+
+    $resp1 = new Response(SymfonyResponse::HTTP_OK, [], json_encode($response1));
+    $resp2 = new Response(SymfonyResponse::HTTP_OK, [], json_encode($response2));
+    $this->ch_client->shouldReceive('get')->andReturn($resp1, $resp2, $resp1);
+    $this->ch_client->shouldReceive('getRemoteSettings')->passthru();
+
+    $this->ch_client->cacheRemoteSettings(FALSE);
+    $actual = $this->ch_client->getRemoteSettings();
+    $this->assertSame($response1, $actual);
+    $actual = $this->ch_client->getRemoteSettings();
+    $this->assertSame($response2, $actual);
+
+    $actual = $this->ch_client->getRemoteSettings();
+    $this->ch_client->cacheRemoteSettings(TRUE);
+    $this->assertSame($response1, $actual);
+    $actual = $this->ch_client->getRemoteSettings();
+    $this->assertSame($response1, $actual);
   }
 
 }

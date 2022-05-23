@@ -29,13 +29,7 @@ services:
 
   acquia_contenthub_subscriber.handle_webhook.purge:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\Purge
-    arguments: ['@queue', '@acquia_contenthub.logger_channel']
-    tags:
-      - { name: event_subscriber }
-
-  acquia_contenthub_subscriber.data_tamper.existing_entity:
-    class: Drupal\acquia_contenthub_subscriber\EventSubscriber\EntityDataTamper\ExistingEntity
-    arguments: ['@acquia_contenthub_subscriber.tracker']
+    arguments: ['@queue', '@acquia_contenthub.logger_channel', '@acquia_contenthub.cdf_metrics_manager']
     tags:
       - { name: event_subscriber }
 
@@ -98,3 +92,7 @@ services:
     arguments: ['@database']
     tags:
       - { name: event_subscriber }
+
+  acquia_contenthub_subscriber.cdf_importer:
+    class: Drupal\acquia_contenthub_subscriber\CdfImporter
+    arguments: [ '@event_dispatcher', '@entity.cdf.serializer', '@acquia_contenthub.client.factory', '@acquia_contenthub_subscriber.logger_channel', '@acquia_contenthub_subscriber.tracker' ]

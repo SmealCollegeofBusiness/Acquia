@@ -92,12 +92,21 @@ trait LayoutBuilderDataHandlerTrait {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function unserializeComponents(array $components) {
+    /** @var \Drupal\Core\Logger\LoggerChannel $logger */
+    $logger = \Drupal::service('acquia_contenthub.logger_channel');
     foreach ($components as $component) {
       $plugin = $component->getPlugin();
       // @todo Decide if it's worth to handle this as an event.
       if ($plugin instanceof InlineBlock) {
         $block_uuid = $component->get('block_uuid');
         $entities = $this->entityTypeManager->getStorage('block_content')->loadByProperties(['uuid' => $block_uuid]);
+        if (empty($entities)) {
+          $logger->warning(sprintf(
+            'Entity of type block_content having component: %s, not found.',
+            $component->getUuid()
+          ));
+          continue;
+        }
         $entity = array_shift($entities);
         $componentConfiguration = $this->getComponentConfiguration($component);
         $componentConfiguration['block_revision_id'] = $entity->getRevisionId();

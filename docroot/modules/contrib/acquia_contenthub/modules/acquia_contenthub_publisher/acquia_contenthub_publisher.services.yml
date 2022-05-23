@@ -93,7 +93,7 @@ services:
 
   acquia_contenthub_publisher.handle_webhook.purge:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook\Purge
-    arguments: ['@queue', '@acquia_contenthub.logger_channel', '@database']
+    arguments: ['@queue', '@acquia_contenthub.logger_channel', '@acquia_contenthub.cdf_metrics_manager', '@database']
     tags:
       - { name: event_subscriber }
 

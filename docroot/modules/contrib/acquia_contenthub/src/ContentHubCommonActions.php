@@ -3,19 +3,17 @@
 namespace Drupal\acquia_contenthub;
 
 use Acquia\ContentHubClient\CDF\CDFObjectInterface;
-use Acquia\ContentHubClient\CDF\ClientCDFObject;
 use Acquia\ContentHubClient\CDFDocument;
 use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\ContentHubPublishEntitiesEvent;
 use Drupal\acquia_contenthub\Event\DeleteRemoteEntityEvent;
-use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
+use Drupal\acquia_contenthub_subscriber\CdfImporter;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\depcalc\DependencyCalculator;
 use Drupal\depcalc\DependencyStack;
@@ -72,6 +70,15 @@ class ContentHubCommonActions {
   protected $config;
 
   /**
+   * The CDF importer service.
+   *
+   * @var \Drupal\acquia_contenthub_subscriber\CdfImporter
+   *
+   * @deprecatedMessage Remove dependency in acquia_contenthub:2.33.
+   */
+  protected $cdfImporter;
+
+  /**
    * ContentHubCommonActions constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -86,14 +93,25 @@ class ContentHubCommonActions {
    *   The logger channel factory.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The Config Factory.
+   * @param \Drupal\acquia_contenthub_subscriber\CdfImporter|null $cdf_importer
+   *   The CDF importer service.
    */
-  public function __construct(EventDispatcherInterface $dispatcher, EntityCdfSerializer $serializer, DependencyCalculator $calculator, ClientFactory $factory, LoggerChannelFactoryInterface $logger_factory, ConfigFactoryInterface $config_factory) {
+  public function __construct(
+    EventDispatcherInterface $dispatcher,
+    EntityCdfSerializer $serializer,
+    DependencyCalculator $calculator,
+    ClientFactory $factory,
+    LoggerChannelFactoryInterface $logger_factory,
+    ConfigFactoryInterface $config_factory,
+    ?CdfImporter $cdf_importer = NULL
+  ) {
     $this->dispatcher = $dispatcher;
     $this->serializer = $serializer;
     $this->calculator = $calculator;
     $this->factory = $factory;
     $this->channel = $logger_factory->get('acquia_contenthub');
     $this->config = $config_factory->getEditable('acquia_contenthub.admin_settings');
+    $this->cdfImporter = $cdf_importer;
   }
 
   /**
@@ -106,7 +124,7 @@ class ContentHubCommonActions {
    * that process in order to give a full representation of the entities
    * requested and their dependencies.
    *
-   * @param \Drupal\Core\Entity\EntityInterface ...$entities @codingStandardsIgnoreLine
+   * @param \Drupal\Core\Entity\EntityInterface ...$entities
    *   The entities for which to generate a CDFDocument.
    *
    * @return \Acquia\ContentHubClient\CDFDocument
@@ -114,7 +132,7 @@ class ContentHubCommonActions {
    *
    * @throws \Exception
    */
-  public function getLocalCdfDocument(EntityInterface ...$entities) { //@codingStandardsIgnoreLine
+  public function getLocalCdfDocument(EntityInterface ...$entities) {
     $document = new CDFDocument();
     $wrappers = [];
     foreach ($entities as $entity) {
@@ -162,136 +180,37 @@ class ContentHubCommonActions {
   /**
    * Import a group of entities by their uuids from the ContentHub Service.
    *
-   * The uuids passed are just the list of entities you absolutely want,
-   * ContentHub will calculate all the missing entities and ensure they are
-   * installed on your site.
+   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::importEntities()
    *
-   * @param string ...$uuids @codingStandardsIgnoreLine
-   *   The list of uuids to import.
-   *
-   * @return \Drupal\depcalc\DependencyStack
-   *   The DependencyStack object.
-   *
-   * @throws \Exception
+   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
+   *   Use CdfImporter instead.
    */
-  public function importEntities(string ...$uuids) { //@codingStandardsIgnoreLine
-    $document = $this->getCdfDocument(...$uuids);
-    return $this->importEntityCdfDocument($document);
+  public function importEntities(string ...$uuids) {
+    return $this->cdfImporter->importEntities(...$uuids);
   }
 
   /**
    * Imports a list of entities from a CDFDocument object.
    *
-   * @param \Acquia\ContentHubClient\CDFDocument $document
-   *   The CDF document representing the entities to import.
+   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::importEntityCdfDocument()
    *
-   * @return \Drupal\depcalc\DependencyStack
-   *   The DependencyStack object.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
+   *   Use CdfImporter instead.
    */
   public function importEntityCdfDocument(CDFDocument $document) {
-    $stack = new DependencyStack();
-    $this->serializer->unserializeEntities($document, $stack);
-    return $stack;
+    return $this->cdfImporter->importEntityCdfDocument($document);
   }
 
   /**
    * Retrieves entities and dependencies by uuid and returns a CDFDocument.
    *
-   * @param string ...$uuids @codingStandardsIgnoreLine
-   *   The list of uuids to retrieve.
+   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::getCdfDocument()
    *
-   * @return \Acquia\ContentHubClient\CDFDocument
-   *   The CDFDocument object.
-   *
-   * @throws \Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException
+   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
+   *   Use CdfImporter instead.
    */
-  public function getCdfDocument(string ...$uuids) { //@codingStandardsIgnoreLine
-    $uuid_list = [];
-    foreach ($uuids as $uuid) {
-      if (!Uuid::isValid($uuid)) {
-        $exception = new ContentHubImportException(sprintf("Invalid uuid %s.", $uuid), 101);
-        $exception->setUuids([$uuid]);
-        throw $exception;
-      }
-      $uuid_list[$uuid] = $uuid;
-    }
-    $document = $this->getClient()->getEntities($uuid_list);
-    $this->validateDocument($document, $uuid_list);
-    $missing_dependencies = $this->getMissingDependencies($document);
-    $client = $this->getClient();
-    while ($missing_dependencies) {
-      $document->mergeDocuments($client->getEntities($missing_dependencies));
-      $uuid_list += $missing_dependencies;
-      $this->validateDocument($document, $uuid_list);
-      $missing_dependencies = $this->getMissingDependencies($document);
-    }
-    return $document;
-  }
-
-  /**
-   * Validate the expected number of retrieved entities.
-   *
-   * @param \Acquia\ContentHubClient\CDFDocument $document
-   *   The CDFDocument object.
-   * @param array $uuids
-   *   The list of expected uuids.
-   *
-   * @throws \Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException
-   */
-  protected function validateDocument(CDFDocument $document, array $uuids) {
-    $cdf_objects = $document->getEntities();
-    $uuids_count = count($uuids);
-    $document_count = count($cdf_objects);
-    $message = '';
-    if ($uuids_count <= $document_count) {
-      return;
-    }
-    $diff_uuids = array_diff($uuids, array_keys($cdf_objects));
-    foreach ($uuids as $uuid) {
-      $cdf_object = $document->getCdfEntity($uuid);
-      if (!$cdf_object) {
-        $message .= sprintf("The entity with UUID = \"%s\" could not be imported because it is missing from Content Hub.", $uuid) . PHP_EOL;
-        continue;
-      }
-      $dependencies = $cdf_object->getDependencies();
-      $vanished_uuids = array_intersect($diff_uuids, array_keys($dependencies));
-      if (!empty($vanished_uuids)) {
-        $type = $cdf_objects[$uuid]->getAttribute('entity_type')->getValue()[LanguageInterface::LANGCODE_NOT_SPECIFIED];
-        $origin = $cdf_objects[$uuid]->getOrigin();
-        // Using array_keys() to only pass the dependency UUIDs, not the hashes.
-        $this->requestToRepublishEntity($origin, $type, $uuid, array_keys($dependencies));
-        $message .= sprintf("The entity (%s, %s) could not be imported because the following dependencies are missing from Content Hub: %s.", $type, $uuid, implode(', ', $vanished_uuids)) . PHP_EOL;
-      }
-    }
-    $exception = new ContentHubImportException($message, 100);
-    $exception->setUuids($diff_uuids);
-    throw $exception;
-  }
-
-  /**
-   * Gets missing dependencies from CDFObjects within a CDFDocument.
-   *
-   * @param \Acquia\ContentHubClient\CDFDocument $document
-   *   The document from which to identify missing dependencies.
-   *
-   * @return array
-   *   The array of missing uuids.
-   */
-  protected function getMissingDependencies(CDFDocument $document) {
-    $missing_dependencies = [];
-    foreach ($document->getEntities() as $cdf) {
-      // @todo add the hash to the CDF so that we can check it here to see if we need to update.
-      foreach ($cdf->getDependencies() as $dependency => $hash) {
-        // If the document doesn't have a version of this dependency, it might
-        // be missing.
-        if (!$document->hasEntity($dependency)) {
-          $missing_dependencies[$dependency] = $dependency;
-        }
-      }
-    }
-    return $missing_dependencies;
+  public function getCdfDocument(string ...$uuids) {
+    return $this->cdfImporter->getCdfDocument(new DependencyStack(), ...$uuids);
   }
 
   /**
@@ -391,89 +310,27 @@ class ContentHubCommonActions {
   /**
    * Request to republish an entity via Webhook.
    *
-   * @param string $origin
-   *   Entity Origin.
-   * @param string $type
-   *   Entity Type.
-   * @param string $uuid
-   *   Entity UUID to republish.
-   * @param array $dependencies
-   *   An array of dependency UUIDs.
+   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::requestToRepublishEntity()
    *
-   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
+   *   Use CdfImporter instead.
    */
   public function requestToRepublishEntity(string $origin, string $type, string $uuid, array $dependencies): void {
-    $client = $this->getClient();
-    $webhook_url = $this->getWebhookUrlFromClientOrigin($origin);
-    if (!$webhook_url) {
-      $message = sprintf('Could not find Webhook URL for origin = "%s". Request to re-export entity "%s/%s" could not be made.',
-        $origin,
-        $type,
-        $uuid
-      );
-      $this->channel->error($message);
-      return;
-    }
-    $settings = $client->getSettings();
-    $cdf = [
-      'uuid' => $uuid,
-      'type' => $type,
-      'dependencies' => $dependencies,
-    ];
-
-    $payload = [
-      'status' => 'successful',
-      'uuid' => $uuid,
-      'crud' => 'republish',
-      'initiator' => $settings->getUuid(),
-      'cdf' => $cdf,
-    ];
-    try {
-      $response = $client->request('post', $webhook_url, [
-        'body' => json_encode($payload),
-      ]);
-    }
-    catch (\Exception $e) {
-      $this->channel->error('An error occurred while connecting to Publisher. Webhook Url: @webhook_url, Error: @error',
-        [
-          '@webhook_url' => $webhook_url,
-          '@error' => $e->getMessage(),
-        ]
-      );
-      return;
-    }
-
-    $message = $response->getBody()->getContents();
-    $code = $response->getStatusCode();
-    if ($code == 200) {
-      $this->channel->info('@message', ['@message' => $message]);
-    }
-    else {
-      $this->channel->error(sprintf('Request to re-export entity failed. Response code = %s, Response message = "%s".', $code, $message));
-    }
+    $this->cdfImporter->requestToRepublishEntity($origin, $type, $uuid, $dependencies);
   }
 
   /**
    * Obtain the webhook from the Client CDF, given origin.
    *
-   * @param string $origin
-   *   The origin of the site.
+   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::getWebhookUrlFromClientOrigin()
    *
-   * @return false|mixed
-   *   The webhook URL if it can be obtained, FALSE otherwise.
-   *
-   * @throws \Exception
+   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
+   *   Use CdfImporter instead.
    */
   public function getWebhookUrlFromClientOrigin(string $origin) {
-    // Obtaining the webhook from the remote origin.
-    $cdf = $this->getClient()->getEntity($origin);
-    if ($cdf instanceof ClientCDFObject) {
-      $webhook = $cdf->getWebhook();
-      if (isset($webhook['url'])) {
-        return $webhook['url'];
-      }
-    }
-    return FALSE;
+    // Return string or bool to comply to the old implementation.
+    $url = $this->cdfImporter->getWebhookUrlFromClientOrigin($origin);
+    return $url === '' ? FALSE : $url;
   }
 
   /**

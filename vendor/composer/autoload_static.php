@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5145927148376d55b2072d249cca80db
+class ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9
 {
     public static $files = array (
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
@@ -4230,8 +4230,10 @@ class ComposerStaticInit5145927148376d55b2072d249cca80db
         'FileEye\\MimeMap\\Map\\BaseMap' => __DIR__ . '/..' . '/fileeye/mimemap/src/Map/BaseMap.php',
         'FileEye\\MimeMap\\Map\\DefaultMap' => __DIR__ . '/..' . '/fileeye/mimemap/src/Map/DefaultMap.php',
         'FileEye\\MimeMap\\Map\\EmptyMap' => __DIR__ . '/..' . '/fileeye/mimemap/src/Map/EmptyMap.php',
+        'FileEye\\MimeMap\\Map\\MapInterface' => __DIR__ . '/..' . '/fileeye/mimemap/src/Map/MapInterface.php',
         'FileEye\\MimeMap\\MappingException' => __DIR__ . '/..' . '/fileeye/mimemap/src/MappingException.php',
         'FileEye\\MimeMap\\Type' => __DIR__ . '/..' . '/fileeye/mimemap/src/Type.php',
+        'FileEye\\MimeMap\\TypeInterface' => __DIR__ . '/..' . '/fileeye/mimemap/src/TypeInterface.php',
         'FileEye\\MimeMap\\TypeParameter' => __DIR__ . '/..' . '/fileeye/mimemap/src/TypeParameter.php',
         'FileEye\\MimeMap\\TypeParser' => __DIR__ . '/..' . '/fileeye/mimemap/src/TypeParser.php',
         'FileEye\\MimeMap\\Version' => __DIR__ . '/..' . '/fileeye/mimemap/src/Version.php',
@@ -8989,11 +8991,11 @@ class ComposerStaticInit5145927148376d55b2072d249cca80db
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5145927148376d55b2072d249cca80db::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5145927148376d55b2072d249cca80db::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit5145927148376d55b2072d249cca80db::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit5145927148376d55b2072d249cca80db::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit5145927148376d55b2072d249cca80db::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$classMap;
 
         }, null, ClassLoader::class);
     }

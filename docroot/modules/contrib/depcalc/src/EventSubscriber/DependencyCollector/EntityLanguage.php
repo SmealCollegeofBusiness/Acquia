@@ -10,6 +10,7 @@ use Drupal\depcalc\DependencyCalculatorEvents;
 use Drupal\depcalc\DependentEntityWrapper;
 use Drupal\depcalc\Event\CalculateEntityDependenciesEvent;
 use Drupal\depcalc\FieldExtractor;
+use Drupal\language\Entity\ContentLanguageSettings;
 
 /**
  * Class EntityLanguage.
@@ -61,7 +62,7 @@ class EntityLanguage extends BaseDependencyCollector {
       foreach ($fields as $field) {
         /** @var \Drupal\language\Entity\ContentLanguageSettings $settings */
         $settings = \Drupal::entityTypeManager()->getStorage('language_content_settings')->load("{$entity->getEntityTypeId()}.{$entity->bundle()}");
-        if (!$settings || !$settings->status() || !$settings->isLanguageAlterable()) {
+        if (!$this->isContentTranslationEnabled($settings)) {
           return;
         }
         $settings_wrapper = new DependentEntityWrapper($settings);
@@ -81,6 +82,22 @@ class EntityLanguage extends BaseDependencyCollector {
     }
   }
 
+  /**
+   * Check when content translation is enabled.
+   *
+   * @param \Drupal\language\Entity\ContentLanguageSettings|null $settings
+   *   The content translation setting.
+   *
+   * @return bool
+   *   TRUE if content translation is enabled, FALSE otherwise.
+   */
+  protected function isContentTranslationEnabled(?ContentLanguageSettings $settings): bool {
+    if (!$settings || !$settings->status() || !$settings->get('third_party_settings')) {
+      return FALSE;
+    }
 
+    return $settings->get('third_party_settings')['content_translation']['enabled'] ?? FALSE;
+
+  }
 
 }

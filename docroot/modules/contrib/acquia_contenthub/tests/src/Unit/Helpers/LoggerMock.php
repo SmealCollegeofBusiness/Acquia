@@ -162,4 +162,11 @@ class LoggerMock implements LoggerChannelInterface {
   public function addLogger(LoggerInterface $logger, $priority = 0) {
   }
 
+  /**
+   * Resets log messages.
+   */
+  public function reset(): void {
+    $this->logMessages = [];
+  }
+
 }

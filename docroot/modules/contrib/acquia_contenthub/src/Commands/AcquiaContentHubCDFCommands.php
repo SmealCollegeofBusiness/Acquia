@@ -2,9 +2,6 @@
 
 namespace Drupal\acquia_contenthub\Commands;
 
-use Acquia\ContentHubClient\CDF\CDFObject;
-use Acquia\ContentHubClient\CDFDocument;
-use Drupal\Component\Serialization\Json;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Serialization\Yaml;
 use Drush\Commands\DrushCommands;
@@ -17,13 +14,9 @@ use Drush\Commands\DrushCommands;
 class AcquiaContentHubCDFCommands extends DrushCommands {
 
   /**
-   * AcquiaContentHubCDFCommands constructor.
-   */
-  public function __construct() {
-  }
-
-  /**
    * Generates a CDF Document from a manifest file.
+   *
+   * @todo move this command to publisher in export optimization/refactor.
    *
    * @param string $manifest
    *   The location of the manifest file.
@@ -59,38 +52,6 @@ class AcquiaContentHubCDFCommands extends DrushCommands {
     /** @var \Drupal\acquia_contenthub\ContentHubCommonActions $common */
     $common = \Drupal::service('acquia_contenthub_common_actions');
     return $common->getLocalCdfDocument(...$entities)->toString();
-  }
-
-  /**
-   * Imports entities from a CDF Document.
-   *
-   * @param string $location
-   *   The location of the cdf file.
-   *
-   * @command acquia:contenthub-import-local-cdf
-   * @aliases ach-ilc
-   *
-   * @throws \Exception
-   */
-  public function importCdf($location): void {
-    if (!file_exists($location)) {
-      throw new \Exception("The cdf to import was not found in the specified location.");
-    }
-    $json = file_get_contents($location);
-    $data = Json::decode($json);
-    $document_parts = [];
-    foreach ($data['entities'] as $entity) {
-      $document_parts[] = CDFObject::fromArray($entity);
-    }
-    $cdf_document = new CDFDocument(...$document_parts);
-
-    /** @var \Drupal\acquia_contenthub\ContentHubCommonActions $common */
-    $common = \Drupal::service('acquia_contenthub_common_actions');
-    $stack = $common->importEntityCdfDocument($cdf_document);
-    $this->output->writeln(dt("Imported @items from @location.", [
-      '@items' => count($stack->getDependencies()),
-      '@location' => $location,
-    ]));
   }
 
 }

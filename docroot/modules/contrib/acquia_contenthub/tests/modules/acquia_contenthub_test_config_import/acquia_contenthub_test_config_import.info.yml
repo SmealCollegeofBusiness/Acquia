@@ -10,7 +10,7 @@ dependencies:
   - depcalc
   - drupal:system (>= 8.5)
 
-# Information added by Drupal.org packaging script on 2022-03-28
-version: '8.x-2.31'
+# Information added by Drupal.org packaging script on 2022-05-10
+version: '8.x-2.32'
 project: 'acquia_contenthub'
-datestamp: 1648484470
+datestamp: 1652167420

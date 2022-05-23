@@ -34,7 +34,7 @@ class CdfMetricsManagerTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = [
+  public static $modules = [
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_publisher',
@@ -113,7 +113,10 @@ class CdfMetricsManagerTest extends EntityKernelTestBase {
       ->client
       ->getRemoteSettings()
       ->shouldBeCalled()
-      ->willReturn(new \stdClass());
+      ->willReturn([
+        'return' => 'remote',
+        'settings' => 'data',
+      ]);
     $this
       ->clientFactory
       ->getClient()
@@ -135,15 +138,28 @@ class CdfMetricsManagerTest extends EntityKernelTestBase {
   public function testUnsuccessfulCdfCreation(): void {
     $this
       ->clientFactory
+      ->getClient()
+      ->willReturn(FALSE);
+    $this->sendCdfUpdates();
+    $error_messages = $this->loggerMock->getErrorMessages();
+    $this->assertEquals('Could not instantiate Content Hub Client.', $error_messages[0]);
+    $this->loggerMock->reset();
+
+    $this
+      ->clientFactory
       ->getSettings()
       ->willReturn(NULL);
+    $this
+      ->clientFactory
+      ->getClient()
+      ->willReturn($this->client->reveal());
     $this
       ->client
       ->getRemoteSettings()
       ->shouldNotBeCalled();
     $this->sendCdfUpdates();
     $error_messages = $this->loggerMock->getErrorMessages();
-    $this->assertEquals('Couldn\'t instantiate Content Hub Client or Content Hub settings.', $error_messages[0]);
+    $this->assertEquals('Could not retrieve Content Hub settings.', $error_messages[0]);
   }
 
   /**

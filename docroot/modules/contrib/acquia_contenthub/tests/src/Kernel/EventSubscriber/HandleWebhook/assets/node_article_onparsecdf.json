@@ -1,0 +1,30 @@
+{
+  "uuid": "5d1ba3c3-d527-4328-8fce-a6b714c5ef79",
+  "type": "node",
+  "created": "2020-03-28T11:22:21+00:00",
+  "modified": "2020-03-28T11:22:21+00:00",
+  "origin": false,
+  "attributes": {
+    "entity_type": {
+      "type": "keyword",
+      "value": {
+        "und": "node"
+      }
+    }
+  },
+  "metadata": {
+    "additional_data": "Change label to this one",
+    "default_language": "en",
+    "dependencies": {
+      "entity": {},
+      "module": [
+        "user",
+        "editor",
+        "ckeditor",
+        "node",
+        "path",
+        "language"
+      ]
+    }
+  }
+}

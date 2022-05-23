@@ -2,6 +2,7 @@
 
 namespace Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook;
 
+use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\EventSubscriber\HandleWebhook\PurgeBase;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Logger\LoggerChannelInterface;
@@ -31,11 +32,13 @@ class Purge extends PurgeBase {
    *   The queue factory.
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
    *   The logger channel.
+   * @param \Drupal\acquia_contenthub\Client\CdfMetricsManager $cdf_metrics_manager
+   *   The Content Hub metrics manager.
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
    */
-  public function __construct(QueueFactory $queue_factory, LoggerChannelInterface $logger_channel, Connection $database) {
-    parent::__construct($queue_factory, $logger_channel);
+  public function __construct(QueueFactory $queue_factory, LoggerChannelInterface $logger_channel, CdfMetricsManager $cdf_metrics_manager, Connection $database) {
+    parent::__construct($queue_factory, $logger_channel, $cdf_metrics_manager);
     $this->database = $database;
   }
 

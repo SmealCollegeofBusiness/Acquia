@@ -3,11 +3,13 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel\EventSubscriber\HandleWebhook;
 
 use Acquia\Hmac\Key;
+use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook\Purge;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\node\Entity\Node;
+use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -94,7 +96,9 @@ class PurgeTest extends EntityKernelTestBase {
     $this->loggerChannel = $this->prophesize(LoggerChannelInterface::class)
       ->reveal();
 
-    $this->purge = new Purge($this->queueFactory, $this->loggerChannel, $this->database);
+    $cdf_metrics_manager = $this->prophesize(CdfMetricsManager::class);
+    $cdf_metrics_manager->sendClientCdfUpdates(Argument::any())->shouldBeCalledOnce();
+    $this->purge = new Purge($this->queueFactory, $this->loggerChannel, $cdf_metrics_manager->reveal(), $this->database);
   }
 
   /**

@@ -32,6 +32,7 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
    */
   public static $modules = [
     'breakpoint',
+    'content_translation',
     'depcalc',
     'field',
     'filter',
@@ -131,7 +132,7 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
       new DependencyStack()
     );
     $contentLanguageSettings->setDefaultLangcode('cs')
-      ->setLanguageAlterable(FALSE)
+      ->setThirdPartySetting('content_translation', 'enabled', FALSE)
       ->save();
 
     $this->assertArrayNotHasKey($csLanguage->uuid(), $csDependencies);
@@ -139,7 +140,7 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
     $this->assertArrayNotHasKey($contentLanguageSettings->uuid(), $csDependencies);
 
     $contentLanguageSettings->setDefaultLangcode('cs')
-      ->setLanguageAlterable(TRUE)
+      ->setThirdPartySetting('content_translation', 'enabled', TRUE)
       ->save();
 
     $csNode = $this->createTestNode('cs');

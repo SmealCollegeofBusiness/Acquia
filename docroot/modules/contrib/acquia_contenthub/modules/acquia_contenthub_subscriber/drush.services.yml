@@ -1,11 +1,35 @@
 services:
+
   acquia_contenthub_subscriber.commands:
     class: Drupal\acquia_contenthub_subscriber\Commands\AcquiaContentHubSubscriberCommands
     arguments: ['@database', '@config.factory', '@acquia_contenthub.client.factory', '@logger.factory', '@state', '@module_handler']
     tags:
       - { name: drush.command }
+
   acquia_contenthub_subscriber.audit_commands:
     class: Drupal\acquia_contenthub_subscriber\Commands\AcquiaContentHubSubscriberAuditCommands
     arguments: ['@acquia_contenthub_subscriber.tracker', '@queue']
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub.commands.entity_scan.subscriber:
+    class: Drupal\acquia_contenthub_subscriber\Commands\AcquiaContentHubSubscriberEntityScanCommands
+    decorates: acquia_contenthub.commands.entity_scan
+    arguments:
+      - '@acquia_contenthub.depcalc_cache_operator'
+      - '@acquia_contenthub.client.factory'
+      - '@entity_type.manager'
+      - '@database'
+      - '@acquia_contenthub.config'
+
+  acquia_contenthub_subscriber.cdf_import_commands:
+    class: Drupal\acquia_contenthub_subscriber\Commands\AcquiaContentHubSubscriberCdfImportCommands
+    arguments: [ '@acquia_contenthub_subscriber.cdf_importer' ]
+    tags:
+      - { name: drush.command }
+
+  acquia_contenthub_subscriber.interest_list_commands:
+    class: Drupal\acquia_contenthub_subscriber\Commands\AcquiaContentHubSubscriberInterestListCommands
+    arguments: [ '@acquia_contenthub.client.factory', '@acquia_contenthub.config', '@acquia_contenthub_subscriber.acquia_contenthub_import_queue', '@acquia_contenthub_subscriber.tracker']
     tags:
       - { name: drush.command }

@@ -4,7 +4,7 @@ namespace Drupal\acquia_contenthub_subscriber\Plugin\QueueWorker;
 
 use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Client\ClientFactory;
-use Drupal\acquia_contenthub\ContentHubCommonActions;
+use Drupal\acquia_contenthub_subscriber\CdfImporter;
 use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -32,11 +32,11 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
   protected $dispatcher;
 
   /**
-   * The common actions object.
+   * The CDF importer object.
    *
-   * @var \Drupal\acquia_contenthub\ContentHubCommonActions
+   * @var \Drupal\acquia_contenthub_subscriber\CdfImporter
    */
-  protected $common;
+  protected $importer;
 
   /**
    * The Content Hub Client.
@@ -78,7 +78,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
    *   Dispatcher.
-   * @param \Drupal\acquia_contenthub\ContentHubCommonActions $common
+   * @param \Drupal\acquia_contenthub_subscriber\CdfImporter $cdf_importer
    *   The common actions object.
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $factory
    *   The client factory.
@@ -101,7 +101,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
    */
   public function __construct(
     EventDispatcherInterface $dispatcher,
-    ContentHubCommonActions $common,
+    CdfImporter $cdf_importer,
     ClientFactory $factory,
     SubscriberTracker $tracker,
     LoggerChannelFactoryInterface $logger_factory,
@@ -112,8 +112,8 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
     $plugin_definition
   ) {
 
-    $this->common = $common;
-    if (!empty($this->common->getUpdateDbStatus())) {
+    $this->importer = $cdf_importer;
+    if (!empty($this->importer->getUpdateDbStatus())) {
       throw new \Exception("Site has pending database updates. Apply these updates before importing content.");
     }
     $this->dispatcher = $dispatcher;
@@ -131,7 +131,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $container->get('event_dispatcher'),
-      $container->get('acquia_contenthub_common_actions'),
+      $container->get('acquia_contenthub_subscriber.cdf_importer'),
       $container->get('acquia_contenthub.client.factory'),
       $container->get('acquia_contenthub_subscriber.tracker'),
       $container->get('logger.factory'),
@@ -199,7 +199,7 @@ class ContentHubImportQueueWorker extends QueueWorkerBase implements ContainerFa
     }
 
     try {
-      $stack = $this->common->importEntities(...$uuids);
+      $stack = $this->importer->importEntities(...$uuids);
       $this->cdfMetricsManager->sendClientCdfUpdates();
     }
     catch (ContentHubImportException $e) {

@@ -68,7 +68,7 @@ class ImportQueueWorkerLoggingTest extends UnserializationTest {
     $this->assertLogMessage('acquia_contenthub_subscriber', 'There are no matching entities in the queues and the site interest list.');
 
     // Successful addition to interest list.
-    $cdf_document = $this->createCDFDocumentFromFixture('view_modes.json');
+    $cdf_document = $this->createCdfDocumentFromFixtureFile('view_modes.json');
     $this->contentHubClient->getEntities([self::CLIENT_UUID_1 => self::CLIENT_UUID_1])->willReturn($cdf_document);
 
     $this->contentHubClient->getInterestsByWebhook(Argument::type('string'))->willReturn(['fefd7eda-4244-4fe4-b9b5-b15b89c61aa8']);

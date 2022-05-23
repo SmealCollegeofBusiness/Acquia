@@ -3,6 +3,7 @@
 namespace Drupal\acquia_contenthub\Form;
 
 use Acquia\ContentHubClient\Webhook;
+use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubConnectionManager;
 use Drupal\Component\Utility\UrlHelper;
@@ -54,6 +55,13 @@ class ContentHubSettingsForm extends ConfigFormBase {
   protected $chConnectionManager;
 
   /**
+   * Content Hub metrics manager.
+   *
+   * @var \Drupal\acquia_contenthub\Client\CdfMetricsManager
+   */
+  protected $chMetrics;
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
@@ -90,11 +98,14 @@ class ContentHubSettingsForm extends ConfigFormBase {
    *   The Configuration Factory.
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The Client Factory.
+   * @param \Drupal\acquia_contenthub\Client\CdfMetricsManager $cdf_metrics_manager
+   *   The Content Hub metrics manager.
    */
-  public function __construct(ContentHubConnectionManager $ch_connection_manager, ConfigFactoryInterface $config_factory, ClientFactory $client_factory) {
+  public function __construct(ContentHubConnectionManager $ch_connection_manager, ConfigFactoryInterface $config_factory, ClientFactory $client_factory, CdfMetricsManager $cdf_metrics_manager) {
     parent::__construct($config_factory);
     $this->chConnectionManager = $ch_connection_manager;
     $this->clientFactory = $client_factory;
+    $this->chMetrics = $cdf_metrics_manager;
     $this->achPath = Url::fromRoute('acquia_contenthub.webhook')->toString();
   }
 
@@ -105,7 +116,8 @@ class ContentHubSettingsForm extends ConfigFormBase {
     return new static(
       $container->get('acquia_contenthub.connection_manager'),
       $container->get('config.factory'),
-      $container->get('acquia_contenthub.client.factory')
+      $container->get('acquia_contenthub.client.factory'),
+      $container->get('acquia_contenthub.cdf_metrics_manager')
     );
   }
 
@@ -178,7 +190,7 @@ class ContentHubSettingsForm extends ConfigFormBase {
     $form['settings']['send_contenthub_updates'] = [
       '#type' => 'checkbox',
       '#title' => 'Send updates to Content Hub Service.',
-      '#description' => 'Set this flag with drush to False in case of service degradation to disable sending Content Hub Service related updates temporarily. Turning it off will prevent any performance hits for the site for the duration of the event.',
+      '#description' => $this->t('Set this flag with drush to False in case of service degradation to disable sending Content Hub Service related updates temporarily. Turning it off will prevent any performance hits for the site for the duration of the event.'),
       '#disabled' => TRUE,
       '#default_value' => $this
         ->config('acquia_contenthub.admin_settings')
@@ -188,7 +200,7 @@ class ContentHubSettingsForm extends ConfigFormBase {
     $form['settings']['send_clientcdf_updates'] = [
       '#type' => 'checkbox',
       '#title' => 'Send Client metrics updates to Content Hub Service.',
-      '#description' => 'Set this flag with drush to false in case of service degradation to disable sending Metrics updates to Content Hub Service.',
+      '#description' => $this->t('Set this flag with drush to false in case of service degradation to disable sending Metrics updates to Content Hub Service.'),
       '#disabled' => TRUE,
       '#default_value' => $this
         ->config('acquia_contenthub.admin_settings')
@@ -415,7 +427,15 @@ class ContentHubSettingsForm extends ConfigFormBase {
     $response = $this->chConnectionManager->registerWebhook($webhook);
     if (empty($response)) {
       $this->messenger()->addWarning($this->t('Registration to Content Hub was successful, but Content Hub could not reach your site to verify connectivity. Please update your publicly accessible URL and try again.'));
-      return;
+    }
+
+    try {
+      $this->chMetrics->sendClientCdfUpdates($this->client);
+    }
+    catch (\Exception $e) {
+      $this->messenger()->addWarning($this->t('Warning: incomplete client registration. Please check the logs for more information.'));
+      $this->logger('acquia_contenthub')
+        ->warning(sprintf('Error during client CDF creation. Could not send it to Content Hub. Error: %s', $e->getMessage()));
     }
   }
 

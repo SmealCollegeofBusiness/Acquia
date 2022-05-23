@@ -64,6 +64,21 @@ class ContentHubClient extends Client {
    */
   protected $dispatcher;
 
+  /**
+   * Cached remote settings.
+   *
+   * @var array
+   */
+  protected $remoteSettings = [];
+
+  /**
+   * Whether to return cached remote settings.
+   *
+   * @var bool
+   *   True if it should return cached.
+   */
+  protected $shouldReturnCachedRemoteSettings = FALSE;
+
   // phpcs:disable
   /**
    * {@inheritdoc}
@@ -630,7 +645,28 @@ class ContentHubClient extends Client {
    * @throws \Exception
    */
   public function getClientByName($name) {
-    return self::getResponseJson($this->get("settings/clients/$name"));
+    return self::getResponseJson($this->get("settings/client/name/$name"));
+  }
+
+  /**
+   * Returns the Client, given its uuid.
+   *
+   * @param string $uuid
+   *   Client uuid.
+   *
+   * @return array
+   *   The client array (uuid, name).
+   *
+   * @throws \Exception
+   */
+  public function getClientByUuid(string $uuid): array {
+    $settings = $this->getRemoteSettings();
+    foreach ($settings['clients'] as $client) {
+      if ($client['uuid'] === $uuid) {
+        return $client;
+      }
+    }
+    return [];
   }
 
   /**
@@ -728,15 +764,29 @@ class ContentHubClient extends Client {
   /**
    * Obtains the Settings for the active subscription.
    *
-   * @return Settings
+   * @return array
    *   Response.
    *
    * @throws \Exception
    *
    * @codeCoverageIgnore
    */
-  public function getRemoteSettings() {
-    return self::getResponseJson($this->get('settings'));
+  public function getRemoteSettings(): array {
+    if ($this->shouldReturnCachedRemoteSettings && !empty($this->remoteSettings)) {
+      return $this->remoteSettings;
+    }
+    $this->remoteSettings = self::getResponseJson($this->get('settings'));
+    return !is_array($this->remoteSettings) ? [] : $this->remoteSettings;
+  }
+
+  /**
+   * Sets cachable remote settings.
+   *
+   * @param bool $should_cache
+   *   If set to true, returns cached remote settings.
+   */
+  public function cacheRemoteSettings(bool $should_cache): void {
+    $this->shouldReturnCachedRemoteSettings = $should_cache;
   }
 
   /**

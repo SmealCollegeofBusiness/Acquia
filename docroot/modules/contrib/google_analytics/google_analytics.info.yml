@@ -4,6 +4,8 @@ description: 'Allows your site to be tracked by Google Analytics by adding a Jav
 package: Statistics
 core_version_requirement: ^8.9 || ^9
 configure: google_analytics.admin_settings_form
+dependencies:
+  - drupal:path_alias
 
 # Information added by Drupal.org packaging script on 2021-10-14
 version: '4.0.0'

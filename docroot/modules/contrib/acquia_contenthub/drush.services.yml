@@ -64,3 +64,9 @@ services:
     arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.connection_manager', '@config.factory']
     tags:
       - { name: drush.command }
+
+  acquia_contenthub.commands.entity_scan:
+    class: Drupal\acquia_contenthub\Commands\AcquiaContentHubEntityScanCommands
+    arguments: [ '@acquia_contenthub.depcalc_cache_operator', '@acquia_contenthub.client.factory' ]
+    tags:
+      - { name: drush.command }

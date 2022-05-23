@@ -6,8 +6,8 @@ use Acquia\ContentHubClient\CDF\CDFObject;
 use Acquia\ContentHubClient\CDFDocument;
 use Acquia\Hmac\ResponseSigner;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
-use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
+use Drupal\acquia_contenthub_subscriber\CdfImporter;
 use Drupal\Core\Url;
 use GuzzleHttp\Psr7\Response;
 use Laminas\Diactoros\ResponseFactory;
@@ -26,20 +26,20 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class PreviewEntity implements EventSubscriberInterface {
 
   /**
-   * The common actions object.
+   * The CDF importer object.
    *
-   * @var \Drupal\acquia_contenthub\ContentHubCommonActions
+   * @var \Drupal\acquia_contenthub_subscriber\CdfImporter
    */
-  protected $common;
+  protected $importer;
 
   /**
    * PreviewEntity constructor.
    *
-   * @param \Drupal\acquia_contenthub\ContentHubCommonActions $common
-   *   The common actions object.
+   * @param \Drupal\acquia_contenthub_subscriber\CdfImporter $cdf_importer
+   *   The CDF importer service.
    */
-  public function __construct(ContentHubCommonActions $common) {
-    $this->common = $common;
+  public function __construct(CdfImporter $cdf_importer) {
+    $this->importer = $cdf_importer;
   }
 
   /**
@@ -74,7 +74,7 @@ class PreviewEntity implements EventSubscriberInterface {
       $cdfObject = CDFObject::fromArray($object);
       $document->addCdfEntity($cdfObject);
     }
-    $this->common->importEntityCdfDocument($document);
+    $this->importer->importEntityCdfDocument($document);
     $url = Url::fromRoute('acquia_contenthub_preview.preview',
       ['uuid' => $payload['preview']],
       [

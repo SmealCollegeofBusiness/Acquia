@@ -2,7 +2,7 @@ services:
 
   acquia_contenthub_common_actions:
     class: Drupal\acquia_contenthub\ContentHubCommonActions
-    arguments: ['@event_dispatcher', '@entity.cdf.serializer', '@entity.dependency.calculator', '@acquia_contenthub.client.factory', '@logger.factory', '@config.factory']
+    arguments: ['@event_dispatcher', '@entity.cdf.serializer', '@entity.dependency.calculator', '@acquia_contenthub.client.factory', '@logger.factory', '@config.factory', '@?acquia_contenthub_subscriber.cdf_importer']
 
   acquia_contenthub.stub.tracker:
     class: Drupal\acquia_contenthub\StubTracker
@@ -494,3 +494,7 @@ services:
   acquia_contenthub.cdf_metrics_manager:
     class: Drupal\acquia_contenthub\Client\CdfMetricsManager
     arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.config', '@acquia_contenthub.logger_channel', '@event_dispatcher' ]
+
+  acquia_contenthub.depcalc_cache_operator:
+    class: Drupal\acquia_contenthub\Libs\Depcalc\DepcalcCacheOperator
+    arguments: ['@database']

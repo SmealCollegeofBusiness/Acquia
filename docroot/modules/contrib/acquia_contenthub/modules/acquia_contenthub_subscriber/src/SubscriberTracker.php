@@ -204,7 +204,7 @@ class SubscriberTracker {
   }
 
   /**
-   * Delete an entry by its uuid.
+   * Delete rows based on given field and value.
    *
    * @param string $field_name
    *   The field used in filter condition.
@@ -354,6 +354,14 @@ class SubscriberTracker {
     }
 
     return $query->execute()->fetchAll(\PDO::FETCH_ASSOC);
+  }
+
+  /**
+   * Delete all the rows in the tracking table.
+   */
+  public function deleteAll(): void {
+    $query = $this->database->delete(self::IMPORT_TRACKING_TABLE);
+    $query->execute();
   }
 
 }

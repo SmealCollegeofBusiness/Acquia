@@ -3,6 +3,7 @@
 namespace Drupal\acquia_contenthub\EventSubscriber\HandleWebhook;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
+use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Queue\QueueFactory;
@@ -39,16 +40,26 @@ abstract class PurgeBase implements EventSubscriberInterface {
   protected $logger;
 
   /**
+   * Content Hub metrics manager.
+   *
+   * @var \Drupal\acquia_contenthub\Client\CdfMetricsManager
+   */
+  protected $chMetrics;
+
+  /**
    * PurgeBase constructor.
    *
    * @param \Drupal\Core\Queue\QueueFactory $queue_factory
    *   The queue factory.
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
    *   The logger factory.
+   * @param \Drupal\acquia_contenthub\Client\CdfMetricsManager $cdf_metrics_manager
+   *   The Content Hub metrics manager.
    */
-  public function __construct(QueueFactory $queue_factory, LoggerChannelInterface $logger_channel) {
+  public function __construct(QueueFactory $queue_factory, LoggerChannelInterface $logger_channel, CdfMetricsManager $cdf_metrics_manager) {
     $this->queue = $queue_factory->get($this->getQueueName());
     $this->logger = $logger_channel;
+    $this->chMetrics = $cdf_metrics_manager;
   }
 
   /**
@@ -81,6 +92,7 @@ abstract class PurgeBase implements EventSubscriberInterface {
     }
 
     $this->onPurgeSuccessful();
+    $this->createClientCdf();
   }
 
   /**
@@ -92,6 +104,20 @@ abstract class PurgeBase implements EventSubscriberInterface {
     $this->logger->info(
       'Queue @queue has been purged successfully.',
       ['@queue' => $this->getQueueName()]);
+  }
+
+  /**
+   * Registers deleted client CDFs on purge.
+   */
+  protected function createClientCdf(): void {
+    try {
+      $this->chMetrics->sendClientCdfUpdates();
+    }
+    catch (\Exception $e) {
+      $this->logger->warning(
+        sprintf('Could not recreate client CDF after purge operation. Error: %s', $e->getMessage())
+      );
+    }
   }
 
   /**
