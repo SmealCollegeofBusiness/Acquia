@@ -4,7 +4,6 @@ namespace Drupal\scheduler_content_moderation_integration\Plugin\Field\FieldWidg
 
 use Drupal\content_moderation\ModerationInformationInterface;
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget;
@@ -34,13 +33,6 @@ class SchedulerModerationWidget extends OptionsSelectWidget implements Container
   protected $moderationInformation;
 
   /**
-   * The moderated entity.
-   *
-   * @var \Drupal\Core\Entity\EntityInterface
-   */
-  protected $entity;
-
-  /**
    * {@inheritdoc}
    */
   public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ModerationInformationInterface $moderation_information) {
@@ -61,30 +53,23 @@ class SchedulerModerationWidget extends OptionsSelectWidget implements Container
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
 
+    // @todo Can this conditional ever be false? There is no test coverage for
+    // that situation (if it exists).
     if ($form_state->getFormObject() instanceof ContentEntityForm) {
-      $this->entity = $form_state->getFormObject()->getEntity();
-      if (!$this->moderationInformation->isModeratedEntity($this->entity)) {
+      /** @var \Drupal\Core\Entity\EntityInterface $entity */
+      $entity = $form_state->getFormObject()->getEntity();
+      if (!$this->moderationInformation->isModeratedEntity($entity)) {
         $element['#access'] = FALSE;
       }
     }
 
     // If the user is not allowed to set the publishing or un-publishing dates
-    // return an empty array.
+    // or the element has no option values then hide the element.
     if (!\Drupal::currentUser()->hasPermission('schedule publishing of nodes') || !$this->getOptions($items->getEntity())) {
       $element['#access'] = FALSE;
     }
 
     return $element;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEmptyLabel() {
-    if ($this->entity && $this->moderationInformation->isModeratedEntity($this->entity)) {
-      return '';
-    }
-    return parent::getEmptyLabel();
   }
 
   /**
@@ -106,7 +91,7 @@ class SchedulerModerationWidget extends OptionsSelectWidget implements Container
    * {@inheritdoc}
    */
   public static function isApplicable(FieldDefinitionInterface $field_definition) {
-    if ($field_definition instanceof BaseFieldDefinition && $field_definition->getProvider() === 'scheduler_content_moderation_integration') {
+    if ($field_definition->getFieldStorageDefinition()->getProvider() === 'scheduler_content_moderation_integration') {
       return TRUE;
     }
   }

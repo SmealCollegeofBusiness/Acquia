@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraint;
  * @Constraint(
  *   id = "SchedulerPublishState",
  *   label = @Translation("Scheduler publish state validation", context = "Validation"),
- *   type = "entity:node"
+ *   type = "string"
  * )
  */
 class PublishStateConstraint extends Constraint {
@@ -18,8 +18,8 @@ class PublishStateConstraint extends Constraint {
   /**
    * Publish state invalid transition message.
    *
-   * Message to display on invalid publishing transition between the nodes
-   * current moderation state to the specified publishing state.
+   * Message to display on invalid publishing transition between the current
+   * moderation state to the specified publishing state.
    *
    * @var string
    */

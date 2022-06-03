@@ -119,3 +119,13 @@ function acquia_contenthub_publisher_update_82002() {
   $schema = \Drupal::database()->schema();
   $schema->addField('acquia_contenthub_publisher_export_tracking', 'queue_id', $queue_id_column);
 }
+
+/**
+ * Add paragraphs_unchanged_disable_revision flag.
+ */
+function acquia_contenthub_publisher_update_82003() {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('acquia_contenthub_publisher.features');
+  $config->set('paragraphs_unchanged_disable_revision', TRUE);
+  $config->save();
+}

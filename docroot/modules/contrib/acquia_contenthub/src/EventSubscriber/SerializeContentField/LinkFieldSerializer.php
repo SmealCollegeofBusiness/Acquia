@@ -86,13 +86,13 @@ class LinkFieldSerializer implements EventSubscriberInterface {
         }
 
         // Explode the uri first by a colon to retrieve the link type.
-        list($uri_type, $uri_reference) = explode(':', $values['uri'], 2);
+        [$uri_type, $uri_reference] = explode(':', $values['uri'], 2);
 
         // Set uri type in meta data.
         $values['uri_type'] = $item->isExternal() ? 'external' : $uri_type;
         if ($uri_type === 'entity') {
           // Explode entity to get the type and id.
-          list($entity_type, $entity_id) = explode('/', $uri_reference, 2);
+          [$entity_type, $entity_id] = explode('/', $uri_reference, 2);
 
           // Load the entity to be added as a dependency.
           $uri_entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);

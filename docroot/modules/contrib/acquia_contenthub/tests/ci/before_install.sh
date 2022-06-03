@@ -9,14 +9,6 @@ if [[ "$ORCA_JOB" == "INTEGRATED_TEST_ON_OLDEST_SUPPORTED" || "$ORCA_JOB" == "IN
   DRUPAL_CORE=8;
 fi
 
-if [[ "$DRUPAL_CORE" == "9" ]]; then
-  rm -Rf "$ORCA_SUT_DIR/modules/acquia_contenthub_s3"
-fi
-if [[ "$DRUPAL_CORE" == "9" && "$ACQUIACI" == TRUE ]]; then
-  rm -Rf "/ramfs$ORCA_SUT_DIR/modules/acquia_contenthub_s3"
-fi
-
-
 if [[ "$ORCA_JOB" == "STATIC_CODE_ANALYSIS" ]]; then
   rm -Rf "$ORCA_SUT_DIR/modules/acquia_contenthub_curation/ember"
 fi

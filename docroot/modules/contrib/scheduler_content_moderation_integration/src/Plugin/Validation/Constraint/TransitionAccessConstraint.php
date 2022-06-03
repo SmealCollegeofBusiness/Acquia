@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraint;
  * @Constraint(
  *   id = "SchedulerModerationTransitionAccess",
  *   label = @Translation("Scheduler content moderation transition access validation", context = "Validation"),
- *   type = "entity:node"
+ *   type = "string"
  * )
  */
 class TransitionAccessConstraint extends Constraint {

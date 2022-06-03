@@ -78,32 +78,46 @@ class ReExport implements EventSubscriberInterface {
     $settings = $client->getSettings();
     $client_uuid = $settings->getUuid();
 
-    if ('successful' !== $payload['status'] || empty($payload['uuid']) || 'republish' !== $payload['crud'] || $payload['initiator'] === $client_uuid || empty($payload['cdf'])) {
+    if ('successful' !== $payload['status'] || 'republish' !== $payload['crud'] || $payload['initiator'] === $client_uuid || empty($payload['entities'])) {
       return;
     }
 
-    // Obtaining Entity from Webhook message.
-    $uuid = $payload['cdf']['uuid'];
-    $type = $payload['cdf']['type'];
-    $dependencies = $payload['cdf']['dependencies'] ?? [];
+    // Obtaining Entities from Webhook message.
+    $body = '';
+    $response_code = 200;
+    $entities_not_found = [];
+    $entities_enqueued = [];
+    foreach ($payload['entities'] as $entity) {
+      $uuid = $entity['uuid'];
+      $type = $entity['type'];
+      $dependencies = $entity['dependencies'] ?? [];
+      try {
+        $entity = $this->entityRepository->loadEntityByUuid($type, $uuid);
+      }
+      catch (\Exception $exception) {
+        $entity = FALSE;
+      }
+      if (!$entity) {
+        $entities_not_found[] = "$type/$uuid";
+        continue;
+      }
 
-    try {
-      $entity = $this->entityRepository->loadEntityByUuid($type, $uuid);
-    }
-    catch (\Exception $exception) {
-      $entity = FALSE;
-    }
-    if (!$entity) {
-      $body = sprintf('The entity "%s:%s" could not be found and thus cannot be re-exported from a webhook request by origin = %s.', $type, $uuid, $payload['initiator']);
-      $this->channel->error($body);
-      $response = $this->getResponse($event, $body, 404);
-    }
-    else {
+      $entities_enqueued[] = "$type/$uuid";
       $this->publisherActions->reExportEntityFull($entity, $dependencies);
-      $body = sprintf('Entity "%s/%s" successfully enqueued for export from webhook UUID = %s by origin = %s.', $type, $uuid, $payload['uuid'], $payload['initiator']);
-      $this->channel->info($body);
-      $response = $this->getResponse($event, $body, 200);
     }
+
+    if (!empty($entities_enqueued)) {
+      $body = sprintf('Entities have been successfully enqueued by origin = %s. Entities: %s.' . PHP_EOL,
+        $payload['initiator'], implode(', ', $entities_enqueued));
+      $this->channel->info($body);
+    }
+
+    if (!empty($entities_not_found)) {
+      $body .= sprintf('The entities could not be re-exported. Requesting client: %s. Entities: %s.', $payload['initiator'], implode(', ', $entities_not_found));
+      $this->channel->error($body);
+    }
+
+    $response = $this->getResponse($event, $body, $response_code);
     $event->setResponse($response);
     $event->stopPropagation();
   }

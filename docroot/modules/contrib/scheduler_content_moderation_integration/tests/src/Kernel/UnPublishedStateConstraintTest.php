@@ -9,7 +9,7 @@ use Drupal\node\Entity\Node;
  *
  * @coversDefaultClass \Drupal\scheduler_content_moderation_integration\Plugin\Validation\Constraint\UnPublishStateConstraintValidator
  *
- * @group scheduler
+ * @group scheduler_content_moderation_integration
  */
 class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase {
 
@@ -44,7 +44,7 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
     ]);
 
     $violations = $node->validate();
-    $this->assertCount(0, $violations);
+    $this->assertCount(0, $violations, 'Both transitions should pass validation');
   }
 
   /**
@@ -56,18 +56,23 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
    * @cover ::validate
    */
   public function testInvalidUnPublishStateTransition() {
-    $node = Node::create([
-      'type' => 'example',
-      'title' => 'Test title',
-      'moderation_state' => 'draft',
-      'unpublish_on' => strtotime('tomorrow'),
-      'unpublish_state' => 'archived',
-    ]);
+    // Check cases when a publish_state has been selected and not selected.
+    // No publish_on date been entered, so they should fail validation.
+    foreach (['', '_none', 'published'] as $publish_state) {
+      $node = Node::create([
+        'type' => 'example',
+        'title' => 'Test title',
+        'moderation_state' => 'draft',
+        'publish_state' => $publish_state,
+        'unpublish_on' => strtotime('tomorrow'),
+        'unpublish_state' => 'archived',
+      ]);
 
-    $violations = $node->validate();
-
-    $this->assertCount(1, $violations);
-    $this->assertEquals('The scheduled un-publishing state of <em class="placeholder">archived</em> is not a valid transition from the current moderation state of <em class="placeholder">draft</em> for this content.', $violations->get(0)->getMessage());
+      // Assert that the change from draft to archived fails validation.
+      $violations = $node->validate();
+      $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
+      $this->assertEquals('The scheduled un-publishing state of archived is not a valid transition from the current moderation state of draft for this content.', strip_tags($message));
+    }
   }
 
   /**
@@ -79,6 +84,8 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
    * @covers ::validate
    */
   public function testInvalidPublishStateToUnPublishStateTransition() {
+    // Add a second published state, and a transition to it from draft, but no
+    // transition from it to archived.
     $this->workflow->getTypePlugin()
       ->addState('published_2', 'Published 2')
       ->addTransition('published_2', 'Published 2', ['draft'], 'published_2');
@@ -100,10 +107,12 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
       'publish_state' => 'published_2',
     ]);
 
+    // Check that the attempted scheduled transition from the new published_2
+    // state to archived fails validation.
     $violations = $node->validate();
-
-    $this->assertCount(1, $violations);
-    $this->assertEquals('The scheduled un-publishing state of <em class="placeholder">archived</em> is not a valid transition from the scheduled publishing state of <em class="placeholder">published_2</em>.', $violations->get(0)->getMessage());
+    $this->assertCount(1, $violations, 'The transition from published 2 to archived should fail validation');
+    $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
+    $this->assertEquals('The scheduled un-publishing state of archived is not a valid transition from the scheduled publishing state of published_2.', strip_tags($message));
   }
 
 }

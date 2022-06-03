@@ -14,3 +14,11 @@ acquia_contenthub_publisher.exclude_settings:
       sequence:
         type: string
         label: 'Bundle'
+
+acquia_contenthub_publisher.features:
+  type: config_object
+  label: 'Acquia ContentHub Publisher features'
+  mapping:
+    paragraphs_unchanged_disable_revision:
+      type: boolean
+      label: 'Enforce paragraph to have same revision, if entity unchanged'

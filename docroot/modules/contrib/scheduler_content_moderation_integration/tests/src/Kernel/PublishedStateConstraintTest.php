@@ -9,7 +9,7 @@ use Drupal\node\Entity\Node;
  *
  * @coversDefaultClass \Drupal\scheduler_content_moderation_integration\Plugin\Validation\Constraint\PublishStateConstraintValidator
  *
- * @group scheduler
+ * @group scheduler_content_moderation_integration
  */
 class PublishedStateConstraintTest extends SchedulerContentModerationTestBase {
 

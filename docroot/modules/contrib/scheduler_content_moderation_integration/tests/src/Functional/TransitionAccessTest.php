@@ -2,97 +2,37 @@
 
 namespace Drupal\Tests\scheduler_content_moderation_integration\Functional;
 
-use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
-
 /**
  * Test covering the TransitionAccessConstraintValidator.
  *
  * @coversDefaultClass \Drupal\scheduler_content_moderation_integration\Plugin\Validation\Constraint\TransitionAccessConstraintValidator
  *
- * @group scheduler
+ * @group scheduler_content_moderation_integration
  */
-class TransitionAccessTest extends BrowserTestBase {
-
-  use ContentModerationTestTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $defaultTheme = 'stark';
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['content_moderation', 'scheduler_content_moderation_integration'];
-
-  /**
-   * User.
-   *
-   * @var \Drupal\user\Entity\User
-   */
-  protected $user;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-
-    $this->drupalCreateContentType([
-      'type' => 'page',
-      'name' => 'Basic page',
-    ])
-      ->setThirdPartySetting('scheduler', 'publish_enable', TRUE)
-      ->setThirdPartySetting('scheduler', 'unpublish_enable', TRUE)
-      ->save();
-
-    $workflow = $this->createEditorialWorkflow();
-    $workflow->getTypePlugin()->addEntityTypeAndBundle('node', 'page');
-    $workflow->save();
-
-    $this->schedulerUser = $this->drupalCreateUser([
-      'access content',
-      'create page content',
-      'edit any page content',
-      'schedule publishing of nodes',
-      'view latest version',
-      'view any unpublished content',
-      'access content overview',
-      'use editorial transition create_new_draft',
-      'use editorial transition publish',
-      'use editorial transition archive',
-    ]);
-
-    $this->restrictedUser = $this->drupalCreateUser([
-      'access content',
-      'create page content',
-      'edit own page content',
-      'view latest version',
-      'view any unpublished content',
-      'access content overview',
-      'use editorial transition create_new_draft',
-    ]);
-
-  }
+class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
 
   /**
    * Test TransitionAccessConstraintValidator.
+   *
+   * @dataProvider dataEntityTypes()
    */
-  public function testTransitionAccess() {
+  public function testTransitionAccess($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
+    $titleField = 'title';
 
-    // Create a node and publish it using the "publish" transition.
+    // Create an entity and publish it using the "publish" transition.
+    $title = $this->randomString();
     $edit = [
-      'title[0][value]' => $this->randomString(),
+      "{$titleField}[0][value]" => $title,
       'moderation_state[0][state]' => 'published',
     ];
-    $this->drupalPostForm('node/add/page', $edit, 'Save');
+    $this->drupalGet("$entityTypeId/add/$bundle");
+    $this->submitForm($edit, 'Save');
 
-    $node = $this->drupalGetNodeByTitle($edit['title[0][value]']);
+    $entity = $this->drupalGetNodeByTitle($title);
     $publish_time = strtotime('+2 days');
 
-    // Change node moderation state to "archived" (using the "archive"
+    // Change entity moderation state to "archived" (using the "archive"
     // transition), and schedule publishing.
     $edit = [
       'moderation_state[0][state]' => 'archived',
@@ -100,7 +40,8 @@ class TransitionAccessTest extends BrowserTestBase {
       'publish_on[0][value][time]' => date('H:i:s', $publish_time),
       'publish_state[0]' => 'published',
     ];
-    $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, 'Save');
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->submitForm($edit, 'Save');
     // It should fail because the user does not have access to the
     // "archived_published" transition.
     $this->assertSession()->pageTextContains('You do not have access to transition from Archived to Published');
@@ -112,64 +53,111 @@ class TransitionAccessTest extends BrowserTestBase {
       'publish_on[0][value][time]' => date('H:i:s', $publish_time),
       'publish_state[0]' => 'published',
     ];
-    $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, 'Save');
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->submitForm($edit, 'Save');
     $date_formatter = \Drupal::service('date.formatter');
-    $this->assertSession()->pageTextContains(sprintf('%s is scheduled to be published %s.', $node->getTitle(), $date_formatter->format($publish_time, 'long')));
+    $this->assertSession()->pageTextContains(sprintf('%s is scheduled to be published %s.', $entity->label(), $date_formatter->format($publish_time, 'long')));
   }
 
   /**
    * Test access to scheduled content for users without right to transition.
+   *
+   * @dataProvider dataEntityTypes()
    */
-  public function testRestrictedTransitionAccess() {
+  public function testRestrictedTransitionAccess($entityTypeId, $bundle) {
+    $schedulerUser = $this->schedulerUser;
+    $restrictedUser = $this->restrictedUser;
+
     // Create a draft as restricted user.
-    $this->drupalLogin($this->restrictedUser);
+    $titleField = 'title';
+    $this->drupalLogin($restrictedUser);
+    $title = $this->randomString();
     $edit = [
-      'title[0][value]' => $this->randomString(),
+      "{$titleField}[0][value]" => $title,
       'moderation_state[0][state]' => 'draft',
     ];
-    $this->drupalPostForm('node/add/page', $edit, 'Save');
+    $this->drupalGet("$entityTypeId/add/$bundle");
+    $this->submitForm($edit, 'Save');
 
-    $node = $this->drupalGetNodeByTitle($edit['title[0][value]']);
+    $entity = $this->drupalGetNodeByTitle($title);
     $publish_time = strtotime('+2 days');
     $date_formatter = \Drupal::service('date.formatter');
 
     // Schedule publishing.
-    $this->drupalLogin($this->schedulerUser);
+    $this->drupalLogin($schedulerUser);
     $edit = [
       'moderation_state[0][state]' => 'draft',
       'publish_on[0][value][date]' => date('Y-m-d', $publish_time),
       'publish_on[0][value][time]' => date('H:i:s', $publish_time),
       'publish_state[0]' => 'published',
     ];
-    $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, 'Save');
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->assertResponse(200, 'Scheduler user should be able to edit the entity."');
+    $this->submitForm($edit, 'Save');
 
     $this->assertSession()
-      ->pageTextContains(sprintf('%s is scheduled to be published %s.', $node->getTitle(), $date_formatter->format($publish_time, 'long')));
-
-    $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertResponse(200, 'Scheduler user should be able to edit the node."');
+      ->pageTextContains(sprintf('%s is scheduled to be published %s.', $entity->label(), $date_formatter->format($publish_time, 'long')));
 
     // Restricted user does not have permission to scheduled transition,
     // editing access should be denied.
-    $this->drupalLogin($this->restrictedUser);
-    $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertResponse(403, 'Restricted user should not be able to edit the node."');
+    $this->drupalLogin($restrictedUser);
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->assertResponse(403, 'Restricted user should not be able to edit the entity."');
 
     // Remove scheduling info.
-    $this->drupalLogin($this->schedulerUser);
+    $this->drupalLogin($schedulerUser);
     $edit = [
       'moderation_state[0][state]' => 'draft',
       'publish_on[0][value][date]' => NULL,
       'publish_on[0][value][time]' => NULL,
-      'publish_state[0]' => '_none',
     ];
-    $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, 'Save');
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->submitForm($edit, 'Save');
 
-    // Check if node is editable when there is no scheduling
+    // Check that entity is editable when there is no scheduling
     // (using 'create_new_draft' transition).
-    $this->drupalLogin($this->restrictedUser);
-    $this->drupalGet('node/' . $node->id() . '/edit');
-    $this->assertResponse(200, 'Restricted user should be able to edit the node."');
+    $this->drupalLogin($restrictedUser);
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->assertResponse(200, 'Restricted user should be able to edit the entity."');
+    $this->submitForm([], 'Save');
+    $this->assertSession()->pageTextContains(sprintf('%s has been updated.', $entity->label()));
+
+    // Repeat the above for scheduled unpublishing.
+    $this->drupalLogin($schedulerUser);
+    $edit = [
+      'moderation_state[0][state]' => 'published',
+      'unpublish_on[0][value][date]' => date('Y-m-d', $publish_time),
+      'unpublish_on[0][value][time]' => date('H:i:s', $publish_time),
+      'unpublish_state[0]' => 'archived',
+    ];
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->assertResponse(200, 'Scheduler user should be able to edit the entity."');
+    $this->submitForm($edit, 'Save');
+
+    $this->assertSession()
+      ->pageTextContains(sprintf('%s is scheduled to be unpublished %s.', $entity->label(), $date_formatter->format($publish_time, 'long')));
+
+    // Restricted user does not have permission to scheduled transition,
+    // editing access should be denied.
+    $this->drupalLogin($restrictedUser);
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->assertResponse(403, 'Restricted user should not be able to edit the entity."');
+
+    // Remove scheduling info.
+    $this->drupalLogin($schedulerUser);
+    $edit = [
+      'unpublish_on[0][value][date]' => NULL,
+      'unpublish_on[0][value][time]' => NULL,
+    ];
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->submitForm($edit, 'Save');
+
+    // Check entity is editable by restricted user when there is no scheduling.
+    $this->drupalLogin($restrictedUser);
+    $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
+    $this->assertResponse(200, 'Restricted user should be able to edit the entity."');
+    $this->submitForm([], 'Save');
+    $this->assertSession()->pageTextContains(sprintf('%s has been updated.', $entity->label()));
   }
 
 }

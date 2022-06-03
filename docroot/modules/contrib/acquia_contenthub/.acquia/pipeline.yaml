@@ -50,7 +50,7 @@ _orca_steps: &orca_steps
         cd ${CI_WORKSPACE}
         ../orca/bin/ci/before_install.sh && error=false || error=true
         if [ "$error" = "false" ]; then
-          ./tests/travis/before_install.sh && error=false || error=true
+          ./tests/ci/before_install.sh && error=false || error=true
         fi
         # Switch to PHP8. The version will depend on the version(s) installed in your Dockerfile.
         # The template provides version 8.0.
@@ -63,7 +63,7 @@ _orca_steps: &orca_steps
           ../orca/bin/ci/install.sh && error=false || error=true
         fi
         if [ "$error" = "false" ]; then
-          ./tests/travis/install.sh && error=false || error=true
+          ./tests/ci/install.sh && error=false || error=true
         fi
         if [ "$error" = "false" ]; then
           # Display details about the fixture.
@@ -74,7 +74,7 @@ _orca_steps: &orca_steps
           ../orca/bin/ci/script.sh && error=false || error=true
         fi
         if [ "$error" = "false" ]; then
-          ./tests/travis/script.sh && error=false || error=true
+          ./tests/ci/script.sh && error=false || error=true
         fi
         if [ "$error" = "true" ]; then
           echo "Running after failure";

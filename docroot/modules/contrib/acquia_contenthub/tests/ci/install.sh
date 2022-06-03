@@ -79,6 +79,7 @@ if [[ "$DRUPAL_CORE" == "9" ]]; then
     drupal/redirect \
     drupal/metatag \
     drupal/entityqueue \
+    drupal/s3fs:^3 \
     dms/phpunit-arraysubset-asserts
 else
   echo "Adding modules for Drupal 8.x..."

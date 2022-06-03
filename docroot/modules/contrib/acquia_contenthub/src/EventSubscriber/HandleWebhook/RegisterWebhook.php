@@ -56,7 +56,7 @@ class RegisterWebhook implements EventSubscriberInterface {
     $payload = $event->getPayload();
     if ($payload['status'] == 'pending') {
       $client = $event->getClient();
-      $uuid = isset($payload['uuid']) ? $payload['uuid'] : FALSE;
+      $uuid = $payload['uuid'] ?? FALSE;
 
       if ($uuid && $payload['publickey'] == $client->getSettings()->getApiKey()) {
         $response = new Response();

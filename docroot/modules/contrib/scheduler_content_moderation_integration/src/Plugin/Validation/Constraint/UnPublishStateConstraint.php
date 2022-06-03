@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraint;
  * @Constraint(
  *   id = "SchedulerUnPublishState",
  *   label = @Translation("Scheduler un-publish state validation", context = "Validation"),
- *   type = "entity:node"
+ *   type = "string"
  * )
  */
 class UnPublishStateConstraint extends Constraint {
@@ -28,9 +28,8 @@ class UnPublishStateConstraint extends Constraint {
   /**
    * Invalid unpublish transition message.
    *
-   * Message to display when the transition between the notes current
-   * moderation state to the scheduled un-publishing state is not a
-   * valid transition.
+   * Message to display when the transition between the current moderation state
+   * and the scheduled un-publishing state is not a valid transition.
    *
    * @var string
    */

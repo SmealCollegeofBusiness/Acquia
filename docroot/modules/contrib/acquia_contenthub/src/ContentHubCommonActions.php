@@ -9,7 +9,6 @@ use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\ContentHubPublishEntitiesEvent;
 use Drupal\acquia_contenthub\Event\DeleteRemoteEntityEvent;
-use Drupal\acquia_contenthub_subscriber\CdfImporter;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -70,15 +69,6 @@ class ContentHubCommonActions {
   protected $config;
 
   /**
-   * The CDF importer service.
-   *
-   * @var \Drupal\acquia_contenthub_subscriber\CdfImporter
-   *
-   * @deprecatedMessage Remove dependency in acquia_contenthub:2.33.
-   */
-  protected $cdfImporter;
-
-  /**
    * ContentHubCommonActions constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -93,8 +83,6 @@ class ContentHubCommonActions {
    *   The logger channel factory.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The Config Factory.
-   * @param \Drupal\acquia_contenthub_subscriber\CdfImporter|null $cdf_importer
-   *   The CDF importer service.
    */
   public function __construct(
     EventDispatcherInterface $dispatcher,
@@ -102,8 +90,7 @@ class ContentHubCommonActions {
     DependencyCalculator $calculator,
     ClientFactory $factory,
     LoggerChannelFactoryInterface $logger_factory,
-    ConfigFactoryInterface $config_factory,
-    ?CdfImporter $cdf_importer = NULL
+    ConfigFactoryInterface $config_factory
   ) {
     $this->dispatcher = $dispatcher;
     $this->serializer = $serializer;
@@ -111,7 +98,6 @@ class ContentHubCommonActions {
     $this->factory = $factory;
     $this->channel = $logger_factory->get('acquia_contenthub');
     $this->config = $config_factory->getEditable('acquia_contenthub.admin_settings');
-    $this->cdfImporter = $cdf_importer;
   }
 
   /**
@@ -175,42 +161,6 @@ class ContentHubCommonActions {
     }
 
     return $this->serializer->serializeEntities(...array_values($entities));
-  }
-
-  /**
-   * Import a group of entities by their uuids from the ContentHub Service.
-   *
-   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::importEntities()
-   *
-   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
-   *   Use CdfImporter instead.
-   */
-  public function importEntities(string ...$uuids) {
-    return $this->cdfImporter->importEntities(...$uuids);
-  }
-
-  /**
-   * Imports a list of entities from a CDFDocument object.
-   *
-   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::importEntityCdfDocument()
-   *
-   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
-   *   Use CdfImporter instead.
-   */
-  public function importEntityCdfDocument(CDFDocument $document) {
-    return $this->cdfImporter->importEntityCdfDocument($document);
-  }
-
-  /**
-   * Retrieves entities and dependencies by uuid and returns a CDFDocument.
-   *
-   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::getCdfDocument()
-   *
-   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
-   *   Use CdfImporter instead.
-   */
-  public function getCdfDocument(string ...$uuids) {
-    return $this->cdfImporter->getCdfDocument(new DependencyStack(), ...$uuids);
   }
 
   /**
@@ -305,32 +255,6 @@ class ContentHubCommonActions {
       $data[$object->getUuid()] = $object;
     }
     return $data;
-  }
-
-  /**
-   * Request to republish an entity via Webhook.
-   *
-   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::requestToRepublishEntity()
-   *
-   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
-   *   Use CdfImporter instead.
-   */
-  public function requestToRepublishEntity(string $origin, string $type, string $uuid, array $dependencies): void {
-    $this->cdfImporter->requestToRepublishEntity($origin, $type, $uuid, $dependencies);
-  }
-
-  /**
-   * Obtain the webhook from the Client CDF, given origin.
-   *
-   * @see \Drupal\acquia_contenthub_subscriber\CdfImporter::getWebhookUrlFromClientOrigin()
-   *
-   * @deprecated in acquia_contenthub:2.32.0 and is removed from acquia_contenthub:2.33.0. @codingStandardsIgnoreLine
-   *   Use CdfImporter instead.
-   */
-  public function getWebhookUrlFromClientOrigin(string $origin) {
-    // Return string or bool to comply to the old implementation.
-    $url = $this->cdfImporter->getWebhookUrlFromClientOrigin($origin);
-    return $url === '' ? FALSE : $url;
   }
 
   /**

@@ -246,6 +246,8 @@ class CdfImporter {
       return;
     }
     $diff_uuids = array_diff($uuids, array_keys($cdf_objects));
+    // Entities are sorted by origin.
+    $marked_for_republish = [];
     foreach ($uuids as $uuid) {
       $cdf_object = $document->getCdfEntity($uuid);
       if (!$cdf_object) {
@@ -257,10 +259,16 @@ class CdfImporter {
       if (!empty($vanished_uuids)) {
         $type = $cdf_objects[$uuid]->getAttribute('entity_type')->getValue()[LanguageInterface::LANGCODE_NOT_SPECIFIED];
         $origin = $cdf_objects[$uuid]->getOrigin();
-        // Using array_keys() to only pass the dependency UUIDs, not the hashes.
-        $this->requestToRepublishEntity($origin, $type, $uuid, array_keys($dependencies));
+        $marked_for_republish[$origin][] = [
+          'uuid' => $uuid,
+          'type' => $type,
+          'dependencies' => array_keys($dependencies),
+        ];
         $message .= sprintf("The entity (%s, %s) could not be imported because the following dependencies are missing from Content Hub: %s.", $type, $uuid, implode(', ', $vanished_uuids)) . PHP_EOL;
       }
+    }
+    if (!empty($marked_for_republish)) {
+      $this->requestToRepublishEntities($marked_for_republish);
     }
     $exception = new ContentHubImportException($message, 100);
     $exception->setUuids($diff_uuids);
@@ -302,65 +310,53 @@ class CdfImporter {
   /**
    * Request to republish an entity via Webhook.
    *
-   * @param string $origin
-   *   Entity Origin.
-   * @param string $type
-   *   Entity Type.
-   * @param string $uuid
-   *   Entity UUID to republish.
-   * @param array $dependencies
+   * @param array $entities_by_origin
    *   An array of dependency UUIDs.
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
    */
-  public function requestToRepublishEntity(string $origin, string $type, string $uuid, array $dependencies): void {
+  public function requestToRepublishEntities(array $entities_by_origin): void {
     $client = $this->getClient();
-    $webhook_url = $this->getWebhookUrlFromClientOrigin($origin);
-    if ($webhook_url === '') {
-      $message = sprintf('Could not find Webhook URL for origin = "%s". Request to re-export entity "%s/%s" could not be made.',
-        $origin,
-        $type,
-        $uuid
-      );
-      $this->channel->error($message);
-      return;
-    }
-    $settings = $client->getSettings();
-    $cdf = [
-      'uuid' => $uuid,
-      'type' => $type,
-      'dependencies' => $dependencies,
-    ];
+    foreach ($entities_by_origin as $origin => $entities) {
+      $webhook_url = $this->getWebhookUrlFromClientOrigin($origin);
+      if ($webhook_url === '') {
+        $message = sprintf('Could not find Webhook URL for origin = "%s". Request to re-export entities could not be made.',
+          $origin
+        );
+        $this->channel->error($message);
+        continue;
+      }
+      $settings = $client->getSettings();
 
-    $payload = [
-      'status' => 'successful',
-      'uuid' => $uuid,
-      'crud' => 'republish',
-      'initiator' => $settings->getUuid(),
-      'cdf' => $cdf,
-    ];
-    try {
-      $response = $client->request('post', $webhook_url, [
-        'body' => json_encode($payload),
-      ]);
-    }
-    catch (\Exception $e) {
-      $this->channel->error('An error occurred while connecting to Publisher. Webhook Url: @webhook_url, Error: @error',
-        [
-          '@webhook_url' => $webhook_url,
-          '@error' => $e->getMessage(),
-        ]
-      );
-      return;
-    }
+      $payload = [
+        'status' => 'successful',
+        'crud' => 'republish',
+        'initiator' => $settings->getUuid(),
+        'entities' => $entities,
+      ];
+      try {
+        $response = $client->request('post', $webhook_url, [
+          'body' => json_encode($payload),
+        ]);
+      }
+      catch (\Exception $e) {
+        $this->channel->error('An error occurred while connecting to Publisher. Webhook Url: @webhook_url, Error: @error',
+          [
+            '@webhook_url' => $webhook_url,
+            '@error' => $e->getMessage(),
+          ]
+        );
+        return;
+      }
 
-    $message = $response->getBody()->getContents();
-    $code = $response->getStatusCode();
-    if ($code == 200) {
-      $this->channel->info('@message', ['@message' => $message]);
-    }
-    else {
-      $this->channel->error(sprintf('Request to re-export entity failed. Response code = %s, Response message = "%s".', $code, $message));
+      $message = $response->getBody()->getContents();
+      $code = $response->getStatusCode();
+      if ($code == 200) {
+        $this->channel->info('@message', ['@message' => $message]);
+      }
+      else {
+        $this->channel->error(sprintf('Request to re-export entity failed. Response code = %s, Response message = "%s".', $code, $message));
+      }
     }
   }
 

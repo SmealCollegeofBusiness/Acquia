@@ -26,16 +26,3 @@ build:
         halt-on-fail: false
         repeat: 1
         suppress-deprecations: true
-      run_tests.js:
-        concurrency: 1
-        types: PHPUnit-FunctionalJavascript
-        testgroups: '--all'
-        color: true
-        die-on-fail: false
-        keep-results: true
-        keep-results-table: false
-        verbose: false
-        halt-on-fail: false
-        repeat: 1
-        suppress-deprecations: true
-      nightwatchjs: {  }

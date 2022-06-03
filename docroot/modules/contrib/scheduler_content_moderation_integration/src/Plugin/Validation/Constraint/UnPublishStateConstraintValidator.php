@@ -31,7 +31,9 @@ class UnPublishStateConstraintValidator extends ConstraintValidatorBase {
       return;
     }
 
-    $publish_state = $entity->publish_state->value === '_none' ? NULL : $entity->publish_state->value;
+    // If there is no publish_on date then any publish_state value should be
+    // ignored and the validation will run as if no publish_state was selected.
+    $publish_state = ($entity->publish_state->value === '_none' || empty($entity->publish_on->value)) ? NULL : $entity->publish_state->value;
     $unpublish_state = $entity->unpublish_state->value;
     $moderation_state = $entity->moderation_state->value;
 

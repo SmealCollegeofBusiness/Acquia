@@ -7,6 +7,8 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\system\Entity\Action;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
+use Drupal\Tests\scheduler\Traits\SchedulerSetupTrait;
 
 /**
  * Base class for the Scheduler Content Moderation tests.
@@ -14,6 +16,14 @@ use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 abstract class SchedulerContentModerationTestBase extends KernelTestBase {
 
   use ContentModerationTestTrait;
+  use SchedulerSetupTrait;
+
+  use NodeCreationTrait {
+    // These two functions are defined in BrowserTestBase but not KernelTestBase
+    // so get them here, as they are very useful.
+    getNodeByTitle as drupalGetNodeByTitle;
+    createNode as drupalCreateNode;
+  }
 
   /**
    * Moderation info service.
@@ -37,6 +47,8 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
     'content_moderation',
     'datetime',
     'field',
+    // Filter is needed for CreateNode filter_default_format().
+    'filter',
     'language',
     'node',
     'options',
@@ -58,6 +70,7 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
     $this->installEntitySchema('user');
     $this->installEntitySchema('content_moderation_state');
     $this->installConfig('content_moderation');
+    $this->installConfig('filter');
 
     // Scheduler calls some config entity, instead of installing whole modules
     // default config just create the ones we need..
@@ -91,6 +104,7 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
   protected function configureExampleNodeType() {
     $node_type = NodeType::create([
       'type' => 'example',
+      'label' => 'Example',
     ]);
     $node_type->setThirdPartySetting('scheduler', 'publish_enable', TRUE);
     $node_type->setThirdPartySetting('scheduler', 'unpublish_enable', TRUE);
@@ -104,6 +118,19 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
     $this->workflow = $this->createEditorialWorkflow();
     $this->workflow->getTypePlugin()->addEntityTypeAndBundle('node', 'example');
     $this->workflow->save();
+  }
+
+  /**
+   * Test data for supported entity types.
+   *
+   * @return array
+   *   Each array item has the values: [entity type id, bundle id].
+   */
+  public function dataEntityTypes() {
+    $data = [
+      '#node' => ['node', 'example'],
+    ];
+    return $data;
   }
 
 }

@@ -6,7 +6,7 @@ package: Acquia ContentHub (Experimental)
 dependencies:
   - acquia_contenthub
 
-# Information added by Drupal.org packaging script on 2022-05-10
-version: '8.x-2.32'
+# Information added by Drupal.org packaging script on 2022-05-30
+version: '8.x-2.33'
 project: 'acquia_contenthub'
-datestamp: 1652167420
+datestamp: 1653895706

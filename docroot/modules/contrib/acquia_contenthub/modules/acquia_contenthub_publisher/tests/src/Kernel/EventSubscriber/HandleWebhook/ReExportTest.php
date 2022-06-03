@@ -187,22 +187,22 @@ class ReExportTest extends EntityKernelTestBase {
 
     $key = new Key('id', 'secret');
     $request = $this->createSignedRequest();
+    $entities[] = [
+      'uuid' => $args[1],
+      'type' => $args[0],
+      'dependencies' => [$args[1]],
+    ];
 
     $payload = [
-      'uuid' => $args[1],
       'crud' => 'republish',
       'status' => 'successful',
       'initiator' => $this->remoteOrigin,
-      'cdf' => [
-        'type' => $args[0],
-        'uuid' => $args[1],
-        'dependencies' => [$args[1]],
-      ],
+      'entities' => $entities,
     ];
 
     // Verify we are starting clean.
     $entity_status = $this->getStatusByUuid($args[1]);
-    $this->assertEqual($args[2], $entity_status);
+    $this->assertEquals($entity_status, $args[2]);
 
     // Handle Webhook Request Event to Re-export entity.
     $event = new HandleWebhookEvent($request, $payload, $key, $this->clientFactory->getClient($this->settings));
@@ -210,16 +210,16 @@ class ReExportTest extends EntityKernelTestBase {
 
     // Verify item has been added to the publisher queue.
     $entity_status = $this->getStatusByUuid($args[1]);
-    $this->assertEqual($args[3], $entity_status);
+    $this->assertEquals($entity_status, $args[3]);
 
     // Verify response code.
     $response = $event->getResponse();
     $code = $response->getStatusCode();
-    $this->assertEqual($code, $args[4]);
+    $this->assertEquals($args[4], $code);
 
     // Verify response message.
     $message = $response->getBody()->getContents();
-    $this->assertEqual($message, $args[5]);
+    $this->assertEquals($args[5], $message);
   }
 
   /**
@@ -232,8 +232,8 @@ class ReExportTest extends EntityKernelTestBase {
         '11111111-1111-1111-0000-111111111111',
         '',
         '',
-        404,
-        'The entity "test_entity:11111111-1111-1111-0000-111111111111" could not be found and thus cannot be re-exported from a webhook request by origin = 98213529-0000-2222-0000-123456789123.',
+        200,
+        'The entities could not be re-exported. Requesting client: 98213529-0000-2222-0000-123456789123. Entities: test_entity/11111111-1111-1111-0000-111111111111.',
       ],
       [
         'node',
@@ -241,7 +241,7 @@ class ReExportTest extends EntityKernelTestBase {
         '',
         'queued',
         200,
-        'Entity "node/98213529-0000-0001-0000-123456789123" successfully enqueued for export from webhook UUID = 98213529-0000-0001-0000-123456789123 by origin = 98213529-0000-2222-0000-123456789123.',
+        'Entities have been successfully enqueued by origin = 98213529-0000-2222-0000-123456789123. Entities: node/98213529-0000-0001-0000-123456789123.' . PHP_EOL,
       ],
     ];
   }

@@ -164,7 +164,7 @@ class S3FileOriginLocator {
    */
   protected function getOriginalFileUrl(string $uri): string {
     $parts = explode('s3/', $uri);
-    $transformed_uri = isset($parts[1]) ? $parts[1] : $parts[0];
+    $transformed_uri = $parts[1] ?? $parts[0];
     return "s3://$transformed_uri";
   }
 

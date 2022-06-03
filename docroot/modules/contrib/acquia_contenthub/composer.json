@@ -6,7 +6,7 @@
     "require": {
         "acquia/content-hub-php": "^2.1.2",
         "acquia/contenthub-console": "^1.4",
-        "drupal/depcalc": "^1.11",
+        "drupal/depcalc": "^1.12",
         "laminas/laminas-diactoros": "^1.8 || ^2.2",
         "symfony/psr-http-message-bridge": "^1.1.2 || ^2.0"
     },

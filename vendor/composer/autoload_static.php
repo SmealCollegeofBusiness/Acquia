@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9
+class ComposerStaticInite043e280b6ddc33736a8ce16b80e5184
 {
     public static $files = array (
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
@@ -4137,6 +4137,8 @@ class ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9
         'Egulias\\EmailValidator\\Result\\SpoofEmail' => __DIR__ . '/..' . '/egulias/email-validator/src/Result/SpoofEmail.php',
         'Egulias\\EmailValidator\\Result\\ValidEmail' => __DIR__ . '/..' . '/egulias/email-validator/src/Result/ValidEmail.php',
         'Egulias\\EmailValidator\\Validation\\DNSCheckValidation' => __DIR__ . '/..' . '/egulias/email-validator/src/Validation/DNSCheckValidation.php',
+        'Egulias\\EmailValidator\\Validation\\DNSGetRecordWrapper' => __DIR__ . '/..' . '/egulias/email-validator/src/Validation/DNSGetRecordWrapper.php',
+        'Egulias\\EmailValidator\\Validation\\DNSRecords' => __DIR__ . '/..' . '/egulias/email-validator/src/Validation/DNSRecords.php',
         'Egulias\\EmailValidator\\Validation\\EmailValidation' => __DIR__ . '/..' . '/egulias/email-validator/src/Validation/EmailValidation.php',
         'Egulias\\EmailValidator\\Validation\\Exception\\EmptyValidationList' => __DIR__ . '/..' . '/egulias/email-validator/src/Validation/Exception/EmptyValidationList.php',
         'Egulias\\EmailValidator\\Validation\\Extra\\SpoofCheckValidation' => __DIR__ . '/..' . '/egulias/email-validator/src/Validation/Extra/SpoofCheckValidation.php',
@@ -8991,11 +8993,11 @@ class ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitb668f063dcc58e1ea9385625fba58ec9::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite043e280b6ddc33736a8ce16b80e5184::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite043e280b6ddc33736a8ce16b80e5184::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInite043e280b6ddc33736a8ce16b80e5184::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInite043e280b6ddc33736a8ce16b80e5184::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInite043e280b6ddc33736a8ce16b80e5184::$classMap;
 
         }, null, ClassLoader::class);
     }

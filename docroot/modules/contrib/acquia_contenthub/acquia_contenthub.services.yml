@@ -2,7 +2,7 @@ services:
 
   acquia_contenthub_common_actions:
     class: Drupal\acquia_contenthub\ContentHubCommonActions
-    arguments: ['@event_dispatcher', '@entity.cdf.serializer', '@entity.dependency.calculator', '@acquia_contenthub.client.factory', '@logger.factory', '@config.factory', '@?acquia_contenthub_subscriber.cdf_importer']
+    arguments: ['@event_dispatcher', '@entity.cdf.serializer', '@entity.dependency.calculator', '@acquia_contenthub.client.factory', '@logger.factory', '@config.factory']
 
   acquia_contenthub.stub.tracker:
     class: Drupal\acquia_contenthub\StubTracker
