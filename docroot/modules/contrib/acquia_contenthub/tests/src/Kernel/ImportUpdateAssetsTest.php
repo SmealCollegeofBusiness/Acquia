@@ -49,7 +49,7 @@ class ImportUpdateAssetsTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'field',
     'filter',
     'depcalc',

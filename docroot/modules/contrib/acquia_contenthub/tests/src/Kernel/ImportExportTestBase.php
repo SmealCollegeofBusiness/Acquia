@@ -43,7 +43,7 @@ abstract class ImportExportTestBase extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'depcalc',
     'acquia_contenthub',
@@ -69,7 +69,7 @@ abstract class ImportExportTestBase extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     if (version_compare(\Drupal::VERSION, '9.0', '>=')) {
       static::$modules[] = 'path_alias';
     }
@@ -94,7 +94,7 @@ abstract class ImportExportTestBase extends EntityKernelTestBase {
     if (!empty($this->fixtures[$delta])) {
       $version_directory = $this->getDrupalVersion();
       $path_to_fixture = sprintf("%s/tests/fixtures/import/$version_directory/%s",
-        drupal_get_path('module', 'acquia_contenthub'),
+        $this->container->get('module_handler')->getModule('acquia_contenthub')->getPath(),
         $this->fixtures[$delta]['cdf']
       );
       return file_get_contents($path_to_fixture);
@@ -118,7 +118,7 @@ abstract class ImportExportTestBase extends EntityKernelTestBase {
     if (!empty($this->fixtures[$delta])) {
       $version_directory = $this->getDrupalVersion();
       $path_to_fixture = sprintf("%s/tests/fixtures/import/$version_directory/%s",
-        drupal_get_path('module', 'acquia_contenthub'),
+        $this->container->get('module_handler')->getModule('acquia_contenthub')->getPath(),
         $this->fixtures[$delta]['expectations']
       );
 

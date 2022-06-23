@@ -6,7 +6,7 @@ use Acquia\ContentHubClient\CDF\CDFObject;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\depcalc\DependencyStack;
 use Drupal\depcalc\DependentEntityWrapper;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Class LoadLocalEntityEvent.
@@ -39,16 +39,26 @@ class LoadLocalEntityEvent extends Event {
   protected $entity;
 
   /**
+   * Where is this event fired from.
+   *
+   * @var bool
+   */
+  protected $firedFromStubCreation = FALSE;
+
+  /**
    * LoadLocalEntityEvent constructor.
    *
    * @param \Acquia\ContentHubClient\CDF\CDFObject $cdf
    *   The CDF object for which to attempt to load a local entity.
    * @param \Drupal\depcalc\DependencyStack $stack
    *   The dependency stack from which to extract related entity data.
+   * @param bool $fired_from_stub_creation
+   *   Whether this event fired from stub creation or not.
    */
-  public function __construct(CDFObject $cdf, DependencyStack $stack) {
+  public function __construct(CDFObject $cdf, DependencyStack $stack, bool $fired_from_stub_creation = FALSE) {
     $this->cdf = $cdf;
     $this->stack = $stack;
+    $this->firedFromStubCreation = $fired_from_stub_creation;
   }
 
   /**
@@ -79,6 +89,16 @@ class LoadLocalEntityEvent extends Event {
    */
   public function getEntity() {
     return $this->entity;
+  }
+
+  /**
+   * Returns the firedFromStubCreation flag.
+   *
+   * @return bool
+   *   firedFromStubCreation flag.
+   */
+  public function isFiredFromStubCreation(): bool {
+    return $this->firedFromStubCreation;
   }
 
   /**

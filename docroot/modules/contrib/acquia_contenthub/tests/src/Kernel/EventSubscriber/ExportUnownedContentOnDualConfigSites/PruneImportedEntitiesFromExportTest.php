@@ -42,7 +42,7 @@ class PruneImportedEntitiesFromExportTest extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'field',
     'depcalc',
@@ -116,7 +116,7 @@ class PruneImportedEntitiesFromExportTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $time = time();

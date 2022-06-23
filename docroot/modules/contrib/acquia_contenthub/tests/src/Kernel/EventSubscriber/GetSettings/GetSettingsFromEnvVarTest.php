@@ -21,7 +21,7 @@ class GetSettingsFromEnvVarTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'depcalc',
     'user',
@@ -39,7 +39,7 @@ class GetSettingsFromEnvVarTest extends KernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->dispatcher = $this->container->get('event_dispatcher');
@@ -65,10 +65,10 @@ class GetSettingsFromEnvVarTest extends KernelTestBase {
     }
 
     $event = new AcquiaContentHubSettingsEvent();
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::GET_SETTINGS, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::GET_SETTINGS);
 
-    $this->assertEqual($event->getSettings()->toArray(), $expected_settings);
-    $this->assertEqual($event->getProvider(), $settings_provider);
+    $this->assertEquals($expected_settings, $event->getSettings()->toArray());
+    $this->assertEquals($settings_provider, $event->getProvider());
   }
 
   /**

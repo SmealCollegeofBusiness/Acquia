@@ -4,7 +4,7 @@ namespace Drupal\acquia_contenthub\Event;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\depcalc\DependencyStack;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Unserializes ContentEntity fields syndicated from CDF.

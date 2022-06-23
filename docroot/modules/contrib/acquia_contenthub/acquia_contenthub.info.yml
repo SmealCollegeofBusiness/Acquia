@@ -3,15 +3,15 @@ description: Module allowing Drupal sites to connect to Acquia Content Hub.
 package: Acquia ContentHub
 
 type: module
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: '>=9.2'
 
 configure: acquia_contenthub.admin_settings
 
 dependencies:
   - depcalc
-  - drupal:system (>= 8.8)
+  - drupal:system (>= 9.2)
 
-# Information added by Drupal.org packaging script on 2022-05-30
-version: '8.x-2.33'
+# Information added by Drupal.org packaging script on 2022-06-15
+version: '8.x-2.34'
 project: 'acquia_contenthub'
-datestamp: 1653895706
+datestamp: 1655277478

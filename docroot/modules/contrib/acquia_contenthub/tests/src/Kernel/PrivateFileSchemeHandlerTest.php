@@ -10,7 +10,6 @@ use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Assert;
-use function GuzzleHttp\Psr7\mimetype_from_extension;
 
 /**
  * Tests the Private File Scheme Handler.
@@ -38,7 +37,7 @@ class PrivateFileSchemeHandlerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installEntitySchema('file');
@@ -56,7 +55,7 @@ class PrivateFileSchemeHandlerTest extends KernelTestBase {
   public function testAddAttributes() {
     $file = $this->createFileEntity('test.jpg', 'private');
     $event = new CreateCdfEntityEvent($file, []);
-    $this->container->get('event_dispatcher')->dispatch(AcquiaContentHubEvents::CREATE_CDF_OBJECT, $event);
+    $this->container->get('event_dispatcher')->dispatch($event, AcquiaContentHubEvents::CREATE_CDF_OBJECT);
 
     $cdf = $event->getCdf($file->uuid());
     $this->assertCdfAttribute($cdf, 'file_scheme', 'private');
@@ -82,13 +81,14 @@ class PrivateFileSchemeHandlerTest extends KernelTestBase {
    */
   protected function createFileEntity(string $file_name, string $scheme, array $values = []): FileInterface {
     $path = explode('/', $file_name);
+    $filemime = \Drupal::service('acquia_contenthub.drupal_bridge')->getMimeTypeFromExtension($file_name);
     $data = [
       'uuid' => \Drupal::service('uuid')->generate(),
       'langcode' => 'en',
       'uid' => 1,
       'filename' => end($path),
       'uri' => sprintf("$scheme://%s", implode('/', $path)),
-      'filemime' => mimetype_from_extension($file_name),
+      'filemime' => $filemime,
       'filesize' => rand(1000, 5000),
       'status' => 1,
       'created' => time(),

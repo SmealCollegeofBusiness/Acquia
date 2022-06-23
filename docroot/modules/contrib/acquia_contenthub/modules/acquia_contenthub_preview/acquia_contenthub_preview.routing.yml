@@ -1,6 +1,0 @@
-acquia_contenthub_preview.preview:
-  path: '/acquia_contenthub_preview/preview/{uuid}'
-  defaults:
-    _controller: '\Drupal\acquia_contenthub_preview\Controller\PreviewEntity::preview'
-  requirements:
-    _access: 'TRUE'

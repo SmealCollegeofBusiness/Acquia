@@ -208,7 +208,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
       $request = new Request([], [], [], [], [], [], json_encode($payload));
       $key = new Key($settings->getApiKey(), $settings->getSecretKey());
       $event = new HandleWebhookEvent($request, $payload, $key, $this->client);
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::HANDLE_WEBHOOK, $event);
+      $this->dispatcher->dispatch($event, AcquiaContentHubEvents::HANDLE_WEBHOOK);
     }
   }
 

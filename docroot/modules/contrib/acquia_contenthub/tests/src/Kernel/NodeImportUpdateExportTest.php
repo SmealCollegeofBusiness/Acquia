@@ -36,7 +36,7 @@ class NodeImportUpdateExportTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'node',
@@ -59,7 +59,7 @@ class NodeImportUpdateExportTest extends ImportExportTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installSchema('user', ['users_data']);
@@ -101,7 +101,7 @@ class NodeImportUpdateExportTest extends ImportExportTestBase {
     /** @var \Drupal\Node\NodeInterface $node */
     $node = $repository->loadEntityByUuid($export_type, $export_uuid);
     $vids = $node_storage->revisionIds($node);
-    $this->assertEqual(count($vids), 2, "New revision created on import.");
+    $this->assertEquals(2, count($vids), "New revision created on import.");
 
   }
 

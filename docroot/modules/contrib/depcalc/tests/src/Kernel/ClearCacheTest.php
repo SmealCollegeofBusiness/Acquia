@@ -37,7 +37,7 @@ class ClearCacheTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc_test',
     'depcalc',
     'node',

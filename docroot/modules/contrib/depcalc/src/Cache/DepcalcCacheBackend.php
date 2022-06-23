@@ -109,7 +109,7 @@ class DepcalcCacheBackend implements CacheBackendInterface, CacheTagsInvalidator
     /** @var \Drupal\depcalc\DependentEntityWrapperInterface[] $wrappers */
     $wrappers = array_map(function($cache) {return $cache->data;}, $cache_objects);
     $event = new InvalidateDependenciesEvent($wrappers);
-    $this->dispatcher->dispatch(DependencyCalculatorEvents::INVALIDATE_DEPENDENCIES, $event);
+    $this->dispatcher->dispatch($event, DependencyCalculatorEvents::INVALIDATE_DEPENDENCIES);
   }
 
   /**

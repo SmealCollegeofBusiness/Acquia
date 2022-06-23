@@ -219,7 +219,7 @@ class ContentEntityParseCdfHandler implements EventSubscriberInterface {
         $field, $cdf->getMetadata()['field'][$field_name],
         $event->getStack()
       );
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::UNSERIALIZE_CONTENT_ENTITY_FIELD, $unserialize_event);
+      $this->dispatcher->dispatch($unserialize_event, AcquiaContentHubEvents::UNSERIALIZE_CONTENT_ENTITY_FIELD);
       $value = $unserialize_event->getValue();
       $entity_values = NestedArray::mergeDeep($entity_values, $value);
     }
@@ -241,7 +241,7 @@ class ContentEntityParseCdfHandler implements EventSubscriberInterface {
    */
   protected function dispatchUnserializeAdditionalMetadataEvent(ContentEntityInterface $entity, CDFObject $cdf): ContentEntityInterface {
     $event = new UnserializeAdditionalMetadataEvent($entity, $cdf);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::UNSERIALIZE_ADDITIONAL_METADATA, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::UNSERIALIZE_ADDITIONAL_METADATA);
     return $event->getEntity();
   }
 

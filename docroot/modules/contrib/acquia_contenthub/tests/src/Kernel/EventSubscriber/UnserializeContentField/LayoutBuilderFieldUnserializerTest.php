@@ -32,7 +32,7 @@ class LayoutBuilderFieldUnserializerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'depcalc',
     'user',
@@ -47,7 +47,7 @@ class LayoutBuilderFieldUnserializerTest extends KernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('block_content');
     $this->installSchema('dblog', 'watchdog');
@@ -69,7 +69,7 @@ class LayoutBuilderFieldUnserializerTest extends KernelTestBase {
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $event = new UnserializeCdfEntityFieldEvent($entity_type->reveal(), 'basic', $field_name, $mock_data['field'], $meta_data, $stack->reveal());
-    $this->container->get('event_dispatcher')->dispatch(AcquiaContentHubEvents::UNSERIALIZE_CONTENT_ENTITY_FIELD, $event);
+    $this->container->get('event_dispatcher')->dispatch($event, AcquiaContentHubEvents::UNSERIALIZE_CONTENT_ENTITY_FIELD);
 
     $expected = [
       'en' => [

@@ -72,7 +72,7 @@ abstract class AcquiaContentHubSerializerTestBase extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'field',
     'filter',
     'depcalc',
@@ -198,7 +198,7 @@ abstract class AcquiaContentHubSerializerTestBase extends KernelTestBase {
 
     $cdf = new CDFObject('drupal8_content_entity', $this->entity->uuid(), date('c'), date('c'), $settings->getUuid());
     $event = new SerializeCdfEntityFieldEvent($this->entity, $field_name, $field, $cdf);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD);
 
     // Check propagationStopped property is changed.
     $this->assertTrue($event->isPropagationStopped());

@@ -30,7 +30,7 @@ class ContentHubMultilingualSettingsWebhookTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'language',
     'locale',
@@ -39,7 +39,7 @@ class ContentHubMultilingualSettingsWebhookTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     // User to manage languages.
@@ -50,20 +50,23 @@ class ContentHubMultilingualSettingsWebhookTest extends BrowserTestBase {
     ConfigurableLanguage::createFromLangcode('fr')->save();
 
     // Set language detection to url.
-    $this->drupalPostForm('/admin/config/regional/language/detection', [
+    $this->drupalGet('/admin/config/regional/language/detection');
+    $this->submitForm([
       'language_interface[enabled][language-url]' => TRUE,
       'language_interface[enabled][language-selected]' => TRUE,
     ], 'Save settings');
 
     // Set prefixes to en and fr.
-    $this->drupalPostForm('/admin/config/regional/language/detection/url', [
+    $this->drupalGet('/admin/config/regional/language/detection/url');
+    $this->submitForm([
       'language_negotiation_url_part' => 'path_prefix',
       'prefix[en]' => 'en',
       'prefix[fr]' => 'fr',
     ], 'Save configuration');
 
     // Set Language Detection for selected language.
-    $this->drupalPostForm('/admin/config/regional/language/detection/selected', [
+    $this->drupalGet('/admin/config/regional/language/detection/selected');
+    $this->submitForm([
       'edit-selected-langcode' => 'en',
     ], 'Save configuration');
 
@@ -77,7 +80,7 @@ class ContentHubMultilingualSettingsWebhookTest extends BrowserTestBase {
   public function testContentHubWebhookPath() {
     $base_path = \Drupal::request()->getBasePath();
     $webhook_path = Url::fromRoute('acquia_contenthub.webhook')->toString();
-    $this->assertEqual($webhook_path, $base_path . '/acquia-contenthub/webhook');
+    $this->assertEquals($base_path . '/acquia-contenthub/webhook', $webhook_path);
   }
 
 }

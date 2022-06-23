@@ -4,7 +4,7 @@ namespace Drupal\depcalc\Event;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\layout_builder\SectionComponent;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The SectionComponentDependenciesEvent event.

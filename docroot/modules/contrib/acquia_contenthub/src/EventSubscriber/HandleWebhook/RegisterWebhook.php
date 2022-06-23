@@ -2,24 +2,20 @@
 
 namespace Drupal\acquia_contenthub\EventSubscriber\HandleWebhook;
 
-use Acquia\Hmac\ResponseSigner;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
+use Drupal\acquia_contenthub\Libs\Traits\HandleResponseTrait;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use GuzzleHttp\Psr7\Response;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\StreamFactory;
-use Laminas\Diactoros\UploadedFileFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Responsible for handling site registration webhook responses.
  */
 class RegisterWebhook implements EventSubscriberInterface {
+
+  use HandleResponseTrait;
 
   /**
    * The acquia_contenthub logger channel.
@@ -54,38 +50,25 @@ class RegisterWebhook implements EventSubscriberInterface {
    */
   public function onHandleWebhook(HandleWebhookEvent $event) {
     $payload = $event->getPayload();
-    if ($payload['status'] == 'pending') {
-      $client = $event->getClient();
-      $uuid = $payload['uuid'] ?? FALSE;
-
-      if ($uuid && $payload['publickey'] == $client->getSettings()->getApiKey()) {
-        $response = new Response();
-
-        if (class_exists(DiactorosFactory::class)) {
-          $httpMessageFactory = new DiactorosFactory();
-        }
-        else {
-          $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
-        }
-        $psr7_request = $httpMessageFactory->createRequest($event->getRequest());
-
-        $signer = new ResponseSigner($event->getKey(), $psr7_request);
-        $signedResponse = $signer->signResponse($response);
-
-        $event->setResponse($signedResponse);
-        return;
-      }
-      else {
-        $ip_address = $event->getRequest()->getClientIp();
-        $message = new FormattableMarkup('Webhook [from IP = @IP] rejected (initiator and/or publickey do not match local settings): @whook', [
-          '@IP' => $ip_address,
-          '@whook' => print_r($payload, TRUE),
-        ]);
-        $this->channel->debug($message);
-        $event->setResponse(new Response());
-        return;
-      }
+    if ($payload['status'] !== 'pending') {
+      return;
     }
+
+    $client = $event->getClient();
+    $uuid = $payload['uuid'] ?? FALSE;
+    if ($uuid && $payload['publickey'] === $client->getSettings()->getApiKey()) {
+      $signed_response = $this->getResponse($event);
+      $event->setResponse($signed_response);
+      return;
+    }
+
+    $ip_address = $event->getRequest()->getClientIp();
+    $message = new FormattableMarkup('Webhook [from IP = @IP] rejected (initiator and/or publickey do not match local settings): @whook', [
+      '@IP' => $ip_address,
+      '@whook' => print_r($payload, TRUE),
+    ]);
+    $this->channel->debug($message);
+    $event->setResponse(new Response());
   }
 
 }

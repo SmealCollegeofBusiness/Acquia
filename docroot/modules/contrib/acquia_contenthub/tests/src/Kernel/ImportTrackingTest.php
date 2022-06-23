@@ -24,7 +24,7 @@ class ImportTrackingTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'file',
     'node',
@@ -75,7 +75,7 @@ class ImportTrackingTest extends EntityKernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installSchema('acquia_contenthub_subscriber', ['acquia_contenthub_subscriber_import_tracking']);
@@ -256,7 +256,7 @@ class ImportTrackingTest extends EntityKernelTestBase {
 
     $key = new Key('id', 'secret');
     $event = new HandleWebhookEvent($request, $payload, $key, $this->clientFactory->getClient());
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::HANDLE_WEBHOOK, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::HANDLE_WEBHOOK);
   }
 
 }

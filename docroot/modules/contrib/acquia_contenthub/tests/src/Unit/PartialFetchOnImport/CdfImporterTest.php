@@ -50,7 +50,7 @@ class CdfImporterTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $dispatcher = $this->prophesize(EventDispatcherInterface::class);

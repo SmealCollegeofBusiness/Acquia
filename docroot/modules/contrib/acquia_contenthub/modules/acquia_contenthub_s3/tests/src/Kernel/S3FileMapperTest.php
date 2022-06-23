@@ -36,7 +36,7 @@ class S3FileMapperTest extends S3FileKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installSchema('file', 'file_usage');
@@ -60,8 +60,8 @@ class S3FileMapperTest extends S3FileKernelTestBase {
     $mapper->mapS3File($cdf->reveal(), $file);
     $s3_file = $this->container->get('acquia_contenthub_s3.file_map')
       ->getFileByUuid($file->uuid());
-    $this->assertEqual($s3_file->bucket, 'test-bucket');
-    $this->assertEqual($s3_file->root_folder, 'test-root');
+    $this->assertEquals('test-bucket', $s3_file->bucket);
+    $this->assertEquals('test-root', $s3_file->root_folder);
   }
 
   /**

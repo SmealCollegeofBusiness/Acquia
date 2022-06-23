@@ -59,7 +59,7 @@ class DepcalcClearCacheTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'depcalc_ui',
     'node',
@@ -69,7 +69,7 @@ class DepcalcClearCacheTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->calculator = $this->container->get('entity.dependency.calculator');

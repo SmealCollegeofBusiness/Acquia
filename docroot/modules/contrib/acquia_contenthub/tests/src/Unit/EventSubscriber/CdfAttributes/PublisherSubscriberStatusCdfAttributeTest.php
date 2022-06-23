@@ -33,7 +33,7 @@ class PublisherSubscriberStatusCdfAttributeTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->dispatcher = new EventDispatcher();
@@ -89,7 +89,7 @@ class PublisherSubscriberStatusCdfAttributeTest extends UnitTestCase {
 
     $event->method('getCdf')->willReturn($cdf);
 
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::BUILD_CLIENT_CDF);
     $cdf = $event->getCdf();
     $publisher = $cdf->getAttribute('publisher');
     $subscriber = $cdf->getAttribute('subscriber');

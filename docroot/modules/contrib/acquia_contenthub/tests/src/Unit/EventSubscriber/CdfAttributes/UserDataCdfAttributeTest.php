@@ -40,12 +40,12 @@ class UserDataCdfAttributeTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->cdf = $this->getMockBuilder(CDFObject::class)
       ->disableOriginalConstructor()
-      ->setMethods(NULL)
+      ->addMethods([])
       ->getMock();
 
     $this->dispatcher = new EventDispatcher();
@@ -64,7 +64,7 @@ class UserDataCdfAttributeTest extends UnitTestCase {
     /** @var \Drupal\user\UserInterface $entity */
     $entity = $this->getMockBuilder(UserInterface::class)
       ->disableOriginalConstructor()
-      ->setMethods([])
+      ->addMethods([])
       ->getMockForAbstractClass();
 
     $entity->method('label')->willReturn($data);
@@ -74,12 +74,12 @@ class UserDataCdfAttributeTest extends UnitTestCase {
     $wrapper = new DependentEntityWrapper($entity);
 
     $event = new CdfAttributesEvent($this->cdf, $entity, $wrapper);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES);
 
     $attribute = $event->getCdf()->getAttribute('username');
     $this->assertEquals(CDFAttribute::TYPE_STRING, $attribute->getType());
 
-    $this->assertArrayEquals($attribute->getValue(), [
+    $this->assertEquals($attribute->getValue(), [
       CDFObject::LANGUAGE_UNDETERMINED => $data,
     ]);
   }
@@ -96,7 +96,7 @@ class UserDataCdfAttributeTest extends UnitTestCase {
     /** @var \Drupal\user\UserInterface $entity */
     $entity = $this->getMockBuilder(UserInterface::class)
       ->disableOriginalConstructor()
-      ->setMethods([])
+      ->onlyMethods([])
       ->getMockForAbstractClass();
     $entity->method('label')->willReturn($data);
     $entity->method('getEntityTypeId')->willReturn('user');
@@ -106,12 +106,12 @@ class UserDataCdfAttributeTest extends UnitTestCase {
     $wrapper = new DependentEntityWrapper($entity);
 
     $event = new CdfAttributesEvent($this->cdf, $entity, $wrapper);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES);
 
     $attribute = $event->getCdf()->getAttribute('is_anonymous');
     $this->assertEquals(CDFAttribute::TYPE_BOOLEAN, $attribute->getType());
 
-    $this->assertArrayEquals($attribute->getValue(), [
+    $this->assertEquals($attribute->getValue(), [
       CDFObject::LANGUAGE_UNDETERMINED => TRUE,
     ]);
 
@@ -132,7 +132,7 @@ class UserDataCdfAttributeTest extends UnitTestCase {
     /** @var \Drupal\user\UserInterface $entity */
     $entity = $this->getMockBuilder(UserInterface::class)
       ->disableOriginalConstructor()
-      ->setMethods([])
+      ->onlyMethods([])
       ->getMockForAbstractClass();
     $entity->method('label')->willReturn($user_name);
     $entity->method('getEntityTypeId')->willReturn('user');
@@ -143,14 +143,14 @@ class UserDataCdfAttributeTest extends UnitTestCase {
     $wrapper = new DependentEntityWrapper($entity);
 
     $event = new CdfAttributesEvent($this->cdf, $entity, $wrapper);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES);
 
     $attribute = $event->getCdf()->getAttribute('mail');
     $this->assertEquals(CDFAttribute::TYPE_STRING, $attribute->getType());
 
     $this->assertNull($event->getCdf()->getAttribute('is_anonymous'));
 
-    $this->assertArrayEquals($attribute->getValue(), [
+    $this->assertEquals($attribute->getValue(), [
       CDFObject::LANGUAGE_UNDETERMINED => $email,
     ]);
   }

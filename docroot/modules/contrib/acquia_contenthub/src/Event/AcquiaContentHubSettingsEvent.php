@@ -4,7 +4,7 @@ namespace Drupal\acquia_contenthub\Event;
 
 use Acquia\ContentHubClient\Settings;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The event dispatched to find settings for the ContentHub Service.

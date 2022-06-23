@@ -191,7 +191,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
     }
 
     $event = new AcquiaContentHubUnregisterEvent($webhook_uuid);
-    $this->eventDispatcher->dispatch(AcquiaContentHubEvents::ACH_UNREGISTER, $event);
+    $this->eventDispatcher->dispatch($event, AcquiaContentHubEvents::ACH_UNREGISTER);
 
     try {
       $delete = $this->input->getOption('delete');

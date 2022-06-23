@@ -30,7 +30,7 @@ class S3FileMapTest extends S3FileKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->s3FileMap = new S3FileMap($this->container->get('database'));
@@ -109,7 +109,7 @@ class S3FileMapTest extends S3FileKernelTestBase {
     $this->s3FileMap->record(...$updated);
     $records = $this->fetchAllData();
     $this->assertCount(1, $records, 'No new entry was added.');
-    $this->assertEqual($updated, array_values(current($records)), 'Data was successfully updated.');
+    $this->assertEquals(array_values(current($records)), $updated, 'Data was successfully updated.');
   }
 
   /**
@@ -135,7 +135,7 @@ class S3FileMapTest extends S3FileKernelTestBase {
     $this->s3FileMap->remove('d2ded609-c7eb-4ca0-97cc-5bb0ddbbbf5a');
     $records = $this->fetchAllData();
     $this->assertCount(1, $records, 'Data was successfully deleted.');
-    $this->assertEqual($data2, array_values(current($records)), 'Non targeted data preserved');
+    $this->assertEquals(array_values(current($records)), $data2, 'Non targeted data preserved');
   }
 
   /**
@@ -153,10 +153,10 @@ class S3FileMapTest extends S3FileKernelTestBase {
     $object = $this->s3FileMap->getFileByUri($file->getFileUri());
     $this->assertInstanceOf('stdClass', $object, 'Returned data is of type stdClass.');
 
-    $this->assertEqual($object->uuid, $file->uuid(), 'File uuid match.');
-    $this->assertEqual($object->bucket, 'bucket', 'Bucket match.');
-    $this->assertEqual($object->root_folder, 'root_folder', 'Root folder match.');
-    $this->assertEqual($object->origin_uuid, '23623525-fb2f-4035-b5ca-a6d64e212ed9', 'Origin uuid match.');
+    $this->assertEquals($file->uuid(), $object->uuid, 'File uuid match.');
+    $this->assertEquals('bucket', $object->bucket, 'Bucket match.');
+    $this->assertEquals('root_folder', $object->root_folder, 'Root folder match.');
+    $this->assertEquals('23623525-fb2f-4035-b5ca-a6d64e212ed9', $object->origin_uuid, 'Origin uuid match.');
 
     $object = $this->s3FileMap->getFileByUri('s3://non-existent-file.jpg');
     $this->assertNull($object, 'Non existent file, return value is NULL.');
@@ -175,10 +175,10 @@ class S3FileMapTest extends S3FileKernelTestBase {
     $object = $this->s3FileMap->getFileByUuid($uuid);
     $this->assertInstanceOf('stdClass', $object, 'Returned data is of type stdClass.');
 
-    $this->assertEqual($object->file_uuid, $uuid, 'File uuid match.');
-    $this->assertEqual($object->bucket, $bucket, 'Bucket match.');
-    $this->assertEqual($object->root_folder, $root, 'Root folder match.');
-    $this->assertEqual($object->origin_uuid, $origin, 'Origin uuid match.');
+    $this->assertEquals($uuid, $object->file_uuid, 'File uuid match.');
+    $this->assertEquals($bucket, $object->bucket, 'Bucket match.');
+    $this->assertEquals($root, $object->root_folder, 'Root folder match.');
+    $this->assertEquals($origin, $object->origin_uuid, 'Origin uuid match.');
 
     $object = $this->s3FileMap->getFileByUuid('c0512f3c-f305-4dce-a114-6d47bcb051a4');
     $this->assertNull($object, 'Non existent file, return value is NULL.');

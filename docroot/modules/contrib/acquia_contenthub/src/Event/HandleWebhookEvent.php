@@ -4,9 +4,9 @@ namespace Drupal\acquia_contenthub\Event;
 
 use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\Hmac\KeyInterface;
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * An event for responding to incoming webhooks from the ContentHub Service.

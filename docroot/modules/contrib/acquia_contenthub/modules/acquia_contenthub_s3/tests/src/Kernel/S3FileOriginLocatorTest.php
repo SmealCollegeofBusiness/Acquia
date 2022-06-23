@@ -54,7 +54,7 @@ class S3FileOriginLocatorTest extends S3FileKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('image_style');
@@ -143,7 +143,7 @@ class S3FileOriginLocatorTest extends S3FileKernelTestBase {
       'bucket' => 'pub-bucket',
       'root_folder' => 'pub-root',
     ];
-    $this->assertEqual($source, $expected);
+    $this->assertEquals($expected, $source);
   }
 
   /**
@@ -171,7 +171,7 @@ class S3FileOriginLocatorTest extends S3FileKernelTestBase {
       'bucket' => $origin_bucket,
       'root_folder' => $origin_root_folder,
     ];
-    $this->assertEqual($source, $expected);
+    $this->assertEquals($expected, $source);
   }
 
   /**

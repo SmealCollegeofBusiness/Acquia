@@ -105,7 +105,7 @@ class CdfMetricsManager {
 
     if ($this->client->getRemoteSettings()) {
       $event = new BuildClientCdfEvent(ClientCDFObject::create($this->settings->getUuid(), ['settings' => $this->settings->toArray()]));
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
+      $this->dispatcher->dispatch($event, AcquiaContentHubEvents::BUILD_CLIENT_CDF);
       $local_cdf = $event->getCdf();
       $this->updateClientCdf($local_cdf);
     }

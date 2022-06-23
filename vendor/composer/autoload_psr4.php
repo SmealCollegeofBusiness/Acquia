@@ -117,7 +117,6 @@ return array(
     'Drupal\\media_entity_soundcloud\\' => array($baseDir . '/docroot/modules/contrib/media_entity_soundcloud/src'),
     'Drupal\\facets_pretty_paths\\' => array($baseDir . '/docroot/modules/contrib/facets_pretty_paths/src'),
     'Drupal\\acsf\\' => array($baseDir . '/docroot/modules/contrib/acsf/src'),
-    'Drupal\\Driver\\Database\\mysql\\' => array($vendorDir . '/drupal/mysql56'),
     'Drupal\\Driver\\' => array($baseDir . '/docroot/drivers/lib/Drupal/Driver'),
     'Drupal\\Core\\' => array($baseDir . '/docroot/core/lib/Drupal/Core'),
     'Drupal\\Composer\\Plugin\\Scaffold\\' => array($vendorDir . '/drupal/core-composer-scaffold'),

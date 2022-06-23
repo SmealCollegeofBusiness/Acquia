@@ -158,8 +158,8 @@ class CreateStubs implements EventSubscriberInterface {
     foreach ($unprocessed as $key => $uuid) {
       $cdf = $event->getCdf()->getCdfEntity($uuid);
       $stack = $event->getStack();
-      $load_event = new LoadLocalEntityEvent($cdf, $stack);
-      $dispatcher->dispatch(AcquiaContentHubEvents::LOAD_LOCAL_ENTITY, $load_event);
+      $load_event = new LoadLocalEntityEvent($cdf, $stack, TRUE);
+      $dispatcher->dispatch($load_event, AcquiaContentHubEvents::LOAD_LOCAL_ENTITY);
 
       $entity = $load_event->getEntity() ??
         $this->createStub($cdf, $uuid, $stack, $dispatcher);
@@ -214,7 +214,7 @@ class CreateStubs implements EventSubscriberInterface {
     $this->generateRequiredSampleItems($entity);
 
     $pre_entity_save_event = new PreEntitySaveEvent($entity, $stack, $cdf);
-    $dispatcher->dispatch(AcquiaContentHubEvents::PRE_ENTITY_SAVE, $pre_entity_save_event);
+    $dispatcher->dispatch($pre_entity_save_event, AcquiaContentHubEvents::PRE_ENTITY_SAVE);
     $entity = $pre_entity_save_event->getEntity();
     // Added to avoid creating new revisions with stubbed data.
     // See \Drupal\content_moderation\Entity\Handler\ModerationHandler.

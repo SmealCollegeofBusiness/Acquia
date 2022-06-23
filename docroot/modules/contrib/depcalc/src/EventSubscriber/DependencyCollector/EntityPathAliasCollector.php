@@ -17,8 +17,7 @@ class EntityPathAliasCollector extends BaseDependencyCollector {
   }
 
   public function onCalculateDependencies(CalculateEntityDependenciesEvent $event) {
-    // @todo remove version condition once 8.7 is no longer supported.
-    if ($event->getEntity()->getEntityTypeId() !== 'path_alias' && version_compare(\Drupal::VERSION, '8.8.0', '>=') && \Drupal::moduleHandler()->moduleExists('path_alias')) {
+    if ($event->getEntity()->getEntityTypeId() !== 'path_alias' && \Drupal::moduleHandler()->moduleExists('path_alias')) {
       $entity = $event->getEntity();
       try {
         $uri = "/{$entity->toUrl()->getInternalPath()}";

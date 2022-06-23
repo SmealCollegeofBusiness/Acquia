@@ -2,21 +2,12 @@
 
 namespace Drupal\acquia_contenthub\EventSubscriber\HandleWebhook;
 
-use Acquia\Hmac\ResponseSigner;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
+use Drupal\acquia_contenthub\Libs\Traits\HandleResponseTrait;
 use Drupal\Core\Extension\ModuleExtensionList;
-use GuzzleHttp\Psr7\Response as GuzzleResponse;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\StreamFactory;
-use Laminas\Diactoros\UploadedFileFactory;
-use Psr\Http\Message\ResponseInterface;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Handles webhooks with a payload requesting site report.
@@ -24,6 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
  * @package Drupal\acquia_contenthub\EventSubscriber\HandleWebhook
  */
 class Report implements EventSubscriberInterface {
+
+  use HandleResponseTrait;
 
   const PAYLOAD_REPORT = 'report';
 
@@ -81,35 +74,6 @@ class Report implements EventSubscriberInterface {
     $response = $this->getResponse($event, json_encode($this->getReport()));
     $event->setResponse($response);
     $event->stopPropagation();
-  }
-
-  /**
-   * Get Response method.
-   *
-   * @param \Drupal\acquia_contenthub\Event\HandleWebhookEvent $event
-   *   Webhook event.
-   * @param string $body
-   *   Body of response.
-   *
-   * @todo Copied from preview. Move it a more generic class.
-   *
-   * @return \Psr\Http\Message\ResponseInterface
-   *   Signed response.
-   */
-  protected function getResponse(HandleWebhookEvent $event, string $body): ResponseInterface {
-    $response = new GuzzleResponse(Response::HTTP_OK, [], $body);
-
-    if (class_exists(DiactorosFactory::class)) {
-      $httpMessageFactory = new DiactorosFactory();
-    }
-    else {
-      $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
-    }
-    $psr7_request = $httpMessageFactory->createRequest($event->getRequest());
-
-    $signer = new ResponseSigner($event->getKey(), $psr7_request);
-    $signedResponse = $signer->signResponse($response);
-    return $signedResponse;
   }
 
   /**

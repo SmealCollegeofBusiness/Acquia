@@ -38,7 +38,7 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'node',
@@ -176,7 +176,7 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
         $this->container->get('logger.factory'),
         $this->container->get('config.factory'),
       ])
-      ->setMethods(['getUpdateDbStatus'])
+      ->onlyMethods(['getUpdateDbStatus'])
       ->getMock();
     $this->container->set('acquia_contenthub_common_actions', $common);
 

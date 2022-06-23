@@ -64,7 +64,7 @@ class ContentHubClientMock extends ContentHubClient {
       'base_uri' => "$url/$api_version",
       'headers' => [
         'Content-Type' => 'application/json',
-        'User-Agent' => self::LIBRARYNAME . '/' . static::VERSION . ' ' . \GuzzleHttp\default_user_agent(),
+        'User-Agent' => self::LIBRARYNAME . '/' . static::LIB_VERSION . ' ' . \GuzzleHttp\default_user_agent(),
       ],
     ];
 
@@ -72,7 +72,7 @@ class ContentHubClientMock extends ContentHubClient {
     $middleware = new HmacAuthMiddleware($key);
     $settings = new Settings($name, MockDataProvider::SETTINGS_UUID, $api_key, $secret, $url);
 
-    return new ContentHubClientMock($config, $logger, $settings, $middleware, $dispatcher, $api_version);
+    return new ContentHubClientMock($logger, $settings, $middleware, $dispatcher, $config, $api_version);
   }
 
   /**

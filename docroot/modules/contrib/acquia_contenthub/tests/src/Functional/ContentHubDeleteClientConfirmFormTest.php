@@ -43,7 +43,7 @@ class ContentHubDeleteClientConfirmFormTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'acquia_contenthub_test',
     'acquia_contenthub_server_test',
@@ -53,7 +53,7 @@ class ContentHubDeleteClientConfirmFormTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->authorizedUser = $this->drupalCreateUser([
@@ -72,7 +72,8 @@ class ContentHubDeleteClientConfirmFormTest extends BrowserTestBase {
     ];
 
     // Successful attempt to register client, but webhook url is unreachable.
-    $this->drupalPostForm('/admin/config/services/acquia-contenthub', $settings, 'Register Site');
+    $this->drupalGet('/admin/config/services/acquia-contenthub');
+    $this->submitForm($settings, 'Register Site');
   }
 
   /**

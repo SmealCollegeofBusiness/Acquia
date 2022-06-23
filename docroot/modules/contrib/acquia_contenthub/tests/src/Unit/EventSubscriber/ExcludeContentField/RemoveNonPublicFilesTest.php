@@ -68,7 +68,7 @@ class RemoveNonPublicFilesTest extends UnitTestCase {
   public function testExcludeEntityField(): void {
     $this->mockEvent();
     $this->assertEquals(FALSE, $this->event->isExcluded());
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::EXCLUDE_CONTENT_ENTITY_FIELD, $this->event);
+    $this->dispatcher->dispatch($this->event, AcquiaContentHubEvents::EXCLUDE_CONTENT_ENTITY_FIELD);
     $this->assertEquals(TRUE, $this->event->isExcluded());
   }
 

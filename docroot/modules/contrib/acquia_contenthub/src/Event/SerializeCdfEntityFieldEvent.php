@@ -5,7 +5,7 @@ namespace Drupal\acquia_contenthub\Event;
 use Acquia\ContentHubClient\CDF\CDFObject;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event fired when serializing individual entity fields for syndication.

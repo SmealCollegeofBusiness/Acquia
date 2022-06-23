@@ -102,7 +102,7 @@ class ConfigEntityHandler implements EventSubscriberInterface {
     }
 
     $config_data_event = new ConfigDataEvent($entity);
-    $dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_CONFIG_ENTITY, $config_data_event);
+    $dispatcher->dispatch($config_data_event, AcquiaContentHubEvents::SERIALIZE_CONFIG_ENTITY);
 
     $metadata['data'] = base64_encode(Yaml::encode($config_data_event->getData()));
     $cdf->setMetadata($metadata);

@@ -19,7 +19,7 @@ use Psr\Http\Message\ResponseInterface;
  */
 class DeleteEntityTest extends EntityKernelTestBase {
 
-  public static $modules = [
+  protected static $modules = [
     'user',
     'system',
     'field',
@@ -70,7 +70,7 @@ class DeleteEntityTest extends EntityKernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installSchema('user', 'users_data');

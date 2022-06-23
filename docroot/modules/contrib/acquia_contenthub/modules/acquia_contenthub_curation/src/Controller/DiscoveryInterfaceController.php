@@ -10,6 +10,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Extension\ModuleHandler;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\Markup;
@@ -79,6 +80,13 @@ class DiscoveryInterfaceController extends ControllerBase {
   protected $moduleList;
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandler
+   */
+  protected $moduleHandler;
+
+  /**
    * ContentHubSubscriberController constructor.
    *
    * @param \Drupal\core\Config\ConfigFactoryInterface $config_factory
@@ -97,8 +105,10 @@ class DiscoveryInterfaceController extends ControllerBase {
    *   The contenthub client factory.
    * @param \Drupal\Core\Extension\ModuleExtensionList $module_list
    *   The module extension list.
+   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   *   The module handler.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, LanguageManagerInterface $language_manager, CsrfTokenGenerator $csrf_token_generator, EntityTypeBundleInfoInterface $bundle_info_manager, EntityTypeManagerInterface $entity_type_manager, StateInterface $state, ClientFactory $client_factory, ModuleExtensionList $module_list) {
+  public function __construct(ConfigFactoryInterface $config_factory, LanguageManagerInterface $language_manager, CsrfTokenGenerator $csrf_token_generator, EntityTypeBundleInfoInterface $bundle_info_manager, EntityTypeManagerInterface $entity_type_manager, StateInterface $state, ClientFactory $client_factory, ModuleExtensionList $module_list, ModuleHandler $module_handler) {
     $this->configFactory = $config_factory;
     $this->languageManager = $language_manager;
     $this->csrfTokenGenerator = $csrf_token_generator;
@@ -107,6 +117,7 @@ class DiscoveryInterfaceController extends ControllerBase {
     $this->state = $state;
     $this->clientFactory = $client_factory;
     $this->moduleList = $module_list;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -129,6 +140,8 @@ class DiscoveryInterfaceController extends ControllerBase {
     $client_factory = $container->get('acquia_contenthub.client.factory');
     /** @var \Drupal\Core\Extension\ModuleExtensionList $module_list */
     $module_list = $container->get('extension.list.module');
+    /** @var \Drupal\Core\Extension\ModuleHandler $module_handler */
+    $module_handler = $container->get('module_handler');
 
     return new static(
       $config_factory,
@@ -138,7 +151,8 @@ class DiscoveryInterfaceController extends ControllerBase {
       $entity_type_manager,
       $state,
       $client_factory,
-      $module_list
+      $module_list,
+      $module_handler
     );
   }
 
@@ -203,8 +217,7 @@ class DiscoveryInterfaceController extends ControllerBase {
 
     // Obtain the list of supported entity types and bundles.
     $entity_types_bundles = $this->getSupportedEntityTypesAndBundles();
-
-    $ember_endpoint = $GLOBALS['base_url'] . '/' . drupal_get_path('module', 'acquia_contenthub_curation') . '/ember/index.html' . '?' . $query_string;
+    $ember_endpoint = $GLOBALS['base_url'] . '/' . $this->moduleHandler->getModule('acquia_contenthub_curation')->getPath() . '/ember/index.html' . '?' . $query_string;
 
     // Set Client User Agent.
     $module_info = $this->moduleList->getExtensionInfo('acquia_contenthub');

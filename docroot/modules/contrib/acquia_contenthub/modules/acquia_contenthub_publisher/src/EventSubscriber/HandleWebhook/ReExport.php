@@ -4,6 +4,7 @@ namespace Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
+use Drupal\acquia_contenthub\Libs\Traits\HandleResponseTrait;
 use Drupal\acquia_contenthub_publisher\PublisherActions;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
@@ -12,11 +13,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * Re-exports an entity and all its dependencies on a webhook request.
  *
- * @package Drupal\acquia_contenthub_preview\EventSubscriber\HandleWebhook
+ * @package Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook
  */
 class ReExport implements EventSubscriberInterface {
 
-  use HandleWebhookTrait;
+  use HandleResponseTrait;
 
   /**
    * The Publisher Actions Service.
@@ -84,7 +85,6 @@ class ReExport implements EventSubscriberInterface {
 
     // Obtaining Entities from Webhook message.
     $body = '';
-    $response_code = 200;
     $entities_not_found = [];
     $entities_enqueued = [];
     foreach ($payload['entities'] as $entity) {
@@ -117,7 +117,7 @@ class ReExport implements EventSubscriberInterface {
       $this->channel->error($body);
     }
 
-    $response = $this->getResponse($event, $body, $response_code);
+    $response = $this->getResponse($event, $body);
     $event->setResponse($response);
     $event->stopPropagation();
   }

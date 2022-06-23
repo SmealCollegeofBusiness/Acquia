@@ -3,7 +3,7 @@
 namespace Drupal\depcalc\Event;
 
 use Drupal\depcalc\DependentEntityWrapper;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Class FilterDependencyConfigEntityEvent

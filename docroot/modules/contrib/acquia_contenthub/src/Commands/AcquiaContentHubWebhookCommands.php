@@ -131,7 +131,7 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
         }
 
         $event = new AcquiaContentHubUnregisterEvent($webhook->getUuid(), '', TRUE);
-        $this->eventDispatcher->dispatch(AcquiaContentHubEvents::ACH_UNREGISTER, $event);
+        $this->eventDispatcher->dispatch($event, AcquiaContentHubEvents::ACH_UNREGISTER);
 
         $io = $this->io();
         $orphaned_filters = $event->getOrphanedFilters();

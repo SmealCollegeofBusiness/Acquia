@@ -156,7 +156,7 @@ class ContentHubCommonActions {
     if ($return_minimal) {
       // Modify/Remove objects before publishing to ContentHub service.
       $event = new ContentHubPublishEntitiesEvent($entity->uuid(), ...array_values($entities));
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::PUBLISH_ENTITIES, $event);
+      $this->dispatcher->dispatch($event, AcquiaContentHubEvents::PUBLISH_ENTITIES);
       $entities = $event->getDependencies();
     }
 
@@ -208,7 +208,7 @@ class ContentHubCommonActions {
       throw new \Exception(sprintf("Invalid uuid %s.", $uuid));
     }
     $event = new DeleteRemoteEntityEvent($uuid);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::DELETE_REMOTE_ENTITY, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::DELETE_REMOTE_ENTITY);
     $remote_entity = $this->getRemoteEntity($uuid);
     if (!$remote_entity) {
       return; //@codingStandardsIgnoreLine
@@ -226,7 +226,7 @@ class ContentHubCommonActions {
       ->info(sprintf("Deleted entity with UUID = \"%s\" from Content Hub.", $uuid));
 
     // Clean up the interest list.
-    $webhook_uuid = $settings->getWebhook('uuid');
+    $webhook_uuid = $settings->getWebhook('uuid') ?? '';
     $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
     if ($send_update && Uuid::isValid($webhook_uuid)) {
       $client->deleteInterest($uuid, $webhook_uuid);

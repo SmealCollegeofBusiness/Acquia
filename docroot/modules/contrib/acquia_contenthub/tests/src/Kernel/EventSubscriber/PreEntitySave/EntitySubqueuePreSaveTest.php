@@ -27,7 +27,7 @@ class EntitySubqueuePreSaveTest extends AcquiaContentHubSerializerTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'entityqueue',
   ];
 

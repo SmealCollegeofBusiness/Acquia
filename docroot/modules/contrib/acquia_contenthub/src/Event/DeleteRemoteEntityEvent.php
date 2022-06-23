@@ -2,7 +2,7 @@
 
 namespace Drupal\acquia_contenthub\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The event dispatched to inform of remote entity deletion.

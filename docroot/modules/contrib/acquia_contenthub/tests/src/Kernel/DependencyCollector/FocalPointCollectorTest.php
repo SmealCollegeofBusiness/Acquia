@@ -48,7 +48,7 @@ class FocalPointCollectorTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'crop',
     'focal_point',

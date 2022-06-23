@@ -44,7 +44,7 @@ class FileImportExportTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'node',
@@ -60,7 +60,7 @@ class FileImportExportTest extends ImportExportTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installSchema('user', ['users_data']);
@@ -234,7 +234,7 @@ class FileImportExportTest extends ImportExportTestBase {
    */
   protected function getPathToFixtures() {
     $path_to_fixtures = sprintf('%s/tests/fixtures',
-      drupal_get_path('module', 'acquia_contenthub')
+      $this->container->get('module_handler')->getModule('acquia_contenthub')->getPath()
     );
     return $path_to_fixtures;
   }

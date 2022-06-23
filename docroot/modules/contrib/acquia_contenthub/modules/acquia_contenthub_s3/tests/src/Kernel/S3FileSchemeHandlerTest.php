@@ -31,7 +31,7 @@ class S3FileSchemeHandlerTest extends S3FileKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $config_factory = $this->container->get('config.factory');
@@ -50,7 +50,7 @@ class S3FileSchemeHandlerTest extends S3FileKernelTestBase {
   public function testAddAttributes() {
     $file = $this->createFileEntity('test.jpg', 's3');
     $event = new CreateCdfEntityEvent($file, []);
-    $this->container->get('event_dispatcher')->dispatch(AcquiaContentHubEvents::CREATE_CDF_OBJECT, $event);
+    $this->container->get('event_dispatcher')->dispatch($event, AcquiaContentHubEvents::CREATE_CDF_OBJECT);
 
     $cdf = $event->getCdf($file->uuid());
     $this->assertCdfAttribute($cdf, 'ach_s3_bucket', 'bucket-name');

@@ -124,13 +124,13 @@ class ContentEntityCreateCdfHandler implements EventSubscriberInterface {
     $fields = [];
     foreach ($entity as $field_name => $field) {
       $exclude_field_event = new ExcludeEntityFieldEvent($entity, $field_name, $field);
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::EXCLUDE_CONTENT_ENTITY_FIELD, $exclude_field_event);
+      $this->dispatcher->dispatch($exclude_field_event, AcquiaContentHubEvents::EXCLUDE_CONTENT_ENTITY_FIELD);
       if ($exclude_field_event->isExcluded()) {
         continue;
       }
 
       $field_event = new SerializeCdfEntityFieldEvent($entity, $field_name, $field, $cdf);
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD, $field_event);
+      $this->dispatcher->dispatch($field_event, AcquiaContentHubEvents::SERIALIZE_CONTENT_ENTITY_FIELD);
 
       $fields[$field_name] = $field_event->getFieldData();
     }
@@ -165,7 +165,7 @@ class ContentEntityCreateCdfHandler implements EventSubscriberInterface {
    */
   protected function dispatchSerializeAdditionalMetadataEvent(ContentEntityInterface $entity, CDFObject $cdf): CDFObject {
     $event = new SerializeAdditionalMetadataEvent($entity, $cdf);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::SERIALIZE_ADDITIONAL_METADATA, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::SERIALIZE_ADDITIONAL_METADATA);
     return $event->getCdf();
   }
 

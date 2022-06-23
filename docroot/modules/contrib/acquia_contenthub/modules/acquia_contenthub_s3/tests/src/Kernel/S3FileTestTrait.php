@@ -7,7 +7,6 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use PHPUnit\Framework\Assert;
-use function GuzzleHttp\Psr7\mimetype_from_extension;
 
 /**
  * Provides common methods for s3 related tests.
@@ -23,7 +22,8 @@ trait S3FileTestTrait {
    *   The cdf array.
    */
   protected function getFileFixture(string $file_name): array {
-    $location = drupal_get_path('module', 'acquia_contenthub_s3') . "/tests/fixtures/file/$file_name";
+    $path = \Drupal::service('module_handler')->getModule('acquia_contenthub_s3')->getPath();
+    $location = $path . "/tests/fixtures/file/$file_name";
     $data = json_decode(file_get_contents($location), TRUE);
     return is_array($data) ? $data : [];
   }
@@ -55,13 +55,14 @@ trait S3FileTestTrait {
     }
 
     $path = explode('/', $file_name);
+    $filemime = \Drupal::service('acquia_contenthub.drupal_bridge')->getMimeTypeFromExtension($file_name);
     $data = [
       'uuid' => \Drupal::service('uuid')->generate(),
       'langcode' => 'en',
       'uid' => 1,
       'filename' => end($path),
       'uri' => sprintf("$scheme://%s", implode('/', $path)),
-      'filemime' => mimetype_from_extension($file_name),
+      'filemime' => $filemime,
       'filesize' => rand(1000, 5000),
       'status' => 1,
       'created' => time(),

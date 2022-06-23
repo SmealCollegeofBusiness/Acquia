@@ -14,7 +14,7 @@ class BlockTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'node',
     'field',
@@ -46,7 +46,7 @@ class BlockTest extends ImportExportTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('block_content');
     $this->installSchema('user', ['users_data']);

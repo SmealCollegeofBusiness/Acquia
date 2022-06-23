@@ -40,7 +40,7 @@ class S3FileEntityHandlerTest extends S3FileKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installSchema('system', 'sequences');
@@ -71,15 +71,15 @@ class S3FileEntityHandlerTest extends S3FileKernelTestBase {
 
     $event = new ParseCdfEntityEvent($cdf, new DependencyStack(), $file);
     $this->container->get('event_dispatcher')
-      ->dispatch(AcquiaContentHubEvents::PARSE_CDF, $event);
+      ->dispatch($event, AcquiaContentHubEvents::PARSE_CDF);
     $cdf = $event->getCdf();
     $object = $this->s3FileMap->getFileByUuid($file->uuid());
 
     // Test if s3 file recording was successful.
-    $this->assertEqual($object->file_uuid, $file->uuid(), 'File uuid match.');
+    $this->assertEquals($file->uuid(), $object->file_uuid, 'File uuid match.');
     $this->assertCdfAttribute($cdf, 'ach_s3_bucket', $object->bucket);
     $this->assertCdfAttribute($cdf, 'ach_s3_source', $object->root_folder);
-    $this->assertEqual($object->origin_uuid, $cdf->getOrigin(), 'Origin uuid match.');
+    $this->assertEquals($cdf->getOrigin(), $object->origin_uuid, 'Origin uuid match.');
   }
 
 }

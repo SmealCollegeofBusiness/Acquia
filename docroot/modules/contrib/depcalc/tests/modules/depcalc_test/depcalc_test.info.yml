@@ -3,10 +3,10 @@ description: Support module for depcalc module testing.
 package: Testing
 # version: VERSION
 type: module
-core_version_requirement: ^8.7.7 || ^9
+core_version_requirement: '>=9.2'
 hidden: true
 
-# Information added by Drupal.org packaging script on 2022-05-05
-version: '8.x-1.12'
+# Information added by Drupal.org packaging script on 2022-06-14
+version: '8.x-1.13'
 project: 'depcalc'
-datestamp: 1651753284
+datestamp: 1655210014

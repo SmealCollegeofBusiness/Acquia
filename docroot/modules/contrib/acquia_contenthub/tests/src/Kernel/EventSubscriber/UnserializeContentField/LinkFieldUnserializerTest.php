@@ -26,7 +26,7 @@ class LinkFieldUnserializerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'depcalc',
     'user',
@@ -49,7 +49,7 @@ class LinkFieldUnserializerTest extends KernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('field_config');
     $this->installEntitySchema('taxonomy_term');
@@ -97,7 +97,7 @@ class LinkFieldUnserializerTest extends KernelTestBase {
 
     $entity_type = $this->prophesize(EntityTypeInterface::class);
     $event = new UnserializeCdfEntityFieldEvent($entity_type->reveal(), 'test', 'link', $mock_field, $meta_data, $stack->reveal());
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::UNSERIALIZE_CONTENT_ENTITY_FIELD, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::UNSERIALIZE_CONTENT_ENTITY_FIELD);
 
     $expected = [
       'en' => [
@@ -116,7 +116,7 @@ class LinkFieldUnserializerTest extends KernelTestBase {
       ],
     ];
 
-    $this->assertEqual($event->getValue(), $expected);
+    $this->assertEquals($expected, $event->getValue());
   }
 
 }

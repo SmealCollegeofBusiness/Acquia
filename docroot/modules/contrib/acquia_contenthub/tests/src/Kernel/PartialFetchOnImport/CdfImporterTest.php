@@ -58,7 +58,7 @@ class CdfImporterTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'taxonomy',
     'user',
@@ -95,7 +95,7 @@ class CdfImporterTest extends ImportExportTestBase {
   /**
    * {@inheritDoc}
    */
-  public function setUp() {
+  public function setup(): void {
     parent::setUp();
 
     $this->installEntitySchema('user');

@@ -27,7 +27,7 @@ class EntityFormDisplayDependencyCollectorTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'field',
     'filter',
@@ -48,7 +48,7 @@ class EntityFormDisplayDependencyCollectorTest extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig('node');
@@ -95,8 +95,8 @@ class EntityFormDisplayDependencyCollectorTest extends KernelTestBase {
 
     /** @var \Drupal\depcalc\DependentEntityWrapper $formDisplayEntityWrapper */
     $formDisplayEntityWrapper = $dependencies[$enabledFormDisplay->uuid()];
-    $this->assertEqual($formDisplayEntityWrapper->getUuid(), $enabledFormDisplay->uuid());
-    $this->assertEqual($enabledFormDisplay->getEntityTypeId(), 'entity_form_display');
+    $this->assertEquals($enabledFormDisplay->uuid(), $formDisplayEntityWrapper->getUuid());
+    $this->assertEquals('entity_form_display', $enabledFormDisplay->getEntityTypeId());
   }
 
   /**

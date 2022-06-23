@@ -127,7 +127,7 @@ class ProcessHighPriorityEntities implements EventSubscriberInterface {
     $entity = $storage->create($default_values);
 
     $pre_entity_save_event = new PreEntitySaveEvent($entity, $stack, $cdf);
-    $dispatcher->dispatch(AcquiaContentHubEvents::PRE_ENTITY_SAVE, $pre_entity_save_event);
+    $dispatcher->dispatch($pre_entity_save_event, AcquiaContentHubEvents::PRE_ENTITY_SAVE);
     $entity = $pre_entity_save_event->getEntity();
 
     $entity->save();

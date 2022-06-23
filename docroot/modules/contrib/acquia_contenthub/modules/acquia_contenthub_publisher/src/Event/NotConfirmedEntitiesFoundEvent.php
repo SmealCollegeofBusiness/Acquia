@@ -2,7 +2,7 @@
 
 namespace Drupal\acquia_contenthub_publisher\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event for not entities not yet in a confirmed state.

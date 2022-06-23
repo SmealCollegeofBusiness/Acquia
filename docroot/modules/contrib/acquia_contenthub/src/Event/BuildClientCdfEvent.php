@@ -3,7 +3,7 @@
 namespace Drupal\acquia_contenthub\Event;
 
 use Acquia\ContentHubClient\CDF\ClientCDFObject;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The event dispatched to build the clientcdf.

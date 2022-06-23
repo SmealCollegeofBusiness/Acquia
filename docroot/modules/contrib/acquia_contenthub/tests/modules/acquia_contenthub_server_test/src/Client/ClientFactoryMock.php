@@ -43,11 +43,11 @@ class ClientFactoryMock extends ClientFactory {
     ];
 
     $this->client = new ContentHubClientMock(
-      $config,
       $this->loggerFactory->get('acquia_contenthub'),
       $this->settings,
       $this->settings->getMiddleware(),
-      $this->dispatcher
+      $this->dispatcher,
+      $config
     );
 
     return $this->client;

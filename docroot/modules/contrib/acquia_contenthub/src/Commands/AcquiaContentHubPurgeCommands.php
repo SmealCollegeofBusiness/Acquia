@@ -211,7 +211,7 @@ class AcquiaContentHubPurgeCommands extends DrushCommands {
     ];
 
     $dispatcher = \Drupal::service('event_dispatcher');
-    return new ContentHubClient($config, $this->logger(), $new_settings, $new_settings->getMiddleware(), $dispatcher);
+    return new ContentHubClient($this->logger(), $new_settings, $new_settings->getMiddleware(), $dispatcher, $config);
   }
 
 }

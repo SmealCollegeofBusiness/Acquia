@@ -165,7 +165,7 @@ class ContentHubEntityEnqueuer {
    */
   protected function dispatchEvent(EntityInterface $entity, string $op): ContentHubEntityEligibilityEvent {
     $event = new ContentHubEntityEligibilityEvent($entity, $op);
-    $this->dispatcher->dispatch(ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY, $event);
+    $this->dispatcher->dispatch($event, ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY);
 
     return $event;
   }

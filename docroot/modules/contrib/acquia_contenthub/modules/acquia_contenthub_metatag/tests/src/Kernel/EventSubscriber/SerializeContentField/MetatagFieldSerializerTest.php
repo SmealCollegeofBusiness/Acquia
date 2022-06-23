@@ -30,7 +30,7 @@ class MetatagFieldSerializerTest extends AcquiaContentHubSerializerTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub_metatag',
     'metatag',
     'token',

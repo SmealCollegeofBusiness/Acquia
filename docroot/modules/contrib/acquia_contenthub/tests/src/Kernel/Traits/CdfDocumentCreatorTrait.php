@@ -46,8 +46,9 @@ trait CdfDocumentCreatorTrait {
    */
   protected function getCdfData(string $fixture_filename) {
     $version_directory = $this->getDrupalVersion();
+    $path = \Drupal::service('module_handler')->getModule('acquia_contenthub')->getPath();
     $path_to_fixture = sprintf("%s/tests/fixtures/import/$version_directory/%s",
-      drupal_get_path('module', 'acquia_contenthub'),
+      $path,
       $fixture_filename
     );
     $json = file_get_contents($path_to_fixture);

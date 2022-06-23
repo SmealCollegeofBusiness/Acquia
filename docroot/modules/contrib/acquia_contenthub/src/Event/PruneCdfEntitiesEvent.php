@@ -3,7 +3,7 @@
 namespace Drupal\acquia_contenthub\Event;
 
 use Acquia\ContentHubClient\CDFDocument;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Use to remove entities a subscriber does not want to import.

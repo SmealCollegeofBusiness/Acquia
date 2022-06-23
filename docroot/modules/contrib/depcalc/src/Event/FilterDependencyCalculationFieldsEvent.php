@@ -4,7 +4,7 @@ namespace Drupal\depcalc\Event;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The FilterDependencyCalculationFieldsEvent event.

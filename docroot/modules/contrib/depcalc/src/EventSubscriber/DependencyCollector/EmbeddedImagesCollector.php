@@ -90,7 +90,7 @@ class EmbeddedImagesCollector extends BaseDependencyCollector {
    *   Files list.
    */
   protected function getAttachedFiles(EntityInterface $entity, string $module = 'file'): array {
-    $criteria = new Condition('AND');
+    $criteria = $this->database->condition('AND');
     $criteria->condition('type', $entity->getEntityTypeId())
       ->condition('count', '0', '>')
       ->condition('module', [$module], 'in')

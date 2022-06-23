@@ -57,6 +57,7 @@ class IgnoreFilter extends ConfigFilterBase implements ContainerFactoryPluginInt
     $container->get('module_handler')->invokeAll('config_ignore_settings_alter', [&$ignored]);
     // Set the list in the plugin configuration.
     $configuration['ignored'] = $ignored;
+    $configuration['enable_export_filtering'] = (bool) $container->get('config.factory')->get('config_ignore.settings')->get('enable_export_filtering');
 
     return new static(
       $configuration,
@@ -174,10 +175,70 @@ class IgnoreFilter extends ConfigFilterBase implements ContainerFactoryPluginInt
       if (!array_key_exists($name, $data)) {
         $data[$name] = [];
       }
-      $filtered_data[$name] = $this->activeRead($name, $data[$name]);
+      $name_data = isset($data[$name]) ? $data[$name] : [];
+      $filtered_data[$name] = $this->activeRead($name, $name_data);
     }
 
     return array_filter($filtered_data);
+  }
+
+  /**
+   * Write from the source configuration.
+   *
+   * This method will write the configuration from the source config store.
+   * But rather than just straight up returning the value it will check if
+   * a nested config key is set to be ignored and set only that value on the
+   * data to be filtered.
+   *
+   * @param string $name
+   *   The name of the configuration to write.
+   * @param mixed $data
+   *   The data to be filtered.
+   *
+   * @return mixed
+   *   The data filtered or written from the source storage.
+   */
+  protected function sourceWrite($name, $data) {
+    $keys = [];
+    foreach ($this->configuration['ignored'] as $ignored) {
+      // Split the ignore settings so that we can ignore individual keys.
+      $ignored = explode(':', $ignored);
+      if (self::wildcardMatch($ignored[0], $name)) {
+        if (count($ignored) == 1) {
+          // If one of the definitions does not have keys ignore the
+          // whole config.
+          return $this->source->read($name);
+        }
+        else {
+          // Add the sub parts to ignore to the keys.
+          $keys[] = $ignored[1];
+        }
+      }
+
+    }
+
+    $source = $this->source->read($name);
+    if ($source !== FALSE) {
+      foreach ($keys as $key) {
+          $parts = explode('.', $key);
+
+          if (count($parts) == 1 && isset($source[$key])) {
+            $data[$key] = $source[$key];
+          }
+          else {
+            $value = NestedArray::getValue($source, $parts, $key_exists);
+            if ($key_exists) {
+              // Enforce the value if it existed in the active config.
+              NestedArray::setValue($data, $parts, $value, TRUE);
+            }
+            else {
+              NestedArray::unsetValue($data, $parts);
+            }
+          }
+      }
+    }
+
+    return $data;
   }
 
   /**
@@ -190,6 +251,38 @@ class IgnoreFilter extends ConfigFilterBase implements ContainerFactoryPluginInt
     }
 
     return $data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function filterWrite($name, array $data) {
+    // Write from the file storage when the name is in the ignored list.
+    if ($this->configuration['enable_export_filtering'] && $this->matchConfigName($name)) {
+      return $this->sourceWrite($name, $data);
+    }
+
+    return $data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function filterDeleteAll($prefix, $delete) {
+    if (empty($prefix)) {
+      return FALSE;
+    }
+    return parent::filterDeleteAll($prefix, $delete);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function filterDelete($name, $delete) {
+    if ($this->configuration['enable_export_filtering'] && $this->matchConfigName($name)) {
+      return FALSE;
+    }
+    return parent::filterDelete($name, $delete);
   }
 
   /**

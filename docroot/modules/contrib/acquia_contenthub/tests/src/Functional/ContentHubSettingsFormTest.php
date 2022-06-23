@@ -43,7 +43,7 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'acquia_contenthub_test',
     'acquia_contenthub_server_test',
@@ -53,7 +53,7 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->authorizedUser = $this->drupalCreateUser([
@@ -127,7 +127,8 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
       'webhook' => 'httpp://invalid-url.com',
     ];
 
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Register Site');
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Register Site');
     $session->pageTextContains('Acquia Content Hub Hostname field is required.');
     $session->pageTextContains('API Key field is required.');
     $session->pageTextContains('Secret Key field is required.');
@@ -154,7 +155,8 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
     ];
 
     // Successful attempt to register client.
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Register Site');
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Register Site');
     $session->pageTextContains('Site successfully connected to Content Hub. To change connection settings, unregister the site first.');
     $session->statusCodeEquals(200);
     $session->buttonNotExists('Register Site');
@@ -181,7 +183,8 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
     ];
 
     // Successful attempt to register client, but webhook url is unreachable.
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Register Site');
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Register Site');
     $session->pageTextContains('Site successfully connected to Content Hub. To change connection settings, unregister the site first.');
     $session->statusCodeEquals(200);
 
@@ -191,13 +194,15 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
 
     // Failed attempt to update url.
     $settings = ['webhook' => MockDataProvider::ALREADY_REGISTERED_WEBHOOK];
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Update Public URL');
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Update Public URL');
     $session->pageTextContains('This webhook is already being used.');
     $session->pageTextContains('Please insert another one, or unregister the existing one first.');
 
     // Successful attempt to update url.
     $settings = ['webhook' => MockDataProvider::VALID_WEBHOOK_URL];
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Update Public URL');
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Update Public URL');
     $session->pageTextContains('Site successfully connected to Content Hub. To change connection settings, unregister the site first.');
     $session->pageTextContains('Successfully Updated Public URL.');
   }
@@ -218,16 +223,19 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
       'webhook' => MockDataProvider::VALID_WEBHOOK_URL,
     ];
 
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Register Site');
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Register Site');
     $session->pageTextContains(sprintf('Could not get authorization from Content Hub to register client %s. Are your credentials inserted correctly?', $settings['client_name']));
     $session->pageTextContains('There is a problem connecting to Acquia Content Hub. Please ensure that your hostname and credentials are correct.');
 
     $settings['hostname'] = MockDataProvider::VALID_HOSTNAME;
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Register Site');
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Register Site');
     $session->pageTextContains(sprintf('[4001] Not Found: Customer Key %s could not be found.', $settings['api_key']));
 
     $settings['api_key'] = MockDataProvider::VALID_API_KEY;
-    $this->drupalPostForm(self::CH_SETTINGS_FORM_PATH, $settings, 'Register Site');
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Register Site');
     $session->pageTextContains('[4001] Signature for the message does not match expected signature for API key.');
   }
 

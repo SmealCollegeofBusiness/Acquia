@@ -58,7 +58,7 @@ class ClientCDFTest extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_publisher',
@@ -69,7 +69,7 @@ class ClientCDFTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->clientUuid = '2d5ddb2b-b8dd-42af-be20-35d409eb473f';
@@ -163,11 +163,11 @@ class ClientCDFTest extends EntityKernelTestBase {
     $export_query->execute();
 
     $event = new BuildClientCdfEvent(ClientCDFObject::create($this->clientUuid, ['settings' => $clientSettings->toArray()]));
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::BUILD_CLIENT_CDF);
     $baseClient = $event->getCdf();
 
     $event = new BuildClientCdfEvent(ClientCDFObject::create($this->clientUuid, ['settings' => $clientSettings->toArray()]));
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::BUILD_CLIENT_CDF);
     $successiveClient = $event->getCdf();
 
     $this->assertTrue(($baseClient->getAttribute('hash')->getValue() === $successiveClient->getAttribute('hash')->getValue()), 'Hashes match after two seconds.');

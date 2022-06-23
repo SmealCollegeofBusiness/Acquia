@@ -54,6 +54,13 @@ Examples: <ul>
       '#default_value' => implode(PHP_EOL, $config_ignore_settings->get('ignored_config_entities')),
       '#size' => 60,
     ];
+
+    $form['enable_export_filtering'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable export filtering'),
+      '#description' => $this->t('By default, configuration values are ignored on import only. Enable to also ignore changes during configuration export operations.'),
+      '#default_value' => $config_ignore_settings->get('enable_export_filtering'),
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -67,6 +74,7 @@ Examples: <ul>
     $config_ignore_settings_array = array_filter($config_ignore_settings_array);
     $config_ignore_settings_array = array_values($config_ignore_settings_array);
     $config_ignore_settings->set('ignored_config_entities', $config_ignore_settings_array);
+    $config_ignore_settings->set('enable_export_filtering', $values['enable_export_filtering']);
     $config_ignore_settings->save();
     parent::submitForm($form, $form_state);
 

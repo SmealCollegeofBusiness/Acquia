@@ -5,7 +5,7 @@ namespace Drupal\acquia_contenthub\Event;
 use Acquia\ContentHubClient\CDFDocument;
 use Drupal\acquia_contenthub\EntityCdfSerializer;
 use Drupal\depcalc\DependencyStack;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * An event for responding to failed imports.

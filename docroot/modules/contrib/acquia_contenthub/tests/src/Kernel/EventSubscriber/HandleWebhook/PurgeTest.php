@@ -68,7 +68,7 @@ class PurgeTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'acquia_contenthub_publisher',
     'acquia_contenthub_server_test',
@@ -140,8 +140,8 @@ class PurgeTest extends EntityKernelTestBase {
     $this->purge->onHandleWebhook($event);
 
     // After purge.
-    $this->assertEqual(0, $queue->numberOfItems());
-    $this->assertEqual(0, $this->getExportTableCount());
+    $this->assertEquals($queue->numberOfItems(), 0);
+    $this->assertEquals($this->getExportTableCount(), 0);
   }
 
   /**

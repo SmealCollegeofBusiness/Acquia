@@ -40,7 +40,7 @@ class IsPathAliasForUnpublishedContentTest extends UnitTestCase {
   /**
    * Setup function.
    */
-  public function setup() {
+  public function setUp(): void {
     parent::setUp();
     // Initializing Services.
     $this->matcher = $this->prophesize(UrlMatcherInterface::class);

@@ -4,7 +4,7 @@ namespace Drupal\acquia_contenthub\Event;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\depcalc\DependencyStack;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event to clean up stubs after import.

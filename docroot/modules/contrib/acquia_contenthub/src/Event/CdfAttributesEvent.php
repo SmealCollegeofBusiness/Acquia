@@ -5,7 +5,7 @@ namespace Drupal\acquia_contenthub\Event;
 use Acquia\ContentHubClient\CDF\CDFObject;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\depcalc\DependentEntityWrapperInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The event which adds custom CDF attributes to the CDF objects.

@@ -2,7 +2,7 @@
 
 namespace Drupal\acquia_contenthub\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event dispatched on webhook deletion.

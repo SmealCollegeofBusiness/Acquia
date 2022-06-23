@@ -57,9 +57,9 @@ class TaxonomyTermMatch implements EventSubscriberInterface {
 
     $parents = $this->extractParentAttribute($object);
     $label = $this->getTermLabel($object);
-
+    $is_fired_from_stub = $event->isFiredFromStubCreation();
     foreach ($parents as $parent) {
-      $term = $this->findTaxonomyTerm($label, $vocabulary_name, $parent, $event->getStack());
+      $term = $this->findTaxonomyTerm($label, $vocabulary_name, $parent, $event->getStack(), $is_fired_from_stub);
       if (empty($term)) {
         continue;
       }
@@ -151,13 +151,15 @@ class TaxonomyTermMatch implements EventSubscriberInterface {
    *   Term's parent UUID.
    * @param \Drupal\depcalc\DependencyStack $stack
    *   The Dependency Stack.
+   * @param bool $is_fired_from_stub_creation
+   *   Whether this event fired from stub creation or not.
    *
    * @return \Drupal\taxonomy\Entity\Term|null
    *   Taxonomy term if exists, NULL otherwise.
    *
    * @throws \Exception
    */
-  protected function findTaxonomyTerm(?string $label, ?string $vocabulary, string $parent, DependencyStack $stack) {
+  protected function findTaxonomyTerm(?string $label, ?string $vocabulary, string $parent, DependencyStack $stack, bool $is_fired_from_stub_creation) {
     if (!$label || !$vocabulary) {
       return NULL;
     }
@@ -167,12 +169,18 @@ class TaxonomyTermMatch implements EventSubscriberInterface {
       // The stack should ALWAYS have a term representing the parent. This
       // could be a local or remote term, but the remote uuid should always
       // retrieve it.
+      // If this event is fired from stub creation then
+      // there's a possibility parent might not have been processed yet.
       if (!$parent_term) {
-        throw new \Exception(sprintf("Taxonomy term %s could not be found in the dependency stack during DataTamper.", $parent));
+        if (!$is_fired_from_stub_creation) {
+          throw new \Exception(sprintf("Taxonomy term %s could not be found in the dependency stack during DataTamper.", $parent));
+        }
+        return NULL;
       }
       $parent = $parent_term->getId();
     }
 
+    /** @var \Drupal\taxonomy\Entity\Term[] $terms */
     $terms = $this->getTermStorage()->loadByProperties([
       'name' => $label,
       'vid' => $vocabulary,

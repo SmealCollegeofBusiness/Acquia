@@ -30,7 +30,7 @@ class RedirectCollectorTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'acquia_contenthub',
     'field',
@@ -55,7 +55,7 @@ class RedirectCollectorTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installConfig('node');

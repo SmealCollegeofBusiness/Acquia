@@ -33,7 +33,7 @@ class HashCdfAttributeTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->dispatcher = new EventDispatcher();
@@ -71,7 +71,7 @@ class HashCdfAttributeTest extends UnitTestCase {
     $cdf = new CDFObject($type, $uuid, $created, $modified, $origin, $metadata);
 
     $event = new CdfAttributesEvent($cdf, $entity, $wrapper);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES);
 
     $hash_attribute = $event->getCdf()->getAttribute('hash');
 
@@ -80,7 +80,7 @@ class HashCdfAttributeTest extends UnitTestCase {
     $expected = [
       CDFObject::LANGUAGE_UNDETERMINED => $wrapper->getHash(),
     ];
-    $this->assertArrayEquals($expected, $hash_attribute->getValue());
+    $this->assertEquals($expected, $hash_attribute->getValue());
   }
 
   /**

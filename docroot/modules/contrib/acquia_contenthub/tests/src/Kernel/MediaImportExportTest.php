@@ -36,7 +36,7 @@ class MediaImportExportTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'node',
@@ -54,7 +54,7 @@ class MediaImportExportTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setup(): void {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installSchema('user', ['users_data']);

@@ -24,7 +24,7 @@ class OptionalDependencyCalculationTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'field',
@@ -48,7 +48,7 @@ class OptionalDependencyCalculationTest extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  public function setUp() {
+  public function setup(): void {
     parent::setUp();
     $this->installSchema('acquia_contenthub_publisher', ['acquia_contenthub_publisher_export_tracking']);
     $this->installConfig('node');
@@ -111,11 +111,11 @@ class OptionalDependencyCalculationTest extends KernelTestBase {
     $entities = [];
     // Get CDF without dependencies.
     $cdf_objects = $this->commonActionService->getEntityCdf($node, $entities, TRUE, FALSE);
-    $this->assertEqual(1, count($cdf_objects), 'There is only 1 CDF object.');
+    $this->assertEquals(count($cdf_objects), 1, 'There is only 1 CDF object.');
     /** @var \Acquia\ContentHubClient\CDF\CDFObject $cdf */
     $cdf = reset($cdf_objects);
     // Only cdf object is for given node.
-    $this->assertEqual($node->uuid(), $cdf->getUuid());
+    $this->assertEquals($cdf->getUuid(), $node->uuid());
     $this->assertEmpty($cdf->getDependencies());
     $this->assertEmpty($cdf->getModuleDependencies());
 

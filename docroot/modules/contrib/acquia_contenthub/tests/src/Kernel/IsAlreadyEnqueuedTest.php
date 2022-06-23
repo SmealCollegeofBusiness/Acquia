@@ -19,7 +19,7 @@ class IsAlreadyEnqueuedTest extends QueueingTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'node',
     'user',
   ];

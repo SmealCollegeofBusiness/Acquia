@@ -25,7 +25,7 @@ class EntityLanguagesAttributeTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'depcalc',
     'system',
@@ -57,7 +57,7 @@ class EntityLanguagesAttributeTest extends EntityKernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('node');
     $this->installSchema('node', ['node_access']);

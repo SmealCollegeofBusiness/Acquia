@@ -25,7 +25,7 @@ class RedirectResourceTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'depcalc',
     'user',
@@ -49,7 +49,7 @@ class RedirectResourceTest extends KernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('field_config');
     $this->installEntitySchema('redirect');
@@ -77,13 +77,13 @@ class RedirectResourceTest extends KernelTestBase {
     $redirect->save();
 
     $event = new PreEntitySaveEvent($redirect, new DependencyStack(), $cdf);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::PRE_ENTITY_SAVE, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::PRE_ENTITY_SAVE);
 
     /** @var \Drupal\redirect\Entity\Redirect $entity */
     $entity = $event->getEntity();
 
     $source = $entity->getSource();
-    $this->assertEqual($source, $expected_source);
+    $this->assertEquals($expected_source, $source);
 
   }
 

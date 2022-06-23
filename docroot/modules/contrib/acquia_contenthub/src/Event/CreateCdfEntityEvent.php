@@ -4,7 +4,7 @@ namespace Drupal\acquia_contenthub\Event;
 
 use Acquia\ContentHubClient\CDF\CDFObject;
 use Drupal\Core\Entity\EntityInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The event dispatched to create new CDF objects.

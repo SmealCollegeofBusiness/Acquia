@@ -58,7 +58,7 @@ class DependencyCalculatorTest extends KernelTestBase {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installSchema('file', ['file_usage']);
@@ -132,9 +132,9 @@ class DependencyCalculatorTest extends KernelTestBase {
     // Calculate dependencies for the last entity from the $entities list.
     /** @var \Drupal\Core\Entity\EntityInterface $entity */
     $actual_entities = $this->getEntityDependencies($entity);
-    $this->assertEqual($actual_entities, $expected_entities);
+    $this->assertEquals($expected_entities, $actual_entities);
     $actual_modules = $this->getModuleDependencies($entity);
-    $this->assertEqual($actual_modules, $expected_modules);
+    $this->assertEquals($expected_modules, $actual_modules);
   }
 
   /**

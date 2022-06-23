@@ -34,7 +34,7 @@ class MenuDependencyTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('user');
     $this->installEntitySchema('node');
@@ -103,8 +103,8 @@ class MenuDependencyTest extends KernelTestBase {
     $subscriber = new MenuItemContentDependencyCollector();
     $subscriber->onCalculateDependencies($event);
 
-    $this->assertEqual(array_keys($wrapper->getDependencies()), $expected_entities);
-    $this->assertEqual($wrapper->getModuleDependencies(), $expected_modules);
+    $this->assertEquals($expected_entities, array_keys($wrapper->getDependencies()));
+    $this->assertEquals($expected_modules, $wrapper->getModuleDependencies());
   }
 
   /**

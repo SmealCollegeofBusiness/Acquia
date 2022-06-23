@@ -5,18 +5,20 @@ namespace Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
+use Drupal\acquia_contenthub\Libs\Traits\HandleResponseTrait;
 use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Gets files during preview in content as a service.
  *
- * @package Drupal\acquia_contenthub_preview\EventSubscriber\HandleWebhook
+ * @package Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook
  */
 class GetFile implements EventSubscriberInterface {
 
-  use HandleWebhookTrait;
+  use HandleResponseTrait;
 
   /**
    * The common actions object.
@@ -76,8 +78,8 @@ class GetFile implements EventSubscriberInterface {
     $file_scheme = $payload['cdf']['scheme'];
 
     if ($this->streamWrapperManager->isValidScheme($file_scheme) && is_file($file_uri)) {
-      $binary = new BinaryFileResponse($file_uri, 200, [], ($file_scheme === 'private' ? FALSE : TRUE), 'inline');
-      $response = $this->getResponse($event, '', 200, $binary);
+      $binary = new BinaryFileResponse($file_uri, Response::HTTP_OK, [], $file_scheme !== 'private', 'inline');
+      $response = $this->getResponse($event, '', Response::HTTP_OK, $binary);
       $event->setResponse($response);
       $event->stopPropagation();
     }

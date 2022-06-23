@@ -16,7 +16,7 @@ class ConfigEntityTranslationTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'block_content',
     'language',
     'locale',
@@ -64,7 +64,7 @@ class ConfigEntityTranslationTest extends ImportExportTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installSchema('acquia_contenthub_publisher', ['acquia_contenthub_publisher_export_tracking']);

@@ -146,14 +146,17 @@ class LayoutBuilderDependencyCalculatorTest extends KernelTestBase {
     $this->assertTrue(in_array($view->uuid(), $actual_entities));
 
     $actual_modules = $this->getModuleDependencies($entity);
-    $this->assertEqual($actual_modules, [
-      'user',
-      'block_content',
-      'layout_builder',
-      'layout_discovery',
-      'views',
-      'text'
-    ]);
+    $this->assertEquals(
+      [
+        'user',
+        'block_content',
+        'layout_builder',
+        'layout_discovery',
+        'views',
+        'text',
+      ],
+      $actual_modules
+    );
 
     $node = \Drupal::entityTypeManager()->getStorage('node')->load(1);
 
@@ -167,7 +170,7 @@ class LayoutBuilderDependencyCalculatorTest extends KernelTestBase {
     $this->assertTrue(in_array($view->uuid(), $actual_entities));
 
     $actual_modules = $this->getModuleDependencies($node);
-    $this->assertEqual($actual_modules, [
+    $this->assertEquals($actual_modules, [
       'node',
       'layout_discovery',
       'block_content',

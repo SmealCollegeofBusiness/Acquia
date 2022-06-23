@@ -23,7 +23,7 @@ class LayoutBuilderInlineBlockStubCleanupTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'depcalc',
     'block',
@@ -45,7 +45,7 @@ class LayoutBuilderInlineBlockStubCleanupTest extends KernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installEntitySchema('block_content');
@@ -67,7 +67,7 @@ class LayoutBuilderInlineBlockStubCleanupTest extends KernelTestBase {
     $this->createEntity();
 
     $event = new CleanUpStubsEvent($block_content, new DependencyStack());
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::CLEANUP_STUBS, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::CLEANUP_STUBS);
 
     // Inline block usage is not set, should not stop propagation.
     $this->assertFalse($event->isPropagationStopped());
@@ -76,7 +76,7 @@ class LayoutBuilderInlineBlockStubCleanupTest extends KernelTestBase {
     $this->addInlineBlockUsage($block_content->id());
 
     $event = new CleanUpStubsEvent($block_content, new DependencyStack());
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::CLEANUP_STUBS, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::CLEANUP_STUBS);
 
     // Inline block usage is there so propagation should be stopped.
     $this->assertTrue($event->isPropagationStopped());
@@ -87,7 +87,7 @@ class LayoutBuilderInlineBlockStubCleanupTest extends KernelTestBase {
         'info' => $block_content->get('info')->value,
       ]);
 
-    $this->assertEqual(count($blocks), 1, 'Only 1 block should be after subscriber run');
+    $this->assertEquals(1, count($blocks), 'Only 1 block should be after subscriber run');
   }
 
   /**

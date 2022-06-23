@@ -27,67 +27,84 @@ service: acquia_contenthub
 # For advanced needs,
 # @see https://github.com/acquia/orca/blob/main/docs/advanced-usage.md
 
-
-# Validate the formatting of the pipeline.yaml file.
-validate_config: true
-
 # The environment container image is used to prepare code versions
 # and tooling for tests during pre, post and build stages.
 environment_image:
   file: ".acquia/Dockerfile.ci"
   context: "."
-  cache_from: acquia_contenthub-environment:7.4-cli-buster
-  # The build_matrix is only required for testing multiple versions.
-  build_matrix:
-    base_images:
-      - php:7.4-cli-buster
 
 _orca_steps: &orca_steps
-  - steps:
-      - |
-        cp -ar /acquia /ramfs && df -hT
-        export CI_WORKSPACE=/ramfs${CI_WORKSPACE}
-        cd ${CI_WORKSPACE}
-        ../orca/bin/ci/before_install.sh && error=false || error=true
-        if [ "$error" = "false" ]; then
-          ./tests/ci/before_install.sh && error=false || error=true
-        fi
-        # Switch to PHP8. The version will depend on the version(s) installed in your Dockerfile.
-        # The template provides version 8.0.
-        if [ "$error" = "false" && "$JENKINS_PHP_VERSION" = 8.0 ]; then
-          update-alternatives --install /usr/local/bin/php php /usr/bin/php8.0 80
-          php -v
-        fi
-        # Create the test fixture and place the SUT.
-        if [ "$error" = "false" ]; then
-          ../orca/bin/ci/install.sh && error=false || error=true
-        fi
-        if [ "$error" = "false" ]; then
-          ./tests/ci/install.sh && error=false || error=true
-        fi
-        if [ "$error" = "false" ]; then
-          # Display details about the fixture.
-          ../orca/bin/ci/before_script.sh && error=false || error=true
-        fi
-        if [ "$error" = "false" ]; then
-          # Run the test script.
-          ../orca/bin/ci/script.sh && error=false || error=true
-        fi
-        if [ "$error" = "false" ]; then
-          ./tests/ci/script.sh && error=false || error=true
-        fi
-        if [ "$error" = "true" ]; then
-          echo "Running after failure";
-          ../orca/bin/ci/after_failure.sh;
-          if [ "$ALLOWED_FAILURE" = "true" ]; then
-            exit 0;
-          else
-            exit 1;
-          fi
+  steps:
+    # The following operations should happen on the RAM disk:
+    # 1. All PHP code that gets executed during tests. (Because most PHP
+    #    code will only be executed once, making PHP's built-in OPCache
+    #    ineffective. Acquia CI does not handle massive disk I/O
+    #    concurrency well, and that is exactly what happens when executing
+    #    multiple test jobs each testing a PHP application with many files
+    #    on disk: just Drupal core alone already requires a significant
+    #    number of files to be read from disk.
+    # 2. SQLite database. The SQLite database lives on disk. Executing
+    #    Drupal test suites tends to trigger many database queries, which
+    #    in turn result in disk I/O.
+    #    When not paying attention to these points, ORCA test suites can
+    #    easily be significantly slower on Acquia CI than on TravisCI
+    #    (which has a different disk I/O model). But when taken into
+    #    account, ORCA on Acquia CI tends to *FAST*!
+    #    If you were to run out of space on the RAM disk, simply file a
+    #    DEVOPS ticket to bump the memory limit for your project; they will
+    #    provision you more.
+    # @see https://docs.docker.com/storage/tmpfs/
+    # @see https://github.com/acquia/devops-pipeline/pull/275
+    -
+      - cp -ar /acquia /ramfs  &&  df -hT
+      - export CI_WORKSPACE=/ramfs${CI_WORKSPACE}
+    - |
+      cd /ramfs${CI_WORKSPACE}
+      ../orca/bin/ci/before_install.sh && error=false || error=true
+      if [ "$error" = "false" ]; then
+        ./tests/ci/before_install.sh
+      fi
+    - |
+      cd /ramfs${CI_WORKSPACE}
+      # Switch to PHP8.1. The version will depend on the version(s) installed in your Dockerfile.
+      # The template provides version 8.1.
+      if [ "$JENKINS_PHP_VERSION" = 8.1 ]; then
+        update-alternatives --install /usr/local/bin/php php /usr/bin/php8.1 80
+        php -v
+      fi
+    - |
+      cd /ramfs${CI_WORKSPACE}
+      ../orca/bin/ci/install.sh && error=false || error=true
+      if [ "$error" = "false" ]; then
+        ./tests/ci/install.sh
+      fi
+    -
+      - cd /ramfs${CI_WORKSPACE}
+      - ../orca/bin/ci/before_script.sh
+    - |
+      cd /ramfs${CI_WORKSPACE}
+      ../orca/bin/ci/script.sh && error=false || error=true
+      if [ "$error" = "false" ]; then
+        ./tests/ci/script.sh
+      fi
+      if [ "$error" = "true" ]; then
+        echo "Running after failure";
+        ../orca/bin/ci/after_failure.sh;
+        if [ "$ALLOWED_FAILURE" = "true" ]; then
+          exit 0;
         else
-          echo "Running after success";
-          ../orca/bin/ci/after_success.sh;
+          exit 1;
         fi
+      else
+        echo "Running after success";
+        ../orca/bin/ci/after_success.sh;
+      fi
+
+_orca_job: &orca_job
+  <<: *orca_steps
+_orca_job_allow_failures: &orca_job_allow_failures
+  - ignore_failures: true
+    <<: *orca_steps
 
 # -- Continuous Integration --
 # Pre-build runs after building the environment image, and relies on it to
@@ -95,61 +112,62 @@ _orca_steps: &orca_steps
 pre_build:
   static_code_analysis:
     - args: --env ORCA_JOB=STATIC_CODE_ANALYSIS
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_on_oldest_supported:
     - args: --env ORCA_JOB=INTEGRATED_TEST_ON_OLDEST_SUPPORTED
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_on_latest_lts:
     - args: --env ORCA_JOB=INTEGRATED_TEST_ON_LATEST_LTS
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_on_prev_minor:
     - args: --env ORCA_JOB=INTEGRATED_TEST_ON_PREVIOUS_MINOR
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_from_prev_minor:
     - args: --env ORCA_JOB=INTEGRATED_UPGRADE_TEST_FROM_PREVIOUS_MINOR
-      <<: *orca_steps
+      <<: *orca_job
   isolated_test_on_current:
     - args: --env ORCA_JOB=ISOLATED_TEST_ON_CURRENT
-      <<: *orca_steps
+      <<: *orca_job
   isolated_test_on_current_php8:
-    - args: --env ORCA_JOB=ISOLATED_TEST_ON_CURRENT --env JENKINS_PHP_VERSION=8.0
-      <<: *orca_steps
+    - args: --env ORCA_JOB=ISOLATED_TEST_ON_CURRENT --env JENKINS_PHP_VERSION=8.1
+      <<: *orca_job
   integrated_test_on_current:
     - args: --env ORCA_JOB=INTEGRATED_TEST_ON_CURRENT
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_to_next_minor:
     - args: --env ORCA_JOB=INTEGRATED_UPGRADE_TEST_TO_NEXT_MINOR
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_to_next_minor_dev:
     - args: --env ORCA_JOB=INTEGRATED_UPGRADE_TEST_TO_NEXT_MINOR_DEV --env ALLOWED_FAILURE=true
-      <<: *orca_steps
+      <<: *orca_job
   isolated_test_on_current_dev:
     - args: --env ORCA_JOB=ISOLATED_TEST_ON_CURRENT_DEV
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_on_current_dev:
     - args: --env ORCA_JOB=INTEGRATED_TEST_ON_CURRENT_DEV
-      <<: *orca_steps
+      <<: *orca_job
   loose_deprecated_code_scan:
     - args: --env ORCA_JOB=LOOSE_DEPRECATED_CODE_SCAN --env ALLOWED_FAILURE=true
-      <<: *orca_steps
+      <<: *orca_job
   strict_deprecated_code_scan:
     - args: --env ORCA_JOB=STRICT_DEPRECATED_CODE_SCAN --env ALLOWED_FAILURE=true
-      <<: *orca_steps
+      <<: *orca_job
   deprecated_code_scan_w_contrib:
     - args: --env ORCA_JOB=DEPRECATED_CODE_SCAN_W_CONTRIB --env ALLOWED_FAILURE=true
-      <<: *orca_steps
+      <<: *orca_job
   isolated_test_on_next_minor:
     - args: --env ORCA_JOB=ISOLATED_TEST_ON_NEXT_MINOR
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_on_next_minor:
     - args: --env ORCA_JOB=INTEGRATED_TEST_ON_NEXT_MINOR
-      <<: *orca_steps
+      <<: *orca_job
   isolated_test_on_next_minor_dev:
     - args: --env ORCA_JOB=ISOLATED_TEST_ON_NEXT_MINOR_DEV --env ALLOWED_FAILURE=true
-      <<: *orca_steps
+      <<: *orca_job
   integrated_test_on_next_minor_dev:
     - args: --env ORCA_JOB=INTEGRATED_TEST_ON_NEXT_MINOR_DEV --env ALLOWED_FAILURE=true
-      <<: *orca_steps
+      <<: *orca_job
+
   # Uncomment the following four jobs to enable the corresponding tests once
   # the next major version of Drupal core has an alpha release or earlier.
   # Until then it's wasteful to use CI jobs on them, even if they exit early.
@@ -165,20 +183,16 @@ pre_build:
   # integrated_test_on_next_major_latest_minor_dev
   #   - args: --env ORCA_JOB=INTEGRATED_TEST_ON_NEXT_MAJOR_LATEST_MINOR_DEV
   #     <<: *orca_steps
+
   isolated_upgrade_test_to_next_major_beta_later:
     - args: --env ORCA_JOB=ISOLATED_UPGRADE_TEST_TO_NEXT_MAJOR_BETA_OR_LATER
-      <<: *orca_steps
+      <<: *orca_job
   isolated_upgrade_test_to_next_major_dev:
     - args: --env ORCA_JOB=ISOLATED_UPGRADE_TEST_TO_NEXT_MAJOR_DEV --env ALLOWED_FAILURE=true
-      <<: *orca_steps
+      <<: *orca_job
 
   security_composition_analysis:
     required: true
-  # Unit test cases are already ran using ORCA job, so we don't need to run them again seperately.
-  # unit_tests is commented until we figure out how to get reports of testcases from ORCA.
-  # unit_tests:
-  # - steps:
-  #  - XDEBUG_MODE=coverage $CI_WORKSPACE/phpunit --coverage-clover=phpunit-coverage-result.xml --log-junit=phpunit-execution-result.xml
 
   # code_analysis is option for sonarqube if you have group and team name added on top of pipeline.yaml
   # https://github.com/acquia/devops-pipeline/commit/b707527f72a56e352e0975ac9482504e34603b7c

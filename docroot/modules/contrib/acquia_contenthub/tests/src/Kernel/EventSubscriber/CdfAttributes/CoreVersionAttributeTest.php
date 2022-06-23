@@ -21,7 +21,7 @@ class CoreVersionAttributeTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub_server_test',
     'acquia_contenthub',
     'depcalc',
@@ -40,7 +40,7 @@ class CoreVersionAttributeTest extends KernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->dispatcher = $this->container->get('event_dispatcher');
@@ -58,7 +58,7 @@ class CoreVersionAttributeTest extends KernelTestBase {
     $cdf = ClientCDFObject::create('uuid', ['settings' => ['name' => 'test']]);
 
     $event = new BuildClientCdfEvent($cdf);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::BUILD_CLIENT_CDF);
     $core_attribute = $event->getCdf()->getAttribute('drupal_version');
     $this->assertNotNull($core_attribute);
     $this->assertEquals(CDFAttribute::TYPE_ARRAY_STRING, $core_attribute->getType());

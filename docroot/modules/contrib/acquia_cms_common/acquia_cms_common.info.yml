@@ -1,0 +1,29 @@
+name: "Acquia CMS Common"
+package: "Acquia CMS"
+description: "Handles shared functionality for Acquia CMS."
+type: module
+core_version_requirement: ^9
+dependencies:
+  - drupal:block
+  - drupal:ckeditor
+  - drupal:config
+  - drupal:config_rewrite
+  - drupal:content_moderation
+  - drupal:entity_clone
+  - drupal:focal_point
+  - drupal:language
+  - drupal:media
+  - drupal:media_library
+  - drupal:menu_ui
+  - drupal:metatag
+  - drupal:node
+  - drupal:pathauto
+  - drupal:simple_sitemap
+  - drupal:smart_trim
+  - drupal:scheduler_content_moderation_integration
+  - drupal:taxonomy
+
+# Information added by Drupal.org packaging script on 2022-06-21
+version: '1.4.0'
+project: 'acquia_cms_common'
+datestamp: 1655795924

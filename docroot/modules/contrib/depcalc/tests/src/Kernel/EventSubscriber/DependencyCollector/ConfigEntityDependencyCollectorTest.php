@@ -30,7 +30,7 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'breakpoint',
     'content_translation',
     'depcalc',
@@ -57,7 +57,7 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('user');
@@ -81,7 +81,7 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
     $dependencies = $this->calculator->calculateDependencies($wrapper, new DependencyStack());
 
     $this->assertNotEmpty($dependencies);
-    $this->assertEqual(2, count($dependencies));
+    $this->assertEquals(2, count($dependencies));
     $this->assertArrayHasKey($style1->uuid(), $dependencies);
 
     // Creating a one more dependent image style.
@@ -106,11 +106,11 @@ class ConfigEntityDependencyCollectorTest extends KernelTestBase {
     $wrapper = new DependentEntityWrapper($responsiveImageStyle);
     $dependencies = $this->calculator->calculateDependencies($wrapper, new DependencyStack());
     $this->assertNotEmpty($dependencies);
-    $this->assertEqual(4, count($dependencies));
+    $this->assertEquals(4, count($dependencies));
     $this->assertArrayHasKey($style1->uuid(), $wrapper->getDependencies());
     $this->assertArrayHasKey($style2->uuid(), $wrapper->getDependencies());
 
-    $this->assertEqual($dependencies['module'], [$wrapper->getEntity()->getEntityType()->getProvider()]);
+    $this->assertEquals([$wrapper->getEntity()->getEntityType()->getProvider()], $dependencies['module']);
   }
 
   /**

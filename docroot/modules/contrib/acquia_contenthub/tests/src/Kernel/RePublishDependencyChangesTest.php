@@ -31,7 +31,7 @@ class RePublishDependencyChangesTest extends QueueingTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'field',
     'filter',
     'node',

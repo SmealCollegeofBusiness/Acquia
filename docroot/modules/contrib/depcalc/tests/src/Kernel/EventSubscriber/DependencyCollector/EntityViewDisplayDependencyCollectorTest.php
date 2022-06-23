@@ -50,7 +50,7 @@ class EntityViewDisplayDependencyCollectorTest extends KernelTestBase {
    * @throws \ReflectionException
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('filter_format');

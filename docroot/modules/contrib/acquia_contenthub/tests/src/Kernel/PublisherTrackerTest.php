@@ -100,7 +100,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
 
     $this->publisherTracker->setQueueItemByUuid($this->node->uuid(), $expected_queue_id);
     $actual_queue_id = $this->getTrackingTableColByUuid($this->node->uuid(), 'queue_id');
-    $this->assertEqual($actual_queue_id, $expected_queue_id);
+    $this->assertEquals($expected_queue_id, $actual_queue_id);
   }
 
   /**

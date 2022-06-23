@@ -145,7 +145,7 @@ class StubTracker {
    */
   protected function deleteStubConditionally(EntityInterface $entity) {
     $event = new CleanUpStubsEvent($entity, $this->stack);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::CLEANUP_STUBS, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::CLEANUP_STUBS);
     if ($event->doDeleteStub()) {
       $entity->delete();
     }

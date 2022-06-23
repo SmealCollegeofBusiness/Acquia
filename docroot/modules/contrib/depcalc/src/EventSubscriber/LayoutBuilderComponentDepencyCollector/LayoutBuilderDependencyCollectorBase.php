@@ -69,7 +69,7 @@ abstract class LayoutBuilderDependencyCollectorBase extends BaseDependencyCollec
   protected function addComponentDependencies(CalculateEntityDependenciesEvent $event, array $components) {
     foreach ($components as $component) {
       $componentEvent = new SectionComponentDependenciesEvent($component);
-      $this->dispatcher->dispatch(DependencyCalculatorEvents::SECTION_COMPONENT_DEPENDENCIES_EVENT, $componentEvent);
+      $this->dispatcher->dispatch($componentEvent, DependencyCalculatorEvents::SECTION_COMPONENT_DEPENDENCIES_EVENT);
       $this->addSectionComponentEntityDependencies($event, $componentEvent->getEntityDependencies());
       $event->setModuleDependencies($componentEvent->getModuleDependencies());
     }

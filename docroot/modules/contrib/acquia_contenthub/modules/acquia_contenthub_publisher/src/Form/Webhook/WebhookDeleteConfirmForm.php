@@ -81,7 +81,7 @@ class WebhookDeleteConfirmForm extends FormBase {
     $this->uuid = $uuid;
 
     $this->event = new AcquiaContentHubUnregisterEvent($this->uuid, '', TRUE);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::ACH_UNREGISTER, $this->event);
+    $this->dispatcher->dispatch($this->event, AcquiaContentHubEvents::ACH_UNREGISTER);
 
     $form['cancel'] = [
       '#type' => 'submit',

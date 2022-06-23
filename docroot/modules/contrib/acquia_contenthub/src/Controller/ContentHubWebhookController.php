@@ -80,7 +80,7 @@ class ContentHubWebhookController extends ControllerBase {
 
         if ($payload = Json::decode($payload)) {
           $event = new HandleWebhookEvent($request, $payload, $key, $this->clientFactory->getClient());
-          $this->dispatcher->dispatch(AcquiaContentHubEvents::HANDLE_WEBHOOK, $event);
+          $this->dispatcher->dispatch($event, AcquiaContentHubEvents::HANDLE_WEBHOOK);
           return $event->getResponse();
         }
       }

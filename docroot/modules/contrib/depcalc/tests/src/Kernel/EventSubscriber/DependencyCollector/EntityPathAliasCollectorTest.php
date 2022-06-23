@@ -53,7 +53,7 @@ class EntityPathAliasCollectorTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'field',
     'filter',

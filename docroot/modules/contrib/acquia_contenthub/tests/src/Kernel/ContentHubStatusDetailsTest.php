@@ -21,7 +21,7 @@ class ContentHubStatusDetailsTest extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_test',
@@ -47,7 +47,7 @@ class ContentHubStatusDetailsTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('date_format');
     $this->installSchema('acquia_contenthub_publisher', ['acquia_contenthub_publisher_export_tracking']);

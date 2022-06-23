@@ -24,7 +24,7 @@ services:
 
   entity.cdf.serializer:
     class: Drupal\acquia_contenthub\EntityCdfSerializer
-    arguments: ['@event_dispatcher', '@config.factory', '@entity.dependency.calculator', '@module_installer', '@acquia_contenthub.stub.tracker']
+    arguments: ['@event_dispatcher', '@config.factory', '@entity.dependency.calculator', '@module_installer', '@acquia_contenthub.stub.tracker', '@extension.list.module']
 
   acquia_contenthub.client.factory:
     class: Drupal\acquia_contenthub\Client\ClientFactory
@@ -498,3 +498,6 @@ services:
   acquia_contenthub.depcalc_cache_operator:
     class: Drupal\acquia_contenthub\Libs\Depcalc\DepcalcCacheOperator
     arguments: ['@database']
+
+  acquia_contenthub.drupal_bridge:
+    class: Drupal\acquia_contenthub\Libs\Common\DrupalVersionCompatibilityBridge

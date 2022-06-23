@@ -17,6 +17,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\SynchronizableInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\depcalc\DependencyCalculator;
 use Drupal\depcalc\DependencyStack;
@@ -75,6 +76,13 @@ class EntityCdfSerializer {
   protected $tracker;
 
   /**
+   * The module extension list.
+   *
+   * @var \Drupal\Core\Extension\ModuleExtensionList
+   */
+  protected $moduleList;
+
+  /**
    * EntityCdfSerializer constructor.
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -87,13 +95,16 @@ class EntityCdfSerializer {
    *   The module installer.
    * @param \Drupal\acquia_contenthub\StubTracker $tracker
    *   The stub tracker.
+   * @param \Drupal\Core\Extension\ModuleExtensionList $module_list
+   *   The module extension list.
    */
-  public function __construct(EventDispatcherInterface $dispatcher, ConfigFactoryInterface $config_factory, DependencyCalculator $calculator, ModuleInstallerInterface $module_installer, StubTracker $tracker) {
+  public function __construct(EventDispatcherInterface $dispatcher, ConfigFactoryInterface $config_factory, DependencyCalculator $calculator, ModuleInstallerInterface $module_installer, StubTracker $tracker, ModuleExtensionList $module_list) {
     $this->dispatcher = $dispatcher;
     $this->configFactory = $config_factory;
     $this->calculator = $calculator;
     $this->moduleInstaller = $module_installer;
     $this->tracker = $tracker;
+    $this->moduleList = $module_list;
   }
 
   /**
@@ -118,10 +129,10 @@ class EntityCdfSerializer {
         $wrapper_dependencies['module'] = array_values($module_dependencies);
       }
       $event = new CreateCdfEntityEvent($entity, $wrapper_dependencies);
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::CREATE_CDF_OBJECT, $event);
+      $this->dispatcher->dispatch($event, AcquiaContentHubEvents::CREATE_CDF_OBJECT);
       foreach ($event->getCdfList() as $cdf) {
         $attributesEvent = new CdfAttributesEvent($cdf, $entity, $wrapper);
-        $this->dispatcher->dispatch(AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES, $attributesEvent);
+        $this->dispatcher->dispatch($attributesEvent, AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES);
         $output[] = $cdf;
       }
     }
@@ -241,7 +252,7 @@ class EntityCdfSerializer {
       // Module isn't installed.
       if (!$this->getModuleHandler()->moduleExists($module)) {
         // Module doesn't exist in the code base, so we can't install.
-        if (!drupal_get_filename('module', $module)) {
+        if (!$this->moduleList->getPathname($module)) {
           throw new \Exception(sprintf("The %s module code base is not present.", $module));
         }
       }
@@ -305,12 +316,12 @@ class EntityCdfSerializer {
    */
   protected function preprocessCdf(CDFDocument $cdf, DependencyStack $stack): CDFDocument {
     $prune_cdf_event = new PruneCdfEntitiesEvent($cdf);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::PRUNE_CDF, $prune_cdf_event);
+    $this->dispatcher->dispatch($prune_cdf_event, AcquiaContentHubEvents::PRUNE_CDF);
     $cdf = $prune_cdf_event->getCdf();
 
     // Allows entity data to be manipulated before unserialization.
     $entity_data_tamper_event = new EntityDataTamperEvent($cdf, $stack);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::ENTITY_DATA_TAMPER, $entity_data_tamper_event);
+    $this->dispatcher->dispatch($entity_data_tamper_event, AcquiaContentHubEvents::ENTITY_DATA_TAMPER);
     return $entity_data_tamper_event->getCdf();
   }
 
@@ -340,7 +351,7 @@ class EntityCdfSerializer {
       }
 
       $pre_entity_save_event = new PreEntitySaveEvent($entity, $stack, $entity_data);
-      $this->dispatcher->dispatch(AcquiaContentHubEvents::PRE_ENTITY_SAVE, $pre_entity_save_event);
+      $this->dispatcher->dispatch($pre_entity_save_event, AcquiaContentHubEvents::PRE_ENTITY_SAVE);
       $entity = $pre_entity_save_event->getEntity();
       // Added to avoid creating new revisions with stubbed data.
       // See \Drupal\content_moderation\Entity\Handler\ModerationHandler.
@@ -368,10 +379,10 @@ class EntityCdfSerializer {
    */
   protected function getEntityFromCdf(CDFObject $entity_data, DependencyStack $stack): ?EntityInterface {
     $load_local_entity_event = new LoadLocalEntityEvent($entity_data, $stack);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::LOAD_LOCAL_ENTITY, $load_local_entity_event);
+    $this->dispatcher->dispatch($load_local_entity_event, AcquiaContentHubEvents::LOAD_LOCAL_ENTITY);
 
     $parse_cdf_event = new ParseCdfEntityEvent($entity_data, $stack, $load_local_entity_event->getEntity());
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::PARSE_CDF, $parse_cdf_event);
+    $this->dispatcher->dispatch($parse_cdf_event, AcquiaContentHubEvents::PARSE_CDF);
 
     return $parse_cdf_event->getEntity() ?? NULL;
   }
@@ -393,7 +404,7 @@ class EntityCdfSerializer {
       $event_name = AcquiaContentHubEvents::ENTITY_IMPORT_UPDATE;
       $entity_import_event = new EntityImportEvent($entity, $entity_data);
     }
-    $this->dispatcher->dispatch($event_name, $entity_import_event);
+    $this->dispatcher->dispatch($entity_import_event, $event_name);
   }
 
   /**
@@ -442,7 +453,7 @@ class EntityCdfSerializer {
 
     // @todo get import failure logging and tracking working.
     $failed_import_event = new FailedImportEvent($cdf, $stack, $count, $this);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::IMPORT_FAILURE, $failed_import_event);
+    $this->dispatcher->dispatch($failed_import_event, AcquiaContentHubEvents::IMPORT_FAILURE);
     if ($failed_import_event->hasException()) {
       $this->tracker->cleanUp(TRUE);
       throw $failed_import_event->getException();

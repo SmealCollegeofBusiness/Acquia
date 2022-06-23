@@ -95,7 +95,7 @@ class DependencyCalculator {
     // resave it later when all dependencies are correctly calculated.
     $stack->addDependency($wrapper, FALSE);
     $event = new CalculateEntityDependenciesEvent($wrapper, $stack);
-    $this->dispatcher->dispatch(DependencyCalculatorEvents::CALCULATE_DEPENDENCIES, $event);
+    $this->dispatcher->dispatch($event, DependencyCalculatorEvents::CALCULATE_DEPENDENCIES);
     // Update the stack with the newest $wrapper and the correct dependencies.
     $stack->addDependency($wrapper);
 

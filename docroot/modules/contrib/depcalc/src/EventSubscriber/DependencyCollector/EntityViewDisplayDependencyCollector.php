@@ -50,6 +50,7 @@ class EntityViewDisplayDependencyCollector extends BaseDependencyCollector {
       $entity = $event->getEntity();
       $ids = $this->entityTypeManager->getStorage('entity_view_display')
         ->getQuery('AND')
+        ->accessCheck(FALSE)
         ->condition('status', TRUE)
         ->condition('targetEntityType', $entity->getEntityTypeId())
         ->condition('bundle', $entity->bundle())

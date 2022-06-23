@@ -69,7 +69,7 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'depcalc',
     'user',
@@ -80,7 +80,7 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->settings = $this->prophesize(Settings::class);

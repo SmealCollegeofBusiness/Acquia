@@ -25,7 +25,7 @@ class ContentHubStatusReportTest extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_test',
@@ -50,7 +50,7 @@ class ContentHubStatusReportTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $settings = $this->prophesize(Settings::class);
     $settings->getUuid()->willReturn('3a89ff1b-8869-419d-b931-f2282aca3e88');

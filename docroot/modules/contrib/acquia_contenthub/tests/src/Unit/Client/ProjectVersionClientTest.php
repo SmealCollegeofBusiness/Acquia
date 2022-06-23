@@ -30,7 +30,7 @@ class ProjectVersionClientTest extends UnitTestCase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->loggerChannel = $this->prophesize(LoggerChannelInterface::class)->reveal();
   }

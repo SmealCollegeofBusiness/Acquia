@@ -4,7 +4,7 @@ namespace Drupal\acquia_contenthub\Event;
 
 use Acquia\ContentHubClient\CDF\CDFObject;
 use Drupal\Core\Entity\EntityInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * An event for invoking post-entity-save operations.

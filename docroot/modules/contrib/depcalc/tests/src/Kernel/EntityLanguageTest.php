@@ -69,7 +69,7 @@ class EntityLanguageTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installConfig(['language', 'field', 'filter', 'node', 'system']);

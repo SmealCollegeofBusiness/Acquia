@@ -20,7 +20,7 @@ use Prophecy\Argument;
  */
 class NotConfirmedEntitiesTest extends EntityKernelTestBase {
 
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_publisher',
@@ -66,7 +66,7 @@ class NotConfirmedEntitiesTest extends EntityKernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installSchema('acquia_contenthub_publisher', ['acquia_contenthub_publisher_export_tracking']);

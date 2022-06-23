@@ -18,14 +18,14 @@ class ImportQueueWorkerLoggingTest extends UnserializationTest {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'dblog',
   ];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installSchema('dblog', ['watchdog']);

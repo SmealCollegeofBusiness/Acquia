@@ -106,7 +106,7 @@ class ReExportTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'acquia_contenthub_publisher',
     'depcalc',

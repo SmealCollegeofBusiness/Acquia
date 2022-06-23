@@ -3,7 +3,7 @@
 namespace Drupal\acquia_contenthub\Event;
 
 use Drupal\depcalc\DependentEntityWrapperInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event fired for publishing of entities.

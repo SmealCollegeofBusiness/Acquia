@@ -35,7 +35,7 @@ class CreateModeratedForwardRevisionTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'user',
     'field',
@@ -59,7 +59,7 @@ class CreateModeratedForwardRevisionTest extends KernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
@@ -112,7 +112,7 @@ class CreateModeratedForwardRevisionTest extends KernelTestBase {
     );
 
     $mod_state = $this->node->get('moderation_state')->getString();
-    $this->assertEqual('draft', $mod_state);
+    $this->assertEquals($mod_state, 'draft');
 
     $create_forward_revision->onPreEntitySave($event);
 
@@ -120,7 +120,7 @@ class CreateModeratedForwardRevisionTest extends KernelTestBase {
     $entity = $event->getEntity();
 
     $mod_state = $entity->get('moderation_state')->getString();
-    $this->assertEqual('archived', $mod_state);
+    $this->assertEquals($mod_state, 'archived');
   }
 
   /**
@@ -145,7 +145,7 @@ class CreateModeratedForwardRevisionTest extends KernelTestBase {
     $entity = $event->getEntity();
 
     $mod_state = $entity->get('moderation_state')->getString();
-    $this->assertEqual('draft', $mod_state);
+    $this->assertEquals($mod_state, 'draft');
   }
 
 }

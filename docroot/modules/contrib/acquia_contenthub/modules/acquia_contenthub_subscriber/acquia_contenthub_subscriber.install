@@ -77,9 +77,31 @@ function acquia_contenthub_subscriber_schema() {
 function acquia_contenthub_subscriber_update_82001() {
   // Make sure schema has been installed.
   if (!\Drupal::database()->schema()->tableExists('acquia_contenthub_subscriber_import_tracking')) {
-    drupal_install_schema('acquia_contenthub_subscriber');
+    _acquia_contenthub_subscriber_install_schema('acquia_contenthub_subscriber');
   }
   \Drupal::configFactory()->getEditable('rest.resource.contenthub_filter')->delete();
+}
+
+/**
+ * This function is a replacement for drupal_install_schema.
+ *
+ * @param string $module_name
+ *   Name of the module.
+ */
+function _acquia_contenthub_subscriber_install_schema(string $module_name) {
+  module_load_install($module_name);
+  $schema = \Drupal::moduleHandler()->invoke($module_name, 'schema');
+  foreach ($schema as $name => $table) {
+    if (empty($table['module'])) {
+      $table['module'] = $module_name;
+    }
+    if (!isset($table['name'])) {
+      $table['name'] = $name;
+    }
+  }
+  foreach ($schema as $name => $table) {
+    \Drupal::database()->schema()->createTable($name, $table);
+  }
 }
 
 /**

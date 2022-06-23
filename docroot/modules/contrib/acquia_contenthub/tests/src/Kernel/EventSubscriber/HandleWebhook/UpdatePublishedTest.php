@@ -58,7 +58,7 @@ class UpdatePublishedTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'acquia_contenthub',
     'acquia_contenthub_publisher',
     'acquia_contenthub_server_test',
@@ -134,7 +134,7 @@ class UpdatePublishedTest extends EntityKernelTestBase {
     $this->updatePublished->onHandleWebhook($event);
 
     $entity_status = $this->getStatusByUuid($args[1]);
-    $this->assertEqual($args[2], $entity_status);
+    $this->assertEquals($entity_status, $args[2]);
   }
 
   /**

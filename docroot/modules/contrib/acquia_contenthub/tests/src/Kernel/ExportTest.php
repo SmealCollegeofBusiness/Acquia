@@ -39,7 +39,7 @@ class ExportTest extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'image',
     'file',
@@ -134,7 +134,7 @@ class ExportTest extends EntityKernelTestBase {
    *
    * @throws \Exception
    */
-  public function setUp() {
+  public function setup(): void {
     if (version_compare(\Drupal::VERSION, '9.0', '>=')) {
       static::$modules[] = 'path_alias';
     }
@@ -226,7 +226,7 @@ class ExportTest extends EntityKernelTestBase {
         $this->container->get('logger.factory'),
         $this->container->get('config.factory'),
       ])
-      ->setMethods(['getUpdateDbStatus'])
+      ->onlyMethods(['getUpdateDbStatus'])
       ->getMock();
     $this->container->set('acquia_contenthub_common_actions', $common);
 
@@ -522,7 +522,7 @@ class ExportTest extends EntityKernelTestBase {
     $file->setFilename($filename);
     $file->setMimeType($filemime);
     $file->setFileUri($uri);
-    $file->set('status', FILE_STATUS_PERMANENT);
+    $this->container->get('acquia_contenthub.drupal_bridge')->setFileStatusPermanent($file);
     $file->save();
     $fid = $file->id();
     $this->fieldUuids[] = $file->uuid();
@@ -1136,7 +1136,7 @@ class ExportTest extends EntityKernelTestBase {
     $file->setFilename($filename);
     $file->setMimeType($filemime);
     $file->setFileUri($uri);
-    $file->set('status', FILE_STATUS_PERMANENT);
+    $this->container->get('acquia_contenthub.drupal_bridge')->setFileStatusPermanent($file);
     $file->save();
     file_put_contents($file->getFileUri(), $content);
 

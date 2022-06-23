@@ -4,7 +4,7 @@ namespace Drupal\depcalc\Event;
 
 use Drupal\depcalc\DependencyStack;
 use Drupal\depcalc\DependentEntityWrapperInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * The event dispatched to calculate dependencies.

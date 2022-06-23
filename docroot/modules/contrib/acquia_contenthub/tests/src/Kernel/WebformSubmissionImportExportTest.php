@@ -26,7 +26,7 @@ class WebformSubmissionImportExportTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'field',
@@ -41,7 +41,7 @@ class WebformSubmissionImportExportTest extends ImportExportTestBase {
    *
    * @throws \Exception
    */
-  public function setUp() {
+  public function setup(): void {
     parent::setUp();
 
     $this->installSchema('webform', ['webform']);
@@ -79,7 +79,7 @@ class WebformSubmissionImportExportTest extends ImportExportTestBase {
     /** @var \Drupal\Webform\Entity\WebformSubmission $submission */
     $submission = $repository->loadEntityByUuid('webform_submission', $export_uuid);
 
-    $this->assertEqual($submission_fixture_data, $submission->getData(), "Submission data exported successfully.");
+    $this->assertEquals($submission->getData(), $submission_fixture_data, "Submission data exported successfully.");
   }
 
   /**

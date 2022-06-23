@@ -21,8 +21,8 @@ class PublicFileSchemeHandler extends OriginalPublicFileSchemeHandler {
   public function getFile(CDFObject $object) {
     if ($object->getAttribute('file_location') && $object->getAttribute('file_uri')) {
       $url = $object->getAttribute('file_location')->getValue()['und'];
-
-      $url = str_replace('module::', drupal_get_path('module', 'acquia_contenthub'), $url);
+      $path = \Drupal::service('module_handler')->getModule('acquia_contenthub')->getPath();
+      $url = str_replace('module::', $path, $url);
 
       $contents = file_get_contents($url);
       $uri = $object->getAttribute('file_uri')->getValue()['und'];

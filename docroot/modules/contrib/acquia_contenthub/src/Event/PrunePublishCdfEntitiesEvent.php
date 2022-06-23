@@ -4,7 +4,7 @@ namespace Drupal\acquia_contenthub\Event;
 
 use Acquia\ContentHubClient\CDFDocument;
 use Acquia\ContentHubClient\ContentHubClient;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Class TrackTotalsEvent.

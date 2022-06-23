@@ -50,7 +50,7 @@ class UnserializationTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'file',
     'node',
@@ -87,7 +87,7 @@ class UnserializationTest extends EntityKernelTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installEntitySchema('taxonomy_term');
@@ -119,7 +119,7 @@ class UnserializationTest extends EntityKernelTestBase {
         $this->container->get('acquia_contenthub_subscriber.logger_channel'),
         $this->container->get('acquia_contenthub_subscriber.tracker'),
       ])
-      ->setMethods(['getUpdateDbStatus'])
+      ->onlyMethods(['getUpdateDbStatus'])
       ->getMock();
     $this->container->set('acquia_contenthub_common_actions', $common);
 
@@ -136,7 +136,7 @@ class UnserializationTest extends EntityKernelTestBase {
         NULL,
         NULL,
       ])
-      ->setMethods(NULL)
+      ->addMethods([])
       ->getMock();
   }
 

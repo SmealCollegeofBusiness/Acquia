@@ -32,7 +32,7 @@ class WebformImportExportTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'field',
@@ -47,7 +47,7 @@ class WebformImportExportTest extends ImportExportTestBase {
    *
    * @throws \Exception
    */
-  public function setUp() {
+  public function setup(): void {
     parent::setUp();
 
     $this->installSchema('webform', ['webform']);

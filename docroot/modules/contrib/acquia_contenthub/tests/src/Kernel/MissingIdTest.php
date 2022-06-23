@@ -19,7 +19,7 @@ class MissingIdTest extends QueueingTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'webform',
   ];
 
@@ -65,9 +65,9 @@ class MissingIdTest extends QueueingTestBase {
     ]);
     $webform_submission->save();
 
-    $this->assertEqual(
-      $this->contentHubQueue->getQueueCount(),
+    $this->assertEquals(
       $pre_webform_submission_queue_count,
+      $this->contentHubQueue->getQueueCount(),
       'Webform submission not queued.'
     );
   }

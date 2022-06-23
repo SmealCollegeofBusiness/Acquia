@@ -193,7 +193,7 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
     // to look at the output and see if there are entries in our subscriber
     // table and then compare the rest against plexus data.
     $event = new PrunePublishCdfEntitiesEvent($this->client, $document, $config->get('origin'));
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::PRUNE_PUBLISH_CDF_ENTITIES, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::PRUNE_PUBLISH_CDF_ENTITIES);
     $output = array_values($event->getDocument()->getEntities());
     if (empty($output)) {
       $this->achLoggerChannel->warning(
@@ -228,7 +228,7 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
       $entity_uuids[] = $item->getUuid();
     }
 
-    $webhook = $config->get('webhook.uuid');
+    $webhook = $config->get('webhook.uuid') ?? '';
     $exported_entities = implode(', ', $entity_uuids);
 
     if (!Uuid::isValid($webhook)) {

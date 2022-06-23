@@ -25,7 +25,7 @@ class TermImportExportTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'taxonomy',
     'user',
@@ -40,7 +40,7 @@ class TermImportExportTest extends ImportExportTestBase {
    *
    * @throws \Exception
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
 
     $this->installEntitySchema('user');

@@ -5,7 +5,7 @@ namespace Drupal\acquia_contenthub\Event;
 use Acquia\ContentHubClient\CDF\CDFObject;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\depcalc\DependencyStack;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event that fires prior to an entity save.

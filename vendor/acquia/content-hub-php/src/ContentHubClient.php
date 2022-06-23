@@ -28,8 +28,7 @@ use function GuzzleHttp\default_user_agent;
  */
 class ContentHubClient extends Client {
 
-  // Override VERSION inherited from GuzzleHttp::ClientInterface.
-  const VERSION = '2.0.0';
+  const LIB_VERSION = '2.2.0';
 
   const LIBRARYNAME = 'AcquiaContentHubPHPLib';
 
@@ -86,11 +85,11 @@ class ContentHubClient extends Client {
    * @codeCoverageIgnore
    */
   public function __construct(
-    array $config = [],
     LoggerInterface $logger,
     Settings $settings,
     HmacAuthMiddleware $middleware,
     EventDispatcherInterface $dispatcher,
+    array $config = [],
     $api_version = 'v2'
   ) {
     $this->logger = $logger;
@@ -109,7 +108,7 @@ class ContentHubClient extends Client {
     }
 
     // Setting up the User Header string.
-    $user_agent_string = self::LIBRARYNAME . '/' . self::VERSION . ' ' . default_user_agent();
+    $user_agent_string = self::LIBRARYNAME . '/' . self::LIB_VERSION . ' ' . default_user_agent();
     if (isset($config['client-user-agent'])) {
       $user_agent_string = $config['client-user-agent'] . ' ' . $user_agent_string;
     }
@@ -206,7 +205,7 @@ class ContentHubClient extends Client {
       'base_uri' => self::makeBaseURL($url, $api_version),
       'headers' => [
         'Content-Type' => 'application/json',
-        'User-Agent' => self::LIBRARYNAME . '/' . self::VERSION . ' ' . default_user_agent(),
+        'User-Agent' => self::LIBRARYNAME . '/' . self::LIB_VERSION . ' ' . default_user_agent(),
       ],
       'handler' => ObjectFactory::getHandlerStack(),
     ];
@@ -292,7 +291,7 @@ class ContentHubClient extends Client {
       'base_uri' => self::makeBaseURL($url, $api_version),
       'headers' => [
         'Content-Type' => 'application/json',
-        'User-Agent' => self::LIBRARYNAME . '/' . self::VERSION . ' ' . default_user_agent(),
+        'User-Agent' => self::LIBRARYNAME . '/' . self::LIB_VERSION . ' ' . default_user_agent(),
       ],
       'handler' => ObjectFactory::getHandlerStack(),
     ];
@@ -409,7 +408,7 @@ class ContentHubClient extends Client {
    */
   protected function getCDFObject($data) { // phpcs:ignore
     $event = ObjectFactory::getCDFTypeEvent($data);
-    $this->dispatcher->dispatch(ContentHubLibraryEvents::GET_CDF_CLASS, $event);
+    $this->dispatcher->dispatch($event, ContentHubLibraryEvents::GET_CDF_CLASS);
 
     return $event->getObject();
   }

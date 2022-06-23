@@ -23,7 +23,7 @@ class RevisionIsCurrentTest extends QueueingTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'node',
     'language',
     'workflows',
@@ -107,9 +107,9 @@ class RevisionIsCurrentTest extends QueueingTestBase {
     ]);
     $node->save();
 
-    $this->assertEqual(
-      $this->contentHubQueue->getQueueCount(),
+    $this->assertEquals(
       0,
+      $this->contentHubQueue->getQueueCount(),
       'Node created as draft not queued.'
     );
 
@@ -118,9 +118,9 @@ class RevisionIsCurrentTest extends QueueingTestBase {
       'title' => 'Test ES',
     ]);
     $node->save();
-    $this->assertEqual(
-      $this->contentHubQueue->getQueueCount(),
+    $this->assertEquals(
       0,
+      $this->contentHubQueue->getQueueCount(),
       'Translation created as draft not queued.'
     );
 
@@ -133,9 +133,9 @@ class RevisionIsCurrentTest extends QueueingTestBase {
       $node->setNewRevision(TRUE);
       $node->set('moderation_state', $moderation_state);
       $node->save();
-      $this->assertEqual(
-        $this->contentHubQueue->getQueueCount(),
+      $this->assertEquals(
         $expected_queue_count[$key],
+        $this->contentHubQueue->getQueueCount(),
         $message[$key]
       );
     }

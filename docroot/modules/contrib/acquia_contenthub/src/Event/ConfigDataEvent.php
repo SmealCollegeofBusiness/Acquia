@@ -3,7 +3,7 @@
 namespace Drupal\acquia_contenthub\Event;
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event for configuration data.

@@ -96,7 +96,7 @@ class DeleteAssetsTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setup(): void {
     $this->entity = $this->prophesize(EntityBase::class);
     $entity = $this->entity;
 

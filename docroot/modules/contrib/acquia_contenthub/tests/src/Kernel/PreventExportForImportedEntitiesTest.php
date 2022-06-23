@@ -16,7 +16,7 @@ class PreventExportForImportedEntitiesTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'taxonomy',
     'acquia_contenthub_publisher',
     'acquia_contenthub_subscriber',

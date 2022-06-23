@@ -61,7 +61,7 @@ class ClientDeleteConfirmForm extends ContentHubDeleteClientConfirmForm {
    */
   public function dispatchEvent(string $webhook_uuid) {
     $this->event = new AcquiaContentHubUnregisterEvent($webhook_uuid, $this->uuid);
-    $this->eventDispatcher->dispatch(AcquiaContentHubEvents::ACH_UNREGISTER, $this->event);
+    $this->eventDispatcher->dispatch($this->event, AcquiaContentHubEvents::ACH_UNREGISTER);
   }
 
   /**

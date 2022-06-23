@@ -3,7 +3,7 @@
 namespace Drupal\acquia_contenthub_publisher\Event;
 
 use Drupal\Core\Entity\EntityInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event fired for eligibility of an entity to POST to ContentHub.

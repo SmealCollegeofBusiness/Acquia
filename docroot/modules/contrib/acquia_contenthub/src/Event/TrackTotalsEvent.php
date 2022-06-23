@@ -3,7 +3,7 @@
 namespace Drupal\acquia_contenthub\Event;
 
 use Acquia\ContentHubClient\ContentHubClient;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event for tracking totals for status metrics.

@@ -26,7 +26,7 @@ class ClientFactoryTest extends EntityKernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'field',
     'depcalc',
@@ -37,7 +37,7 @@ class ClientFactoryTest extends EntityKernelTestBase {
   /**
    * {@inheritDoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $pv_client = $this->prophesize(ProjectVersionClient::class);
     $pv_client

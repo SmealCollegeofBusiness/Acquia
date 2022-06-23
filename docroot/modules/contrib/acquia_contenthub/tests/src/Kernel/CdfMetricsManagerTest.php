@@ -34,7 +34,7 @@ class CdfMetricsManagerTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'depcalc',
     'acquia_contenthub',
     'acquia_contenthub_publisher',
@@ -238,7 +238,7 @@ class CdfMetricsManagerTest extends EntityKernelTestBase {
   protected function mockRemoteCdf(bool $change_hash = TRUE): void {
     $remote_cdf = ClientCDFObject::create($this->clientUuid, ['settings' => $this->settings->toArray()]);
     $event = new BuildClientCdfEvent($remote_cdf);
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::BUILD_CLIENT_CDF, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::BUILD_CLIENT_CDF);
     $remote_cdf = $event->getCdf();
     if ($change_hash) {
       $remote_cdf->addAttribute('hash', CDFAttribute::TYPE_KEYWORD, 'random-hash');

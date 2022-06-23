@@ -23,7 +23,7 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'file',
     'node',
@@ -66,7 +66,7 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setup(): void {
     parent::setUp();
     $this->installSchema('acquia_contenthub_subscriber', ['acquia_contenthub_subscriber_import_tracking']);
     $this->importQueue = $this->container->get('acquia_contenthub_subscriber.acquia_contenthub_import_queue');
@@ -87,10 +87,12 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
     $content_hub_client = $this
       ->getMockBuilder(ContentHubClient::class)
       ->disableOriginalConstructor()
-      ->setMethods([
+      ->addMethods([
         'post',
         'put',
         'delete',
+      ])
+      ->onlyMethods([
         'getSettings',
         'getRemoteSettings',
         'getEntity',

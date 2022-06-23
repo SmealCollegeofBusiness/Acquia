@@ -73,7 +73,7 @@ class StubTrackerTest extends UnitTestCase {
       ->delete()
       ->willReturn();
     $dispatcher
-      ->dispatch(AcquiaContentHubEvents::CLEANUP_STUBS, Argument::any())
+      ->dispatch(Argument::any(), AcquiaContentHubEvents::CLEANUP_STUBS)
       ->will(
         function ($event_data) {
           $event = $event_data[1];

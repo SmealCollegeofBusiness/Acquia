@@ -10,16 +10,11 @@ use Acquia\Hmac\KeyLoader;
 use Acquia\Hmac\RequestAuthenticator;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubSettingsEvent;
+use Drupal\acquia_contenthub\Libs\Traits\HandleResponseTrait;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Laminas\Diactoros\ResponseFactory;
-use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\StreamFactory;
-use Laminas\Diactoros\UploadedFileFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -29,6 +24,8 @@ use Symfony\Component\HttpFoundation\Request;
  * @see \Acquia\ContentHubClient\ContentHub
  */
 class ClientFactory {
+
+  use HandleResponseTrait;
 
   /**
    * The event dispatcher.
@@ -112,7 +109,7 @@ class ClientFactory {
    */
   protected function populateSettings() {
     $event = new AcquiaContentHubSettingsEvent();
-    $this->dispatcher->dispatch(AcquiaContentHubEvents::GET_SETTINGS, $event);
+    $this->dispatcher->dispatch($event, AcquiaContentHubEvents::GET_SETTINGS);
     $this->settings = $event->getSettings();
     $this->settingsProvider = $event->getProvider();
   }
@@ -170,11 +167,11 @@ class ClientFactory {
     ];
 
     $this->client = new ContentHubClient(
-      $config,
       $this->loggerFactory->get('acquia_contenthub'),
       $settings,
       $settings->getMiddleware(),
-      $this->dispatcher
+      $this->dispatcher,
+      $config
     );
 
     return $this->client;
@@ -239,14 +236,8 @@ class ClientFactory {
 
     $authenticator = new RequestAuthenticator($keyLoader);
 
-    // Authentication requires a PSR7 compatible request.
-    if (class_exists(DiactorosFactory::class)) {
-      $httpMessageFactory = new DiactorosFactory();
-    }
-    else {
-      $httpMessageFactory = new PsrHttpFactory(new ServerRequestFactory(), new StreamFactory(), new UploadedFileFactory(), new ResponseFactory());
-    }
-    $psr7_request = $httpMessageFactory->createRequest($request);
+    $http_message_factory = $this->createPsrFactory();
+    $psr7_request = $http_message_factory->createRequest($request);
 
     try {
       return $authenticator->authenticate($psr7_request);

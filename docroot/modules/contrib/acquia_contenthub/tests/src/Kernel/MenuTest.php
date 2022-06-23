@@ -29,7 +29,7 @@ class MenuTest extends ImportExportTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'user',
     'node',
@@ -46,7 +46,7 @@ class MenuTest extends ImportExportTestBase {
    *
    * @throws \Exception
    */
-  public function setUp() {
+  public function setup(): void {
     parent::setUp();
 
     $this->installEntitySchema('menu_link_content');

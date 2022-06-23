@@ -200,7 +200,7 @@ function _acquia_contenthub_dispatch_not_confirmed_entities_event() {
   $event = new NotConfirmedEntitiesFoundEvent($items);
   /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
   $dispatcher = \Drupal::service('event_dispatcher');
-  $dispatcher->dispatch(ContentHubPublisherEvents::NOT_CONFIRMED_ENTITIES_FOUND, $event);
+  $dispatcher->dispatch($event, ContentHubPublisherEvents::NOT_CONFIRMED_ENTITIES_FOUND);
 }
 
 /**
