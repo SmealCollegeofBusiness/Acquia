@@ -58,7 +58,8 @@ class _0023EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
         $json_values->model->{$model->getUUID()}->settings->responsiveMode = TRUE;
       }
 
-      if (in_array($element->getProperty('uid'), ['form-section', 'form-tab-item'])) {
+      $form_uids = ['form-section', 'form-tab-item'];
+      if (in_array($element->getProperty('uid'), $form_uids)) {
         $json_values->model->{$model->getUUID()}->settings->breakpointIcon = "";
       }
     }

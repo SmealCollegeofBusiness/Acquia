@@ -18,6 +18,7 @@ use Drupal\imce\Imce;
 use Drupal\node\NodeTypeInterface;
 use Drupal\workbench_email\TemplateInterface;
 use Symfony\Component\Yaml\Yaml;
+use Acquia\DrupalEnvironmentDetector\AcquiaDrupalEnvironmentDetector as Environment;
 
 /**
  * Implements hook_preinstall().
@@ -306,5 +307,37 @@ function acquia_cms_common_module_implements_alter(&$implementations, $hook) {
   // This way we can improve the overall installation time.
   if (($hook == 'modules_installed' && InstallerKernel::installationAttempted()) || getenv('UNSET_COHESION_SYNC')) {
     unset($implementations['cohesion_sync']);
+  }
+}
+
+/**
+ * Implements hook_preprocess_template().
+ */
+function acquia_cms_common_preprocess_status_report_general_info(&$variables) {
+  // List of available starter kits.
+  $starter_kits = [
+    'acquia_cms_enterprise_low_code' => 'Acquia CMS Enterprise Low Code',
+    'acquia_cms_headless' => 'Acquia CMS Headless' ,
+    'acquia_cms_community' => 'Acquia CMS Community',
+  ];
+  // Check for the starter kit selection.
+  if ($starter_kit = \Drupal::state()->get('acquia_cms.starter_kit')) {
+    // Store selected starter kit into the variable.
+    $variables['acquia_cms']['starter_kit'] = $starter_kits[$starter_kit];
+  }
+}
+
+/** 
+ * Implements hook_modules_installed().
+ */
+function acquia_cms_common_modules_installed($modules) {
+  if (in_array('imagemagick', $modules) && Environment::isAhEnv()) {
+    $config_factory = \Drupal::configFactory();
+    $config_factory->getEditable('imagemagick.settings')
+      ->set('path_to_binaries', '/usr/bin/')
+      ->save();
+    $config_factory->getEditable('system.image')
+      ->set('toolkit', 'imagemagick')
+      ->save();
   }
 }

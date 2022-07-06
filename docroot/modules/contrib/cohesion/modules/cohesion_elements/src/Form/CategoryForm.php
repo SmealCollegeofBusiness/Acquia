@@ -80,7 +80,8 @@ class CategoryForm extends EntityForm {
     // Apply Angular styling to this form.
     $form['#attributes']['class'][] = 'coh-form';
 
-    // Include the Angular css (which controls the cohesion_accordion and other form styling).
+    // Include the Angular css (which controls the cohesion_accordion and other
+    // form styling).
     $form['#attached']['library'][] = 'cohesion/cohesion-admin-styles';
 
     return $form;

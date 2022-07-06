@@ -81,8 +81,9 @@ class CustomStylesResource extends CohesionResourceBase {
     $storage = $this->entityTypeManager->getStorage('cohesion_custom_style');
 
     // Get parent custom styles.
+    $condition_value = [$custom_style_type->get('id'), 'generic'];
     $entity_ids = $storage->getQuery()->sort('weight')->notExists('parent')
-      ->condition('custom_style_type', [$custom_style_type->get('id'), 'generic'], 'IN')->condition('status', TRUE)->execute();
+      ->condition('custom_style_type', $condition_value, 'IN')->condition('status', TRUE)->execute();
 
     // Execute the query.
     if ($entities = $storage->loadMultiple($entity_ids)) {

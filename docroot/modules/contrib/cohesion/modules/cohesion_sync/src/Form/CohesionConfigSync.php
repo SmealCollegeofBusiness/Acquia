@@ -311,7 +311,10 @@ class CohesionConfigSync extends FormBase {
       foreach ($config_names as $config_name) {
         if ($config_change_type == 'rename') {
           $names = $storage_comparer->extractRenameNames($config_name);
-          $config_name = $this->t('@source_name to @target_name', ['@source_name' => $names['old_name'], '@target_name' => $names['new_name']]);
+          $config_name = $this->t('@source_name to @target_name', [
+            '@source_name' => $names['old_name'],
+            '@target_name' => $names['new_name'],
+          ]);
         }
 
         $form[$collection][$config_change_type]['list']['#rows'][] = [
@@ -332,9 +335,9 @@ class CohesionConfigSync extends FormBase {
       ];
     }
 
-    // The package can to be imported in it contains new or updated file and/or if
-    // it contains config changes except locked entity.
-    // If it only contains locked entities there is nothing to be imported
+    // The package can to be imported in it contains new or updated file and/or
+    // if it contains config changes except locked entity. If it only contains
+    // locked entities there is nothing to be imported.
     if($storage_comparer->hasChanges() || count($cohesion_file_changes['new_files']) > 0 || count($cohesion_file_changes['updated_files']) > 0) {
 
       $form['actions'] = [];
@@ -396,8 +399,9 @@ class CohesionConfigSync extends FormBase {
           $cohesion_sync_import_options['extra-validation'] = TRUE;
         }
 
-        // For each config to be deleted, retain everywhere it is used in order to rebuild the in use system.
-        // This is to make sure the in use table is up to date after delete or replacement with a new UUID
+        // For each config to be deleted, retain everywhere it is used in order
+        // to rebuild the in use system. This is to make sure the in use table
+        // is up to date after delete or replacement with a new UUID.
         $in_use_to_rebuild = $form_state->get('storage_comparer')->getInuseDelete();
 
         $sync_steps = $config_importer->initialize();
@@ -409,16 +413,28 @@ class CohesionConfigSync extends FormBase {
           'progress_message' => t('Completed step @current of @total.'),
           'error_message' => t('Configuration synchronization has encountered an error.'),
         ];
-        $batch['operations'][] = [[BatchImportController::class, 'fileImport'], [$this->syncStorage, $form_state->get('sync_dir')]];
+        $batch['operations'][] = [
+          [BatchImportController::class, 'fileImport'],
+          [$this->syncStorage, $form_state->get('sync_dir')],
+        ];
 
         foreach ($sync_steps as $sync_step) {
-          $batch['operations'][] = [[ConfigImporterBatch::class, 'process'], [$config_importer, $sync_step]];
+          $batch['operations'][] = [
+            [ConfigImporterBatch::class, 'process'],
+            [$config_importer, $sync_step],
+          ];
         }
 
-        $batch['operations'][] = [[BatchImportController::class, 'handleRebuilds'], [$form_state->get('storage_comparer')]];
+        $batch['operations'][] = [
+          [BatchImportController::class, 'handleRebuilds'],
+          [$form_state->get('storage_comparer')],
+        ];
 
-        if(!empty($in_use_to_rebuild)) {
-          $batch['operations'][] = [[BatchImportController::class, 'handleInuse'], [$in_use_to_rebuild]];
+        if (!empty($in_use_to_rebuild)) {
+          $batch['operations'][] = [
+            [BatchImportController::class, 'handleInuse'],
+            [$in_use_to_rebuild],
+          ];
         }
         batch_set($batch);
 

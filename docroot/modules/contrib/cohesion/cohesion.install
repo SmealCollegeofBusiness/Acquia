@@ -19,7 +19,8 @@ use Drupal\Core\Installer\InstallerKernel;
  */
 function cohesion_requirements($phase) {
   $requirements = [];
-  if (!\Drupal::moduleHandler()->moduleExists('node_revision_delete')) {
+  $moduleHandler = \Drupal::moduleHandler();
+  if (!$moduleHandler->moduleExists('node_revision_delete')) {
     $settings = [
       '@module_link' => 'https://www.drupal.org/project/node_revision_delete',
       '@docs_link' => 'https://sitestudiodocs.acquia.com/user-guide/managing-revisions'
@@ -32,14 +33,12 @@ function cohesion_requirements($phase) {
     );
   }
 
-  $moduleHandler = \Drupal::moduleHandler();
-
   $submodule_installed = $moduleHandler->moduleExists('sitestudio_contenthub_publisher') || $moduleHandler->moduleExists('sitestudio_contenthub_subscriber');
   if ($moduleHandler->moduleExists('acquia_contenthub') && !$submodule_installed) {
     $settings = ['@link' => 'https://github.com/acquia/sitestudio_contenthub'];
     $requirements['cohesion'] = array(
       'title' => t('Site Studio'),
-      'description' => t('The Acquia ContentHub integration with Site Studio has changed, please download and configure <a href="@link">sitestudio_contenthub</a>', $settings),
+      'description' => t('The Acquia Content Hub integration with Site Studio has changed, please download and configure <a href="@link">sitestudio_contenthub</a>', $settings),
       'severity' => REQUIREMENT_WARNING,
     );
   }

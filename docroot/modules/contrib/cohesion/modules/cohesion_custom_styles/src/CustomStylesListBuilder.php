@@ -340,7 +340,8 @@ class CustomStylesListBuilder extends CohesionListBuilder implements FormInterfa
       $weight = 0;
       foreach ($entities as $id => $entity) {
 
-        // Store the current order so we can use it to sort custom styles in stylesheet.json.
+        // Store the current order so we can use it to sort custom styles in
+        // stylesheet.json.
         $config_name = $entity->getConfigDependencyName();
         try {
           $config = \Drupal::configFactory()->getEditable($config_name);

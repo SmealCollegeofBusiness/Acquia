@@ -84,8 +84,8 @@ class StyleGuideManager extends CohesionConfigEntityBase implements CohesionSett
    * {@inheritdoc}
    */
   public function toUrl($rel = 'edit-form', array $options = []) {
-    // Style guide managers are editing in the theme settings so the edit form url
-    // needs to be overwritten to point to the theme settings page.
+    // Style guide managers are editing in the theme settings so the edit form
+    // url needs to be overwritten to point to the theme settings page.
     if ($rel == 'edit-form') {
       $uri = new Url('system.theme_settings_theme', ['theme' => $this->get('theme')]);
       return $uri;

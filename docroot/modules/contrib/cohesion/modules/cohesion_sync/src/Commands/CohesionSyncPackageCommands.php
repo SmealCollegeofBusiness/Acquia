@@ -47,24 +47,24 @@ class CohesionSyncPackageCommands extends DrushCommands {
    *
    * @command sitestudio:package:list
    */
-    public function listPackage() {
+  public function listPackage() {
 
-      $packages = $this->getPackages();
+    $packages = $this->getPackages();
 
-      if ($packages) {
-        $this->output()->writeln('Available Site Studio packages:');
-        $this->output()->writeln('');
+    if ($packages) {
+      $this->output()->writeln('Available Site Studio packages:');
+      $this->output()->writeln('');
 
-        foreach ($packages as $package) {
-         $this->output()->writeln($package->get('label') . ' - id: ' . $package->get('id'));
-        }
+      foreach ($packages as $package) {
+        $this->output()->writeln($package->get('label') . ' - id: ' . $package->get('id'));
       }
-      // No sync packages created.
-      else {
-        $this->output()->writeln('No Site Studio packages available');
-      }
-
-      return CommandResult::exitCode(self::EXIT_SUCCESS);
     }
+    // No sync packages created.
+    else {
+      $this->output()->writeln('No Site Studio packages available');
+    }
+
+    return CommandResult::exitCode(self::EXIT_SUCCESS);
+  }
 
 }

@@ -405,7 +405,8 @@ class ImportFileForm extends FormBase {
       '#value' => $this->store_key,
     ];
 
-    // Get the data saved during validation and delete straight after from the store
+    // Get the data saved during validation and delete straight after from the
+    // store.
     $sync_data = $this->sitestudioTempSharedStore->get($this->store_key);
     if($sync_data !== NULL) {
       if(isset($sync_data['action_data'])) {
@@ -444,7 +445,8 @@ class ImportFileForm extends FormBase {
       $no_change_form = [];
       foreach ($this->action_data as $uuid => $action_data_entry) {
 
-        // Render a form for each type of entry that the user might want to take actions against
+        // Render a form for each type of entry that the user might want to take
+        // actions against
         switch ($action_data_entry['entry_action_state']) {
           case ENTRY_EXISTING_ASK:
             // If the entry requires user input.
@@ -500,7 +502,8 @@ class ImportFileForm extends FormBase {
         '#type' => 'submit',
         '#value' => $this->step == 0 ? $this->t('Validate package') : $this->t('Import package'),
         '#button_type' => 'primary',
-        // Don't disable the button if validation has completed otherwise the form won't submit.
+        // Don't disable the button if validation has completed otherwise the
+        // form won't submit.
         '#disabled' => !$form_state->isValidationComplete(),
         '#name' => 'legacy_import',
       ],

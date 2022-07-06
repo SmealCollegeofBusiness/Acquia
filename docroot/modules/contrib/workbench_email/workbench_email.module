@@ -267,6 +267,6 @@ function _workbench_email_content_moderation_event_shim(ContentModerationState $
   $new_state = $entity->moderation_state->value;
   if ($original_state !== $new_state) {
     $workflow = $entity->workflow->target_id;
-    \Drupal::service('event_dispatcher')->dispatch('content_moderation.state_changed', new ContentModerationStateChangedEvent($moderated_entity, $new_state, $original_state, $workflow));
+    \Drupal::service('event_dispatcher')->dispatch(new ContentModerationStateChangedEvent($moderated_entity, $new_state, $original_state, $workflow), 'content_moderation.state_changed');
   }
 }

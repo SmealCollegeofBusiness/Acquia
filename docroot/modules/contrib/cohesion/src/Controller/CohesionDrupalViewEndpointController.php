@@ -330,7 +330,8 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
                       'name' => '[sort] ' . $filter_name,
                     ];
                   }
-                  // Sorts are always available as lists (they're always <select>'s)
+                  // Sorts are always available as lists
+                  // (they're always <select>'s)
                   else {
                     if ($filter['id'] == $filter_id) {
                       $results['view_filter_display']['list'] = [

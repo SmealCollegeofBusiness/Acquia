@@ -172,10 +172,14 @@ class ElementModel implements \JsonSerializable {
         if (property_exists($this->model->styles->styles, $bp_key)) {
           $value = $this->model->styles->styles->{$bp_key};
           $current_bp = [];
-          // Check if the breakpoint has background image/gradient and loop over.
+          // Check if the breakpoint has background image/gradient and loop
+          // over.
           if (is_object($value) && property_exists($value, 'background-image-settings') && is_array($value->{'background-image-settings'})) {
             foreach ($value->{'background-image-settings'} as $key => &$background) {
-              // If the current breakpoint background is a background image but empty populate it with the previous breakpoint/index in the array image otherwise if it has an image store it for lower breakpoints.
+              // If the current breakpoint background is a background image but
+              // empty populate it with the previous breakpoint/index in the
+              // array image otherwise if it has an image store it for lower
+              // breakpoints.
               if (property_exists($background, 'backgroundImage') && property_exists($background, 'backgroundLayerType') && property_exists($background->backgroundLayerType, 'value') && $background->backgroundLayerType->value == 'image' && is_object($background->backgroundImage)) {
                 if ((!property_exists($background->backgroundImage, 'value') || $background->backgroundImage->value == '') && property_exists($background->backgroundImage, 'imageStyle') && isset($previous_bp[$key])) {
                   $background->backgroundImage->value = $previous_bp[$key];
@@ -234,28 +238,36 @@ class ElementModel implements \JsonSerializable {
         if ($componentLayoutCanvas) {
           // Iterate through each model of each element in the component entity.
           /** @var \Drupal\cohesion\LayoutCanvas\LayoutCanvas $componentLayoutCanvas */
-          // And send the content to be hash if the value is linked to a component field.
+          // And send the content to be hash if the value is linked to a
+          // component field.
           foreach ($componentLayoutCanvas->iterateCanvas() as $element) {
 
             if ($element->getModel()) {
 
               $inner_component_model_values = [];
               // If the element is a component (component in component)
-              // get the component model path/value/key (@see iterateValuesWithPath) so we can match
-              // the parent component field uuid with the real path to it's content.
+              // get the component model path/value/key
+              // (@see iterateValuesWithPath) so we can match
+              // the parent component field uuid with the real path to it's
+              // content.
               if ($element->isComponent()) {
                 $inner_component_model_values = $this->hashContentComponent($element, TRUE);
               }
 
-              // Iterate through each form element field and get their value and path in the model.
+              // Iterate through each form element field and get their value
+              // and path in the model.
               foreach ($element->getModel()->getLeavesWithPathToRoot() as $component_model_value) {
-                // Check if the form element field is attached to one or more component field (field.[uuid])
+                // Check if the form element field is attached to one or more
+                // component field (field.[uuid])
                 if (preg_match_all(self::MATCH_COMPONENT_FIELD, $component_model_value['value'], $matches) && isset($matches[1])) {
                   foreach ($matches[1] as $uuid) {
                     // If it is a component in component.
                     if ($is_nested_component) {
-                      // If the key exists in the component inside this current component, get the path/value/key and pass it to it's parent component
-                      // Other it's the latest component in the chain so pass the current path/value/key to it's parent.
+                      // If the key exists in the component inside this current
+                      // component, get the path/value/key and pass it to it's
+                      // parent component. Other it's the latest component in
+                      // the chain so pass the current path/value/key to it's
+                      // parent.
                       if (isset($inner_component_model_values[$component_model_value['key']])) {
                         $vars[$uuid] = $inner_component_model_values[$component_model_value['key']];
                       }
@@ -294,8 +306,9 @@ class ElementModel implements \JsonSerializable {
    */
   private function processValue(&$value, $element, $component_model_value, $inner_component_model_values) {
     // If the model value is an object or array loop over it to hash each value
-    // If in the outer most component and the key in the model exists in a child component, get the path from the child
-    // Otherwise get the field path from the element.
+    // If in the outer most component and the key in the model exists in a child
+    // component, get the path from the child. Otherwise get the field path
+    // from the element.
     if (is_object($value)) {
       foreach ($value as $key => $sub_value) {
         if ($element->isComponent() && isset($inner_component_model_values[$component_model_value['key']])) {
@@ -361,20 +374,27 @@ class ElementModel implements \JsonSerializable {
 
       // Hash if the path is registered as content.
       if ($dx8_content_paths && in_array($path, $dx8_content_paths)) {
-        // Component fields and tokens are not content so they should not be hashed
-        // Now scan for strings NOT surrounding [field.*] and [token.*]
-        // This extracts all part of a string not containing [field.*] or [token.*] so they can be hashed.
-        if ($content_parts = preg_split('((\[token\.(.*?)\])|(\[field\.(.*?)\]))', $value)) {
+        // Component fields and tokens are not content so they should not be
+        // hashed. Now scan for strings NOT surrounding [field.*] and [token.*]
+        // This extracts all part of a string not containing
+        // [field.*] or [token.*] so they can be hashed.
+        if ($content_parts = preg_split('((\[token\.(.*?)\])|(\[field\.(.*?)\]))', $value, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_OFFSET_CAPTURE)) {
+          // Eveytime we replace some content with a uuid it will add to the
+          // offset calculated by preg_split
+          $added_string = 0;
 
           // Perform the replacement, building the list of UUIDs up.
-          foreach (array_filter($content_parts) as $string) {
+          foreach ($content_parts as [$string, $offset]) {
 
-            if (!preg_match(self::MATCH_UUID, $string) && preg_match('/\w/', $string)) {
+            if (!preg_match(self::MATCH_UUID, $string)) {
               // Create a UUID.
               $uuid = \Drupal::service('uuid')->generate();
 
               // Replace the outbound string partial.
-              $value = str_replace($string, $uuid, $value);
+              $value = substr_replace($value, $uuid, $offset + $added_string, strlen($string));
+              // The string has been replaced by the uuid so we need to account
+              // for this has it will increase the offset for the next replace
+              $added_string += strlen($uuid) - strlen($string);
 
               // Save the hash.
               $this->hashed_content[$uuid] = $string;

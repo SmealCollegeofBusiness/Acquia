@@ -87,7 +87,10 @@ class AdministrationController extends ControllerBase {
         $data = [
           'data' => ['element_group' => $group],
         ];
-        $operations[] = ['cohesion_website_settings_process_batch_import', [$data]];
+        $operations[] = [
+          'cohesion_website_settings_process_batch_import',
+          [$data],
+        ];
       }
     }
 

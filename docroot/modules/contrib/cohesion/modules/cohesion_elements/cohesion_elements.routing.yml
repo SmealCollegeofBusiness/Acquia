@@ -90,3 +90,15 @@ cohesion.settings.helpers:
     _title: 'Helpers'
   requirements:
     _permission: 'administer helpers'
+
+# custom component builder
+cohesion_elements.custom_component.builder:
+  path: '/admin/cohesion/components/custom-component-builder/{machine_name}'
+  defaults:
+    _controller: '\Drupal\cohesion_elements\Controller\CustomComponentController::builder'
+    _title: 'Custom component builder'
+    machine_name: ''
+  options:
+    _admin_route: TRUE
+  requirements:
+    _permission: 'use custom component builder'

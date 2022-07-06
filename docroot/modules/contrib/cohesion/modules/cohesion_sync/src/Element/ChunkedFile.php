@@ -8,7 +8,8 @@ use Drupal\file\Element\ManagedFile;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Provides an form element for uploading managed files in chunks to bypass `upload_max_filesize`.
+ * Provides an form element for uploading managed files in chunks to bypass
+ * `upload_max_filesize`.
  *
  * @FormElement("chunked_file")
  */
@@ -80,7 +81,12 @@ class ChunkedFile extends ManagedFile {
 
     // Enable the upload button if resetting the form.
     if ($form_state->getTriggeringElement()['#name'] == 'package_yaml_remove_button') {
-      $response->addCommand(new InvokeCommand('[data-drupal-selector="edit-submit"]', 'attr', ['disabled', 'disabled']));
+      $response->addCommand(new InvokeCommand('[data-drupal-selector="edit-submit"]', 'attr',
+        [
+          'disabled',
+          'disabled',
+        ]
+      ));
       $response->addCommand(new InvokeCommand('[data-drupal-selector="edit-submit"]', 'addClass', ['is-disabled']));
     }
 

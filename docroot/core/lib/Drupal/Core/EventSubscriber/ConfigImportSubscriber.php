@@ -123,7 +123,7 @@ class ConfigImportSubscriber extends ConfigImportValidateEventSubscriberBase {
         // If this error has occurred the other checks are irrelevant.
         return;
       }
-      else {
+      elseif ($install_profile !== 'acquia_cms') {
         $config_importer->logError($this->t('Cannot change the install profile from %profile to %new_profile once Drupal is installed.', [
           '%profile' => $install_profile,
           '%new_profile' => $core_extension['profile'],
@@ -134,6 +134,9 @@ class ConfigImportSubscriber extends ConfigImportValidateEventSubscriberBase {
     // Get a list of modules with dependency weights as values.
     $module_data = $this->moduleExtensionList->getList();
     $nonexistent_modules = array_keys(array_diff_key($core_extension['module'], $module_data));
+    if (($key = array_search('minimal', $nonexistent_modules)) !== FALSE) {
+      unset($nonexistent_modules[$key]);
+    }
     foreach ($nonexistent_modules as $module) {
       $config_importer->logError($this->t('Unable to install the %module module since it does not exist.', ['%module' => $module]));
     }
@@ -182,7 +185,7 @@ class ConfigImportSubscriber extends ConfigImportValidateEventSubscriberBase {
     }
 
     // Ensure that the install profile is not being uninstalled.
-    if (in_array($install_profile, $uninstalls, TRUE)) {
+    if (in_array($install_profile, $uninstalls, TRUE) && $install_profile !== 'acquia_cms') {
       $profile_name = $module_data[$install_profile]->info['name'];
       $config_importer->logError($this->t('Unable to uninstall the %profile profile since it is the install profile.', ['%profile' => $profile_name]));
     }

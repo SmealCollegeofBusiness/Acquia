@@ -84,7 +84,8 @@ class CohesionEntityReferenceRevisionsItem extends EntityReferenceRevisionsItem 
     ];
 
     if ($must_confirm) {
-      // Add a confirmation checkbox to the form for enabling elements on a content entity.
+      // Add a confirmation checkbox to the form for enabling elements on a
+      // content entity.
       $form['access_elements']['confirm_access_elements'] = [
         '#type' => 'checkbox',
         '#title' => t('Confirm you understand the implications of enabling access to elements on a content entity.'),

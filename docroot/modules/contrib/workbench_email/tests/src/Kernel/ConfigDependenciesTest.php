@@ -50,7 +50,7 @@ class ConfigDependenciesTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('node');
     $this->installConfig([
@@ -64,7 +64,7 @@ class ConfigDependenciesTest extends KernelTestBase {
     $node_type = $this->createContentType(['type' => 'test']);
     $this->setUpModerationForNodeType($node_type);
     $this->setUpEmailFieldForNodeBundle();
-    $this->editorRole = Role::create(['id' => 'editor']);
+    $this->editorRole = Role::create(['id' => 'editor', 'label' => 'editor']);
     $this->editorRole->save();
     $this->template = $this->setUpTemplate();
   }

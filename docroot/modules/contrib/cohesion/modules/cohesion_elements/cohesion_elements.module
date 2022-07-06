@@ -12,6 +12,7 @@ use Drupal\Core\Render\Element;
 use Drupal\cohesion_elements\Entity\ComponentContent;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\TranslatableRevisionableStorageInterface;
+use Drupal\Core\Utility\Error;
 
 define('COHESION_ELEMENTS_COHESION_COMPONENT_SETTINGS_TRAY_WIDTH', 770);
 define('COHESION_ELEMENTS_COHESION_COMPONENT_CATEGORY_COUNT', 15);
@@ -58,7 +59,8 @@ function cohesion_elements_library_info_alter(&$libraries, $extension) {
           foreach ($library_info['js'] as $library) {
             $url = file_create_url($library['asset_url']);
             $asset_url = (isset($url) && (strpos($url, $base_url) !== FALSE)) ? str_replace($base_url, '', $url) : $url;
-            // Replace StreamWrapper with its base path for translation. see _locale_parse_js_file in locale.module.
+            // Replace StreamWrapper with its base path for translation.
+            // see _locale_parse_js_file in locale.module.
             $library['asset_url'] = $asset_url;
             $libraries[$library_key]['js'][$library['asset_url']] = [
               'weight' => (isset($library['weight']) && $library['weight'] < 0) ? $library['weight'] : 0,
@@ -91,7 +93,59 @@ function cohesion_elements_library_info_alter(&$libraries, $extension) {
         }
       }
     }
+
+    /** @var \Drupal\cohesion_elements\CustomComponentsService $custom_component_service */
+    $custom_component_service = \Drupal::service('custom.components');
+    try {
+      $custom_components = $custom_component_service->getComponents();
+    }
+    catch (\Exception $exception) {
+      \Drupal::logger('cohesion_elements.custom_components')->error(
+        $exception->getMessage(),
+        Error::decodeException($exception)
+      );
+    }
+    if (isset($custom_components)) {
+      foreach ($custom_components as $id => $component) {
+        $library_id = 'custom-component-' . str_replace('_', '-', $id);
+        // Build the library
+        if (!empty($component['css'])) {
+          $libraries[$library_id]['css']['component'] = _component_build_library($component['css'], $component['subpath']);
+        }
+        if (!empty($component['js'])) {
+          $libraries[$library_id]['js'] = _component_build_library($component['js'], $component['subpath']);
+        }
+        if ($component['dependencies']) {
+          $libraries[$library_id]['dependencies'] = $component['dependencies'];
+        }
+      }
+    }
   }
+}
+
+/**
+ * Helper function to process and build library assets.
+ *
+ * @param array $assets
+ *   The asset array for CSS or JS.
+ * @param string $subpath
+ *   The path to the component parent folder, relative to root. This is
+ *   expected to have a forward slash at the beginning and end already.
+ */
+function _component_build_library(array $assets, $subpath) {
+  $processed = [];
+  foreach ($assets as $asset_file => $asset_data) {
+    // Allow external assets to use absolute path.
+    if (!empty($asset_data['type']) && $asset_data['type'] == 'external') {
+      $asset_path = $asset_file;
+    }
+    else {
+      $asset_path = $subpath . $asset_file;
+    }
+    $processed[$asset_path] = $asset_data;
+  }
+
+  return $processed;
 }
 
 /**
@@ -112,7 +166,7 @@ function preprocess_cohesion_elements_component(&$variables) {
  * Implements hook_theme().
  */
 function cohesion_elements_theme($existing, $type, $theme, $path) {
-  return [
+  $themes = [
     'cohesion_layout' => [
       'render element' => 'element',
     ],
@@ -151,6 +205,44 @@ function cohesion_elements_theme($existing, $type, $theme, $path) {
       'render element' => 'element',
     ],
   ];
+
+  /** @var \Drupal\cohesion_elements\CustomComponentsService $custom_component_service */
+  $custom_component_service = \Drupal::service('custom.components');
+  try {
+    $custom_components = $custom_component_service->getComponents();
+
+    foreach($custom_components as $id => $component) {
+      if (isset($component['template'])) {
+        $themes['custom_component_' . str_replace('-', '_', $component['template'])] = [
+          'variables' => [
+            'field' => NULL,
+            'dropzones' => [],
+          ],
+          'template' => $component['template'],
+          'path' => rtrim($component['subpath'], '/'),
+          'render comp' => 'children',
+        ];
+      }
+    }
+  }
+  catch (\Exception $exception) {
+    \Drupal::logger('cohesion_elements.custom_components')->error($exception->getMessage(), Error::decodeException($exception));
+  }
+
+  // Default custom component theme
+  // When a template is not provided
+  $themes['custom_component'] = [
+    'variables' => [
+      'field' => NULL,
+      'attributes' => NULL,
+      'dropzones' => NULL,
+      'html_template' => NULL,
+    ],
+    'template' => 'custom-component',
+    'render comp' => 'children',
+  ];
+
+  return $themes;
 }
 
 /**
@@ -185,7 +277,7 @@ function cohesion_elements_get_elements_style_process_batch($verbose = FALSE, &$
   if ($verbose) {
     $context['message'] = t('Importing styles for elements (@time seconds, @memory MB)', [
       '@time' => number_format((float) microtime(TRUE) - $time_start, 2, '.', ''),
-      '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ',')
+      '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ','),
     ]);
   }
   else {
@@ -254,9 +346,9 @@ function cohesion_elements_theme_suggestions_component_alter(array &$suggestions
 /**
  * Implements hook_module_implements_alter().
  *
- * Our cohesion_elements_form_language_content_settings_form_alter() needs to be run after
- * that of the content_translation module in order to see the current state
- * of the translation field.
+ * Our cohesion_elements_form_language_content_settings_form_alter() needs to be
+ * run after that of the content_translation module in order to see the current
+ * state of the translation field.
  *
  * The hook here can't be more specific, as the $hook that's passed in to this
  * function is form_alter, and not form_FORM_ID_alter.
@@ -471,7 +563,7 @@ function cohesion_elements_menu_local_actions_alter(&$local_actions) {
   $action_routes = [
     'entity.cohesion_component.toggle_components_groups',
     'entity.cohesion_helper.toggle_helpers_groups',
-    'entity.component_content.toggle_component_content_groups'
+    'entity.component_content.toggle_component_content_groups',
   ];
 
   foreach($action_routes as $action_route) {

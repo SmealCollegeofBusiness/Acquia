@@ -23,7 +23,8 @@ class MasterTemplatesForm extends TemplateForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
-    // If user is "creating" the master template, the title needs to reflect this.
+    // If user is "creating" the master template, the title needs to reflect
+    // this.
     $operation = $this->getOperation();
     if ($operation == 'duplicate') {
       $this->entity->set('default', FALSE);

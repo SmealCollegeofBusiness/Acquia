@@ -26,10 +26,12 @@ class CohesionLayoutFieldProcessor extends DefaultFieldProcessor {
       // Get the layout canvas json from the data and build a LayoutCanvas.
       $layout_canvas = new LayoutCanvas($data[0]['value']['#text']);
 
-      // Loop over each element in the canvas and load each component if the element is one.
+      // Loop over each element in the canvas and load each component if the
+      // element is one.
       foreach ($layout_canvas->iterateCanvas() as $element) {
         if ($element->isComponent() && $component = Component::load($element->getComponentID())) {
-          // Get the models of each form field of the component as an array keyed by their uuid.
+          // Get the models of each form field of the component as an array
+          // keyed by their uuid.
           $component_model = $component->getLayoutCanvasInstance()
             ->iterateModels('component_form');
           if ($element->getModel()) {
@@ -52,7 +54,8 @@ class CohesionLayoutFieldProcessor extends DefaultFieldProcessor {
     $data_layout = [];
     foreach ($values as $key => $value) {
       // If the key in the model matches a uuid then it a component field value
-      // If the model contains (property) and is TRUE, the field is excluded from being expose as translatable.
+      // If the model contains (property) and is TRUE, the field is excluded
+      // from being expose as translatable.
       if (preg_match(ElementModel::MATCH_UUID, $key)) {
         if (is_array($value)) {
           foreach ($value as $index => $inner_value) {

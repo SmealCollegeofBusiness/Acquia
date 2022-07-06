@@ -29,12 +29,13 @@ class CategoryDeleteForm extends CohesionDeleteForm {
     $category_entity_type_id = $this->entity->getEntityTypeId();
 
     // First, delete the category.
-    // Use reset instead of delete because some entities like BaseStyle or ContentTemplates
-    // should never be deleted but we don't want to override the default delete behavior
-    // in case we do have to delete it.
+    // Use reset instead of delete because some entities like BaseStyle or
+    // ContentTemplates should never be deleted but we don't want to override
+    // the default delete behavior in case we do have to delete it.
     $this->entity->reset();
 
-    // Set all the components / helpers that use this category to "Uncategorized".
+    // Set all the components / helpers that use this category to
+    // "Uncategorized".
     \Drupal::service('cohesion_elements.category_relationships')->processCategory($category_entity_id, $category_entity_type_id, $category_entity_class);
 
     // Redirect and message.

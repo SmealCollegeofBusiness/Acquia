@@ -90,7 +90,10 @@ class SyncConfigImportSubscriber extends ConfigImportSubscriber {
                   count($diffs),
                   'Configuration %name depends on the %module module that will not be installed after import.',
                   'Configuration %name depends on modules (%module) that will not be installed after import.',
-                  ['%name' => $name, '%module' => implode(', ', $this->getNames($diffs, $module_data))]
+                  [
+                    '%name' => $name,
+                    '%module' => implode(', ', $this->getNames($diffs, $module_data)),
+                  ]
                 );
                 break;
 
@@ -99,7 +102,10 @@ class SyncConfigImportSubscriber extends ConfigImportSubscriber {
                   count($diffs),
                   'Configuration %name depends on the %theme theme that will not be installed after import.',
                   'Configuration %name depends on themes (%theme) that will not be installed after import.',
-                  ['%name' => $name, '%theme' => implode(', ', $this->getNames($diffs, $theme_data))]
+                  [
+                    '%name' => $name,
+                    '%theme' => implode(', ', $this->getNames($diffs, $theme_data)),
+                  ]
                 );
                 break;
 

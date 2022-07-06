@@ -11,8 +11,8 @@ use Drupal\Core\Form\FormStateInterface;
  */
 function cohesion_theme_form_alter(&$form, FormStateInterface $form_state, $form_id) {
 
-    // Add placeholder to search block form input.
-    if ($form_id === 'search_block_form') {
-        $form['keys']['#attributes']['placeholder'] = t('Search');
-    }
+  // Add placeholder to search block form input.
+  if ($form_id === 'search_block_form') {
+    $form['keys']['#attributes']['placeholder'] = t('Search');
+  }
 }

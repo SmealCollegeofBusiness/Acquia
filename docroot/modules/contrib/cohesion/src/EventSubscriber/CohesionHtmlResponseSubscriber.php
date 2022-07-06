@@ -41,7 +41,15 @@ class CohesionHtmlResponseSubscriber implements EventSubscriberInterface {
 
       // Set inline styles for dx8 and
       // remove bigpipe token key from style output.
-      $content = str_replace(['<cohesion-placeholder></cohesion-placeholder>', 'big_pipe_nojs_placeholder_attribute_safe:'], [implode("\n", $inline_styles), ''], $response->getContent());
+      $search = [
+        '<cohesion-placeholder></cohesion-placeholder>',
+        'big_pipe_nojs_placeholder_attribute_safe:',
+      ];
+      $replace = [
+        implode("\n", $inline_styles),
+        '',
+      ];
+      $content = str_replace($search, $replace, $response->getContent());
       $response->setContent($content);
     }
   }

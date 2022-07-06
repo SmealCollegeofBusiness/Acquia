@@ -96,7 +96,7 @@ abstract class ExportFormBase extends ConfigFormBase {
   protected function showNoEntityTypesMessage() {
 
     $args = [
-      '@link' => Link::createFromRoute('Click here to go to the export settings.', 'cohesion_sync.export_settings')->toString()
+      '@link' => Link::createFromRoute('Click here to go to the export settings.', 'cohesion_sync.export_settings')->toString(),
     ];
 
     \Drupal::messenger()->addWarning($this->t('Entities available for export have not been defined. @link', $args), TRUE);

@@ -76,7 +76,13 @@ class CohesionEventSubscriber implements EventSubscriberInterface {
 
     if ($config->getName() == 'system.theme' && $config->getOriginal('default') !== $config->get('default') && $this->cohesionUtils->themeHasCohesionEnabled($config->get('default')) && !theme_get_setting('features.cohesion_build_assets', $config->get('default'))) {
       $theme = $this->themeHandler->listInfo()[$config->get('default')];
-      $this->messenger->addMessage(t('%theme is using Site Studio and needs assets to be built for it. You may need to perform a <a href=":rebuild">rebuild</a>', ['%theme' => $theme->info['name'], ':rebuild' => Url::fromRoute('cohesion.configuration.rebuild')->toString()]), MessengerInterface::TYPE_WARNING);
+      $this->messenger->addMessage(t(
+        '%theme is using Site Studio and needs assets to be built for it. You may need to perform a <a href=":rebuild">rebuild</a>',
+        [
+          '%theme' => $theme->info['name'],
+          ':rebuild' => Url::fromRoute('cohesion.configuration.rebuild')->toString(),
+        ]),
+        MessengerInterface::TYPE_WARNING);
     }
 
     if (!is_null($config->get('features.cohesion_build_assets')) && $config->get('features.cohesion_build_assets') == 1 && ($config->getOriginal('features.cohesion_build_assets') == 0 || is_null($config->getOriginal('features.cohesion_build_assets')))) {

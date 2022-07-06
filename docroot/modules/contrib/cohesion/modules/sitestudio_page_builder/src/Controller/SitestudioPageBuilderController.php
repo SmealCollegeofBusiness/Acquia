@@ -82,7 +82,8 @@ class SitestudioPageBuilderController extends ControllerBase {
   /**
    * Save a layout canvas from the frontend editor
    *
-   * returns a list of worklow state that this entity can now transition to (if applicable)
+   * Returns a list of worklow state that this entity can now transition to
+   * (if applicable)
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *
@@ -106,7 +107,7 @@ class SitestudioPageBuilderController extends ControllerBase {
     $data = json_decode($content);
     if(!$data || !property_exists($data, 'canvases') || !is_object($data->canvases)) {
       return new CohesionJsonResponse([
-        'data' => $this->t('Missing data canvases')
+        'data' => $this->t('Missing data canvases'),
       ], 400);
     }
 
@@ -121,8 +122,8 @@ class SitestudioPageBuilderController extends ControllerBase {
       if(!$layout_canvas) {
         return new CohesionJsonResponse([
           'data' => $this->t('Cannot find entity Layout canvas with id: @id', [
-            '@id' => $layout_canvas_id
-          ])
+            '@id' => $layout_canvas_id,
+          ]),
         ], 400);
       }
 
@@ -134,8 +135,8 @@ class SitestudioPageBuilderController extends ControllerBase {
         return new CohesionJsonResponse([
           'data' => $this->t('Cannot find tranlaste for langauge %lang for Layout canvas entity id: @id', [
             '@lang' => $current_lang,
-            '@id' => $layout_canvas_id
-          ])
+            '@id' => $layout_canvas_id,
+          ]),
         ], 400);
       }
 
@@ -145,7 +146,7 @@ class SitestudioPageBuilderController extends ControllerBase {
       // Check that the json is valid
       if($errors = $layout_canvas->jsonValuesErrors()) {
         return new CohesionJsonResponse([
-          'data' => $errors['error']
+          'data' => $errors['error'],
         ], 400);
       }
 
@@ -204,7 +205,7 @@ class SitestudioPageBuilderController extends ControllerBase {
 
       if(!$entity->access('update')) {
         return new CohesionJsonResponse([
-          'data' => 'Forbidden, you do not have the necessary permissions to edit this content'
+          'data' => 'Forbidden, you do not have the necessary permissions to edit this content',
         ], 403);
       } elseif (count($violations)) {
         $errors_msg = [];
@@ -212,7 +213,7 @@ class SitestudioPageBuilderController extends ControllerBase {
           $errors_msg[] = $violation->getMessage();
         }
         return new CohesionJsonResponse([
-          'data' => implode("\n", $errors_msg)
+          'data' => implode("\n", $errors_msg),
         ], 403);
       } else {
         $entity->save();
@@ -257,7 +258,7 @@ class SitestudioPageBuilderController extends ControllerBase {
       }
     }else{
       return new CohesionJsonResponse([
-        'data' => 'An error occurred, the entity for the layout canvas can\'t be found '
+        'data' => 'An error occurred, the entity for the layout canvas can\'t be found ',
       ], 400);
     }
 
@@ -265,7 +266,7 @@ class SitestudioPageBuilderController extends ControllerBase {
       'data' => [
         'moderationStates' => array_values($transition_labels),
         'currentState' => $current_state,
-      ]
+      ],
     ]);
   }
 
@@ -283,14 +284,14 @@ class SitestudioPageBuilderController extends ControllerBase {
         if($layout = CohesionLayout::load($layoutId[1])) {
           if(!$layout->getParentEntity() || !$layout->getParentEntity()->access('update')) {
             return new CohesionJsonResponse([
-              'data' => 'Forbidden, you do not have the necessary permissions to edit this content'
+              'data' => 'Forbidden, you do not have the necessary permissions to edit this content',
             ], 403);
           }
 
           $layout->setJsonValue($layout_canvas);
           if ($cohesion_error = $layout->process()) {
             return new CohesionJsonResponse([
-              'data' => $cohesion_error
+              'data' => $cohesion_error,
             ], 400);
           }
 
@@ -305,14 +306,14 @@ class SitestudioPageBuilderController extends ControllerBase {
           return $response;
         }else {
           return new CohesionJsonResponse([
-            'data' => $this->t("The LayoutCanvas entity with id @id can't be found", ['@id' => $layoutId[1]])
+            'data' => $this->t("The LayoutCanvas entity with id @id can't be found", ['@id' => $layoutId[1]]),
           ], 400);
         }
       }
     }
 
     return new CohesionJsonResponse([
-      'data' => $this->t('Missing parameter canvas_id')
+      'data' => $this->t('Missing parameter canvas_id'),
     ], 400);
   }
 

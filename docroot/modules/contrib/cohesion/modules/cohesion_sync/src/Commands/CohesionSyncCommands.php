@@ -39,10 +39,12 @@ class CohesionSyncCommands extends DrushCommands {
    * Export DX8 packages to sync.
    *
    * @param array $options
-   *   An associative array of options whose values come from cli, aliases, config, etc.
+   *   An associative array of options whose values come from cli, aliases,
+   *   config, etc.
    *
    * @option filename-prefix
-   *   The export filename prefix that will output a file like: [prefix]-package.yml_
+   *   The export filename prefix that will output a file
+   *   like: [prefix]-package.yml_
    *
    * @validate-module-enabled cohesion_sync
    *
@@ -72,7 +74,8 @@ class CohesionSyncCommands extends DrushCommands {
    * Import DX8 packages from sync.
    *
    * @param array $options
-   *   An associative array of options whose values come from cli, aliases, config, etc.
+   *   An associative array of options whose values come from cli, aliases,
+   *   config, etc.
    *
    * @option overwrite-all
    *   Overwrite existing entities when differences detected
@@ -92,7 +95,14 @@ class CohesionSyncCommands extends DrushCommands {
    * @command sync:import
    * @aliases sync-import
    */
-  public function import(array $options = ['overwrite-all' => NULL, 'keep-all' => NULL, 'path' => NULL, 'force' => NULL, 'no-rebuild' => NULL, 'no-maintenance' => NULL]) {
+  public function import(array $options = [
+    'overwrite-all' => NULL,
+    'keep-all' => NULL,
+    'path' => NULL,
+    'force' => NULL,
+    'no-rebuild' => NULL,
+    'no-maintenance' => NULL,
+  ]) {
     // Get options.
     $overwrite_all = $options['overwrite-all'];
     $keep_all = $options['keep-all'];

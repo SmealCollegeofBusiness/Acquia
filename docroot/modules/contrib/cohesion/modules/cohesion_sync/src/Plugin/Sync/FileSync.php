@@ -94,7 +94,10 @@ class FileSync extends SyncPluginBase {
     }
     else {
       \Drupal::service('cohesion.utils')->errorHandler(
-        $this->t('File @uri does not exist on the local filesystem although the entity @label exists.', ['@uri' => $entity->getFileUri(), '@label' => $entity->label()]),
+        $this->t('File @uri does not exist on the local filesystem although the entity @label exists.', [
+          '@uri' => $entity->getFileUri(),
+          '@label' => $entity->label(),
+        ]),
         TRUE
       );
     }
@@ -130,7 +133,8 @@ class FileSync extends SyncPluginBase {
 
     if (!base64_decode($entry['content'])) {
       // Failed to decode (the source site didn't have a file).
-      // But we're going to say this is a pass and just not create the file on the dest.
+      // But we're going to say this is a pass and just not create the file on
+      // the dest.
       $entry['content'] = TRUE;
     }
 
@@ -204,7 +208,8 @@ class FileSync extends SyncPluginBase {
     $dirname = $this->fileSystem->dirname($uri);
     $this->fileSystem->prepareDirectory($dirname, FileSystemInterface::MODIFY_PERMISSIONS | FileSystemInterface::CREATE_DIRECTORY);
 
-    // Only attempt to save the file if it can be decoded, otherwise just create the entity.
+    // Only attempt to save the file if it can be decoded, otherwise just create
+    // the entity.
     if ($content = base64_decode($entry['content'])) {
       if (!$this->fileSystem->saveData($content, $uri, FileSystemInterface::EXISTS_REPLACE)) {
         throw new \Exception("Unable to save file {$uri}");

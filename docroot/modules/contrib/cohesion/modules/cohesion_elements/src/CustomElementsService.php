@@ -153,9 +153,9 @@ class CustomElementsService {
 
         // Set the custom element to a container if defined in its definition
         if (isset($element['container']) && $element['container'] === TRUE) {
-            $item['type'] = 'container';
-            $item['children'] = [];
-            $item['status']['collapsed'] = FALSE;
+          $item['type'] = 'container';
+          $item['children'] = [];
+          $item['status']['collapsed'] = FALSE;
         }
 
         $children[] = $item;

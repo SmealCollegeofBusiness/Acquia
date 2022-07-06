@@ -43,7 +43,8 @@ class CohesionTemplateSelectorFieldWidget extends WidgetBase {
       $entity_type = $entity->getEntityTypeId();
     }
     else {
-      // The cohesion template selector field is supported only on content entity and field config.
+      // The cohesion template selector field is supported only on content
+      // entity and field config.
       return [];
     }
 

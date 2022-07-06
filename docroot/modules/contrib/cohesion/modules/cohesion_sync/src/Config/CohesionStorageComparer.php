@@ -12,7 +12,7 @@ use Drupal\Core\Config\StorageInterface;
 class CohesionStorageComparer extends StorageComparer {
 
   /**
-   * The usage update manager service
+   * The usage update manager service.
    *
    * @var \Drupal\cohesion\UsageUpdateManager
    */
@@ -22,8 +22,11 @@ class CohesionStorageComparer extends StorageComparer {
    * Constructs the Configuration storage comparer.
    *
    * @param \Drupal\Core\Config\StorageInterface $source_storage
+   *   Storage object used to read configuration.
    * @param \Drupal\Core\Config\StorageInterface $target_storage
+   *   Storage object used to write configuration.
    * @param \Drupal\cohesion\UsageUpdateManager $usageUpdateManager
+   *   Usage Update Manager service.
    */
   public function __construct(StorageInterface $source_storage, StorageInterface $target_storage, UsageUpdateManager $usageUpdateManager) {
     parent::__construct($source_storage, $target_storage);
@@ -40,9 +43,9 @@ class CohesionStorageComparer extends StorageComparer {
     return $list;
   }
 
-    /**
-     * {@inheritdoc}
-     */
+  /**
+   * {@inheritdoc}
+   */
   protected function addChangelistCreate($collection) {
     parent::addChangelistCreate($collection);
 
@@ -124,7 +127,8 @@ class CohesionStorageComparer extends StorageComparer {
   }
 
   /**
-   * Checks if there are any operations with changes to process and locked changed entities.
+   * Checks if there are any operations with changes to process and locked
+   * changed entities.
    *
    * @return bool
    */

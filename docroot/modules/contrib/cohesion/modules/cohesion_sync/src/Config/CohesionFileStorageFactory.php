@@ -10,7 +10,8 @@ use Drupal\Core\Site\Settings;
 class CohesionFileStorageFactory {
 
   /**
-   * Returns a CohesionFileStorage object working with the sync config directory.
+   * Returns a CohesionFileStorage object working with the sync config
+   * directory.
    *
    * @return \Drupal\cohesion_sync\Config\CohesionFileStorage FileStorage
    *

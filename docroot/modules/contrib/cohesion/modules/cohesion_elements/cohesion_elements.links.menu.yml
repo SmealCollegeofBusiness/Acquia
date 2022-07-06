@@ -69,3 +69,11 @@ entity.cohesion_helper_category.collection:
   route_name: entity.cohesion_helper_category.collection
   parent: cohesion.settings.helpers
   weight: 2
+
+# Custom components form builder
+cohesion_elements.custom_component.form_builder:
+  title: 'Custom component builder'
+  description: 'Builder UI for custom components.'
+  route_name: cohesion_elements.custom_component.builder
+  parent: cohesion.settings.components
+  weight: 3

@@ -26,7 +26,7 @@ use Drupal\field\Entity\FieldConfig;
  *     plural = "@count components",
  *   ),
  *   handlers = {
- *     "list_builder" = "Drupal\cohesion_elements\ElementsListBuilder",
+ *     "list_builder" = "Drupal\cohesion_elements\ComponentListBuilder",
  *     "form" = {
  *       "default" = "Drupal\cohesion_elements\Form\ComponentForm",
  *       "add" = "Drupal\cohesion_elements\Form\ComponentForm",
@@ -159,8 +159,8 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
   }
 
   /**
-   * Check whether an entity using this component has content defined for a field that no
-   * long exists in the component form.
+   * Check whether an entity using this component has content defined for a
+   * field that no long exists in the component form.
    *
    * @param $entity
    *   \Drupal\Core\Entity\EntityInterface - the entity using this component
@@ -249,7 +249,8 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
   public static function preDelete(EntityStorageInterface $storage, array $entities) {
     parent::preDelete($storage, $entities);
 
-    // Remove preview images and component content- update usage and delete file if necessary.
+    // Remove preview images and component content- update usage and delete file
+    // if necessary.
     foreach ($entities as $entity) {
       // Delete any component contents for this component.
       $storage = \Drupal::entityTypeManager()->getStorage('component_content');

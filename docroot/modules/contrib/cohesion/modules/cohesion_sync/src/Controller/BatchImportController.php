@@ -32,7 +32,10 @@ class BatchImportController extends ControllerBase {
     $entries = \Drupal::service('cohesion_sync.packager')->getExportsByUUID($uri, $uuids);
     foreach ($entries as $entry) {
       \Drupal::service('cohesion_sync.packager')->applyPackageEntry($entry);
-      $context['message'] = t('Pre processing:  @type - @uuid', ['@type' => $entry['type'], '@uuid' => $entry['export']['uuid']]);
+      $context['message'] = t('Pre processing:  @type - @uuid', [
+        '@type' => $entry['type'],
+        '@uuid' => $entry['export']['uuid'],
+      ]);
     }
   }
 
@@ -46,17 +49,21 @@ class BatchImportController extends ControllerBase {
     if (isset($context['results']['error'])) {
       return;
     }
-    // Make sure API send() function just returns without sending anything to the API.
+    // Make sure API send() function just returns without sending anything to
+    // the API.
     $cohesion_sync_lock = &drupal_static('cohesion_sync_lock');
     $cohesion_sync_lock = TRUE;
     $package_manager = \Drupal::service('cohesion_sync.packager');
     $config_storage = \Drupal::service('config.storage');
     $source_storage = new StorageReplaceDataWrapper($config_storage);
 
-    if($entries = \Drupal::service('cohesion_sync.packager')->getExportsByUUID($uri, $uuids)) {
+    if ($entries = \Drupal::service('cohesion_sync.packager')->getExportsByUUID($uri, $uuids)) {
       foreach ($entries as $entry) {
         $package_manager->replaceData($source_storage, $entry, $action_data);
-        $context['message'] = t('Importing:  @type - @uuid', ['@type' => $entry['type'], '@uuid' => $entry['export']['uuid']]);
+        $context['message'] = t('Importing:  @type - @uuid', [
+          '@type' => $entry['type'],
+          '@uuid' => $entry['export']['uuid'],
+        ]);
         $context['results'][] = $entry['type'] . ':' . $entry['export']['uuid'];
       }
 
@@ -134,7 +141,10 @@ class BatchImportController extends ControllerBase {
     $no_maintenance ?: \Drupal::service('state')->set('system.maintenance_mode', FALSE);
     $no_maintenance ?: \Drupal::messenger()->addMessage(t('Maintenance mode disabled'));
     if (!isset($context['results']['error'])) {
-      $context['message'] = t('Imported @count items from package: @path', ['@count' => count($context['results']), '@path' => $path]);
+      $context['message'] = t('Imported @count items from package: @path', [
+        '@count' => count($context['results']),
+        '@path' => $path,
+      ]);
     }
     else {
       \Drupal::messenger()->addError(t('Finished with an error.'));
@@ -179,7 +189,7 @@ class BatchImportController extends ControllerBase {
    * @param $context - batch context
    */
   public static function batchValidateEntry($file_uri, $entry_uuids, $store_key, &$context) {
-    // Skip if there is validation errors
+    // Skip if there is validation errors.
     if ($context['results'] && $context['results']['error']) {
       return;
     }
@@ -190,17 +200,20 @@ class BatchImportController extends ControllerBase {
     $entity_repository = \Drupal::service('entity.repository');
     try {
       foreach ($entry_uuids as $entry_uuid) {
-        if($entry = $package_manager->getExportByUUID($file_uri, $entry_uuid)) {
-          $context['message'] = t('Validating: @type - @uuid', ['@type' => $entry['type'], '@uuid' => $entry_uuid]);
+        if ($entry = $package_manager->getExportByUUID($file_uri, $entry_uuid)) {
+          $context['message'] = t('Validating: @type - @uuid', [
+            '@type' => $entry['type'],
+            '@uuid' => $entry_uuid,
+          ]);
           $action_data = $package_manager->validatePackageEntry($entry);
           $broken_entities = [];
-          // Check content will not be lost if entity exists
+          // Check content will not be lost if entity exists.
           if ($entry['type'] == 'cohesion_component' || $entry['type'] == 'cohesion_style_guide') {
             /** @var \Drupal\cohesion_elements\Entity\Component $entity */
             $entity = $entity_repository->loadEntityByUuid($entry['type'], $entry['export']['uuid']);
-            if($entity) {
+            if ($entity) {
               $entities = $entity->checkContentIntegrity($entry['export']['json_values']);
-              if(!empty($entities)) {
+              if (!empty($entities)) {
                 $broken_entities = [
                   'in_use_url' => $entity->toUrl('in-use'),
                   'entity' => [
@@ -240,7 +253,8 @@ class BatchImportController extends ControllerBase {
     }catch (\Exception $e) {
       $context['results']['error'] = $e->getMessage();
       \Drupal::service('messenger')->addError($e->getMessage());
-      // If the validation fails set the data to false so it can be process by the form
+      // If the validation fails set the data to false so it can be process by
+      // the form.
       $temp_store->set($store_key, FALSE);
     }
   }
@@ -264,7 +278,8 @@ class BatchImportController extends ControllerBase {
     $temp_store = \Drupal::service('tempstore.shared')->get('sitestudio');
     $sync_data = $temp_store->get($store_key);
 
-    // Check if no any entity has been marked as broken and will loose data after importing
+    // Check if no any entity has been marked as broken and will loose data
+    // after importing.
     if (isset($sync_data['broken_entities']) && $overwrite && !$force) {
       $broken_entities = $sync_data['broken_entities'];
       $error_messages = [];
@@ -273,10 +288,20 @@ class BatchImportController extends ControllerBase {
         /** @var \Drupal\cohesion\Entity\CohesionConfigEntityBase $entity */
         $entity = $broken_entity['entity'];
         $error_messages[] = "\n";
-        $error_messages[] = $drupal_translate->translate('Cannot import @entity_type \'@label\' (id: @id). This entity is missing populated fields. If you proceed, content in these fields will be lost.', ['@entity_type' => $entity['type'], '@label' => $entity['label'], '@id' => $entity['id']]);
+        $error_messages[] = $drupal_translate->translate('Cannot import @entity_type \'@label\' (id: @id). This entity is missing populated fields. If you proceed, content in these fields will be lost.',
+          [
+            '@entity_type' => $entity['type'],
+            '@label' => $entity['label'],
+            '@id' => $entity['id'],
+          ]
+        );
         $error_messages[] = $drupal_translate->formatPlural(count($broken_entity['entities']), '1 entity affected:', '@count entities affected:');
         foreach ($broken_entity['entities'] as $broken) {
-          $error_messages[] = $drupal_translate->translate('@entity_type \'@label\' (id: @id)', ['@entity_type' => $broken['type'], '@label' => $broken['label'], '@id' => $broken['id']]);
+          $error_messages[] = $drupal_translate->translate('@entity_type \'@label\' (id: @id)', [
+            '@entity_type' => $broken['type'],
+            '@label' => $broken['label'],
+            '@id' => $broken['id'],
+          ]);
         }
       }
 
@@ -284,15 +309,17 @@ class BatchImportController extends ControllerBase {
         $error_messages[] = "\n" . $drupal_translate->translate('You can choose to ignore and proceed with the import by adding `--force` to your command');
         $context['results']['error'] = implode("\n", $error_messages);
         \Drupal::service('messenger')->addError(implode("\n", $error_messages));
-        // If the validation fails set the data to false so it can be process by the form
+        // If the validation fails set the data to false so it can be process
+        // by the form.
         $temp_store->set($store_key, FALSE);
         return;
       }
     }
 
-    if(isset($sync_data['action_data'])) {
+    if (isset($sync_data['action_data'])) {
       $action_data = $sync_data['action_data'];
-      // Set the status of the action items denpending on the drush command options.
+      // Set the status of the action items denpending on the drush command
+      // options.
       foreach ($action_data as $uuid => $action) {
         if ($action['entry_action_state'] == ENTRY_EXISTING_ASK) {
           if ($overwrite) {
@@ -314,7 +341,7 @@ class BatchImportController extends ControllerBase {
 
       $operations[] = [
         '\Drupal\cohesion_sync\Controller\BatchImportController::batchDrushFinishedCallback',
-        [$path, $no_maintenance]
+        [$path, $no_maintenance],
       ];
 
       $batch = [
@@ -426,7 +453,11 @@ class BatchImportController extends ControllerBase {
       // An error occurred.
       // $operations contains the operations that remained unprocessed.
       $error_operation = reset($operations);
-      $message = t('An error occurred while processing %error_operation with arguments: @arguments', ['%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)]);
+      $message = t('An error occurred while processing %error_operation with arguments: @arguments',
+        [
+          '%error_operation' => $error_operation[0],
+          '@arguments' => print_r($error_operation[1], TRUE),
+        ]);
       $messenger->addError($message);
     }
   }

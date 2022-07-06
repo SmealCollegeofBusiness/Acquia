@@ -68,7 +68,11 @@
         "patchLevel": {
             "drupal/core": "-p2"
         },
-        "patches": {}
+        "patches": {
+          "acquia/acquia_cms": {
+            "Auto switch profile from Acquia CMS to minimal": "https://gist.githubusercontent.com/chandan-singh7929/9018a3537dfe2191927aad1d72b1211f/raw/073a303f981272eee3690039ee56795a10c57a14/profile_switch_in_sf_acms.patch"
+          }
+        }
     },
     "autoload": {},
     "repositories": {

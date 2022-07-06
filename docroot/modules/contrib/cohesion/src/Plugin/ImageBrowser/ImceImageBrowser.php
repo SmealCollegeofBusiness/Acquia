@@ -89,7 +89,8 @@ class ImceImageBrowser extends ImageBrowserPluginBase {
           continue;
         }
 
-        // Restrict access to imce file browser content by disabling all permissions.
+        // Restrict access to imce file browser content by disabling all
+        // permissions.
         $profile['conf']['folders'][] = [
           'path' => 'cohesion',
           'permissions' => [],
@@ -127,7 +128,8 @@ class ImceImageBrowser extends ImageBrowserPluginBase {
   private function filter_folders($folders = []) {
     $results = [];
     if (in_array('folders', array_keys($folders))) {
-      // Filter directories which contains the cohesion keyword and restrict access.
+      // Filter directories which contains the cohesion keyword and restrict
+      // access.
       foreach ($folders['folders'] as $folder) {
         $path = $folder['path'];
         if (strpos($path, 'cohesion') !== FALSE) {

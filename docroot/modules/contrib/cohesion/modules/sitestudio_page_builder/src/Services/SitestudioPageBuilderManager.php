@@ -22,7 +22,8 @@ class SitestudioPageBuilderManager implements SitestudioPageBuilderManagerInterf
 
   /**
    * SitestudioPageBuilderManager constructor.
-   *    * @param \Drupal\cohesion\Routing\CohesionRouteMatchInterface $current_route_match
+   *
+   * @param \Drupal\cohesion\Routing\CohesionRouteMatchInterface $current_route_match
    * Current rout match service.
    */
   public function __construct(CohesionRouteMatchInterface $current_route_match) {

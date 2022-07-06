@@ -9,7 +9,7 @@ use Drupal\Core\Config\StorageTransformEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Class ConfigFilterEventSubscriber.
+ * Event subscriber bridging the Config Filter and Drupal 8.8 core API.
  */
 class ConfigFilterEventSubscriber implements EventSubscriberInterface {
 
@@ -84,7 +84,7 @@ class ConfigFilterEventSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    // @todo: use class constants when they get added in #2991683
+    // @todo Use class constants when they get added in #2991683
     $events['config.transform.import'][] = ['onImportTransform'];
     $events['config.transform.export'][] = ['onExportTransform'];
     return $events;

@@ -21,8 +21,8 @@ class CohesionLayoutAccessControlHandler extends EntityAccessControlHandler {
     // Allowed when the operation is not view or the status is true.
     /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $paragraph */
     if ($cohesion_layout->getParentEntity() != NULL) {
-      // Delete permission on the cohesion_layout, should just depend on 'update'
-      // access permissions on the parent.
+      // Delete permission on the cohesion_layout, should just depend on
+      // 'update' access permissions on the parent.
       $operation = ($operation == 'delete') ? 'update' : $operation;
       $parent_access = $cohesion_layout->getParentEntity()->access($operation, $account, TRUE);
       return $access_result = AccessResult::allowedIf($parent_access);

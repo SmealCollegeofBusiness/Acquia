@@ -237,7 +237,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
    * @param \Symfony\Component\HttpFoundation\Request $request
    *
    * @return \Symfony\Component\HttpFoundation\Response json response data
-   *
+   *   Endpoint to return one of the website settings library (color,font,icon)
    */
   public function libraryAction(Request $request) {
     // Get the type of website setting from the request.
@@ -255,7 +255,8 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
         break;
 
       case 'color_palette':
-        // A second parameter can be passed for color palette to retrieve a specific color.
+        // A second parameter can be passed for color palette to retrieve a
+        // specific color.
         $item = $request->get('item');
         $colors = \Drupal::service('settings.endpoint.utils')->getColorsList($item);
         if ($item) {
@@ -395,6 +396,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
     $type = $request->get('type');
     $with_categories = $request->query->get('withcategories');
     $entity_type_id = $request->query->get('entityTypeId');
+    $isCustom = $request->query->get('isCustom');
 
     // Check if it's a component.
     $isComponentBuilder = FALSE;
@@ -424,24 +426,43 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
       if ($entity_type_id) {
         $data['categories'] = $this->filterByEntityTypeId($data['categories'], $entity_type_id);
       }
-    }
 
-    // Filter the list of form elements (whitelist for style guide sidebar).
-    if ($group = 'form_elements' && $entity_type_id == 'cohesion_style_guide') {
-      $form_elements = \Drupal::keyValue('cohesion.assets.static_assets')->get('style-guide-form-element-whitelist');
-      foreach ($data as $form_element_id => $form_element) {
-        if (!in_array($form_element_id, $form_elements)) {
-          unset($data[$form_element_id]);
+      // Filter the list of elements for the custom component form builder page.
+      if ($entity_type_id == 'cohesion_component' && isset($isCustom) && $isCustom == TRUE) {
+        $allowed_elements = \Drupal::keyValue('cohesion.assets.static_assets')
+          ->get('custom-component-element-whitelist');
+
+        foreach ($data['categories'] as $key => $category) {
+          foreach ($category['children'] as $k => $child) {
+            if (!in_array($child['uid'], $allowed_elements)) {
+              unset($data['categories'][$key]['children'][$k]);
+            }
+          }
         }
       }
     }
 
-    // Filter the list of form elements (blacklist for component sidebar).
-    if ($group = 'form_elements' && in_array($entity_type_id, ['cohesion_component', 'cohesion_helper'])) {
-      $form_elements = \Drupal::keyValue('cohesion.assets.static_assets')->get('component-form-element-blacklist');
-      foreach ($data as $form_element_id => $form_element) {
-        if (in_array($form_element_id, $form_elements)) {
-          unset($data[$form_element_id]);
+    if ($group == 'form_elements') {
+      // Filter the list of form elements (whitelist for style guide sidebar).
+      if ($entity_type_id == 'cohesion_style_guide') {
+        $form_elements = \Drupal::keyValue('cohesion.assets.static_assets')
+          ->get('style-guide-form-element-whitelist');
+        foreach ($data as $form_element_id => $form_element) {
+          if (!in_array($form_element_id, $form_elements)) {
+            unset($data[$form_element_id]);
+          }
+        }
+      }
+
+      // Filter the list of form elements (allowed for component sidebar).
+      $allowed_list = ['cohesion_component', 'cohesion_helper'];
+      if (in_array($entity_type_id, $allowed_list)) {
+        $form_elements = \Drupal::keyValue('cohesion.assets.static_assets')
+          ->get('component-form-element-blacklist');
+        foreach ($data as $form_element_id => $form_element) {
+          if (in_array($form_element_id, $form_elements)) {
+            unset($data[$form_element_id]);
+          }
         }
       }
     }
@@ -611,7 +632,8 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
       }
     }
 
-    // Process all remaining Site Studio configuration entities. (components, templates etc...)
+    // Process all remaining Site Studio configuration entities. (components,
+    // templates etc...)
     $search = 'cohesion_';
     foreach ($configs as $entity_type_name => $entity_type) {
       if ($entity_type instanceof ConfigEntityTypeInterface && substr($entity_type_name, 0, strlen($search)) === $search) {

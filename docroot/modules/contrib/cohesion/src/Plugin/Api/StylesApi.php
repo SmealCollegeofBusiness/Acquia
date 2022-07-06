@@ -83,7 +83,8 @@ class StylesApi extends ApiPluginBase {
         // Check to see if there are actually some stylesheets to process.
         if (isset($data['master']) && !empty($data['master'])) {
 
-          // Create admin icon library and website settings stylesheet for admin.
+          // Create admin icon library and website settings stylesheet for
+          // admin.
           $master = Json::decode($data['master']);
 
           if (isset($master['cohesion_website_settings']['icon_libraries'])) {

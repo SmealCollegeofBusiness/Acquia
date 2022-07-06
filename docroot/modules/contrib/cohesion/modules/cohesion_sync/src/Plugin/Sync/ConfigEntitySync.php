@@ -199,9 +199,11 @@ class ConfigEntitySync extends SyncPluginBase {
    * @param \Drupal\cohesion_sync\SyncConfigImporter $config_importer
    */
   private function validate($entry, SyncConfigImporter $config_importer) {
-    // Check this doesn't have an entityupdate setting higher than the highest available entity update script on this site.
+    // Check this doesn't have an entityupdate setting higher than the highest
+    // available entity update script on this site.
     if (isset($entry['last_entity_update'])) {
-      // Has the imported entity run a higher entityupdate_xxxx script that is available on this site (is newer)?
+      // Has the imported entity run a higher entityupdate_xxxx script that is
+      // available on this site (is newer)?
       if (!$this->entityUpdateManager->pluginIdInRange($entry['last_entity_update'])) {
         throw new ConfigImporterException('This package contains entities created with a later version of Site Studio. Upgrade this site to the latest version of Site Studio before attempting to import this package.');
       }
@@ -363,7 +365,8 @@ class ConfigEntitySync extends SyncPluginBase {
           ->execute();
 
         /** @var \Drupal\cohesion_custom_styles\Entity\CustomStyle $existing_entity */
-        // Key must be an array of string or integer otherwise loadMultiple() throws a warning.
+        // Key must be an array of string or integer otherwise loadMultiple()
+        // throws a warning.
         if ($key = key($ids)) {
           if ($existing_entity = $this->entityTypeStorage->load($key)) {
             $existing_entity->delete();

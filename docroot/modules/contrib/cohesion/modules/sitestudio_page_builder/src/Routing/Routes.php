@@ -10,7 +10,8 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
- * Provides routes for building the frontend builder rendering for each entity type
+ * Provides routes for building the frontend builder rendering for each entity
+ * type
  */
 class Routes implements ContainerInjectionInterface {
 
@@ -42,10 +43,11 @@ class Routes implements ContainerInjectionInterface {
    *   An array of route objects.
    */
   public function routes() {
-    // For each entity type that has a canonical url, duplicate this url, prefix it with /cohesionapi
-    // and define its layout canvas build route
-    // This way the entity is passed to the build function context which might be needed from other modules
-    // to render page. For example views that rely on the node id to display results
+    // For each entity type that has a canonical url, duplicate this url, prefix
+    // it with /cohesionapi and define its layout canvas build route. This way
+    // the entity is passed to the build function context which might be needed
+    // from other modules to render page. For example views that rely on the
+    // node id to display results
     $routes = new RouteCollection();
     $entity_types = $this->entityTypeManager->getDefinitions();
     foreach ($entity_types as $entity_type) {
@@ -55,7 +57,7 @@ class Routes implements ContainerInjectionInterface {
         $route->setRequirement('_user_is_logged_in', "TRUE");
         $route->setRequirement('_permission', "access visual page builder");
         $route->setOption('no_cache', 'TRUE');
-// Tag the route
+        // Tag the route
         $route->setOption('sitestudio_build', 'TRUE');
         $route->setDefault('_controller', '\Drupal\sitestudio_page_builder\Controller\SitestudioPageBuilderController::buildLayoutCanvas');
         $route->setOption('parameters', [$entity_type->id() => ['type' => 'entity:' . $entity_type->id()]]);

@@ -18,7 +18,8 @@ class PostRebuildEvent extends Event {
 
 
   /**
-   * If the rebuild is a success with no fatal PHP errors were detected. Other errors handled in results.
+   * If the rebuild is a success with no fatal PHP errors were detected.
+   * Other errors handled in results.
    *
    * @var bool
    */

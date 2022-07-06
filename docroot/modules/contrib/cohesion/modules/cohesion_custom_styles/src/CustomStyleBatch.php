@@ -64,7 +64,8 @@ class CustomStyleBatch {
     // Initial state.
     $running_dx8_batch = TRUE;
 
-    // Copy the live stylesheet.json to temporary:// so styles don't get wiped when  re-importing.
+    // Copy the live stylesheet.json to temporary:// so styles don't get wiped
+    // when  re-importing.
     \Drupal::service('cohesion.local_files_manager')->liveToTemp();
   }
 

@@ -386,7 +386,8 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
         watchdog_exception($e, new \Exception(t('Could not load parent custom style')));
       }
     }
-    // Add top level deleted entities to a queue to send to the Api on prepareStyleSheet().
+    // Add top level deleted entities to a queue to send to the Api on
+    // prepareStyleSheet().
     else {
       /** @var \Drupal\cohesion_custom_styles\Plugin\Api\CustomStylesApi $send_to_api */
       $send_to_api = $this->apiProcessorManager()->createInstance('custom_styles_api');

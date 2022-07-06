@@ -13,7 +13,8 @@ use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
 class JsonXss {
 
   /**
-   * @var \Drupal\Core\Session\AccountInterface*/
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $account;
 
   /**
@@ -71,7 +72,8 @@ class JsonXss {
               // Create a mock for <a property=attribute>.
               $mock = "<a " . addslashes($property->attribute) . "=\"" . addslashes($property->value) . "\">";
               if (Xss::filterAdmin($mock) !== $mock) {
-                // If it fails validation, add both the attribute and value to the paths so they both get disabled by the app.
+                // If it fails validation, add both the attribute and
+                // value to the paths so they both get disabled by the app.
                 $xss_paths[$model->getUUID() . '.markup.attributes.' . $index . '.attribute'] = $property->attribute;
                 $xss_paths[$model->getUUID() . '.markup.attributes.' . $index . '.value'] = $property->value;
               }
@@ -79,24 +81,31 @@ class JsonXss {
           }
 
           // Check Javascript in link to page.
-          if(($linkToPage = $model->getProperty(['settings', 'linkToPage'])) || ($url = $model->getProperty(['settings', 'url']))) {
+          if (($linkToPage = $model->getProperty([
+            'settings',
+            'linkToPage',
+          ])) || ($url = $model->getProperty(['settings', 'url']))) {
 
-            if($linkToPage) {
+            if ($linkToPage) {
               $link_url = $linkToPage;
-            } else {
+            }
+            else {
               $link_url = $url;
             }
 
-            // check link_url is set and if the value is a valid URL? - accounts for node::1, external & internal links.
-            if($link_url && !UrlHelper::isValid($link_url)) {
+            // Check link_url is set and if the value is a valid URL?
+            // accounts for node::1, external & internal links.
+            if ($link_url && !UrlHelper::isValid($link_url)) {
               // mock anchor
               $mock = '<a href="' . addslashes($link_url) . '"></a>';
 
               if (Xss::filterAdmin($mock) !== $mock) {
-                // If it fails validation, add link to page path so it gets disabled by the app.
-                if($linkToPage) {
+                // If it fails validation, add link to page path
+                // so it gets disabled by the app.
+                if ($linkToPage) {
                   $xss_paths[$model->getUUID() . '.settings.linkToPage'] = $link_url;
-                } else {
+                }
+                else {
                   $xss_paths[$model->getUUID() . '.settings.url'] = $link_url;
                 }
               }

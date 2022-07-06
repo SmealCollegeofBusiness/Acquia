@@ -7,7 +7,8 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 /**
  * Class CategoryRelationshipsManager.
  *
- * Handles resetting components and helpers with no category to a new "Uncategorized" category.
+ * Handles resetting components and helpers with no category to a new
+ * "Uncategorized" category.
  *
  * @package Drupal\cohesion_elements
  */
@@ -28,8 +29,8 @@ class CategoryRelationshipsManager {
   }
 
   /**
-   * If the supplied category doesn't exist, scan for components / helpers that used it
-   * and convert them to use "Uncategorized" instead.
+   * If the supplied category doesn't exist, scan for components / helpers
+   * that used it and convert them to use "Uncategorized" instead.
    *
    * @param $category_id
    * @param $category_entity_type_id
@@ -73,18 +74,18 @@ class CategoryRelationshipsManager {
    * @param $default_category_id
    */
   public function createUncategorized($category_storage, $default_category_id) {
-      // Does the uncategorized category exist?
-      // Create the uncategorized category.
-      if (!$category_storage->load($default_category_id)) {
-        $uncategorized = $category_storage->create([
-          'id' => $default_category_id,
-          'label' => t('Uncategorized'),
-          'class' => 'category-1',
-          'weight' => 999,
-        ]);
+    // Does the uncategorized category exist?
+    // Create the uncategorized category.
+    if (!$category_storage->load($default_category_id)) {
+      $uncategorized = $category_storage->create([
+        'id' => $default_category_id,
+        'label' => t('Uncategorized'),
+        'class' => 'category-1',
+        'weight' => 999,
+      ]);
 
-        $uncategorized->save();
-      }
+      $uncategorized->save();
+    }
   }
 
 }

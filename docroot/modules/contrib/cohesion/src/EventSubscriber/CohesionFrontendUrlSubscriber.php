@@ -94,6 +94,27 @@ class CohesionFrontendUrlSubscriber implements EventSubscriberInterface {
       'url' => $url,
       'method' => 'GET',
     ]);
+
+    // Component add URL.
+    $url = Url::fromUserInput(\Drupal::entityTypeManager()->getDefinition('cohesion_component')->getLinkTemplate('add-form'))->toString();
+    $event->addUrl('component-add', [
+      'url' => $url,
+      'method' => 'GET',
+    ]);
+
+    // Helper add URL.
+    $url = Url::fromUserInput(\Drupal::entityTypeManager()->getDefinition('cohesion_helper')->getLinkTemplate('add-form'))->toString();
+    $event->addUrl('helper-add', [
+      'url' => $url,
+      'method' => 'GET',
+    ]);
+
+    // Component content add URL.
+    $url = Url::fromUserInput(\Drupal::entityTypeManager()->getDefinition('component_content')->getLinkTemplate('collection'))->toString();
+    $event->addUrl('component-content-add', [
+      'url' => $url,
+      'method' => 'GET',
+    ]);
   }
 
 }

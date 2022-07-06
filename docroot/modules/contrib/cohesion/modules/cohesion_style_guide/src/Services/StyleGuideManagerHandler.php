@@ -113,8 +113,9 @@ class StyleGuideManagerHandler {
    */
   public function getStyleGuideManagerJsonWithParentMerged($theme_id) {
     $parent_json = NULL;
-    // Loop over each parent value from from to parent to the direct parent of the theme,
-    // and merge them all together by overriding the value if the field being looked at is in the list of changedFields.
+    // Loop over each parent value from from to parent to the direct parent of
+    // the theme, and merge them all together by overriding the value if the
+    // field being looked at is in the list of changedFields.
     foreach ($this->themeHandler->listInfo()[$theme_id]->base_themes as $base_theme_id => $base_theme_name) {
       $child_json = json_decode($this->getStyleGuideManagerJson($base_theme_id));
       $parent_json = $this->mergeChildJson($parent_json, $child_json);
@@ -244,8 +245,8 @@ class StyleGuideManagerHandler {
             $in_use_entities = array_merge($in_use_entities, $this->usageUpdateManager->getInUseEntitiesList($style_guide));
             $style_guide_manager_id = $style_guide_uuid . $theme_id;
 
-            // Loop through each field value and check if the value has been changed (compared to its parent)
-            // and add remove it if not.
+            // Loop through each field value and check if the value has been
+            // changed (compared to its parent) and add remove it if not.
             $style_guide_changed_fields = [];
             if (is_object($style_guide_values)) {
               foreach ($style_guide_values as $field_uuid => $value) {
@@ -274,7 +275,8 @@ class StyleGuideManagerHandler {
               // Style guide manager instance already exists -> update.
               if (isset($style_guide_managers[$style_guide_manager_id])) {
                 $style_guide_manager = $style_guide_managers[$style_guide_manager_id];
-                // Unset it after it's been save so any style guide manager instance left are to be deleted.
+                // Unset it after it's been save so any style guide manager
+                // instance left are to be deleted.
                 unset($style_guide_managers[$style_guide_manager_id]);
 
                 // Do not update if nothing has changed.
@@ -284,7 +286,8 @@ class StyleGuideManagerHandler {
 
               }
               else {
-                // Style guide manager instance does not exists -> create new one.
+                // Style guide manager instance does not exists -> create new
+                // one.
                 /** @var \Drupal\cohesion_style_guide\Entity\StyleGuideManager $style_guide_manager */
                 $style_guide_manager = StyleGuideManager::create([
                   'id' => $style_guide_uuid . $theme_id,
@@ -294,7 +297,8 @@ class StyleGuideManagerHandler {
                 ]);
               }
 
-              // Set the json values to the style guide manager instance and save.
+              // Set the json values to the style guide manager instance and
+              // save.
               $style_guide_manager->setJsonValue($style_json_values);
               $style_guide_manager->save();
 
@@ -416,7 +420,9 @@ class StyleGuideManagerHandler {
                 if (in_array($scannable['type'], ['json_string', 'string']) && property_exists($style_guide_values['json_values'], 'model')) {
                   // Loop through each field of the style guide.
                   foreach ($style_guide_values['json_values']->model as $style_guide_value_uuid => $style_guide_value) {
-                    // If the style guide field has not yet be marked has previewable && has a machine name check if there is at least one occurrence of it's token in the entity.
+                    // If the style guide field has not yet be marked has
+                    // previewable && has a machine name check if there is at
+                    // least one occurrence of it's token in the entity.
                     if ($preview_model[$style_guide_value_uuid] == FALSE && property_exists($style_guide_value, 'settings') && property_exists($style_guide_value->settings, 'machineName') &&
                             strpos($scannable['value'], "[style-guide:{$style_guide->id()}:{$style_guide_value->settings->machineName}]") > 0) {
                       $preview_model[$style_guide_value_uuid] = TRUE;

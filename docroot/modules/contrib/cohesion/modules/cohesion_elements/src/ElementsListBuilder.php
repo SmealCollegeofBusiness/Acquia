@@ -68,7 +68,7 @@ class ElementsListBuilder extends CohesionListBuilder implements FormInterface {
     $header = parent::buildHeader();
 
     // Override type title.
-    $header['type']['data'] = $this->t('Category');
+    $header['type']['data'] = $this->t('Machine Name (id)');
 
     $header['weight'] = [
       'weight' => t('Weight'),
@@ -88,9 +88,7 @@ class ElementsListBuilder extends CohesionListBuilder implements FormInterface {
   public function buildRow(EntityInterface $entity) {
     $row = parent::buildRow($entity);
 
-    if ($category_entity = $entity->getCategoryEntity()) {
-      $row['type'] = $category_entity->label();
-    }
+    $row['type'] = $entity->id();
 
     return $row;
   }
@@ -149,7 +147,8 @@ class ElementsListBuilder extends CohesionListBuilder implements FormInterface {
       '#button_type' => 'primary',
     ];
 
-    // Include the Angular css (which controls the cohesion_accordion and other form styling).
+    // Include the Angular css (which controls the cohesion_accordion and other
+    // form styling).
     $form['#attached']['library'][] = 'cohesion/cohesion-admin-styles';
 
     return $form;
@@ -191,10 +190,10 @@ class ElementsListBuilder extends CohesionListBuilder implements FormInterface {
     ];
 
     // Build rows.
-    foreach ($entities as $entitiy) {
-      $common_row = $this->buildRow($entitiy);
+    foreach ($entities as $entity) {
+      $common_row = $this->buildRow($entity);
 
-      $id = $entitiy->id();
+      $id = $entity->id();
 
       $form_data['table'][$id]['label'] = [
         '#type' => 'html_tag',
@@ -223,9 +222,9 @@ class ElementsListBuilder extends CohesionListBuilder implements FormInterface {
 
       $form_data['table'][$id]['weight'] = [
         '#type' => 'weight',
-        '#title' => $this->t('Weight for @title', ['@title' => $entitiy->label()]),
+        '#title' => $this->t('Weight for @title', ['@title' => $entity->label()]),
         '#title_display' => 'invisible',
-        '#default_value' => $entitiy->getWeight(),
+        '#default_value' => $entity->getWeight(),
         '#attributes' => [
           'class' => [
             'table-sort-weight-' . $category->id(),

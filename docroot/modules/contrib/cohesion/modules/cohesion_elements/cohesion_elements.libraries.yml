@@ -8,3 +8,12 @@ canvas-preview:
     - core/jquery
     - core/jquery.ui
     - core/jquery.ui.resizable
+
+custom-component-form-builder:
+  js:
+    js/custom-component-form-builder.js: {}
+  css:
+    component:
+      css/custom-component-form-builder: { }
+  dependencies:
+    - core/jquery

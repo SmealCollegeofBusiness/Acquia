@@ -95,7 +95,8 @@ trait EntityJsonValuesTrait {
                 ];
               }
 
-              // Make sure user has the right to use the text format defined in the WYSIWYG componet field.
+              // Make sure user has the right to use the text format defined in
+              // the WYSIWYG componet field.
               if (isset($field_model_settings['type']) && $field_model_settings['type'] == 'cohWysiwyg' && is_object($model_value) && property_exists($model_value, 'textFormat') && property_exists($model_value, 'text')) {
 
                 $user_formats = filter_formats(\Drupal::currentUser());
@@ -116,7 +117,8 @@ trait EntityJsonValuesTrait {
                       ];
                     }
                     else {
-                      // Only return an error if the text format or the content has changed.
+                      // Only return an error if the text format or the content
+                      // has changed.
                       if (!isset($original_json['model'][$element->getUUID()][$field_uuid]) ||
                         !isset($original_json['model'][$element->getUUID()][$field_uuid]['text']) ||
                         $original_json['model'][$element->getUUID()][$field_uuid]['text'] != $model_value->text ||
@@ -166,14 +168,16 @@ trait EntityJsonValuesTrait {
       $json_values = $this->getDecodedJsonValues(TRUE);
 
       if (property_exists($json_values, 'canvas')) {
-        // Replace uuids in layout canvas elements and its attached model and mapper.
+        // Replace uuids in layout canvas elements and its attached model and
+        // mapper.
         $this->resetLayoutCanvasElementUUIDS($json_values->canvas, $json_values);
 
       }
       $new_json_values = Json::encode($json_values);
 
       if (property_exists($json_values, 'componentForm')) {
-        // Replace uuids in component form elements and its attached model and mapper.
+        // Replace uuids in component form elements and its attached model and
+        // mapper.
         $replacement_uuids = $this->resetLayoutCanvasElementUUIDS($json_values->componentForm, $json_values);
         // Replace reference to component form fields in layout canvas.
         $new_json_values = str_replace($replacement_uuids['old'], $replacement_uuids['new'], $new_json_values);

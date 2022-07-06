@@ -56,7 +56,23 @@ class CohesionHtmlRouteProvider extends AdminHtmlRouteProvider {
       $collection->add("entity.{$entity_type_id}.disable_selection", $disable_selection_form_route);
     }
 
+    if ($create_form_route = $this->getCreateFormRoute($entity_type)) {
+      $collection->add("entity.{$entity_type_id}.create_form", $create_form_route);
+    }
+
     return $collection;
+  }
+
+  protected function getCreateFormRoute(EntityTypeInterface $entity_type) {
+    if ($entity_type->hasLinkTemplate('create-form')) {
+      $entity_type_id = $entity_type->id();
+      $route = new Route($entity_type->getLinkTemplate('create-form'));
+      $route->setDefault('_entity_form', "{$entity_type_id}.create-form");
+      $route->setOption('_admin_route', TRUE);
+      $route->setRequirement('_entity_access', "{$entity_type_id}.create-form");
+
+      return $route;
+    }
   }
 
   /**

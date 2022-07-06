@@ -33,7 +33,8 @@ trait TemplateEntityTrait {
   }
 
   /**
-   * Remove any global (non theme specific) template form template storage for the entity
+   * Remove any global (non theme specific) template form template storage for
+   * the entity.
    */
   public function removeGlobalTemplate() {
     /** @var \Drupal\cohesion\TemplateStorage\TemplateStorageInterface $template_storage */

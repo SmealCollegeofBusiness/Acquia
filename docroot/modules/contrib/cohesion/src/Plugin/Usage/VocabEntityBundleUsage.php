@@ -59,7 +59,8 @@ class VocabEntityBundleUsage extends UsagePluginBase {
         // Load the field.
         $field = $this->drupalFieldLoad($entry['uuid']);
 
-        // Check if the field is an entity reference and references taxonomy terms.
+        // Check if the field is an entity reference and references taxonomy
+        // terms.
         if (!empty($field) && $field->getType() == 'entity_reference') {
           if ($field->getSetting('handler') == 'default:taxonomy_term') {
             $handler_settings = $field->getSetting('handler_settings');

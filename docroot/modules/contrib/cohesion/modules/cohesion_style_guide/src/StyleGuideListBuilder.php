@@ -47,7 +47,8 @@ class StyleGuideListBuilder extends CohesionListBuilder {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
 
-    // Include the Angualar css (which controls the cohesion_accordion and other form styling).
+    // Include the Angular css (which controls the cohesion_accordion and
+    // other form styling).
     $form['#attached']['library'][] = 'cohesion/cohesion-admin-styles';
 
     return $form;

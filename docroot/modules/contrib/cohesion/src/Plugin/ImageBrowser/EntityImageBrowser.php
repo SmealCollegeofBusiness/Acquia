@@ -95,8 +95,8 @@ class EntityImageBrowser extends ImageBrowserPluginBase {
             // Generate the Url through Drupal.
             $url = Url::fromUserInput($entity_browser->getDisplay()->path(), [
               'query' => [
-                'uuid' => 'dx8'
-              ]
+                'uuid' => 'dx8',
+              ],
             ])->toString();
 
             // Tell Angular which iframe URL to popup.

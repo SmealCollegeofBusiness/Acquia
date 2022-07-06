@@ -157,7 +157,8 @@ class ContentTemplates extends CohesionTemplateBase implements CohesionSettingsI
         foreach ($entity['view_modes'] as $entity_view_mode) {
           // Try to import entity.
           list($entity_type_id, $view_mode) = explode('.', $entity_view_mode['id']);
-          // Determine if has already been imported by finding some existing templates in DB.
+          // Determine if has already been imported by finding some existing
+          // templates in DB.
           $already_imported_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
             ->condition('entity_type', $entity_type)
             ->condition('bundle', $bundle_id)

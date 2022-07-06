@@ -6,6 +6,7 @@ use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\cohesion\Plugin\DX8JsonFormUtils;
 use Drupal\cohesion\Services\CohesionEndpointHelper;
 use Drupal\cohesion_elements\Controller\ElementsController;
+use Drupal\cohesion_elements\CustomComponentsService;
 use Drupal\cohesion_elements\Entity\CohesionElementEntityBase;
 use Drupal\cohesion_elements\Entity\Component;
 use Drupal\Component\Serialization\Json;
@@ -18,6 +19,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Utility\Error;
 use Drupal\field\Entity\FieldStorageConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -68,6 +70,13 @@ class CohesionEndpointController extends ControllerBase {
   protected $cohesionUtils;
 
   /**
+   * Custom Components Service.
+   *
+   * @var \Drupal\cohesion_elements\CustomComponentsService
+   */
+  protected $customComponentsService;
+
+  /**
    * Current request.
    *
    * @var \Symfony\Component\HttpFoundation\Request
@@ -75,21 +84,44 @@ class CohesionEndpointController extends ControllerBase {
   protected $request;
 
   /**
+   * The current user account.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $user;
+
+  /**
    * CohesionEndpointController constructor.
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
+   *   Entity Field Manager.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
+   *   Entity Type Bundle Info.
    * @param \Drupal\cohesion\Services\CohesionUtils $cohesion_utils
-   * @param \Symfony\Component\HttpFoundation\RequestStack
+   *   Cohesion Utils service.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   Request Stack.
+   * @param \Drupal\cohesion_elements\CustomComponentsService
+   *   Custom Components Service.
    */
-  public function __construct(EntityFieldManagerInterface $entity_field_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info, EntityRepository $entity_repository, CohesionUtils $cohesion_utils, RequestStack $requestStack) {
+  public function __construct(
+    EntityFieldManagerInterface $entity_field_manager,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
+    EntityRepository $entity_repository,
+    CohesionUtils $cohesion_utils,
+    RequestStack $requestStack,
+    CustomComponentsService $customComponentsService,
+    AccountInterface $user
+  ) {
     $this->entityFieldManager = $entity_field_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
     $this->entityRepository = $entity_repository;
     $this->cohesionUtils = $cohesion_utils;
+    $this->customComponentsService = $customComponentsService;
     $this->request = $requestStack->getCurrentRequest();
+    $this->user = $user;
 
-    $this->helper = new CohesionEndpointHelper();
+    $this->helper = new CohesionEndpointHelper($this->user);
   }
 
   /**
@@ -101,7 +133,9 @@ class CohesionEndpointController extends ControllerBase {
       $container->get('entity_type.bundle.info'),
       $container->get('entity.repository'),
       $container->get('cohesion.utils'),
-      $container->get('request_stack')
+      $container->get('request_stack'),
+      $container->get('custom.components'),
+      $container->get('current_user')
     );
   }
 
@@ -318,6 +352,23 @@ class CohesionEndpointController extends ControllerBase {
       }
     }
 
+    if ($entity_type === 'cohesion_component') {
+      try {
+        $this->customComponentsService->patchComponentList($element_categories, $type_access, $bundle_access);
+      }
+      catch (\Exception $exception) {
+        $this->getLogger('cohesion_elements.custom_components')->error(
+          $exception->getMessage(),
+          Error::decodeException($exception)
+        );
+
+        return new CohesionJsonResponse([
+          'status' => 'error',
+          'data' => ['error' => $exception->getMessage()],
+        ], 500);
+      }
+    }
+
     // Clean out the categories with no children.
     $element_categories_formatted = $element_categories;
 
@@ -346,7 +397,8 @@ class CohesionEndpointController extends ControllerBase {
   }
 
   /**
-   * Create an array of element data for the sidebar browser / component content creation form.
+   * Create an array of element data for the sidebar browser / component content
+   * creation form.
    *
    * @param $entity
    * @param $entity_type
@@ -386,6 +438,26 @@ class CohesionEndpointController extends ControllerBase {
       // Return the json data.
       $data = $component_entity->getDecodedJsonValues();
     }
+
+    try {
+      $components = $this->customComponentsService->getComponents();
+    }
+    catch (\Exception $exception) {
+      $this->getLogger('cohesion_elements.custom_components')->error(
+        $exception->getMessage(),
+        Error::decodeException($exception)
+      );
+
+      return new CohesionJsonResponse([
+        'status' => 'error',
+        'data' => ['error' => $exception->getMessage()],
+      ], 500);
+    }
+
+    if (isset($components[$uid])) {
+      $data = $components[$uid]['form']->getJsonValuesDecodedArray();
+    }
+
     $error = !empty($data) ? FALSE : TRUE;
     return new CohesionJsonResponse([
       'status' => !$error ? 'success' : 'error',
@@ -425,7 +497,7 @@ class CohesionEndpointController extends ControllerBase {
         return new CohesionJsonResponse([
           'status' => 'success',
           'data' => [
-            'layoutCanvas' => $helper->getDecodedJsonValues(TRUE)
+            'layoutCanvas' => $helper->getDecodedJsonValues(TRUE),
           ],
         ]);
       }
@@ -450,6 +522,7 @@ class CohesionEndpointController extends ControllerBase {
    */
   public function getComponents(Request $request) {
     $components = [];
+    $custom_components = [];
     // Get the uid of the component from the request.
     $uids = $request->query->get('uids');
     if (is_array($uids)) {
@@ -462,12 +535,36 @@ class CohesionEndpointController extends ControllerBase {
             'category' => $component_entity->getCategoryEntity() ? $component_entity->getCategoryEntity()->getClass() : FALSE,
           ], $component_entity->getDecodedJsonValues());
         }
+        else {
+          if (empty($custom_components)) {
+            try {
+              $custom_components = $this->customComponentsService->getComponents();
+            }      catch (\Exception $exception) {
+              $this->getLogger('cohesion_elements.custom_components')->error(
+                $exception->getMessage(),
+                Error::decodeException($exception)
+              );
+
+              return new CohesionJsonResponse([
+                'status' => 'error',
+                'data' => ['error' => $exception->getMessage()],
+              ], 500);
+            }
+          }
+
+          if (array_key_exists($uid, $custom_components)) {
+            $form = $custom_components[$uid]['form']->getJsonValuesDecodedArray();
+            $components[$uid] = array_merge([
+              'title' => $custom_components[$uid]['title'],
+              'category' => $custom_components[$uid]['category'],
+            ], $form);
+          }
+        }
       }
     }
 
-    $error = !empty($components) ? FALSE : TRUE;
     return new CohesionJsonResponse([
-      'status' => !$error ? 'success' : 'error',
+      'status' => empty($components) ? 'error' : 'success',
       'data' => $components,
     ]);
   }
@@ -642,7 +739,8 @@ class CohesionEndpointController extends ControllerBase {
   }
 
   /**
-   * Return TRUE if list should filter helper if helper canvas contains any elements.
+   * Return TRUE if list should filter helper if helper canvas contains any
+   * elements.
    *
    * @param \Drupal\cohesion_elements\Entity\CohesionElementEntityBase $entity
    * @param int $access_elements

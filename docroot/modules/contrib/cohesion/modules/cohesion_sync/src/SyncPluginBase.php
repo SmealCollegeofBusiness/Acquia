@@ -134,7 +134,8 @@ abstract class SyncPluginBase extends PluginBase implements SyncPluginInterface,
    * {@inheritdoc}
    */
   public function applyPackageEntry($entry) {
-    // Make sure API send() function just returns without sending anything to the API.
+    // Make sure API send() function just returns without sending anything to
+    // the API.
     $cohesion_sync_lock = &drupal_static('cohesion_sync_lock');
     $cohesion_sync_lock = TRUE;
   }
@@ -148,7 +149,7 @@ abstract class SyncPluginBase extends PluginBase implements SyncPluginInterface,
       'entry_action_state' => $action_state,
       'entity_type' => $type,
       'id' => $entry[$this->entityTypeDefinition->getKey('id')],
-      'is_config' => $this->entityTypeDefinition instanceof ConfigEntityTypeInterface
+      'is_config' => $this->entityTypeDefinition instanceof ConfigEntityTypeInterface,
     ];
   }
 

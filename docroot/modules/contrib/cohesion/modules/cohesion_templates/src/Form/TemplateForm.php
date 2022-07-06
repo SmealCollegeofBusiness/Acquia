@@ -24,7 +24,8 @@ class TemplateForm extends CohesionBaseForm {
     $form['#attached']['drupalSettings']['cohesion']['formId'] = 'content_template';
     $form['#attached']['drupalSettings']['cohOnInitForm'] = \Drupal::service('settings.endpoint.utils')->getCohFormOnInit('template', 'content_template');
 
-    // Set list of field to blank by default. Template form that inherit from this one will override the variable.
+    // Set list of field to blank by default. Template form that inherit from
+    // this one will override the variable.
     $language_none = \Drupal::languageManager()->getLanguage(LanguageInterface::LANGCODE_NOT_APPLICABLE);
 
     $form['#attached']['drupalSettings']['cohesion']['contextualKey'] = Url::fromRoute('cohesion.entity_fields', [

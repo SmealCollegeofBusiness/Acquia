@@ -140,7 +140,8 @@ class CohesionApiClient {
     $compress = \Drupal::configFactory()->get('cohesion.settings')->get('compress_outbound_request');
     if ($compress !== FALSE) {
       $options['headers']['Content-Encoding'] = 'gzip';
-      // Compression level set to 1 to get the network performance without affecting the client site performance
+      // Compression level set to 1 to get the network performance without
+      // affecting the client site performance
       $options['body'] = gzencode($body, 1);
     } else {
       $options['body'] = $body;
@@ -167,9 +168,10 @@ class CohesionApiClient {
     }
     catch (RequestException $e) {
 
-      // If there are network errors, we need to ensure the application doesn't crash.
-      // if $e->hasResponse is not null we can attempt to get the message
-      // Otherwise, we'll just pass a network unavailable message.
+      // If there are network errors, we need to ensure the application
+      // doesn't crash. If $e->hasResponse is not null we can attempt to
+      // get the message. Otherwise, we'll just pass a network
+      // unavailable message.
       if ($e->hasResponse()) {
         $exception = (string) $e->getResponse()->getBody();
         $response_data = JSON::decode($exception);

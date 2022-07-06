@@ -112,7 +112,8 @@ class StyleHelpersForm extends CohesionStyleBuilderForm {
     }
 
     // Note, the machine name check is performed automatically in
-    // cohesion_custom_styles.module => _cohesion_custom_styles_check_machine_name()
+    // cohesion_custom_styles.module =>
+    // _cohesion_custom_styles_check_machine_name()
     // Check if the machine name is empty.
     if (empty($form_state->getValue('machine_name'))) {
       $form_state->setErrorByName('machine_name', $this->t('The machine name cannot be empty.'));

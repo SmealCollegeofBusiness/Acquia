@@ -101,7 +101,8 @@ class ApiUtils {
       // Search key for UUIDS.
       if (preg_match_all($pattern, $key, $this_uuids)) {
         $uuids[] = $key;
-        // Recurse unless the parent is a uuid which means this is component in a component.
+        // Recurse unless the parent is a uuid which means this is component
+        // in a component.
       }
       elseif (is_array($value)) {
         $this->extractUUIDKeys($value, $uuids);

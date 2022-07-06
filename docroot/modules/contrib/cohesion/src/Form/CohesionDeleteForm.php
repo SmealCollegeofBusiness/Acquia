@@ -47,9 +47,9 @@ class CohesionDeleteForm extends EntityConfirmFormBase {
 
     $form_state->setRedirectUrl($this->getCancelUrl());
 
-    // Use reset instead of delete because some entities like BaseStyle or ContentTemplates
-    // should never be deleted but we don't want to override the default delete behavior
-    // in case we do have to delete it.
+    // Use reset instead of delete because some entities like BaseStyle or
+    // ContentTemplates should never be deleted but we don't want to override
+    // the default delete behavior in case we do have to delete it.
     $this->entity->reset();
 
     \Drupal::messenger()->addMessage($this->t('%entity_name successfully deleted.', [

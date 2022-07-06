@@ -64,7 +64,8 @@ class PackageFormRefreshController extends ControllerBase {
   }
 
   /**
-   * Entrypoint. The form app asked to re-calculate the requirements and contents form.
+   * Entrypoint. The form app asked to re-calculate the requirements and
+   * contents form.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *
@@ -101,7 +102,8 @@ class PackageFormRefreshController extends ControllerBase {
         $group_label = $this->getGroupLabelFromUsage($definition['usage'], $entity, $definition['entity_type']->getPluralLabel()->__toString());
         $group_id = str_replace(' ', '_', $group_label);
 
-        // iI the entity is a content template, we want to filter by only modified ones.
+        // If the entity is a content template, we want to filter by only
+        // modified ones.
         if ($entity_type_id != 'cohesion_content_templates' || $entity->isModified()) {
           // Add the entity to the group array.
           $groups[$group_id]['label'] = $group_label;
@@ -167,7 +169,8 @@ class PackageFormRefreshController extends ControllerBase {
 
           $group_id = $dependency['type'];
 
-          // Set the label of the dependency group (done repeatedly, which is a bit inefficient).
+          // Set the label of the dependency group (done repeatedly, which is a
+          // bit inefficient).
           $dependency_groups[$group_id]['label'] = $entity_type_label;
 
           // Set the uuid and type, etc. of the actual dependent entity.
@@ -178,7 +181,8 @@ class PackageFormRefreshController extends ControllerBase {
         }
         ksort($dependency_groups);
 
-        // check if the dependencies and the package contents have the same items.
+        // Check if the dependencies and the package contents have the same
+        // items.
         $items_to_remove = [];
         foreach($meta['items'] as $i => $item) {
           if(!in_array($i, $dependencies)) {
@@ -224,7 +228,7 @@ class PackageFormRefreshController extends ControllerBase {
       'packageRequirementsForm' => $package_requirements_form,
       'packageContentsForm' => $package_contents_form,
       'excludedEntityTypesForm' => $excluded_entity_types_form,
-      'noLongerDependencies' => $no_longer_dependencies ?? []
+      'noLongerDependencies' => $no_longer_dependencies ?? [],
     ]);
   }
 
@@ -257,7 +261,8 @@ class PackageFormRefreshController extends ControllerBase {
             $label[] = 'All';
           }
         }
-        // If the group label is an entity reference get the label from the entity type definition.
+        // If the group label is an entity reference get the label from the
+        // entity type definition.
         else {
           try {
             $label[] = 'All ' . $this->entityTypeManager->getStorage($group_key_entity_type[$index])->load($entity->get($group_key))->label();
@@ -276,8 +281,8 @@ class PackageFormRefreshController extends ControllerBase {
   }
 
   /**
-   * Create a list of entity types with definitions for the LHS requirements panel.
-   * See: form().
+   * Create a list of entity types with definitions for the LHS requirements
+   * panel. See: form().
    *
    * @return array
    *
@@ -290,7 +295,8 @@ class PackageFormRefreshController extends ControllerBase {
     $definitions = $this->usagePluginManager->getDefinitions();
 
     foreach ($definitions as $usage_plugin_definition) {
-      // Only include entity types that are ste to appear in this list (as defined in their Usage plugin).
+      // Only include entity types that are ste to appear in this list (as
+      // defined in their Usage plugin).
       if (!$usage_plugin_definition['exclude_from_package_requirements']) {
         // Get the entity type definition.
         try {

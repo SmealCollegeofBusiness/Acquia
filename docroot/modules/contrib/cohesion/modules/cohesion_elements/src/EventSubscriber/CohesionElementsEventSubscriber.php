@@ -134,7 +134,8 @@ class CohesionElementsEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Add components list url for the sidebar browser to the front and admin urls.
+   * Add components list url for the sidebar browser to the front and admin
+   * urls.
    *
    * @param \Drupal\cohesion\Event\CohesionJsAppUrlsEvent $event
    */
@@ -186,7 +187,8 @@ class CohesionElementsEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Add component content list for the sidebar browser to the front and admin urls.
+   * Add component content list for the sidebar browser to the front and admin
+   * urls
    *
    * @param \Drupal\cohesion\Event\CohesionJsAppUrlsEvent $event
    */
@@ -220,8 +222,8 @@ class CohesionElementsEventSubscriber implements EventSubscriberInterface {
       $route_params['componentPath'] = Url::fromRouteMatch($this->currentRouteMatch)->getInternalPath();
     }
 
-    // If this is a content entity (has a form display) add the entity type and bundle
-    // to the request to restrict component list if needed
+    // If this is a content entity (has a form display) add the entity type and
+    // bundle to the request to restrict component list if needed
     if ($form_state = $event->getFormState()) {
       $storage = $form_state->getStorage();
       if (isset($storage['form_display']) && $storage['form_display'] instanceof EntityFormDisplayInterface) {
@@ -250,10 +252,21 @@ class CohesionElementsEventSubscriber implements EventSubscriberInterface {
    * @param $event
    */
   private function addElementsListUrl(CohesionJsAppUrlsEvent $event) {
+    $isCustom = FALSE;
+    $entity_type_id = $this->entity_type_id;
+
+    // If the route is the custom component builder then we need to
+    // manually set the entity type.
+    if ($this->currentRouteMatch->getRouteName() === 'cohesion_elements.custom_component.builder') {
+      $entity_type_id = 'cohesion_component';
+      $isCustom = TRUE;
+    }
+
     $route_params = [
       'group' => 'elements',
       'withcategories' => TRUE,
-      'entityTypeId' => $this->entity_type_id,
+      'entityTypeId' => $entity_type_id,
+      'isCustom' => $isCustom,
     ];
 
     $url = Url::fromRoute('cohesion_website_settings.elements', $route_params)->toString();

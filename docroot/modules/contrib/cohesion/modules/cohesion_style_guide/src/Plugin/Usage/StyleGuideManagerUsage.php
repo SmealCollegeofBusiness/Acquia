@@ -111,28 +111,34 @@ class StyleGuideManagerUsage extends UsagePluginBase {
       'style_guide_uuid' => $entity->get('style_guide_uuid'),
     ];
 
-    foreach ($this->themeHandler->listInfo()[$entity->get('theme')]->base_themes as $base_theme_id => $base_theme_name) {
-      $style_guide_managers = $this->entityTypeManager->getStorage('cohesion_style_guide_manager')
-        ->getQuery()
-        ->condition('theme', $base_theme_id)
-        ->condition('style_guide_uuid', $entity->get('style_guide_uuid'))
-        ->execute();
+    // Each style guide manager is dependent on its parent(s) style guide
+    // manager
+    // If the theme of the style guide manager we are saving has parent(s) theme
+    // and these parent theme have a style guide manager as well, attach them
+    // as scannable data as they should be registered as dependencies
+    if (isset($this->themeHandler->listInfo()[$entity->get('theme')]->base_themes)) {
+      foreach ($this->themeHandler->listInfo()[$entity->get('theme')]->base_themes as $base_theme_id => $base_theme_name) {
+        $style_guide_managers = $this->entityTypeManager->getStorage('cohesion_style_guide_manager')
+          ->getQuery()
+          ->condition('theme', $base_theme_id)
+          ->condition('style_guide_uuid', $entity->get('style_guide_uuid'))
+          ->execute();
 
-      $style_guide_managers_id = array_shift($style_guide_managers);
+        $style_guide_managers_id = array_shift($style_guide_managers);
 
-      if ($style_guide_managers_id) {
+        if ($style_guide_managers_id) {
 
-        $style_guide_manager = StyleGuideManager::load($style_guide_managers_id);
-        if ($style_guide_manager) {
-          $scanable_data[] = [
-            'type' => 'coh_style_guide_manager',
-            'style_guide_uuid' => $style_guide_manager->uuid(),
-          ];
+          $style_guide_manager = StyleGuideManager::load($style_guide_managers_id);
+          if ($style_guide_manager) {
+            $scanable_data[] = [
+              'type' => 'coh_style_guide_manager',
+              'style_guide_uuid' => $style_guide_manager->uuid(),
+            ];
+          }
         }
       }
     }
 
-    // Get child styles.
     return $scanable_data;
   }
 

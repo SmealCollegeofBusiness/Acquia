@@ -100,7 +100,8 @@ class CohesionField extends FormElement {
       ];
     }
 
-    // Prevent progress spinning wheel from loading if form is field config form.
+    // Prevent progress spinning wheel from loading if form is field config
+    // form.
     $is_loading = ($form_state->getFormObject()
       ->getFormId() == 'field_config_edit_form') ? '' : 'ssa-is-loading';
 

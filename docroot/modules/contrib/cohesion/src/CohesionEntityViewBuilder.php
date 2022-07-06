@@ -12,7 +12,8 @@ class CohesionEntityViewBuilder implements RenderCallbackInterface {
 
   /**
    * Sets Cohesion - #post_render callback
-   * Remove everything between <style></styles> tags for search view mode results.
+   * Remove everything between <style></styles> tags for search view mode
+   * results.
    *
    * @param $markup
    *

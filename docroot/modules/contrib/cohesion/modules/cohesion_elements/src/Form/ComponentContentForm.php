@@ -69,7 +69,8 @@ class ComponentContentForm extends ContentEntityForm {
 
     $component_id = NULL;
     if ($this->operation == 'add') {
-      // If component content add form attach the component ID from the request for angular.
+      // If component content add form attach the component ID from the request
+      // for angular.
       $request = \Drupal::request();
       $component_id = $request->attributes->get('cohesion_component');
 
@@ -197,7 +198,6 @@ class ComponentContentForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $lsls = $form_state->getValue('component_id');
     $this->entity->set('component', $form_state->getValue('component_id'));
     parent::save($form, $form_state);
     if ($this->entity->id() && $this->entity->access('view')) {
@@ -206,7 +206,10 @@ class ComponentContentForm extends ContentEntityForm {
         ['component_content' => $this->entity->id()]
       );
     }
-    $context = ['@type' => $this->entity->getEntityType()->getLabel(), '%title' => $this->entity->label()];
+    $context = [
+      '@type' => $this->entity->getEntityType()->getLabel(),
+      '%title' => $this->entity->label(),
+    ];
     if ($this->entity->isNew() || $this->operation == 'add') {
       $this->logger('content')->notice('@type: added %title.', $context);
       \Drupal::messenger()->addMessage(t('@type %title has been created.', $context));

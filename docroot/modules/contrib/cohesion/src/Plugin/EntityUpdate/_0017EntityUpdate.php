@@ -37,7 +37,8 @@ class _0017EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
 
         // Update component field default values.
         foreach ($layoutCanvas->iterateModels('component_form') as $model) {
-          // If the component form element is a WYSIWYG and has a value update to the new model.
+          // If the component form element is a WYSIWYG and has a value update
+          // to the new model.
           if ($model->getProperty(['settings', 'type']) == 'cohMediaEmbed') {
             $json_values->model->{$model->getUUID()}->settings->options = ["noPlugin" => TRUE];
           }

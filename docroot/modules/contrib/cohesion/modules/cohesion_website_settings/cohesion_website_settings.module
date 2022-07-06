@@ -54,7 +54,8 @@ function cohesion_website_settings_process_batch_import_start(&$context) {
   // Initial state.
   $running_dx8_batch = TRUE;
 
-  // Copy the live stylesheet.json to temporary:// so styles don't get wiped when  re-importing.
+  // Copy the live stylesheet.json to temporary:// so styles don't get wiped
+  // when  re-importing.
   \Drupal::service('cohesion.local_files_manager')->liveToTemp();
 }
 
@@ -165,14 +166,14 @@ function _resave_entity($entity, $realsave = FALSE, $verbose = FALSE, &$context 
         '@entity_id' => $entity->id(),
         '@time' => number_format((float) microtime(TRUE) - $time_start, 2, '.', ''),
         '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ','),
-        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ',')
+        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ','),
       ]);
     }
     else {
       $context['message'] = t('Building @entity_type_id - @label - @entity_id', [
         '@entity_type_id' => $entity->getEntityTypeId(),
         '@label' => $entity->label(),
-        '@entity_id' => $entity->id()
+        '@entity_id' => $entity->id(),
       ]);
     }
   }
@@ -216,7 +217,7 @@ function _cohesion_style_save($forms, $verbose = FALSE, &$context = []) {
     $context['message'] = t('Rebuilding all styles (@time seconds, @memory MB (total) @memory_peak MB (peak))', [
       '@time' => number_format((float) microtime(TRUE) - $time_start, 2, '.', ''),
       '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ','),
-      '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ',')
+      '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ','),
     ]);
   }
   else {
@@ -232,10 +233,10 @@ function _cohesion_styles_bulk_save($ids, $entity_type, $verbose = FALSE, &$cont
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity_id);
     $entity_update_manager->entityNeedUpdate($entity);
     if($entity && $entity->status()) {
-        $api_plugin = $entity->getApiPluginInstance();
-        $api_plugin->setEntity($entity);
-        $forms = array_merge($api_plugin->getForms(), $forms);
-        unset($api_plugin);
+      $api_plugin = $entity->getApiPluginInstance();
+      $api_plugin->setEntity($entity);
+      $forms = array_merge($api_plugin->getForms(), $forms);
+      unset($api_plugin);
     }
   }
 
@@ -338,19 +339,20 @@ function _process_cohesion_layout_entity($entity, &$context, $verbose) {
         '@entity_id' => $parent_entity_id,
         '@time' => number_format((float) microtime(TRUE) - $time_start, 2, '.', ''),
         '@memory' => number_format(memory_get_usage() / 1024768, 2, '.', ','),
-        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ',')
+        '@memory_peak' => number_format(memory_get_peak_usage() / 1024768, 2, '.', ','),
       ]);
     }
     else {
       $context['message'] = t('Building @entity_type_id - @label - @entity_id', [
         '@entity_type_id' => $parent_entity_type_id,
         '@label' => $parent_entity_label,
-        '@entity_id' => $parent_entity_id
+        '@entity_id' => $parent_entity_id,
       ]);
     }
   }
 
-  // Process latest revisions as well as it can differ from the default revision (ex: published = default vs draft = latest)
+  // Process latest revisions as well as it can differ from the default revision
+  // (ex: published = default vs draft = latest)
   if(!$entity->isLatestRevision()) {
     /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = \Drupal::service('entity_type.manager')->getStorage('cohesion_layout');

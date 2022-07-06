@@ -34,8 +34,9 @@ class MachineName extends CoreMachineName {
 
     ];
     // A form element that only wants to set one #machine_name property (usually
-    // 'source' only) would leave all other properties undefined, if the defaults
-    // were defined by an element plugin. Therefore, we apply the defaults here.
+    // 'source' only) would leave all other properties undefined, if the
+    // defaults were defined by an element plugin. Therefore, we apply the
+    // defaults here.
     $element['#machine_name'] += [
       'source' => ['label'],
       'target' => '#' . $element['#id'],
@@ -60,14 +61,15 @@ class MachineName extends CoreMachineName {
       $form_state->set('machine_name.initial_values', $initial_values);
     }
 
-    // By default, machine names are restricted to Latin alphanumeric characters.
-    // So, default to LTR directionality.
+    // By default, machine names are restricted to Latin alphanumeric
+    // characters. So, default to LTR directionality.
     if (!isset($element['#attributes'])) {
       $element['#attributes'] = [];
     }
     $element['#attributes'] += ['dir' => LanguageInterface::DIRECTION_LTR];
 
-    // The source element defaults to array('name'), but may have been overridden.
+    // The source element defaults to array('name'), but may have been
+    // overridden.
     if (empty($element['#machine_name']['source'])) {
       return $element;
     }

@@ -39,7 +39,8 @@ class _0005EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
 
         // Update component field default values.
         foreach ($layoutCanvas->iterateModels('component_form') as $model) {
-          // If the component form element is a WYSIWYG and has a value update to the new model.
+          // If the component form element is a WYSIWYG and has a value update
+          // to the new model.
           if ($model->getProperty(['settings', 'type']) == 'cohWysiwyg') {
 
             if (is_string($model->getProperty(['model', 'value']))) {
@@ -56,9 +57,11 @@ class _0005EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
           }
         }
 
-        // Update the canvas model for WYSIWYG elements, Google map marker elements and WYSIWYG component values.
+        // Update the canvas model for WYSIWYG elements, Google map marker
+        // elements and WYSIWYG component values.
         foreach ($layoutCanvas->iterateModels('canvas') as $model) {
-          // If the element is a WYSIWYG element and the value exists and is not a token or field (start with [ and ends with ])
+          // If the element is a WYSIWYG element and the value exists and is
+          // not a token or field (start with [ and ends with ])
           if ($model->getElement()->getProperty('uid') == 'wysiwyg' && is_string($model->getProperty([
             'settings',
             'content',
@@ -72,7 +75,8 @@ class _0005EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
             ];
           }
 
-          // If the element is a Google map marker and the value exists and is not a token or field (start with [ and ends with ])
+          // If the element is a Google map marker and the value exists and is
+          // not a token or field (start with [ and ends with ])
           if ($model->getElement()->getProperty('uid') == 'google-map-marker' && is_string($model->getProperty([
             'settings',
             'markerInfo',
@@ -86,7 +90,8 @@ class _0005EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
             ];
           }
 
-          // If the element is a component holding a wysiwyg field and the value exists and is not a token or field (start with [ and ends with ])
+          // If the element is a component holding a wysiwyg field and the value
+          // exists and is not a token or field (start with [ and ends with ])
           if ($componentId = $model->getElement()->getComponentID()) {
             /** @var \Drupal\cohesion_elements\Entity\Component $component */
             if ($component = $this->loadComponent($componentId)) {
@@ -105,7 +110,9 @@ class _0005EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
             }
           }
 
-          // If the element is a custom element holding a wysiwyg field and the value exists and is not a token or field (start with [ and ends with ])
+          // If the element is a custom element holding a wysiwyg field and the
+          // value exists and is not a token or field
+          // (start with [ and ends with ])
           if ($model->getElement()->getProperty('isCustom') == TRUE && $model->getElement()->getProperty('uid')) {
 
             if ($fields = $this->getCustomElementFields($model->getElement()->getProperty('uid'))) {

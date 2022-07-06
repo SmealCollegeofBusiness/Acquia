@@ -361,7 +361,7 @@ class PackageExportGenerateController extends ControllerBase {
    */
   public function processExportBatch(array $package, int $index, array $batch, array &$context) {
     // Do not process if there is an error
-    if(isset($context['results']['error']) && $context['results']['error'] !== '') {
+    if (isset($context['results']['error']) && $context['results']['error'] !== '') {
       return;
     }
 
@@ -397,19 +397,27 @@ class PackageExportGenerateController extends ControllerBase {
       }
     }
 
-    if (is_array($context['results']['index'])) {
-      $context['results']['index'] = array_merge($context['results']['index'], $files);
+    if (isset($files)) {
+      if (isset($context['results']['index']) && is_array($context['results']['index'])) {
+        $context['results']['index'] = array_merge($context['results']['index'], $files);
+      }
+      else {
+        $context['results']['index'] = $files;
+      }
     }
-    else {
-      $context['results']['index'] = $files;
-    }
+
     $context['message'] = t('Running batch @index - Processing @count entities in this batch.',
       [
         '@index' => $index + 1,
         '@count' => count($batch),
       ]
     );
-    $context['sandbox']['progress']++;
+    if (isset($context['sandbox']['progress'])) {
+      $context['sandbox']['progress']++;
+    }
+    else {
+      $context['sandbox']['progress'] = $index;
+    }
   }
 
   /**

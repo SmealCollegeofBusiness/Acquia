@@ -297,7 +297,7 @@ function cohesion_page_attachments(array &$attachments) {
   if ($is_admin && (!isset($image_browser['config']) || !isset($image_browser['content'])) && strpos($current_path, 'cohesion') !== FALSE) {
 
     $args = [
-      '@link' => Link::createFromRoute('Click here to configure the image browser settings.', 'cohesion.configuration.system_settings')->toString()
+      '@link' => Link::createFromRoute('Click here to configure the image browser settings.', 'cohesion.configuration.system_settings')->toString(),
     ];
 
     \Drupal::messenger()->addWarning(t('No image browsers have been defined for Site Studio. @link', $args));
@@ -383,7 +383,6 @@ function cohesion_editor_js_settings_alter(array &$settings) {
  * @param $extension
  */
 function cohesion_library_info_alter(&$libraries, $extension) {
-
   if ('cohesion' == $extension) {
     // Patch the cohesion folder to a real path.
     $libraries = Json::decode(str_replace('public:\/\/cohesion\/', '/' . PublicStream::basePath() . '/cohesion/', Json::encode($libraries)));
@@ -397,22 +396,42 @@ function cohesion_library_info_alter(&$libraries, $extension) {
  */
 function cohesion_css_alter(&$css, $assets) {
   if (\Drupal::service('cohesion.utils')->currentThemeUseCohesion()) {
+    // Get the smallest weight set on all css libraries
+    // We need to set the reset.css and the base stylesheets as the
+    // first two stylesheet loaded on the head.
+    $min_weight = CSS_BASE;
+    foreach ($css as $css_definition) {
+      if (isset($css_definition['weight']) && $css_definition['weight'] < $min_weight) {
+        $min_weight = $css_definition['weight'];
+      }
+    }
+
+    $module_path = drupal_get_path('module', 'cohesion');
     $active_theme_id = \Drupal::service('theme.manager')
       ->getActiveTheme()
       ->getName();
-
-    $module_path = drupal_get_path('module', 'cohesion');
 
     if (isset($css[$module_path . '/css/base-default.css'])) {
       $css_filename = \Drupal::service('cohesion.local_files_manager')
         ->getStyleSheetFilename('base', $active_theme_id, TRUE);
       $css[$module_path . '/css/base-default.css']['data'] = $css_filename;
+      // Set the base stylesheet before the first css
+      $min_weight--;
+      $css[$module_path . '/css/base-default.css']['weight'] = $min_weight;
+    }
+
+    if (isset($css[$module_path . '/css/reset.css'])) {
+      // Set the reset.css as the first css to load.
+      $min_weight--;
+      $css[$module_path . '/css/reset.css']['weight'] = $min_weight;
     }
 
     if (isset($css[$module_path . '/css/theme-default.css'])) {
       $css_filename = \Drupal::service('cohesion.local_files_manager')
         ->getStyleSheetFilename('theme', $active_theme_id, TRUE);
       $css[$module_path . '/css/theme-default.css']['data'] = $css_filename;
+      // Set the theme css to be the first Component (smacss) CSS to load
+      $css[$module_path . '/css/theme-default.css']['weight'] = CSS_COMPONENT - 1;
     }
   }
 }
@@ -444,7 +463,7 @@ function cohesion_theme_registry_alter(array &$theme_registry) {
     $template = Drupal::service('file_system')->basename($file, '.html.twig');
     $theme_hook = str_replace('-', '_', $template);
 
-    list($base_theme_hook,) = explode('__', $theme_hook, 2);
+    [$base_theme_hook] = explode('__', $theme_hook, 2);
 
     // Override existing theme hook or duplicate the base hook (if one exists).
     if (isset($theme_registry[$base_theme_hook]) || $base_theme_hook === 'component') {
@@ -718,7 +737,7 @@ function cohesion_field_info_alter(&$info) {
 function cohesion_tmgmt_translatable_fields_alter(&$entity, &$translatable_fields) {
   if($entity instanceof CohesionLayout && isset($translatable_fields['json_values'])) {
     $translatable_fields = [
-      'json_values' => $translatable_fields['json_values']
+      'json_values' => $translatable_fields['json_values'],
     ];
   }
 }
@@ -756,32 +775,32 @@ function cohesion_tmgmt_source_suggestions(array $items, JobInterface $job) {
             // Loop over all properties of a field item.
             foreach ($field_item->getProperties(TRUE) as $property) {
               if ($property->getValue() instanceof CohesionLayout) {
-                  /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $layout_canvas_entity */
-                  $layout_canvas_entity = $property->getValue();
-                  $layout_canvas = $layout_canvas_entity->getLayoutCanvasInstance();
+                /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $layout_canvas_entity */
+                $layout_canvas_entity = $property->getValue();
+                $layout_canvas = $layout_canvas_entity->getLayoutCanvasInstance();
 
-                  foreach ($layout_canvas->getEntityReferences() as $reference) {
-                    if (Uuid::isValid($reference['entity_id'])) {
-                      $results = $entity = \Drupal::service('entity_type.manager')
-                        ->getStorage($reference['entity_type'])
-                        ->loadByProperties(['uuid' => $reference['entity_id']]);
-                      $target = reset($results);
-                    }
-                    else {
-                      $target = $entity = \Drupal::service('entity_type.manager')
-                        ->getStorage($reference['entity_type'])
-                        ->load($reference['entity_id']);
-                    }
-                    $enabled = $content_translation_manager->isEnabled($target->getEntityTypeId(), $target->bundle());
-                    if ($enabled && $target->hasTranslation($job->getSourceLangcode())) {
-                      // @todo add the component field title maybe the component field name to the reason
-                      $suggestions[] = [
-                        'job_item' => tmgmt_job_item_create('content', $target->getEntityTypeId(), $target->id()),
-                        'reason' => t('Field @label', ['@label' => $definition->getLabel()]),
-                        'from_item' => $item->id(),
-                      ];
-                    }
+                foreach ($layout_canvas->getEntityReferences() as $reference) {
+                  if (Uuid::isValid($reference['entity_id'])) {
+                    $results = $entity = \Drupal::service('entity_type.manager')
+                      ->getStorage($reference['entity_type'])
+                      ->loadByProperties(['uuid' => $reference['entity_id']]);
+                    $target = reset($results);
                   }
+                  else {
+                    $target = $entity = \Drupal::service('entity_type.manager')
+                      ->getStorage($reference['entity_type'])
+                      ->load($reference['entity_id']);
+                  }
+                  $enabled = $content_translation_manager->isEnabled($target->getEntityTypeId(), $target->bundle());
+                  if ($enabled && $target->hasTranslation($job->getSourceLangcode())) {
+                    // @todo add the component field title maybe the component field name to the reason
+                    $suggestions[] = [
+                      'job_item' => tmgmt_job_item_create('content', $target->getEntityTypeId(), $target->id()),
+                      'reason' => t('Field @label', ['@label' => $definition->getLabel()]),
+                      'from_item' => $item->id(),
+                    ];
+                  }
+                }
               }
             }
           }
@@ -797,7 +816,8 @@ function cohesion_tmgmt_source_suggestions(array $items, JobInterface $job) {
  * Implements hook_themes_uninstalled().
  */
 function cohesion_themes_uninstalled(array $themes) {
-  // Upon uninstall of a theme with cohesion enabled remove all cohesion stylesheets
+  // Upon uninstall of a theme with cohesion enabled remove all cohesion
+  // stylesheets.
   foreach ($themes as $theme) {
     if (Drupal::service('cohesion.utils')->themeHasCohesionEnabled($theme)) {
       foreach (['base', 'theme', 'json'] as $type) {
@@ -858,12 +878,12 @@ function cohesion_config_schema_info_alter(&$definitions) {
   if(isset($definitions['theme_settings']['mapping']['features']['mapping']) && is_array($definitions['theme_settings']['mapping']['features']['mapping'])){
     $definitions['theme_settings']['mapping']['features']['mapping']['cohesion_build_assets'] = [
       'type' => 'boolean',
-      'label' => 'Build site studio assets'
+      'label' => 'Build site studio assets',
     ];
 
     $definitions['theme_settings']['mapping']['features']['mapping']['layout_canvas_field'] = [
       'type' => 'boolean',
-      'label' => 'Build site studio assets'
+      'label' => 'Build site studio assets',
     ];
   }
 }
@@ -886,30 +906,35 @@ function preprocess_cohesion_preview_page(&$variables) {
 function cohesion_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $request = \Drupal::request();
 
-  // This resolves an issue where after selecting media library filters you can't insert media.
-  // Restrict this to views exposed form and media library inside Site Studio.
+  // This resolves an issue where after selecting media library filters you
+  // can't insert media. Restrict this to views exposed form and media library
+  // inside Site Studio.
   if ($form_id == 'views_exposed_form' && !empty($request->get('media_library_opener_id') === 'media_library.opener.cohesion')) {
     // Get the selected by from the request.
     $selected_type = $request->get('media_library_selected_type');
     // Get the selected type from the view args.
     if (!empty($view_arg = $form_state->getStorage()['view']->args[0])) {
-      // If the request selected by and view args are not the same then set the request select type to be the views arg type.
+      // If the request selected by and view args are not the same then set the
+      // request select type to be the views arg type.
       if ($selected_type !== $view_arg) {
         $request->query->set('media_library_selected_type', $view_arg);
-        // Re-create the media state based on the new selected type to get the hash and update the hash in the request.
+        // Re-create the media state based on the new selected type to get the
+        // hash and update the hash in the request.
         $media_state = MediaLibraryState::create('media_library.opener.cohesion', $request->get('media_library_allowed_types'), $request->get('media_library_selected_type'), 1);
         $request->query->set('hash', $media_state->getHash());
       }
     }
   }
 
-  // Resolves an issue where the media library doesn't close after clicking insert as it's expecting to close a modal with "drupal-modal" as the id.
+  // Resolves an issue where the media library doesn't close after clicking
+  // insert as it's expecting to close a modal with "drupal-modal" as the id.
   if (!empty($request->get('media_library_opener_id') === 'media_library.opener.cohesion')) {
     // Check the selected media type & load it.
     if (!empty($selected_media_type = $request->get('media_library_selected_type'))) {
       $media_type = MediaType::load($selected_media_type);
-      // Check its source is image (as this only seems to affect when using images)
-      // and we need to account for if some creates their own image media type.
+      // Check its source is image (as this only seems to affect when using
+      // images) and we need to account for if some creates their own image
+      // media type.
       if ($media_type->get('source') === 'image') {
         if ($form_id === 'views_form_media_library_widget_' . $media_type->get('id')) {
           $form['actions']['submit']['#ajax']['callback'] = 'cohesion_alter_media_update_widget';
@@ -924,8 +949,9 @@ function cohesion_form_alter(&$form, FormStateInterface $form_state, $form_id) {
  * Callback for the media library widget.
  */
 function cohesion_alter_media_update_widget(array &$form, FormStateInterface $form_state, Request $request) {
-  // As Site Studio does not use the Drupal modal for the media library popup, we need to pass the id to
-  // CloseDialogCommand as by default it expects drupal-modal.
+  // As Site Studio does not use the Drupal modal for the media library popup,
+  // we need to pass the id to CloseDialogCommand as by default it expects
+  // drupal-modal.
   // @see \Drupal\media_library\Plugin\views\field\MediaLibrarySelectForm::updateWidget().
   $field_id = $form_state->getTriggeringElement()['#field_id'];
   $selected_ids = $form_state->getValue($field_id);

@@ -218,7 +218,7 @@ class CohesionSyncImportCommand extends DrushCommands {
       $batch = [
         'title' => t('Rebuilding in use entities'),
         'operations' => [
-          [[BatchImportController::class, 'handleInuse'], [$in_use_list]]
+          [[BatchImportController::class, 'handleInuse'], [$in_use_list]],
         ],
         'init_message' => t('Starting in use rebuild.'),
         'progress_message' => t('Completed step @current of @total.'),

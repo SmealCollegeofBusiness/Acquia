@@ -53,7 +53,8 @@ class FontLibrariesEntityGroups extends EntityGroupsPluginBase {
               $entity->setJsonValue(Json::encode($libraries->{$source}[$index]->library));
               $entity->save();
 
-              // Store the id so we don't re-scan changes (it will fail because of temporary file paths).
+              // Store the id so we don't re-scan changes (it will fail because
+              // of temporary file paths).
               $new_ids[] = $entity->id();
             }
             break;

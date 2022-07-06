@@ -37,9 +37,18 @@ class _0007EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
       if ($entity->isLayoutCanvas()) {
         $layoutCanvas = $entity->getLayoutCanvasInstance();
 
-        // Update the canvas model for WYSIWYG elements, Google map marker elements and WYSIWYG component values.
+        // Update the canvas model for WYSIWYG elements, Google map marker
+        // elements and WYSIWYG component values.
         foreach ($layoutCanvas->iterateModels('canvas') as $model) {
-          if ($model->getProperty(['styles', 'settings', 'element']) == 'picture' && is_object($model->getProperty(['settings', 'styles']))) {
+          $element_property = $model->getProperty(
+            [
+              'styles',
+              'settings',
+              'element',
+            ]
+          );
+          $styles_property = $model->getProperty(['settings', 'styles']);
+          if ($element_property == 'picture' && is_object($styles_property)) {
             foreach ($model->getProperty(['settings', 'styles']) as $breakpoint => $style) {
               if (!property_exists($style, 'pictureImagesArray')) {
                 $pictureImagesArray = [];

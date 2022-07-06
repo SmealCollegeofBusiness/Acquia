@@ -2,20 +2,30 @@
 
 namespace Drupal\cohesion_sync\Services;
 
+use Drupal\cohesion_sync\Exception\PackageSourceMissingPropertiesException;
+use Drupal\Core\Extension\MissingDependencyException;
+use Drupal\Core\File\Exception\DirectoryNotReadyException;
+
 /**
- * Default Module Package service.
+ * Default Module Package Source service.
  */
 class DefaultModulePackage implements PackageSourceServiceInterface {
 
   const SUPPORTED_TYPE = 'default_module_package';
-  const MODULE_NAME_ERROR_MESSAGE = 'Default module package install attempted, but "module_name" property is missing in source metadata.';
-  const PATH_ERROR_MESSAGE = 'Default module package install attempted for "%s", but "module_name" property is missing in source metadata.';
+  const REQUIRED_PROPERTIES = ['module_name', 'path'];
 
   /**
    * {@inheritdoc}
    */
   public function supportedType(string $type): bool {
     return $type === self::SUPPORTED_TYPE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSupportedType(): string {
+    return self::SUPPORTED_TYPE;
   }
 
   /**
@@ -34,21 +44,41 @@ class DefaultModulePackage implements PackageSourceServiceInterface {
    *   Thrown if source metadata values are missing.
    */
   public function preparePackage(array $sourceMetadata): string {
-    if (isset($sourceMetadata['module_name'])) {
-      $module_path = drupal_get_path('module', $sourceMetadata['module_name']);
+    $this->validateMetadata($sourceMetadata);
+
+    $module_path = drupal_get_path('module', $sourceMetadata['module_name']);
+    $package_path = $sourceMetadata['path'];
+
+    return $module_path . '/' . $package_path;
+  }
+
+  /**
+   * Validates Source metadata.
+   *
+   * @param array $sourceMetadata
+   *   Metadata passed to Source service.
+   *
+   * @return void
+   */
+  protected function validateMetadata(array $sourceMetadata) {
+    $missing_properties = [];
+    foreach (self::REQUIRED_PROPERTIES as $property) {
+      if (!isset($sourceMetadata[$property])) {
+        $missing_properties[] = $property;
+      }
     }
-    else {
-      throw new \Exception(self::MODULE_NAME_ERROR_MESSAGE);
+    if (!empty($missing_properties)) {
+      throw new PackageSourceMissingPropertiesException(self::SUPPORTED_TYPE, $missing_properties, self::REQUIRED_PROPERTIES);
+    }
+    if (drupal_check_module($sourceMetadata['module_name']) !== TRUE) {
+      throw new MissingDependencyException(sprintf('Unable to install default module package due to missing module %s.', $sourceMetadata['module_name']));
     }
 
-    if (isset($sourceMetadata['path'])) {
-      $package_path = $sourceMetadata['path'];
+    $module_path = drupal_get_path('module', $sourceMetadata['module_name']);
+    $package_path = $module_path . '/' . $sourceMetadata['path'];
+    if (!is_dir($package_path) || !is_readable($package_path)) {
+      throw new DirectoryNotReadyException(sprintf('Directory "%s" is not found.', $package_path));
     }
-    else {
-      throw new \Exception(sprintf(self::PATH_ERROR_MESSAGE, $sourceMetadata['module_name']));
-    }
-
-    return $module_path . $package_path;
   }
 
 }

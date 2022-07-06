@@ -99,7 +99,8 @@ class FontLibrary extends WebsiteSettingsEntityBase implements CohesionSettingsI
         // Set the entity label from the name inside the JSON.
         $this->setlabel($json_values['name']);
 
-        // Clear the previous font files if the new font library files are different or as no files,.
+        // Clear the previous font files if the new font library files are
+        // different or as no files.
         if (isset($json_values['fontFiles'])) {
           if ((isset($original_json_values['fontFiles']) && $json_values['fontFiles'] != $original_json_values['fontFiles'])) {
             $this->clearFontFiles($original_json_values, $json_values);

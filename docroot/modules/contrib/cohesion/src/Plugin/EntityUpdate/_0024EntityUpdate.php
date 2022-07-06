@@ -50,7 +50,9 @@ class _0024EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
         $entity->setJsonValue(json_encode($layoutCanvas));
 
         // Build up meta.fieldHistory object for every component.
-        // An array per form field containing it’s type (componentForm[index].uid) and uuid (componentForm[index].uuid) as well as the new machineName generated above.
+        // An array per form field containing it’s type
+        // (componentForm[index].uid) and uuid (componentForm[index].uuid) as
+        // well as the new machineName generated above.
         $json_values = $entity->getDecodedJsonValues(TRUE);
         $json_values->meta = new \stdClass();
         $json_values->meta->fieldHistory = [];

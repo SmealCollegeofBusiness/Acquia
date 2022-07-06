@@ -146,7 +146,8 @@ class StyleGuide extends CohesionConfigEntityBase implements CohesionSettingsInt
   public function delete() {
     parent::delete();
 
-    // Upon delete of style guide also delete all style guide manager instances referencing this style guide entity.
+    // Upon delete of style guide also delete all style guide manager instances
+    // referencing this style guide entity.
     $style_guide_manager_storage = $this->entityTypeManager()
       ->getStorage('cohesion_style_guide_manager');
     $style_guide_manager_ids = $style_guide_manager_storage->getQuery()

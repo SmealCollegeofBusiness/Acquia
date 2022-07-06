@@ -204,18 +204,52 @@ class ComponentContentController extends ControllerBase {
     if (property_exists($content, 'canvas') && property_exists($content, 'model')) {
       $layout_canvas = new LayoutCanvas($content_raw);
       $elements = $layout_canvas->getCanvasElements();
-      // Make sure the canvas contains only one top level element and this element is a component.
+      // Make sure the canvas contains only one top level element and this
+      // element is a component.
       if (count($elements) == 1 && $elements[0]->isComponent() && $elements[0]->getModel()) {
         $element = $elements[0];
         if ($componentEntity = Component::load($element->getComponentID())) {
           // Load the component used for this component content
-          // Get component content from model if it has been changed, from the element otherwise.
-          $component_name = $element->getModel()->getProperty(['settings', 'title']) ? $element->getModel()->getProperty(['settings', 'title']) : $element->getProperty('title');
+          // Get component content from model if it has been changed, from the
+          // element otherwise.
+          $title_property = ['settings', 'title'];
+          $component_name = $element->getModel()->getProperty($title_property) ? $element->getModel()->getProperty($title_property) : $element->getProperty('title');
 
           // Create a new component content.
           $component_content = ComponentContent::create([
             'title' => $component_name,
             'component' => $componentEntity,
+          ]);
+
+          $layout = CohesionLayout::create([
+            'json_values' => $content_raw,
+            'parent_type' => $component_content->getEntityTypeId(),
+            'parent_field_name' => 'field_dx8_component',
+          ]);
+
+          $component_content->set('layout_canvas', $layout);
+          $component_content->setPublished();
+          $component_content->save();
+
+          return new CohesionJsonResponse([
+            'status' => 'success',
+            'data' => [
+              'componentId' => 'cc_' . $component_content->uuid(),
+              'title' => $component_content->label(),
+              'url' => $component_content->toUrl('edit-form')->toString(),
+            ],
+          ]);
+        } elseif ($element->isCustomComponent()) {
+          // Load the component used for this component content
+          // Get component content from model if it has been changed, from the
+          // element otherwise.
+          $title_property = ['settings', 'title'];
+          $component_name = $element->getModel()->getProperty($title_property) ? $element->getModel()->getProperty($title_property) : $element->getProperty('title');
+
+          // Create a new component content.
+          $component_content = ComponentContent::create([
+            'title' => $component_name,
+            'component' => NULL,
           ]);
 
           $layout = CohesionLayout::create([

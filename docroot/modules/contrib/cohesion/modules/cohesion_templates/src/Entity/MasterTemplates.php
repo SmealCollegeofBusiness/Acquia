@@ -89,7 +89,8 @@ class MasterTemplates extends CohesionTemplateBase implements CohesionSettingsIn
    */
   public static function importEntities($entities) {
     $current_entities = self::loadMultiple();
-    // Only import master templates if there is some to import or if there no master template already.
+    // Only import master templates if there is some to import or if there no
+    // master template already.
     if (!is_array($entities) || (count($entities) == 0) || count($current_entities) > 0) {
       return FALSE;
     }

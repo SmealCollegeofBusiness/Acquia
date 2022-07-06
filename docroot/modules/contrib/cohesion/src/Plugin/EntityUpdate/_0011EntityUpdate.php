@@ -37,7 +37,9 @@ class _0011EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
 
         foreach ($layoutCanvas->iterateModels('component_form') as $model) {
           if ($model->getProperty(['settings', 'type']) == 'cohSelect') {
-            if ($model->getProperty(['settings', 'schema']) && !$model->getProperty(['settings', 'schema', 'type'])) {
+            $schema = $model->getProperty(['settings', 'schema']);
+            $schema_type = $model->getProperty(['settings', 'schema', 'type']);
+            if ($schema && !$schema_type) {
               $schema_type = $model->getProperty(['settings', 'schema']);
               $json_values->model->{$model->getUUID()}->settings->schema = new \stdClass();
               $json_values->model->{$model->getUUID()}->settings->schema->type = $schema_type;

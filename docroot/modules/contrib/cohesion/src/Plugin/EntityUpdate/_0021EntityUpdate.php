@@ -53,7 +53,8 @@ class _0021EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
    */
   private function updateEnablePadding($model, &$json_values) {
     if ($model->getProperty(['settings', 'hideRowHeading']) !== NULL) {
-      $json_values->model->{$model->getUUID()}->settings->removePadding = $model->getProperty(['settings', 'hideRowHeading']);
+      $property = ['settings', 'hideRowHeading'];
+      $json_values->model->{$model->getUUID()}->settings->removePadding = $model->getProperty($property);
     }
   }
 

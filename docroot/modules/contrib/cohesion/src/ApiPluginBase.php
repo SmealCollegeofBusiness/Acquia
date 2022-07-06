@@ -256,8 +256,8 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
     $website_settings_storage = $this->entityTypeManager->getStorage('cohesion_website_settings');
 
     foreach ($website_settings_types as $website_settings_type) {
-      // If the one of the form being saved is a website settings use it rather then the one
-      // from the database as it has the latest data.
+      // If the one of the form being saved is a website settings use it rather
+      // than the one from the database as it has the latest data.
       /** @var \Drupal\cohesion_website_settings\Entity\WebsiteSettings $website_settings */
       foreach ($this->data->settings->forms as $form) {
         if (isset($form['parent']) && is_object($form['parent']) && property_exists($form['parent'], 'type') && property_exists($form['parent'], 'bundle') &&
@@ -302,7 +302,9 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
         ];
       }
 
-      // Attach the JSON representation of the stylesheet if Site Studio is enable and is the default theme or it has been set to build assets in the appearance of the theme.
+      // Attach the JSON representation of the stylesheet if Site Studio is
+      // enabled and is the default theme or it has been set to build assets in
+      // the appearance of the theme.
       if ($this->themeHandler->getDefault() == $theme_info->getName() || theme_get_setting('features.cohesion_build_assets', $theme_info->getName())) {
         if ($attach_css == TRUE) {
           $this->data->css[$theme_info->getName()] = $this->localFilesManager->getStyleSheetJson($theme_info->getName());
@@ -313,7 +315,8 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
       }
     }
 
-    // Attach a generic theme if the templates should be built but not the styles (main use is for AMP page)
+    // Attach a generic theme if the templates should be built but not the
+    // styles (main use is for AMP page).
     if (!empty($this->cohesionUtils->getCohesionTemplateOnlyEnabledThemes())) {
       $this->data->css['coh-generic-theme'] = '';
     }
@@ -500,7 +503,8 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
         // Check to see if there are actually some stylesheets to process.
         if (isset($data['base'], $data['theme'], $data['master']) && !empty($data['master'])) {
 
-          // First check to see if the stylesheets have updated since your request was made.
+          // First check to see if the stylesheets have updated since your
+          // request was made.
           if ($currentCssTimestamp != $requestCSSTimestamp) {
             \Drupal::messenger()->addError($this->t('The main stylesheet has been updated by another user since you saved. Please try again.'));
             return FALSE;
@@ -596,7 +600,8 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
   public function send() {
     // If in update.php mode, don't send.
     $dx8_no_send_to_api = &drupal_static('dx8_no_send_to_api');
-    // Process entity if DX8 is enable && if is an entity, it is enable and we don't want to save the data.
+    // Process entity if Site studio is enable && if is an entity, it is enable
+    // and we don't want to save the data.
     $cohesion_sync_lock = &drupal_static('cohesion_sync_lock');
 
     if ($dx8_no_send_to_api || !($this->cohesionUtils->usedx8Status()) ||
@@ -610,7 +615,8 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
     // Don't attach the css to inject for content requests.
     $this->prepareData(!$this->isContent);
 
-    // Whether the generated template should have its content translatable in interface translation.
+    // Whether the generated template should have its content translatable in
+    // interface translation.
     $this->data->translatable = !$this->isContent;
 
     $this->data->settings->forms = array_values($this->data->settings->forms);
@@ -627,12 +633,14 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
     // Process the response.
     if ($this->response && floor($this->response['code'] / 200) == 1) {
 
-      // If this a layout_field, just return the entire request (as it will be store inline in the field).
+      // If this a layout_field, just return the entire request (as it will be
+      // store inline in the field).
       if ($this->isContent || !$this->getSaveData()) {
         return TRUE;
       }
 
-      // Attempt to process the stylesheets received back from the API (merge into the existing stylesheet).
+      // Attempt to process the stylesheets received back from the API (merge
+      // into the existing stylesheet).
       if ($this->processStyles($requestCSSTimestamp)) {
         return TRUE;
       }
@@ -730,7 +738,8 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
 
     if ($this->response && floor($this->response['code'] / 200) == 1) {
 
-      // Attempt to process the stylesheets received back from the API (merge into the exist stylesheet).
+      // Attempt to process the stylesheets received back from the API (merge
+      // into the exist stylesheet).
       if ($this->processStyles($requestCSSTimestamp)) {
         return TRUE;
       }

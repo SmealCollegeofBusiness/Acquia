@@ -183,7 +183,8 @@ class ContentTemplatesListBuilder extends CohesionListBuilder {
 
     foreach ($template_group as $entity) {
 
-      // Always show for full view modes, global templates and for existing templates created.
+      // Always show for full view modes, global templates and for existing
+      // templates created.
       if ($entity->get('view_mode') !== 'full' && $entity->get('bundle') !== '__any__' && !$entity->isModified()) {
 
         // Get active view modes for bundles.

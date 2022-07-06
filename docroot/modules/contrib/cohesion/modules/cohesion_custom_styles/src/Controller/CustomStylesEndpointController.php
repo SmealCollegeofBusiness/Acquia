@@ -128,7 +128,11 @@ class CustomStylesEndpointController extends ControllerBase {
 
       if ($custom_style_type) {
         // Add Generic custom style to all custom style list.
-        $query->condition('custom_style_type', [$custom_style_type->get('id'), 'generic'], 'IN');
+        $condition_value = [
+          $custom_style_type->get('id'),
+          'generic',
+        ];
+        $query->condition('custom_style_type', $condition_value, 'IN');
       }
       // Get only enabled custom styles
       // And custom styles with enable selection turned off so we can catch

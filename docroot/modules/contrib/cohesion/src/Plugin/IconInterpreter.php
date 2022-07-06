@@ -7,7 +7,8 @@ use Drupal\Component\Serialization\Json;
 /**
  * Defines the IconInterpreter plugin.
  *
- * The IconInterpreter plugin actions calls that needs interpreting uploaded icon libraries.
+ * The IconInterpreter plugin actions calls that needs interpreting uploaded
+ * icon libraries.
  */
 class IconInterpreter {
 

@@ -89,7 +89,8 @@ class IconLibrary extends WebsiteSettingsEntityBase implements CohesionSettingsI
         $original_json_values = $original->getDecodedJsonValues();
         $json_values = $this->getDecodedJsonValues();
 
-        // Clear the previous font files if the new icon library files are different or as no files,.
+        // Clear the previous font files if the new icon library files are
+        // different or as no files.
         if (isset($json_values['fontFiles'])) {
           if ((isset($original_json_values['fontFiles']) && $json_values['fontFiles'] != $original_json_values['fontFiles'])) {
             $this->clearIconFontFiles($original_json_values, $json_values);

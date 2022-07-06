@@ -36,21 +36,24 @@ class CustomStyleType extends CohesionConfigEntityBase implements CohesionSettin
   const ASSET_GROUP_ID = 'custom_styles_type';
 
   /**
-   * The machine name of this custom style type (received from the API as "element_id")
+   * The machine name of this custom style type (received from the API as
+   * "element_id")
    *
    * @var string
    */
   protected $id;
 
   /**
-   * The human-readable name of the custom style type (received from the API as: "element_label")
+   * The human-readable name of the custom style type (received from the API
+   * as: "element_label")
    *
    * @var string
    */
   protected $label;
 
   /**
-   * The HTML element that represents this custom style type (h1, cite, ol, etc.)
+   * The HTML element that represents this custom style type
+   * (h1, cite, ol, etc.)
    *
    * @var string
    */

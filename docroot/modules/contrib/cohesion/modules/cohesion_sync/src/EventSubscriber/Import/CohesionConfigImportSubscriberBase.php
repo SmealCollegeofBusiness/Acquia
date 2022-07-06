@@ -359,10 +359,10 @@ abstract class CohesionConfigImportSubscriberBase implements EventSubscriberInte
         $configImporter->logError(
           $this->translationManager->translate(
             '@entity_type \'@label\' (id: @id)', [
-            '@entity_type' => $broken['type'],
-            '@label' => $broken['label'],
-            '@id' => $broken['id'],
-          ])
+              '@entity_type' => $broken['type'],
+              '@label' => $broken['label'],
+              '@id' => $broken['id'],
+            ])
         );
       }
     }

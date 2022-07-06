@@ -32,10 +32,14 @@ abstract class StylesApiPluginBase extends ApiPluginBase {
         if (isset($object['styles'][$bp_key])) {
           $value = $object['styles'][$bp_key];
           $current_bp = [];
-          // Check if the breakpoint has background image/gradient and loop over.
+          // Check if the breakpoint has background image/gradient
+          // and loop over.
           if (isset($value['background-image-settings']) && is_array($value['background-image-settings'])) {
             foreach ($value['background-image-settings'] as $key => &$background) {
-              // If the current breakpoint background is a background image but empty populate it with the previous breakpoint/index in the array image otherwise if it has an image store it for lower breakpoints.
+              // If the current breakpoint background is a background image but
+              // empty populate it with the previous breakpoint/index in the
+              // array image otherwise if it has an image store it
+              // for lower breakpoints.
               if (isset($background['backgroundImage']) && isset($background['backgroundLayerType']['value']) && $background['backgroundLayerType']['value'] == 'image') {
                 if ((!isset($background['backgroundImage']['value']) || $background['backgroundImage']['value'] == '') && isset($previous_bp[$key])) {
                   $background['backgroundImage']['value'] = $previous_bp[$key];

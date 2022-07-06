@@ -47,7 +47,14 @@ class DefaultEntitiesManager {
       foreach ($entities as $e) {
 
         $entity_exists = WebsiteSettings::load($e['element_id']);
-        if (!$entity_exists && !in_array($e['element_id'], ['color_palette', 'font_libraries', 'icon_libraries', 'scss_variables'])) {
+        // Entity type that do not need to be imported.
+        $excluded_website_settings = [
+          'color_palette',
+          'font_libraries',
+          'icon_libraries',
+          'scss_variables',
+        ];
+        if (!$entity_exists && !in_array($e['element_id'], $excluded_website_settings)) {
           // Try to import entity.
           $entity = WebsiteSettings::create([
             'id' => $e['element_id'],

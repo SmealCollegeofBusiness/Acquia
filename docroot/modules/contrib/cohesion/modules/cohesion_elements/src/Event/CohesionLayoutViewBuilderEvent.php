@@ -6,7 +6,8 @@ use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Event to alter the view build array of \Drupal\cohesion_elements\CohesionLayoutViewBuilder
+ * Event to alter the view build array of
+ * \Drupal\cohesion_elements\CohesionLayoutViewBuilder
  */
 class CohesionLayoutViewBuilderEvent extends Event {
 

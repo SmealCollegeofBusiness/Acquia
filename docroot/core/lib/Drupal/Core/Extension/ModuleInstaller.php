@@ -388,6 +388,9 @@ class ModuleInstaller implements ModuleInstallerInterface {
    * {@inheritdoc}
    */
   public function uninstall(array $module_list, $uninstall_dependents = TRUE) {
+    if (($key = array_search('acquia_cms', $module_list)) !== FALSE) {
+      unset($module_list[$key]);
+    }
     // Get all module data so we can find dependencies and sort.
     $module_data = \Drupal::service('extension.list.module')->getList();
     $sync_status = \Drupal::service('config.installer')->isSyncing();

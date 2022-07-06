@@ -161,8 +161,8 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
    * @param \Drupal\cohesion\Event\CohesionJsAppUrlsEvent $event
    */
   public function registerFrontendUrls(CohesionJsAppUrlsEvent $event) {
-    // Each build method has its own url derivating from the entity canonical url
-    // @see \Drupal\sitestudio_page_builder\Routing\Route
+    // Each build method has its own url derivating from the entity
+    // canonical url @see \Drupal\sitestudio_page_builder\Routing\Route
     $query_param = $this->currentRequest->query->all();
 
     if ($entity = $this->pageBuilderManager->shouldEnablePageBuilder()) {
@@ -173,14 +173,14 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
       $params += $query_param;
       $event->addUrl('sitestudio-page-builder.layout_canvas.build', [
         'url' => Url::fromRoute("entity.{$entity->getEntityTypeId()}.sitestudio_build", $params)->toString(),
-        'method' => 'POST'
+        'method' => 'POST',
       ]);
     }
 
     // Builder save page
     $event->addUrl('frontend-builder-save', [
       'url' => Url::fromRoute('sitestudio-page-builder.save')->toString(),
-      'method' => 'POST'
+      'method' => 'POST',
     ]);
 
     // Get the react app library asset
@@ -189,7 +189,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
     if(isset($lib['js'][0]['data'])) {
       $event->addUrl('frontend-builder-js', [
         'url' => file_url_transform_relative(file_create_url($lib['js'][0]['data'])),
-        'method' => 'GET'
+        'method' => 'GET',
       ]);
     }
 
@@ -201,7 +201,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
         if (isset($js['data'])) {
           $urls[] = [
             'url' => file_url_transform_relative(file_create_url($js['data'])),
-            'method' => 'GET'
+            'method' => 'GET',
           ];
         }
       }
@@ -244,7 +244,8 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
       }
       $build['#attached']['drupalSettings']['cohesion']['cohCanvases']['cohcanvas-' . $entity->id()] = $json_values;
 
-      // Get the latest host and pass the next states it can transition into to drupalSettings
+      // Get the latest host and pass the next states it can transition into to
+      // drupalSettings.
       $latest_host = $this->entityRepository->getActive($host->getEntityTypeId(), $host->id());
       if($latest_host->getRevisionId() != $host->getRevisionId()) {
         $build['#attached']['drupalSettings']['cohesion']['isLatest'] = FALSE;

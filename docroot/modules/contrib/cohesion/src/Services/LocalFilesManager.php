@@ -68,10 +68,13 @@ class LocalFilesManager {
     $this->stringTranslation = $stringTranslation;
     $this->stylesheetJsonKeyvalue = $configFactory->get('cohesion.settings')->get('stylesheet_json_storage_keyvalue');
     $this->keyValueStore = $keyValueFactory->get('sitestudio');
-    // When cohesion module is installed during Site Installation, it redirects user to access denied page. During Site
-    // installation, when the request is made to get sharedTempStoreObject without passing userId, it creates a
-    // SharedTempStore for the anonymous user (i.e some random generated identifier).
-    // (@see \Drupal\Core\TempStore\SharedTempStoreFactory::get($collection, $owner)) But after Site Installation is
+    // When cohesion module is installed during Site Installation, it redirects
+    // user to access denied page. During Site installation, when the request is
+    // made to get sharedTempStoreObject without passing userId, it creates a
+    // SharedTempStore for the anonymous user
+    // (i.e some random generated identifier).
+    // (@see \Drupal\Core\TempStore\SharedTempStoreFactory::get)
+    // But after Site Installation is
     // completed, new drupal session is created for the admin user.
     if (InstallerKernel::installationAttempted()) {
       $this->sharedTempStore = $shared_store_factory->get('sitestudio', $session->getId());
@@ -100,14 +103,16 @@ class LocalFilesManager {
   public function liveToTemp() {
 
     if ($this->stylesheetJsonKeyvalue === TRUE) {
-      // If the store is set to key value move the stylesheet jsons from the main key value to the private storage.
+      // If the store is set to key value move the stylesheet jsons from
+      // the main key value to the private storage.
       $keyvalue_store_stylesheet_jsons = $this->keyValueStore->get($this->getStylesheetJsonCollectionName(TRUE));
       if (!empty($keyvalue_store_stylesheet_jsons)) {
         $this->sharedTempStore->set($this->getStylesheetJsonCollectionName(), $keyvalue_store_stylesheet_jsons);
       }
     }
     else {
-      // If the store as been set to files, loop over each enabled theme and move the files to the main site studio folder.
+      // If the store as been set to files, loop over each enabled theme
+      // and move the files to the main site studio folder.
       foreach ($this->cohesionUtils->getCohesionEnabledThemes() as $theme_info) {
         $from = $this->getStyleSheetFilename('json', $theme_info->getName(), TRUE);
         $to = $this->getStyleSheetFilename('json', $theme_info->getName());
@@ -128,14 +133,16 @@ class LocalFilesManager {
   public function tempToLive() {
 
     if ($this->stylesheetJsonKeyvalue === TRUE) {
-      // If the store is set to key value move the stylesheet jsons from the private to the main key value storage.
+      // If the store is set to key value move the stylesheet jsons from
+      // the private to the main key value storage.
       $private_stylesheet_jsons = $this->sharedTempStore->get($this->getStylesheetJsonCollectionName());
       if (!empty($private_stylesheet_jsons)) {
         $this->keyValueStore->set($this->getStylesheetJsonCollectionName(TRUE), $private_stylesheet_jsons);
       }
     }
     else {
-      // If the store as been set to files, loop over each enabled theme and move the files to the main site studio folder.
+      // If the store as been set to files, loop over each enabled theme
+      // and move the files to the main site studio folder.
       foreach ($this->cohesionUtils->getCohesionEnabledThemes() as $theme_info) {
         $from = $this->getStyleSheetFilename('json', $theme_info->getName());
         $to = $this->getStyleSheetFilename('json', $theme_info->getName(), TRUE);
@@ -372,7 +379,8 @@ class LocalFilesManager {
   }
 
   /**
-   * Get the stylesheet.json for a specific theme from the storage set in the config.
+   * Get the stylesheet.json for a specific theme from
+   * the storage set in the config.
    *
    * @param $theme_name
    *
@@ -382,8 +390,8 @@ class LocalFilesManager {
 
     $original_css_contents = '';
 
-    // If site studio is set to store the stysheet json to the key value store only get it from it
-    // Otherwise get it from the file system.
+    // If site studio is set to store the stysheet json to the key value store
+    // only get it from it. Otherwise get it from the file system.
     if ($this->stylesheetJsonKeyvalue === TRUE) {
       $stylesheet_json_value = $this->getKeyValueStore()->get($this->getStylesheetJsonCollectionName());
       if (isset($stylesheet_json_value[$theme_name]['json'])) {

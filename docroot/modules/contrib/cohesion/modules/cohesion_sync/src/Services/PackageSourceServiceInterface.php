@@ -19,6 +19,14 @@ interface PackageSourceServiceInterface {
   public function supportedType(string $type): bool;
 
   /**
+   * Returns supported type.
+   *
+   * @return string $type
+   *   Source type, for example "default_module_package".
+   */
+  public function getSupportedType(): string;
+
+  /**
    * Prepares package sync directory.
    *
    * The purpose of this method is to allow package source service to handle

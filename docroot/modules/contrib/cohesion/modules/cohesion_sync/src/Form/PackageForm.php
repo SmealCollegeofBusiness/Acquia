@@ -41,7 +41,8 @@ class PackageForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
-    // Include the Angualar css (which controls the cohesion_accordion and other form styling).
+    // Include the Angualar css (which controls the cohesion_accordion and other
+    // form styling).
     $form['#attached']['library'][] = 'cohesion/cohesion-admin-scripts';
     $form['#attached']['library'][] = 'cohesion/cohesion-admin-styles';
 
@@ -263,9 +264,6 @@ class PackageForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state, $redirect = NULL) {
     // Set entity id from supplied machine name.
-    // if ($this->getOperation() == 'add' || $this->getOperation() == 'duplicate') {
-    //  $this->entity->set('id', $this->entity->getEntityMachineNamePrefix() . $form_state->getValue('machine_name'));
-    // }
     // Save it and get the status.
     $status = parent::save($form, $form_state);
 

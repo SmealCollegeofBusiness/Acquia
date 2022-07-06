@@ -69,7 +69,8 @@ class CustomStylesForm extends CohesionStyleBuilderForm {
       ->getCohFormOnInit('custom_styles', $custom_style_type->id());
     $form['#attached']['drupalSettings']['cohesion']['custom_style_type'] = $this->entity->get('custom_style_type');
 
-    // Attached to DrupalSettings javascript to have access to the Parent class name if any.
+    // Attached to DrupalSettings javascript to have access to the Parent class
+    // name if any.
     if ($this->entity->getParentId()) {
       $storage = \Drupal::entityTypeManager()->getStorage('cohesion_custom_style');
       $parent = $storage->load($this->entity->getParentId());

@@ -68,7 +68,8 @@ class CohesionEntityAutocompleteMatcher extends EntityAutocompleteMatcher {
       foreach ($entity_labels as $values) {
         foreach ($values as $entity_id => $label) {
           $entity = $this->entityTypeManager->getStorage($target_type)->load($entity_id);
-          // Only show published content & account for entities that don't have an Entity published interface.
+          // Only show published content & account for entities that don't have
+          // an Entity published interface.
           if(($entity instanceof EntityPublishedInterface) && $entity->isPublished() || !($entity instanceof EntityPublishedInterface)) {
 
             $key = "$label ($entity_id)";

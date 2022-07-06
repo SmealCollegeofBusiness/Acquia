@@ -65,7 +65,14 @@ class _0019EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
             property_exists($json_values->model->{$style_guide_uuid}, $form_element->getUUID()) &&
             !is_bool($json_values->model->{$style_guide_uuid}->{$form_element->getUUID()})) {
 
-            if ($json_values->model->{$style_guide_uuid}->{$form_element->getUUID()} == $form_element->getModel()->getProperty(['settings', 'trueValue'])) {
+            $true_value = $form_element->getModel()->getProperty(
+              [
+                'settings',
+                'trueValue',
+              ]
+            );
+
+            if ($json_values->model->{$style_guide_uuid}->{$form_element->getUUID()} == $true_value) {
               $json_values->model->{$style_guide_uuid}->{$form_element->getUUID()} = TRUE;
             }
             else {

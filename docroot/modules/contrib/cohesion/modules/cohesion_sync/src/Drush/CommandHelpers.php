@@ -189,7 +189,8 @@ final class CommandHelpers {
     $file_destination = $dir . '/' . $filename;
     $fp = fopen($file_destination, 'w');
 
-    // Use the Yaml generator to stream the output to the file (buildPackageStream() yields).
+    // Use the Yaml generator to stream the output to the file
+    // (buildPackageStream() yields).
     $counter = 0;
     foreach ($this->packagerManager->buildPackageStream($entities, TRUE, $excluded_entity_type_ids) as $yaml) {
       fwrite($fp, $yaml);
@@ -258,13 +259,21 @@ final class CommandHelpers {
     foreach ($paths as $path) {
       $batch_operations[] = [
         '\Drupal\cohesion_sync\Controller\BatchImportController::setImportBatch',
-        [$path, $store_key, $overwrite, $keep, $force, $no_rebuild, $no_maintenance],
+        [
+          $path,
+          $store_key,
+          $overwrite,
+          $keep,
+          $force,
+          $no_rebuild,
+          $no_maintenance,
+        ],
       ];
     }
 
     $operations[] = [
       '\Drupal\cohesion_sync\Controller\BatchImportController::batchDrushValidationFinishedCallback',
-      [$no_maintenance]
+      [$no_maintenance],
     ];
 
     return $batch_operations;

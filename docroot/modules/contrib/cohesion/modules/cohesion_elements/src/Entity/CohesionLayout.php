@@ -6,6 +6,7 @@ use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\EntityJsonValuesTrait;
 use Drupal\cohesion\EntityUpdateInterface;
 use Drupal\cohesion_elements\CohesionLayoutInterface;
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityBase;
@@ -328,7 +329,13 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
     foreach ($responseData as $themeData) {
       if (isset($themeData['themeName'])) {
         if (isset($themeData['css']['theme']) && $themeData['css']['theme'] !== '' && !in_array($themeData['themeName'], $template_only_themes)) {
-          $css_data = \Drupal::service('twig')->renderInline($themeData['css']['theme'])->__toString();
+          $rendered_css = \Drupal::service('twig')->renderInline($themeData['css']['theme']);
+          if($rendered_css instanceof MarkupInterface) {
+            $css_data = $rendered_css->__toString();
+          } else {
+            $css_data = $rendered_css;
+          }
+
           $styles[$themeData['themeName']] = $css_data;
         }
 
@@ -382,13 +389,15 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
           $layout_cache_tag = 'layout_formatter.' . $parent_entity->uuid();
           $entity_cache_tag = $this->getParentEntity()->getEntityTypeId() . ':' . $parent_entity->id();
 
-          // Invalidate render cache tag for this layout formatter AND the overall node.
+          // Invalidate render cache tag for this layout formatter AND the
+          // overall node.
           \Drupal::service('cache_tags.invalidator')->invalidateTags([
             $layout_cache_tag,
             $entity_cache_tag,
           ]);
 
-          // The purge module is enabled (Ie. Acquia hosting with Vanish), forceably purge the cache for this entity.
+          // The purge module is enabled (Ie. Acquia hosting with Vanish),
+          // forceably purge the cache for this entity.
           if (\Drupal::moduleHandler()->moduleExists('purge')) {
 
             $purgeInvalidationFactory = \Drupal::service('purge.invalidation.factory');
@@ -417,8 +426,9 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
    * {@inheritdoc}
    */
   public function delete() {
-    // Prevent CohesionLayout entities from being deleted changing the field type
-    // for layout canvas to cohesion_entity_reference_revisions in cohesion_elements_update_8308.
+    // Prevent CohesionLayout entities from being deleted changing the field
+    // type for layout canvas to cohesion_entity_reference_revisions in
+    // cohesion_elements_update_8308.
     if (!drupal_static('cohesion_elements_update_8308', FALSE)) {
       parent::delete();
     }

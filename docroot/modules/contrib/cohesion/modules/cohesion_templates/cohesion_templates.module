@@ -235,10 +235,12 @@ function cohesion_templates_views_pre_view(ViewExecutable $view, $display_id, ar
  */
 function _cohesion_templates_get_template_candidate(ContentEntityInterface $entity, $view_mode) {
   $bundle = $entity->bundle();
-  // Get the template set as default if no template selector has been added to the bundle.
+  // Get the template set as default if no template selector has been added to
+  // the bundle.
   $chosen_template = '__default__';
 
-  // For full view models, if entity has a cohesion template selector field get the template value from it.
+  // For full view models, if entity has a cohesion template selector field get
+  // the template value from it.
   if ($view_mode === 'full') {
     if ($field = cohesion_templates_has_cohesion_template_selector_field($entity)) {
       $chosen_template = $entity->get($field->get('field_name'))->getString();
@@ -419,13 +421,15 @@ function _cohesion_templates_get_master_template() {
     }
     elseif (count($entities) == 1 && $entity) {
       // We can handle page that has only one ContentEntity in the url
-      // if Master template is needed for url with multiple entities a specific hook_theme_suggestions_page_alter has to be implemented.
+      // if Master template is needed for url with multiple entities a specific
+      // hook_theme_suggestions_page_alter has to be implemented.
       $entity = reset($entities);
 
       $bundle = $entity->bundle();
       $chosen_template = '__default__';
 
-      // If entity has a cohesion template selector field get the template value from it.
+      // If entity has a cohesion template selector field get the template value
+      // from it.
       if ($field = cohesion_templates_has_cohesion_template_selector_field($entity)) {
         $chosen_template = $entity->get($field->get('field_name'))->getString();
       }
@@ -599,7 +603,7 @@ function _cohesion_templates_generate_content_template_entities() {
 
   return t('Generated @count content template entities.', [
     '@count' => count($entities),
-    ]);
+  ]);
 }
 
 /**

@@ -22,7 +22,8 @@ class Example extends CustomElementPluginBase {
   public function getFields() {
     return [
       'mytextfield' => [
-        // This is the bootstrap class name that will be applied to the wrapping column.
+        // This is the bootstrap class name that will be applied to the
+        // wrapping column.
         'htmlClass' => 'col-xs-12',
         // All form elements require a title.
         'title' => 'Title of my text field.',

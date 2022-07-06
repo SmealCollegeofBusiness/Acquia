@@ -35,7 +35,8 @@ class _0006EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
       if ($entity->isLayoutCanvas()) {
         $layoutCanvas = $entity->getLayoutCanvasInstance();
 
-        // Update the canvas model for WYSIWYG elements, Google map marker elements and WYSIWYG component values.
+        // Update the canvas model for WYSIWYG elements, Google map marker
+        // elements and WYSIWYG component values.
         foreach ($layoutCanvas->iterateModels('canvas') as $model) {
           if ($model->getProperty(['styles'])) {
             $json_values->model->{$model->getUUID()}->styles = $this->setBackgroundImagesToNone($model->getProperty(['styles']));
@@ -68,7 +69,8 @@ class _0006EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
             foreach ($bp_style->{'background-image-settings'} as $index => $background_image) {
               // If the background is a background image.
               if (property_exists($background_image, 'backgroundLayerType') && property_exists($background_image->backgroundLayerType, 'value') && $background_image->backgroundLayerType->value == 'image') {
-                // Set the background type to none if the background image has no images set.
+                // Set the background type to none if the background image has
+                // no images set.
                 if (!property_exists($background_image, 'backgroundImage') || !is_object($background_image->backgroundImage) || !property_exists($background_image->backgroundImage, 'value') || strpos($background_image->backgroundImage->value, '[media-reference') != 0) {
                   $styles->styles->{$breakpoint}->{'background-image-settings'}[$index]->backgroundLayerType->value = 'none';
                   if (property_exists($background_image, 'backgroundImage') && is_object($background_image->backgroundImage)) {

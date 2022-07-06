@@ -6,7 +6,6 @@ editor-loader:
     js/editor-loader.js: {}
   dependencies:
     - core/jquery
-    - cohesion_elements/settings-tray
 
 cohesion-frontend-edit-scripts:
   js:

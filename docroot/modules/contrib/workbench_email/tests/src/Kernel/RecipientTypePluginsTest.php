@@ -64,7 +64,7 @@ class RecipientTypePluginsTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     parent::setUp();
     $this->installEntitySchema('node');
@@ -83,7 +83,7 @@ class RecipientTypePluginsTest extends KernelTestBase {
     $this->setUpModerationForNodeType($node_type);
     $this->setUpEmailFieldForNodeBundle();
     $this->createEntityReferenceField('node', 'test', 'field_approver', 'Approver', 'user');
-    Role::create(['id' => 'editor'])->save();
+    Role::create(['id' => 'editor', 'label' => 'editor'])->save();
     $editor = $this->createUser(['use draft_needs_review transition']);
     $editor->setEmail('editor@example.com');
     $editor->addRole('editor');

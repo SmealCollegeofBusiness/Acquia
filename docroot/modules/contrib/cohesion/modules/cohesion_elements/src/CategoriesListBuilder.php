@@ -22,19 +22,22 @@ class CategoriesListBuilder extends CohesionListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header = parent::buildHeader();
-    unset($header['type']);
 
     $header['label'] = [
       'data' => $this->t('Title'),
       'width' => '40%',
     ];
 
+    $header['type'] = [
+      'data' => $this->t('Machine Name (id)'),
+      'width' => '20%',
+    ];
+
     $header['class'] = [
       'data' => $this->t('Color'),
     ];
 
-    return $header;
+    return $header + parent::buildHeader();
   }
 
   /**
@@ -42,8 +45,7 @@ class CategoriesListBuilder extends CohesionListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     $row = parent::buildRow($entity);
-    unset($row['type']);
-
+    $row['type']['data'] = ['#markup' => $entity->id()];
     $row['class']['#markup'] = '<div class="coh-category-color-item ' . $row['class']['#markup'] . '"></div>';
 
     return $row;
@@ -55,7 +57,8 @@ class CategoriesListBuilder extends CohesionListBuilder {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
 
-    // Include the Angualar css (which controls the cohesion_accordion and other form styling).
+    // Include the Angular css (which controls the cohesion_accordion and other
+    // form styling).
     $form['#attached']['library'][] = 'cohesion/cohesion-admin-styles';
 
     return $form;

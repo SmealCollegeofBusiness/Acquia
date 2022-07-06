@@ -15,7 +15,12 @@ class ComponentContentDeleteForm extends ContentEntityDeleteForm {
   protected function logDeletionMessage() {
     /** @var \Drupal\cohesion_elements\ComponentContentInterface $entity */
     $entity = $this->getEntity();
-    $this->logger('content')->notice('@type: deleted %title.', ['@type' => $entity->getEntityType()->getLabel(), '%title' => $entity->label()]);
+    $this->logger('content')->notice('@type: deleted %title.',
+      [
+        '@type' => $entity->getEntityType()->getLabel(),
+        '%title' => $entity->label(),
+      ]
+    );
   }
 
 }

@@ -75,7 +75,8 @@ class IconLibrariesEntityGroups extends EntityGroupsPluginBase {
             \Drupal::messenger()->addError(t('You cannot add two icons with the same name.'));
           }
 
-          // Store the id so we don't re-scan changes (it will fail because of temporary file paths).
+          // Store the id so we don't re-scan changes (it will fail because of
+          // temporary file paths).
           $new_ids[] = $index;
 
         }

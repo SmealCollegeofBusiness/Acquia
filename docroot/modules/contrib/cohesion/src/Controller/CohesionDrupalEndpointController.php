@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion\Controller;
 
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Url;
 use Drupal\entity_browser\Element\EntityBrowserElement;
@@ -25,11 +26,27 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
  *
  * Returns Drupal data to Angular (views, blocks, node lists, etc).
  * See function index() for the entry point.
- * See function index() for the entry point.
  *
  * @package Drupal\cohesion\Controller
  */
 class CohesionDrupalEndpointController extends ControllerBase {
+
+  const ALLOWED_AUTOCOMPLETE_TYPES = [
+    'node',
+    'view',
+    'taxonomy_term',
+    'user',
+    'media',
+    'file',
+  ];
+
+  const ALLOWED_CONTENT_ENTITY_TYPES = [
+    'node',
+    'taxonomy_term',
+    'user',
+    'media',
+    'file',
+  ];
 
   /**
    * The autocomplete matcher for entity references.
@@ -59,6 +76,13 @@ class CohesionDrupalEndpointController extends ControllerBase {
    * @var \Drupal\Core\Logger\LoggerChannelInterface
    */
   protected $loggerChannel;
+
+  /**
+   * Views Storage.
+   *
+   * @var \Drupal\Core\Entity\EntityStorageInterface
+   */
+  protected $viewStorage;
 
   /**
    * CohesionDrupalEndpointController constructor.
@@ -302,7 +326,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
         }
       }
 
-      // Search via everything else (if not already found via entity ID or UUID).
+      // Search via everything else, if not already found via entity ID or UUID.
       if (strlen($typed_string) > 0 && !count($data)) {
         $bundles = $request->query->get('bundles');
         $selection_handler = $request->attributes->get('selection_handler');
@@ -340,20 +364,15 @@ class CohesionDrupalEndpointController extends ControllerBase {
    */
   public function linkEntityTypes(Request $request) {
     $data = [];
-    $entity_types_definitions = $this->entityTypeManager->getDefinitions();
-    foreach ($entity_types_definitions as $entity_type) {
-      if ($entity_type instanceof ContentEntityTypeInterface) {
+    foreach (self::ALLOWED_AUTOCOMPLETE_TYPES as $type) {
+      if ($this->entityTypeManager->hasDefinition($type)) {
+        $entity_type = $this->entityTypeManager->getDefinition($type);
         $data[] = [
           'label' => $entity_type->getLabel(),
           'value' => $entity_type->id(),
         ];
       }
     }
-
-    $data[] = [
-      'label' => $this->t('View'),
-      'value' => 'view',
-    ];
 
     return new CohesionJsonResponse([
       'status' => 'success',
@@ -362,169 +381,174 @@ class CohesionDrupalEndpointController extends ControllerBase {
   }
 
   /**
+   * Handles LinkAutoComplete requests.
    *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   Current Request object.
+   *
+   * @return \Drupal\cohesion\CohesionJsonResponse
+   *   Cohesion JSON response.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function linkAutoComplete(Request $request) {
+    $data = [];
+    $input = $request->query->get('q');
+
+    if ($input === NULL || UrlHelper::isExternal($input)) {
+      return new CohesionJsonResponse([
+        'status' => 'success',
+        'data' => $data,
+      ]);
+    }
+
     $entity_types = $request->query->get('entity_types');
 
     $content_entity_types = [];
-    $entity_types_definitions = $this->entityTypeManager->getDefinitions();
-    foreach ($entity_types_definitions as $entity_type) {
-      if ($entity_type instanceof ContentEntityTypeInterface) {
-        $content_entity_types[] = $entity_type;
+    foreach (self::ALLOWED_CONTENT_ENTITY_TYPES as $type) {
+      if ($this->entityTypeManager->hasDefinition($type)) {
+        $content_entity_types[$type] = $this->entityTypeManager->getDefinition($type);
       }
     }
 
     $grouped_data = [];
-    $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+    $language = $this->languageManager()->getCurrentLanguage()->getId();
 
-    if ($input = $request->query->get('q')) {
-      $input_string = Tags::explode($input);
-      $typed_string = mb_strtolower(array_pop($input_string));
+    $input_string = Tags::explode($input);
+    $typed_string = mb_strtolower(array_pop($input_string));
 
-      $query_split = explode('::', $typed_string);
-      if (isset($query_split[0])) {
-        if ($query_split[0] == 'view' && isset($query_split[1]) && isset($query_split[2])) {
-          if ($view_type = $this->entityTypeManager->getStorage('view')) {
-            $view = $view_type->load($query_split[1]);
-            if ($view->access('view', \Drupal::currentUser())) {
-              $executable = $view->getExecutable();
-              $executable->initDisplay();
-              foreach ($executable->displayHandlers as $display_id => $display) {
-
-                // Search by view label and display title.
-                if ($display_id == $query_split[2] && $display->hasPath()) {
-                  if (!isset($grouped_data['views'])) {
-                    $grouped_data['views'] = [];
-                  }
-                  $grouped_data['views'][] = [
-                    'name' => "{$view->label()} - {$this->t($display->display['display_title'])}  (/{$display->getPath()})",
-                    'id' => 'view::' . $view->id() . '::' . $display_id,
-                    'group' => $this->t('Views'),
-                  ];
-                }
+    $query_split = explode('::', $typed_string);
+    if (isset($query_split[0])) {
+      if ($query_split[0] == 'view' && isset($query_split[1]) && isset($query_split[2])) {
+        if ($view_storage = $this->getViewStorage()) {
+          $view_instance = $view_storage->load($query_split[1]);
+          if ($view_instance->access('view', $this->currentUser()) === TRUE) {
+            $view = $view_instance->toArray();
+            $display = $view['display'][$query_split[2]] ?? FALSE;
+            if ($display && isset($display['display_options']['path'])) {
+              if (!isset($grouped_data['view'])) {
+                $grouped_data['view'] = [];
               }
-            }
-          }
-        }
-        elseif (isset($query_split[1]) && is_numeric($query_split[1])) {
-          $entity_type = $this->entityTypeManager->getStorage($query_split[0]);
-          if ($entity_type) {
-            /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-            $entity = $entity_type->load($query_split[1]);
-            if ($entity && $entity->access('view', \Drupal::currentUser()) && $entity->hasLinkTemplate('canonical')) {
-              if (!isset($grouped_data[$entity->getEntityType()->id()])) {
-                $grouped_data[$entity->getEntityType()->id()] = [];
-              }
-              if ($entity->hasTranslation($language)) {
-                $entity = $entity->getTranslation($language);
-              }
-              $grouped_data[$entity->getEntityType()->id()][] = [
-                'name' => $entity->label(),
-                'id' => $query_split[0] . '::' . $entity->id(),
-                'group' => $entity->getEntityType()->getLabel(),
+              $grouped_data['view'][] = [
+                'name' => "{$view['label']} - {$this->t($display['display_title'])}  (/{$display['display_options']['path']})",
+                'id' => 'view::' . $view['id'] . '::' . $display['id'],
+                'group' => $this->t('Views'),
               ];
             }
           }
         }
       }
-
-      // Search via content entity ID.
-      if (!count($grouped_data) && is_numeric($typed_string) && $typed_string > 0) {
-        foreach ($content_entity_types as $content_entity_type) {
-          $entity_type = $this->entityTypeManager->getStorage($content_entity_type->id());
-          if ($entity_type) {
-            /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-            $entity = $entity_type->load($typed_string);
-            if ($entity && $entity->access('view', \Drupal::currentUser()) && $entity->hasLinkTemplate('canonical')) {
-              if (!isset($grouped_data[$content_entity_type->id()])) {
-                $grouped_data[$content_entity_type->id()] = [];
-              }
-              if ($entity->hasTranslation($language)) {
-                $entity = $entity->getTranslation($language);
-              }
-              $grouped_data[$content_entity_type->id()][] = [
-                'name' => $entity->label(),
-                'id' => $content_entity_type->id() . '::' . $entity->id(),
-                'group' => $content_entity_type->getLabel(),
-              ];
-            }
+      elseif (isset($query_split[1]) && is_numeric($query_split[1]) && $this->entityTypeManager->hasDefinition($query_split[0])) {
+        $entity_storage = $this->entityTypeManager->getStorage($query_split[0]);
+        /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+        $entity = $entity_storage->load($query_split[1]);
+        if ($entity && $entity->access('view', $this->currentUser()) && $entity->hasLinkTemplate('canonical')) {
+          if (!isset($grouped_data[$entity->getEntityType()->id()])) {
+            $grouped_data[$entity->getEntityType()->id()] = [];
           }
+          if ($entity->hasTranslation($language)) {
+            $entity = $entity->getTranslation($language);
+          }
+          $grouped_data[$entity->getEntityType()->id()][] = [
+            'name' => $entity->label(),
+            'id' => $query_split[0] . '::' . $entity->id(),
+            'group' => $entity->getEntityType()->getLabel(),
+          ];
         }
-      }
-
-      // Search via everything else (if not already found via node ID).
-      if (strlen($typed_string) > 0 && !count($grouped_data)) {
-        $selection_settings = [
-          'match_operator' => 'CONTAINS',
-        ];
-
-        foreach ($content_entity_types as $content_entity_type) {
-          /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $content_entity_type */
-          $entity_type = $this->entityTypeManager->getStorage($content_entity_type->id());
-
-          try {
-            if ($entity_type && (!$entity_types || is_array($entity_types) && in_array($content_entity_type->id(), $entity_types)) && $content_entity_type->hasLinkTemplate('canonical')) {
-              $matches = $this->matcher->getMatches($content_entity_type->id(), 'default', $selection_settings, $typed_string);
-
-              foreach ($matches as $match) {
-                // Extract the node ID.
-                preg_match('#.*\(([^)]+)\)#', $match['value'], $var);
-
-                /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-                $entity = $entity_type->load($var[1]);
-                if ($entity && $entity->access('view', \Drupal::currentUser()) && $entity->hasLinkTemplate('canonical')) {
-                  if (!isset($grouped_data[$content_entity_type->id()])) {
-                    $grouped_data[$content_entity_type->id()] = [];
-                  }
-                  $grouped_data[$content_entity_type->id()][] = [
-                    'name' => $match['label'],
-                    'id' => $content_entity_type->id() . '::' . $entity->id(),
-                    'group' => $content_entity_type->getLabel(),
-                  ];
-                }
-              }
-            }
-          }
-          catch (\Exception $e) {
-            // Some modules don't handle autocomplete so we ignore them.
-          }
-        }
-
-        $view_type = $this->entityTypeManager->getStorage('view');
-        if ($view_type && !$entity_types || is_array($entity_types) && in_array('view', $entity_types)) {
-          $views = $view_type->loadMultiple();
-          foreach ($views as $view) {
-            if ($view->access('view', \Drupal::currentUser())) {
-              $executable = $view->getExecutable();
-              $executable->initDisplay();
-              foreach ($executable->displayHandlers as $display_id => $display) {
-
-                // Search by view label and display title.
-                if ($display->hasPath() && (stripos($view->label(), $typed_string) !== FALSE || stripos($display->display['display_title'], $typed_string) !== FALSE)) {
-
-                  if (!isset($grouped_data['views'])) {
-                    $grouped_data['views'] = [];
-                  }
-
-                  $grouped_data['views'][] = [
-                    'name' => "{$view->label()} - {$this->t($display->display['display_title'])}  (/{$display->getPath()})",
-                    'id' => 'view::' . $view->id() . '::' . $display_id,
-                    'group' => 'Views',
-                  ];
-                }
-              }
-            }
-          }
-        }
-
       }
     }
 
-    $group_sort = ['node', 'views', 'taxonomy_term', 'user', 'media', 'file'];
+    // Search via content entity ID.
+    if (!count($grouped_data) && is_numeric($typed_string) && $typed_string > 0) {
+      foreach ($content_entity_types as $content_entity_type) {
+        $entity_storage = $this->entityTypeManager->getStorage($content_entity_type->id());
+        /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+        $entity = $entity_storage->load($typed_string);
+        if ($entity && $entity->access('view', $this->currentUser()) && $entity->hasLinkTemplate('canonical')) {
+          if (!isset($grouped_data[$content_entity_type->id()])) {
+            $grouped_data[$content_entity_type->id()] = [];
+          }
+          if ($entity->hasTranslation($language)) {
+            $entity = $entity->getTranslation($language);
+          }
+          $grouped_data[$content_entity_type->id()][] = [
+            'name' => $entity->label(),
+            'id' => $content_entity_type->id() . '::' . $entity->id(),
+            'group' => $content_entity_type->getLabel(),
+          ];
+        }
+      }
+    }
 
-    $data = [];
-    foreach ($group_sort as $group) {
+    // Search via everything else (if not already found via node ID).
+    if (strlen($typed_string) > 0 && !count($grouped_data)) {
+      $selection_settings = [
+        'match_operator' => 'CONTAINS',
+      ];
+
+      foreach ($content_entity_types as $content_entity_type) {
+        /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $content_entity_type */
+        $entity_storage = $this->entityTypeManager->getStorage($content_entity_type->id());
+
+        try {
+          if ((!$entity_types || is_array($entity_types) && in_array($content_entity_type->id(), $entity_types)) && $content_entity_type->hasLinkTemplate('canonical')) {
+            $matches = $this->matcher->getMatches($content_entity_type->id(), 'default', $selection_settings, $typed_string);
+
+            foreach ($matches as $match) {
+              // Extract the node ID.
+              preg_match('#.*\(([^)]+)\)#', $match['value'], $var);
+
+              /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+              $entity = $entity_storage->load($var[1]);
+              if ($entity && $entity->access('view', $this->currentUser()) && $entity->hasLinkTemplate('canonical')) {
+                if (!isset($grouped_data[$content_entity_type->id()])) {
+                  $grouped_data[$content_entity_type->id()] = [];
+                }
+                $grouped_data[$content_entity_type->id()][] = [
+                  'name' => $match['label'],
+                  'id' => $content_entity_type->id() . '::' . $entity->id(),
+                  'group' => $content_entity_type->getLabel(),
+                ];
+              }
+            }
+          }
+        }
+        catch (\Exception $e) {
+          // Some modules don't handle autocomplete, so we ignore them.
+        }
+      }
+
+      if (!isset($view_storage)) {
+        $view_storage = $this->getViewStorage();
+      }
+
+      if (isset($view_storage) && !$entity_types || is_array($entity_types) && in_array('view', $entity_types)) {
+        $views = $view_storage->loadMultiple();
+
+        foreach ($views as $view_instance) {
+          if ($view_instance->access('view', $this->currentUser()) === FALSE) {
+            continue;
+          }
+          $view = $view_instance->toArray();
+          foreach ($view['display'] as $display_id => $display) {
+            if (isset($display['display_options']['path']) && (stripos($view['label'], $typed_string) !== FALSE || stripos($display['display_title'], $typed_string) !== FALSE)) {
+
+              if (!isset($grouped_data['view'])) {
+                $grouped_data['view'] = [];
+              }
+              $grouped_data['view'][] = [
+                'name' => "{$view['label']} - {$this->t($display['display_title'])}  (/{$display['display_options']['path']})",
+                'id' => 'view::' . $view['id'] . '::' . $display_id,
+                'group' => 'Views',
+              ];
+            }
+          }
+        }
+      }
+    }
+
+    foreach (self::ALLOWED_AUTOCOMPLETE_TYPES as $group) {
       if (isset($grouped_data[$group]) && !empty($grouped_data[$group])) {
         $data = array_merge($data, $grouped_data[$group]);
         unset($grouped_data[$group]);
@@ -667,7 +691,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
 
     $browsers[] = [
       'label' => 'Typeahead',
-      'value' => 'typeahead'
+      'value' => 'typeahead',
     ];
 
     if ($this->moduleHandler()
@@ -675,7 +699,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
 
       $browsers[] = [
         'label' => 'Media library',
-          'value' => 'media_library',
+        'value' => 'media_library',
       ];
     }
 
@@ -693,9 +717,9 @@ class CohesionDrupalEndpointController extends ControllerBase {
             'value' => $entity_browser->id(),
           ];
         }
-
-      } catch (\Exception $e) {
-          $this->loggerChannel->error($e->getTraceAsString());
+      }
+      catch (\Exception $e) {
+        $this->loggerChannel->error($e->getTraceAsString());
       }
     }
 
@@ -772,7 +796,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
         'media_library_allowed_types' => $allowed_types,
         'media_library_selected_type' => $media_lib_state->getSelectedTypeId(),
         'media_library_remaining' => 1,
-        'hash' => $media_lib_state->getHash()
+        'hash' => $media_lib_state->getHash(),
       ])->toString();
 
       $data = [
@@ -804,8 +828,8 @@ class CohesionDrupalEndpointController extends ControllerBase {
             $url = Url::fromUserInput($display->path(), [
               'query' => [
                 'uuid' => $display->getUuid(),
-                'coh_clean_page' => 'true'
-              ]
+                'coh_clean_page' => 'true',
+              ],
             ])->toString();
 
             $target_bundles = [];
@@ -850,6 +874,23 @@ class CohesionDrupalEndpointController extends ControllerBase {
       'status' => 'success',
       'data' => $data,
     ]);
+  }
+
+  /**
+   * Returns Views storage.
+   *
+   * @return \Drupal\Core\Entity\EntityStorageInterface
+   *   Views Storage.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function getViewStorage() {
+    if (!isset($this->viewStorage)) {
+      $this->viewStorage = $this->entityTypeManager->getStorage('view');
+    }
+
+    return $this->viewStorage;
   }
 
 }

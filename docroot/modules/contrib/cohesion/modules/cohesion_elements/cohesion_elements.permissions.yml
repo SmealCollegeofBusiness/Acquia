@@ -17,3 +17,7 @@ administer helper categories:
 
 permission_callbacks:
   - \Drupal\cohesion_elements\CategoryPermissions::getPermissions
+
+use custom component builder:
+  title: Site Studio custom component builder
+  description: 'Grant access to custom component builder UI.'

@@ -68,6 +68,11 @@ services:
     tags:
       - { name: sitestudio_package_source, priority: 50}
 
+  cohesion_sync.package_source.package:
+    class: Drupal\cohesion_sync\Services\Package
+    tags:
+      - { name: sitestudio_package_source, priority: 50}
+
   cohesion_sync.package_source.tar_archive_package:
     class: Drupal\cohesion_sync\Services\TarArchivePackage
     arguments:
@@ -75,3 +80,20 @@ services:
       - '@file_system'
     tags:
       - { name: sitestudio_package_source, priority: 51}
+
+  cohesion_sync.package_import_handler:
+    class: Drupal\cohesion_sync\Services\PackageImportHandler
+    arguments:
+      - '@event_dispatcher'
+      - '@file_system'
+      - '@config.manager'
+      - '@lock.persistent'
+      - '@config.typed'
+      - '@module_handler'
+      - '@module_installer'
+      - '@theme_handler'
+      - '@string_translation'
+      - '@extension.list.module'
+      - '@config.storage'
+      - '@cohesion_usage.update_manager'
+      - '@cohesion_sync.package_source_manager'

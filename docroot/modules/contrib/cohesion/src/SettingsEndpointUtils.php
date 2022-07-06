@@ -53,7 +53,8 @@ class SettingsEndpointUtils {
 
     // Filter categories based on dx8 access permissions.
     foreach ($categories as $key => $category) {
-      // Component builder group should only be available within the component builder.
+      // Component builder group should only be available within the component
+      // builder.
       if ($key == 'component-builder-elements' && $isComponentBuilder !== TRUE) {
         continue;
       }
@@ -101,7 +102,8 @@ class SettingsEndpointUtils {
               $element_keys[] = $element['element_id'];
             }
 
-            // And query the key/value storage using this sorted list of element ids.
+            // And query the key/value storage using this sorted list of element
+            // ids.
             $assetCategoryLibrary = \Drupal::keyValue('cohesion.assets.element_categories');
             $categories = $assetCategoryLibrary->getMultiple($element_keys);
 
@@ -523,7 +525,8 @@ class SettingsEndpointUtils {
         $id = isset($result['id']) ? $result['id'] : NULL;
         $label = isset($result['label']) ? $result['label'] : NULL;
 
-        // Make sure all code hitting the database is JSON decoded and can be serialized.
+        // Make sure all code hitting the database is JSON decoded and can be
+        // serialized.
         if (isset($result['content'])) {
           if (!is_array($result['content'])) {
             try {
@@ -727,7 +730,8 @@ class SettingsEndpointUtils {
 
         $dx8_permissions = $role == 'administrator' ? $dx8_permissions : array_values(array_intersect($results, $dx8_permissions));
 
-        // Store these results in the cache. Invalidate this cache when the role changes permissions.
+        // Store these results in the cache. Invalidate this cache when the role
+        // changes permissions.
         \Drupal::cache()->set($cache_key, $dx8_permissions, CacheBackendInterface::CACHE_PERMANENT, ['config:user.role.' . $role]);
       }
     }

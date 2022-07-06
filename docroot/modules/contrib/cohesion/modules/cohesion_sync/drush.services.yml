@@ -29,6 +29,13 @@ services:
     tags:
       - { name: drush.command }
 
+  cohesion_sync.commands.multi_import:
+    class: \Drupal\cohesion_sync\Commands\CohesionSyncMultiImportCommand
+    arguments:
+      - '@cohesion_sync.package_import_handler'
+    tags:
+      - { name: drush.command }
+
   cohesion_sync.package.commands:
     class: \Drupal\cohesion_sync\Commands\CohesionSyncPackageCommands
     arguments: ['@entity_type.manager']

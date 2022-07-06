@@ -184,6 +184,15 @@ class Element implements LayoutCanvasElementInterface, \JsonSerializable {
   }
 
   /**
+   * Return TRUE if the element is a custom component.
+   *
+   * @return bool
+   */
+  public function isCustomComponent() {
+    return !is_null($this->getProperty('isCustomComponent')) && $this->getProperty('isCustomComponent') === TRUE;
+  }
+
+  /**
    * Get the component content id.
    *
    * @return mixed|object|string|string[]|null

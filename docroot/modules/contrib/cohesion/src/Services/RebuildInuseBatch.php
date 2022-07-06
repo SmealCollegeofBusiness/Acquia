@@ -121,10 +121,12 @@ class RebuildInuseBatch {
       ];
     }
 
-    // If style guide is used and the in use list contains a style guide manager instance
-    // Get the style guide in use entities and add them to the list rather than the style guide manager entity
-    // Ex: If a color is change and that color is used in a style guide manager instance then we need to rebuild
-    // the entities where the token for this color is used rather than the style guide manager entity.
+    // If style guide is used and the in use list contains a style guide manager
+    // instance. Get the style guide in use entities and add them to the list
+    // rather than the style guide manager entity. Ex: If a color is change and
+    // that color is used in a style guide manager instance then we need to
+    // rebuild the entities where the token for this color is used rather than
+    // the style guide manager entity.
     if ($this->moduleHandler->moduleExists('cohesion_style_guide')) {
       foreach ($in_use_list as $uuid => $type) {
         if ($type == 'cohesion_style_guide_manager') {
@@ -209,7 +211,8 @@ class RebuildInuseBatch {
     // Initial state.
     $running_dx8_batch = TRUE;
 
-    // Copy the live stylesheet.json to temporary:// so styles don't get wiped when  re-importing.
+    // Copy the live stylesheet.json to temporary:// so styles don't get wiped
+    // when  re-importing.
     \Drupal::service('cohesion.local_files_manager')->liveToTemp();
   }
 

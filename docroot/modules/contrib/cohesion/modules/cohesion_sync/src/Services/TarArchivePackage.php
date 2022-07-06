@@ -47,6 +47,13 @@ class TarArchivePackage implements PackageSourceServiceInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getSupportedType(): string {
+    return self::SUPPORTED_TYPE;
+  }
+
+  /**
    * Prepares package archived in .tar.
    *
    * This service extracts from .tar and moves them into the

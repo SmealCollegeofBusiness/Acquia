@@ -112,7 +112,7 @@ abstract class WorkbenchEmailTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     // Place some blocks.
     $this->placeBlock('local_tasks_block', ['id' => 'tabs_block']);

@@ -368,15 +368,15 @@ class PackagerManager {
    */
   public function applyBatchYamlPackageStream($uri, $action_data, $no_rebuild = FALSE) {
 
-    // Operations for the batch process
+    // Operations for the batch process.
     $operations = [];
     // Entities that need to be imported. Can be a mix of config (site studio
-    // and others) and Files
+    // and others) and Files.
     $uuids = [];
     // Entities that need to be rebuilt.
     $entities_need_rebuild = [];
     // Does the sync requires an entire rebuild because base unit settings or
-    // responsive grid has been changed
+    // responsive grid has been changed.
     $needs_complete_rebuild = FALSE;
 
     foreach ($action_data as $uuid => $action) {
@@ -385,7 +385,11 @@ class PackagerManager {
         ENTRY_EXISTING_OVERWRITTEN,
       ])) {
         // Does this sync require a full rebuild.
-        if ($action['entity_type'] == 'cohesion_website_settings' && in_array($action['id'], ['base_unit_settings', 'responsive_grid_settings'])) {
+        $entity_type_need_full_rebuild = [
+          'base_unit_settings',
+          'responsive_grid_settings',
+        ];
+        if ($action['entity_type'] == 'cohesion_website_settings' && in_array($action['id'], $entity_type_need_full_rebuild)) {
           $needs_complete_rebuild = TRUE;
         }
 
@@ -402,7 +406,12 @@ class PackagerManager {
           // be rebuild as well as the entity. Ex: a scss variable that has a
           // change in value, we need to rebuild every entity where this scss
           // variable is used.
-          $entity_type_with_dependency = ['cohesion_scss_variable', 'cohesion_style_guide', 'cohesion_color', 'cohesion_font_stack'];
+          $entity_type_with_dependency = [
+            'cohesion_scss_variable',
+            'cohesion_style_guide',
+            'cohesion_color',
+            'cohesion_font_stack',
+          ];
           if (in_array($action['entity_type'], $entity_type_with_dependency)) {
 
             $usage = \Drupal::database()->select('coh_usage', 'c1')
@@ -544,7 +553,8 @@ class PackagerManager {
   public function matchUUIDS($action_data, $entry) {
     $replace_uuid = [];
     foreach ($action_data as $uuid => $data) {
-      if (in_array($data['entry_action_state'], [ENTRY_NEW_IMPORTED, ENTRY_EXISTING_OVERWRITTEN]) && isset($data['replace_uuid'])) {
+      $to_import_type = [ENTRY_NEW_IMPORTED, ENTRY_EXISTING_OVERWRITTEN];
+      if (in_array($data['entry_action_state'], $to_import_type) && isset($data['replace_uuid'])) {
         $replace_uuid[$uuid] = $data['replace_uuid'];
       }
     }

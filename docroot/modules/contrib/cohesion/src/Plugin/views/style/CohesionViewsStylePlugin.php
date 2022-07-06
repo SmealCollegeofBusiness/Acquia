@@ -174,7 +174,8 @@ class CohesionViewsStylePlugin extends StylePluginBase {
 
     return [
       '#theme' => $theme,
-      // If a view template is available, this is the theme suggestion for that template.
+      // If a view template is available, this is the theme suggestion for that
+      // template.
       '#view' => $this->view,
       '#rows' => $rows,
     ];

@@ -85,8 +85,8 @@ class ComponentContent extends EditorialContentEntityBase implements ComponentCo
       }
     }
 
-    // If no revision author has been set explicitly, make the component content owner the
-    // revision author.
+    // If no revision author has been set explicitly, make the component content
+    // owner the revision author.
     if (!$this->getRevisionUser()) {
       $this->setRevisionUserId($this->getOwnerId());
     }
@@ -99,10 +99,10 @@ class ComponentContent extends EditorialContentEntityBase implements ComponentCo
     parent::preSaveRevision($storage, $record);
 
     if (!$this->isNewRevision() && isset($this->original) && (!isset($record->revision_log) || $record->revision_log === '')) {
-      // If we are updating an existing component content without adding a new revision, we
-      // need to make sure $entity->revision_log is reset whenever it is empty.
-      // Therefore, this code allows us to avoid clobbering an existing log
-      // entry with an empty one.
+      // If we are updating an existing component content without adding a new
+      // revision, we need to make sure $entity->revision_log is reset whenever
+      // it is empty. Therefore, this code allows us to avoid clobbering an
+      // existing log entry with an empty one.
       $record->revision_log = $this->original->revision_log->value;
     }
   }

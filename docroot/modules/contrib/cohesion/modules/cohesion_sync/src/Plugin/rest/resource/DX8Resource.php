@@ -15,7 +15,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Deprecated.
  *
- * REST endpoint to GET packages from this site and POST, PATCH packages to this site.
+ * REST endpoint to GET packages from this site and POST, PATCH packages to
+ * this site.
  *
  * @RestResource(
  *   id = "dx8_resource",

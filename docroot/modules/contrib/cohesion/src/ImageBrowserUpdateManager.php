@@ -194,7 +194,8 @@ class ImageBrowserUpdateManager {
             }
             break;
 
-          // If not a file or media, its another entity type from an Entity browser so just display the title.
+          // If not a file or media, its another entity type from an
+          // Entity browser so just display the title.
           default:
             return [
               'path' => '',

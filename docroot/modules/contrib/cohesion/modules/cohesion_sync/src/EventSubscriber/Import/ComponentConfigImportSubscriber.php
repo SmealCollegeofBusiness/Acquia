@@ -71,7 +71,8 @@ class ComponentConfigImportSubscriber extends CohesionConfigImportSubscriberBase
    *   Entity id.
    *
    * @return bool
-   *   True if entity has content references that are removed in new json_values.
+   *   True if entity has content references that are removed in new
+   *   json_values.
    */
   protected function hasDefinedContentForRemovedComponentField(
     EntityJsonValuesInterface $entity,

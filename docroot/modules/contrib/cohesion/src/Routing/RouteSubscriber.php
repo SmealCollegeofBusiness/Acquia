@@ -11,8 +11,8 @@ use Symfony\Component\Routing\RouteCollection;
 class RouteSubscriber extends RouteSubscriberBase {
 
   /**
-   * Disable access to cohesion entities if assets have not been imported or "Use DX8" option
-   * is set to 'disable'
+   * Disable access to cohesion entities if assets have not been imported
+   * or "Use Site studio" option is set to 'disable'
    * {@inheritdoc}.
    */
   protected function alterRoutes(RouteCollection $collection) {

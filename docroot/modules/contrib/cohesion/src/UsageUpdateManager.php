@@ -210,7 +210,8 @@ class UsageUpdateManager {
       return FALSE;
     }
 
-    // For each entity that this requires, run the plugin specific removal function.
+    // For each entity that this requires, run the plugin specific removal
+    // function.
     foreach ($requires as $uuid => $type) {
       try {
         $requires_entity = $this->entityRepository->loadEntityByUuid($type, $uuid);

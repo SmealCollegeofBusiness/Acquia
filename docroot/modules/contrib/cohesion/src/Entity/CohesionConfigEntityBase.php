@@ -69,7 +69,8 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
   protected $selectable = TRUE;
 
   /**
-   * The list of callbacks from \Drupal\cohesion\EntityUpdateManager that have been applied to this entity.
+   * The list of callbacks from \Drupal\cohesion\EntityUpdateManager that have
+   * been applied to this entity.
    *
    * @var array
    */
@@ -217,7 +218,8 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
   public function preSave(EntityStorageInterface $storage) {
     \Drupal::service('cohesion.entity_update_manager')->apply($this);
 
-    // If the entity type can't be enabled or disable force setting status to TRUE.
+    // If the entity type can't be enabled or disable force setting status to
+    // TRUE.
     if (!$this->getEntityType()->hasKey('status')) {
       $this->enable();
     }
@@ -475,7 +477,8 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
    * {@inheritdoc}
    */
   public function getEntityMachineNamePrefix() {
-    // If the entity already exists and doesn't contain the prefix, don't use the prefix.
+    // If the entity already exists and doesn't contain the prefix, don't use
+    // the prefix.
     if ($this->id !== NULL && substr($this->id, 0, strlen($this::ENTITY_MACHINE_NAME_PREFIX)) !== $this::ENTITY_MACHINE_NAME_PREFIX) {
       return '';
     }

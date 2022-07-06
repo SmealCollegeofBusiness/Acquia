@@ -9,8 +9,10 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
+use Drupal\Core\Utility\Error;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 
 /**
@@ -43,18 +45,47 @@ class CohesionUtils {
   protected $languageManager;
 
   /**
+   * Logger Channel Factory.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   */
+  protected $loggerChannelFactory;
+
+  /**
+   * Custom Components Discovery service.
+   *
+   * @var \Drupal\cohesion_elements\CustomComponentsService
+   */
+  protected $customComponentsService;
+
+  /**
    * CohesionUtils constructor.
    *
    * @param \Drupal\Core\Extension\ThemeHandlerInterface $theme_handler
+   *   Theme handler.
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
+   *   Theme manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   Language manager.
    */
-  public function __construct(ThemeHandlerInterface $theme_handler, ThemeManagerInterface $theme_manager, EntityTypeManagerInterface $entity_type_manager, LanguageManagerInterface $language_manager) {
+  public function __construct(
+    ThemeHandlerInterface $theme_handler,
+    ThemeManagerInterface $theme_manager,
+    EntityTypeManagerInterface $entity_type_manager,
+    LanguageManagerInterface $language_manager,
+    LoggerChannelFactoryInterface $loggerChannelFactory
+  ) {
     $this->themeHandler = $theme_handler;
     $this->themeManager = $theme_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->languageManager = $language_manager;
+    $this->loggerChannelFactory = $loggerChannelFactory;
+    try {
+      $this->customComponentsService = \Drupal::service('custom.components');
+    } catch (\Exception $exception) {
+    }
   }
 
   /**
@@ -67,7 +98,7 @@ class CohesionUtils {
    */
   public function errorHandler($message, $force_exception = FALSE) {
     // Always send the error to dblog.
-    \Drupal::logger('cohesion')->error($message);
+    $this->loggerChannelFactory->get('cohesion')->error($message);
 
     // If part of a batch process, always throw an exception.
     if (\Drupal::config('cohesion.settings')->get('fail.on.error') || $force_exception) {
@@ -223,7 +254,8 @@ class CohesionUtils {
 
               \Drupal::moduleHandler()->alter('dx8_' . $context . '_drupal_token_context', $context_variable);
 
-              // If token has been detected replace potential breaking chars with nothing as they are not valid.
+              // If token has been detected replace potential breaking chars
+              // with nothing as they are not valid.
               $context = str_replace(['[', ']', '{', '}'], '', $context);
 
               $twig_token = '[token.' . str_replace([
@@ -251,19 +283,24 @@ class CohesionUtils {
    */
   public function processFieldValues($fieldValue, $model, $default = NULL) {
     if (!$model->getProperty(['settings', 'type'])) {
-      if ($model->getProperty(['settings', 'schema', 'type']) === 'string' && (is_null($model->getProperty(['settings', 'schema', 'escape'])) || $model->getProperty(['settings', 'schema', 'escape']) === TRUE)) {
+      $schema_type = $model->getProperty(['settings', 'schema', 'type']);
+      $escape = $model->getProperty(['settings', 'schema', 'escape']);
+      if ($schema_type === 'string' && (is_null($escape) || $escape === TRUE)) {
         $fieldValue = Html::escape($fieldValue);
       }
     }
     else {
       switch ($model->getProperty(['settings', 'type'])) {
         case 'checkboxToggle':
-          if ($model->getProperty(['settings', 'toggleType']) == 'string' || $model->getProperty(['settings', 'toggleType']) == 'number') {
-            if ($fieldValue && $model->getProperty(['settings', 'trueValue'])) {
-              $fieldValue = $model->getProperty(['settings', 'trueValue']);
+          $toggle_type = $model->getProperty(['settings', 'toggleType']);
+          if ($toggle_type == 'string'|| $toggle_type == 'number') {
+            $true_value = $model->getProperty(['settings', 'trueValue']);
+            $false_value = $model->getProperty(['settings', 'falseValue']);
+            if ($fieldValue && $true_value) {
+              $fieldValue = $true_value;
             }
-            elseif (!$fieldValue && $model->getProperty(['settings', 'falseValue'])) {
-              $fieldValue = $model->getProperty(['settings', 'falseValue']);
+            elseif (!$fieldValue && $false_value) {
+              $fieldValue = $false_value;
             }
             else {
               $fieldValue = '';
@@ -272,7 +309,8 @@ class CohesionUtils {
           break;
 
         case 'cohTextarea':
-          if (is_null($model->getProperty(['settings', 'schema', 'escape'])) || $model->getProperty(['settings', 'schema', 'escape']) === TRUE) {
+          $escape = $model->getProperty(['settings', 'schema', 'escape']);
+          if (is_null($escape) || $escape === TRUE) {
             $fieldValue = Html::escape($fieldValue);
           }
           break;
@@ -282,8 +320,9 @@ class CohesionUtils {
 
           // Is the value in the endpoint based select options.
           if ($model->getProperty(['settings', 'selectType']) == 'existing') {
-            // Really this should look up the value sin the endpoint, but it's not
-            // possible to call the endpoint and get the valued programmatically.
+            // Really this should look up the value sin the endpoint,
+            // but it's not possible to call the endpoint
+            // get the valued programmatically.
             // This is some protection.
             $fieldValue = Xss::filter($fieldValue);
           }
@@ -315,7 +354,8 @@ class CohesionUtils {
         case 'cohTypeahead':
           $fieldValue = $this->pathRenderer($fieldValue);
 
-          // check that the URL is valid - accounts for node::1, mailto:, external & internal links
+          // Check that the URL is valid
+          // accounts for node::1, mailto:, external & internal links.
           if(!UrlHelper::isValid($fieldValue)) {
             $fieldValue = '';
           }
@@ -396,9 +436,10 @@ class CohesionUtils {
                 if ($view_display_id == $display_id && $display->hasPath()) {
                   $path = $display->getPath();
                   if ($view->status() && strpos($path, '%') === FALSE) {
-                    // Wrap this in a try/catch as trying to generate links to some
-                    // routes may throw a NotAcceptableHttpException if they do not
-                    // respond to HTML, such as RESTExports.
+                    // Wrap this in a try/catch as trying to generate
+                    // links to some routes may throw a
+                    // NotAcceptableHttpException if they do not respond to HTML
+                    // such as RESTExports.
                     try {
                       // @todo Views should expect and store a leading /. See:
                       //   https://www.drupal.org/node/2423913
@@ -448,7 +489,8 @@ class CohesionUtils {
   }
 
   /**
-   * Get the payload to be sent to \Drupal\cohesion\CohesionApiClient::layoutCanvasDataMerge
+   * Get the payload to be sent to
+   * \Drupal\cohesion\CohesionApiClient::layoutCanvasDataMerge
    *
    * @param $entity EntityJsonValuesInterface
    *
@@ -480,6 +522,26 @@ class CohesionUtils {
       ], $component->getDecodedJsonValues());
     }
 
+    if (isset($this->customComponentsService)) {
+      // Custom components - add to components data.
+      try {
+        $custom_components = $this->customComponentsService->getComponents();
+
+        foreach ($component_ids as $component_id) {
+          if (isset($custom_components[$component_id])) {
+            $components_data[$component_id] = array_merge([
+              'title' => $custom_components[$component_id]['name'],
+              'category' => $custom_components[$component_id]['category']->get('class'),
+            ], $custom_components[$component_id]['form']->getJsonValuesDecodedArray());
+
+          }
+        }
+      }
+      catch (\Exception $exception) {
+        $this->loggerChannelFactory->get('cohesion_elements.custom_components')->error($exception->getMessage(), Error::decodeException($exception));
+      }
+    }
+
     $components_content_data = [];
     $components_content = [];
 
@@ -490,7 +552,10 @@ class CohesionUtils {
     }
 
     foreach ($components_content as $component_content) {
-      $category_entity = $component_content->getComponent()->getCategoryEntity();
+      $category_entity = NULL;
+      if($component_content->getComponent()) {
+        $category_entity = $component_content->getComponent()->getCategoryEntity();
+      }
 
       $language = $this->languageManager->getCurrentLanguage()->getId();
       if ($component_content->hasTranslation($language)) {
@@ -500,7 +565,7 @@ class CohesionUtils {
       $components_content_data[$component_content->uuid()] = array_merge([
         'title' => $component_content->label(),
         'url' => $component_content->toUrl('edit-form')->toString(),
-        'category' => $component_content ? $category_entity->getClass() : FALSE,
+        'category' => $category_entity ? $category_entity->getClass() : FALSE,
       ]);
     }
 

@@ -57,7 +57,9 @@ class _0020EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
    * @param $json_values
    */
   private function updateHelpText($model, &$json_values) {
-    if ($model->getProperty(['settings', 'type']) == 'cohHelpText' && $model->getProperty(['model', 'value'])) {
+    $type_property = $model->getProperty(['settings', 'type']);
+    $value_property = $model->getProperty(['model', 'value']);
+    if ($type_property == 'cohHelpText' && $value_property) {
       $value = $model->getProperty(['model', 'value']);
       unset($json_values->model->{$model->getUUID()}->model->value);
       $json_values->model->{$model->getUUID()}->settings->options = new \stdClass();

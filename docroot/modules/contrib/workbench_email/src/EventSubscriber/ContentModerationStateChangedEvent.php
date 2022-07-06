@@ -2,8 +2,8 @@
 
 namespace Drupal\workbench_email\EventSubscriber;
 
+use Drupal\Component\EventDispatcher\Event;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Defines content moderation state change events.

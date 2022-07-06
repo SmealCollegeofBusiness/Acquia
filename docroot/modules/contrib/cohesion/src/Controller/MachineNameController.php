@@ -98,7 +98,8 @@ class MachineNameController extends CoreMachineNameController {
   }
 
   /**
-   * Given machine name input, get a unique machine name to avoid duplicate errors.
+   * Given machine name input, get a unique machine name to avoid
+   * duplicate errors.
    *
    * @param $input
    * @param $field_prefix

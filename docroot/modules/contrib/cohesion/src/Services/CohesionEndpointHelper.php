@@ -2,7 +2,7 @@
 
 namespace Drupal\cohesion\Services;
 
-use Drupal\Component\Serialization\Json;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
@@ -24,9 +24,17 @@ class CohesionEndpointHelper {
   protected $stringTranslation;
 
   /**
+   * The current user account.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $user;
+
+  /**
    * CohesionEndpointHelper constructor.
    */
-  public function __construct() {
+  public function __construct(AccountInterface $user) {
+    $this->user = $user;
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
     $this->stringTranslation = \Drupal::service('string_translation');
   }
@@ -39,14 +47,20 @@ class CohesionEndpointHelper {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function saveElement($values = [], $content = []) {
-    $types = [
-      'helper' => 'cohesion_helper',
-      'component' => 'cohesion_component',
-    ];
-    $content['json_values'] = Json::encode($content['json_values']);
+  public function saveElement(array $values = [], array $content = []) {
+
+    $types = [];
+
+    if ($this->user->hasPermission('administer helpers')) {
+      $types['helper'] = 'cohesion_helper';
+    }
+
+    if ($this->user->hasPermission('administer components')) {
+      $types['component'] = 'cohesion_component';
+    }
+
     // Determine entity_type_id (default helper).
-    $type = isset($content['type']) ? $content['type'] : NULL;
+    $type = $content['type'] ?? NULL;
     if (in_array($type, array_keys($types))) {
       $entity_type_id = $types[$type];
     }
@@ -54,6 +68,8 @@ class CohesionEndpointHelper {
       // Unsupported entity type.
       $error = TRUE;
       $message = $this->t('Unsupported entity type');
+
+      return [$error, $message];
     }
 
     // Create a machine name from the label.
@@ -73,7 +89,13 @@ class CohesionEndpointHelper {
 
     if ($storage->load($machine_name)) {
       $error = TRUE;
-      $message = $this->t('Failed to save @type with an automatically generated machine name of @machine_name. Please use a different title.', ['@type' => $type, '@machine_name' => $machine_name]);
+      $message = $this->t(
+        'Failed to save @type with an automatically generated machine name of @machine_name. Please use a different title.',
+        [
+          '@type' => $type,
+          '@machine_name' => $machine_name,
+        ]
+      );
     }
     else {
       list($error, $message) = $this->createElement($entity_type_id, $values, $machine_name);
@@ -105,7 +127,8 @@ class CohesionEndpointHelper {
         $default_category_id = $category_class::DEFAULT_CATEGORY_ID;
         $query = $this->entityTypeManager->getStorage($entity_type_id)->getQuery()->condition('category', $default_category_id, '=');
 
-        // if "default" category (uncategorized) not available create & set category.
+        // if "default" category (uncategorized) not available create and set
+        // category.
         if (!$query->execute()) {
           $category_storage = $this->entityTypeManager->getStorage($entity->getCategoryEntityTypeId());
           \Drupal::service('cohesion_elements.category_relationships')->createUncategorized($category_storage, $default_category_id);

@@ -7,6 +7,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use \Drupal\Tests\UnitTestCase;
 
@@ -33,8 +34,9 @@ class XssComponentFieldValuesTest extends UnitTestCase {
       ->method('getStorage')
       ->willReturn(FALSE);
     $language_manager = $this->createMock(LanguageManagerInterface::class);
+    $logger_factory = $this->createMock(LoggerChannelFactoryInterface::class);
 
-    $this->cohUtils = new \Drupal\cohesion\Services\CohesionUtils($theme_handler, $theme_manager, $entity_type_manager, $language_manager);
+    $this->cohUtils = new \Drupal\cohesion\Services\CohesionUtils($theme_handler, $theme_manager, $entity_type_manager, $language_manager, $logger_factory);
   }
 
   /**

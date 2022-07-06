@@ -202,13 +202,15 @@ class CohesionBaseForm extends EntityForm {
       $highlighted_elements = [];
 
       foreach ($this->jsonXss->buildXssPaths($form_state->getValue('json_values')) as $path => $new_value) {
-        // Only test if the user changed the value or it's a new value. If it's the same, no need to test.
+        // Only test if the user changed the value or it's a new value.
+        // If it's the same, no need to test.
         if (!isset($original_entity_xss_paths[$path]) || $original_entity_xss_paths[$path] !== $new_value) {
           // Drupal error.
           $form_state->setErrorByName('cohesion', $this->t('You do not have permission to add tags and attributes that fail XSS validation.'));
 
-          // So set the xss paths to the initial so the user has a chance to change something they've edited (otherwise
-          // the illegal value they've just entered will be detected as a XSS entry and disabled).
+          // So set the XSS paths to the initial so the user has a chance to
+          // change something they've edited otherwise the illegal value they've
+          // just entered will be detected as a XSS entry and disabled).
           $form['#attached']['drupalSettings']['cohesion']['xss_paths'] = $form_state->getTemporaryValue('xss_paths_entity');
 
           // Highlighted element.
@@ -228,7 +230,8 @@ class CohesionBaseForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state, $redirect = NULL) {
     // Set modified on save
-    // Only on form and not on entity as modified should be set upon user action not code.
+    // Only on form and not on entity as modified should be set upon user action
+    // not code.
     $this->entity->setModified();
 
     $status = parent::save($form, $form_state);
@@ -293,7 +296,8 @@ class CohesionBaseForm extends EntityForm {
   }
 
   /**
-   * Set the entity ID based on the machine_name field in the form or generate a random id if no machine_name field.
+   * Set the entity ID based on the machine_name field in the form or generate
+   * a random id if no machine_name field.
    *
    * @param $entity
    * @param $form_state
@@ -303,7 +307,8 @@ class CohesionBaseForm extends EntityForm {
     if ($machine_name = $form_state->getValue('machine_name')) {
       $entity->set('id', $this->entity->getEntityMachineNamePrefix() . $machine_name);
     }
-    // If form doesn't have a machine name field, generate a random id for the entity.
+    // If form doesn't have a machine name field, generate a random ID for the
+    // entity.
     else {
       $entity->set('id', implode('_', [
         hash('crc32b', $entity->uuid()),

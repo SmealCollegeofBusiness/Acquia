@@ -11,7 +11,8 @@ namespace Drupal\cohesion;
 interface EntityUpdateInterface {
 
   /**
-   * Return the name of the last entity update callback that was applied to this entity.
+   * Return the name of the last entity update callback that was applied
+   * to this entity.
    *
    * By \Drupal\cohesion\EntityUpdateManager.
    *
@@ -20,7 +21,8 @@ interface EntityUpdateInterface {
   public function getLastAppliedUpdate();
 
   /**
-   * Set the name of the last entity update callback that was applied to this entity.
+   * Set the name of the last entity update callback that was applied
+   * to this entity.
    *
    * @param $callback
    *

@@ -7,7 +7,7 @@ use Drupal\Core\Config\StorageComparer;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
- * Class ConfigFilterStorageFactoryTest.
+ * Tests the ConfigFilterStorageFactory.
  *
  * @group config_filter
  */
@@ -16,7 +16,7 @@ class ConfigFilterStorageFactoryTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'config_filter',
     'config_filter_test',

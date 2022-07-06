@@ -21,9 +21,14 @@ function cohesion_style_guide_form_system_theme_settings_alter(&$form, FormState
 
     $theme_id = $args[0];
 
-    // Check if the theme settings being edited are part of a theme with cohesion enabled.
+    // Check if the theme settings being edited are part of a theme with
+    // cohesion enabled.
     if (\Drupal::service('cohesion.utils')
       ->themeHasCohesionEnabled($theme_id)) {
+      if (Drupal::service('config.factory')->get('system.performance')->get('css.preprocess') === TRUE) {
+        Drupal::messenger()->addWarning('Please note, Style Guide preview is disabled as CSS aggregation is turned on.');
+        $form['#attached']['library'][] = 'cohesion_style_guide/hide-preview';
+      };
 
       $style_guide_manager_handler = Drupal::service('cohesion_style_guide.style_guide_handler');
       $form['#attached']['drupalSettings']['cohesion']['style_guides'] = $style_guide_manager_handler->getJsonDefinition();

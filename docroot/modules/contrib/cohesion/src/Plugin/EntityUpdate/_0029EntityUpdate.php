@@ -102,7 +102,8 @@ class _0029EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
   }
 
   /**
-   * Check the style mapper uuids in the mapper_style_uuids array against the model style uuids.
+   * Check the style mapper uuids in the mapper_style_uuids array against the
+   * model style uuids.
    * @param $entity
    * @param $json_values
    * @param $mapper_style_uuids
@@ -114,7 +115,7 @@ class _0029EntityUpdate extends PluginBase implements EntityUpdatePluginInterfac
       if (property_exists($json_values->model->{$model->getUUID()}, 'styles')) {
 
         foreach ($json_values->model->{$model->getUUID()}->styles as $uuid => $model_style) {
-          if (property_exists($model_style, 'styles') && $uuid !== 'styles') {
+          if (isset($model_style->styles) && $uuid !== 'styles') {
             // if the uuid doesn't exist in the mapper then unset.
             if(!in_array($uuid, $mapper_style_uuids)) {
               unset($json_values->model->{$model->getUUID()}->styles->$uuid);

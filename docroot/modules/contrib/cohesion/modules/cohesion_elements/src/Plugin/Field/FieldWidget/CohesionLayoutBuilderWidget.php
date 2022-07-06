@@ -98,8 +98,9 @@ class CohesionLayoutBuilderWidget extends WidgetBase implements ContainerFactory
       $layout_entity = $entity_storage->create();
     }
     else {
-      // If the form loads after node preview, there is already an entity attached with potentially modified values.
-      // Use that if possible, so we don't lose work in progress.
+      // If the form loads after node preview, there is already an entity
+      // attached with potentially modified values. Use that if possible, so we
+      // don't lose work in progress.
       if (isset($values[$delta]['entity']) && $values[$delta]['entity'] instanceof CohesionLayout) {
         $layout_entity = $values[$delta]['entity'];
       }
@@ -118,7 +119,8 @@ class CohesionLayoutBuilderWidget extends WidgetBase implements ContainerFactory
       ];
     }
 
-    // Set list of field to blank by default. Template form that inherit from this one will override the variable.
+    // Set list of field to blank by default. Template form that inherit from
+    // this one will override the variable.
     $language_none = \Drupal::languageManager()
       ->getLanguage(LanguageInterface::LANGCODE_NOT_APPLICABLE);
 
@@ -130,7 +132,8 @@ class CohesionLayoutBuilderWidget extends WidgetBase implements ContainerFactory
     // Add the shared attachments.
     _cohesion_shared_page_attachments($form);
 
-    // Override the 'access elements' permission depending on the field settings.
+    // Override the 'access elements' permission depending on the field
+    // settings.
     if ($this->getFieldSetting('access_elements') !== "1") {
       $form['#attached']['drupalSettings']['cohesion']['permissions'] = array_values(array_diff($form['#attached']['drupalSettings']['cohesion']['permissions'], ['access elements']));
     }
@@ -290,7 +293,8 @@ class CohesionLayoutBuilderWidget extends WidgetBase implements ContainerFactory
     // Xss validation.
     if (!$this->jsonXss->userCanBypass()) {
       foreach ($this->jsonXss->buildXssPaths($json) as $path => $new_value) {
-        // Only test if the user changed the value or it's a new value. If it's the same, no need to test.
+        // Only test if the user changed the value or it's a new value. If it's
+        // the same, no need to test.
         if (!isset($this->xss_paths[$path]) || $this->xss_paths[$path] !== $new_value) {
           $form_state->setError($element, $this->t('You do not have permission to add tags and attributes that fail XSS validation.'));
         }

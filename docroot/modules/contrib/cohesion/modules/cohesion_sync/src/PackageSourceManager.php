@@ -2,14 +2,13 @@
 
 namespace Drupal\cohesion_sync;
 
+use Drupal\cohesion_sync\Exception\SourceServiceNotFoundException;
 use Drupal\cohesion_sync\Services\PackageSourceServiceInterface;
 
 /**
  * Sitestudio package source service collector and manager.
  */
 class PackageSourceManager {
-
-  const SERVICE_NOT_FOUND_ERROR = 'Service for handling "%s" source type not found.';
 
   /**
    * An unsorted array of arrays of active sitestudio package source services.
@@ -20,6 +19,13 @@ class PackageSourceManager {
    * @var \Drupal\cohesion_sync\Services\PackageSourceServiceInterface[][]
    */
   protected $services = [];
+
+  /**
+   * Unsorted array of source service ids available.
+   *
+   * @var array
+   */
+  protected $serviceIds = [];
 
   /**
    * An array of sitestudio package source services, sorted by priority.
@@ -40,8 +46,9 @@ class PackageSourceManager {
    *
    * @return $this
    */
-  public function addSourceService(PackageSourceServiceInterface $service, int $priority = 0): self {
+  public function addSourceService(PackageSourceServiceInterface $service, string $id, int $priority = 0): self {
     $this->services[$priority][] = $service;
+    $this->serviceIds[] = $service->getSupportedType();
 
     $this->sortedServices = NULL;
 
@@ -56,6 +63,8 @@ class PackageSourceManager {
    *
    * @return \Drupal\cohesion_sync\Services\PackageSourceServiceInterface
    *   Package Source service or NULL if no matching service found.
+   *
+   * @throws \Drupal\cohesion_sync\Exception\SourceServiceNotFoundException
    */
   public function getSourceService(string $type): PackageSourceServiceInterface {
     if ($this->sortedServices === NULL) {
@@ -69,7 +78,7 @@ class PackageSourceManager {
     }
 
     if (!isset($service)) {
-      throw new \Exception(sprintf(self::SERVICE_NOT_FOUND_ERROR, $type));
+      throw new SourceServiceNotFoundException($type, $this->serviceIds);
     }
 
     return $service;

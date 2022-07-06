@@ -9,8 +9,8 @@ use Drupal\Component\Serialization\Json;
 /**
  * Class SCSSVariableEntityGroups.
  *
- * This handles loading and saving back combined SCSS Variable entities with single
- * JSON object.
+ * This handles loading and saving back combined SCSS Variable entities with
+ * single JSON object.
  *
  * @package Drupal\cohesion_website_settings\Plugin\EntiyGroups
  *
@@ -157,7 +157,8 @@ class SCSSVariableEntityGroups extends EntityGroupsPluginBase {
       $merged_variables[$weight] = $json_values;
     }
 
-    // Remove the object keys (Angular expects the SCSS variables list to be an array).
+    // Remove the object keys (Angular expects the SCSS variables list to be an
+    // array).
     ksort($merged_variables);
     $merged_variables = array_values($merged_variables);
 

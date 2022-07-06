@@ -32,6 +32,16 @@ class AccountSettingsForm extends ConfigFormBase {
 
     // Only show the api key and agency key if this is NOT a sandbox site.
     if (!Settings::get('dx8_no_api_keys', FALSE)) {
+      if (is_null($config->get('api_key')) || $config->get('api_key') === '') {
+        $message = $this->t('Looking to try Site Studio? Visit <a href=":site-studio-page" target="_blank">Acquia.com</a> to get a sandbox or 30 day trial credentials.', [':site-studio-page' => 'https://www.acquia.com/products/drupal-cloud/site-studio']);
+        $form['cta_message'] = [
+          '#theme' => 'status_messages',
+          '#message_list' => [
+            'status' => [$message],
+          ],
+        ];
+      }
+
       $form['api_key'] = [
         '#type' => 'textfield',
         '#title' => $this->t('API key'),

@@ -97,7 +97,8 @@ class TemplatesApi extends ApiPluginBase {
         if (is_array($this->content_hashes)) {
           foreach ($this->content_hashes as $hash => $string) {
 
-            // Make sure all single quotes are escaped in single quoted values (unescape all then escape all)
+            // Make sure all single quotes are escaped in single quoted values
+            // (unescape all then escape all).
             if (strpos($template_values['twig'], "'" . $hash . "'") !== FALSE) {
               $string = str_replace("\'", "'", $string);
               $string = str_replace("'", "\'", $string);
@@ -144,7 +145,8 @@ class TemplatesApi extends ApiPluginBase {
       $this->data->settings->isPreview = $this->is_preview;
     }
 
-    // Search through the JSON model and turn tokens into: [token.*|context|context]
+    // Search through the JSON model and turn tokens
+    // into: [token.*|context|context].
     // String replace any raw content so the API doesn't see any sensitive data.
     $layoutCanvas->prepareDataForAPI($this->isPreview());
     $this->content_hashes = $layoutCanvas->getContentHashed();
@@ -182,28 +184,35 @@ class TemplatesApi extends ApiPluginBase {
           return FALSE;
         }
 
-        // Store each template in an array to determine whether they are all unique.
+        // Store each template in an array to determine whether they are all
+        // unique.
         $templates[] = $response['template'];
       }
     }
 
     if ($this->getSaveData() && !empty($templates)) {
       $templates = array_unique($templates);
-      // If each template are the same, none are theme specific (theme specific template are created to have variations base on style guide manager tokens)
+      // If each template are the same, none are theme specific (theme specific
+      // template are created to have variations base on style guide manager
+      // tokens).
       // Only one template has to be saved as it will work for all themes
       if (count($templates) == 1) {
-        // Save the unique template and remove any theme specific template that might have been saved if the template contained style guide manager values.
+        // Save the unique template and remove any theme specific template that
+        // might have been saved if the template contained style guide manager
+        // values.
         $this->saveResponseTemplate($templates[0]);
         $this->entity->removeThemeSpecificTemplates();
       }
       else {
-        // Remove all theme global twig if any and no theme are set to generate template only.
+        // Remove all theme global twig if any and no theme are set to generate
+        // template only.
         $this->entity->removeGlobalTemplate();
 
         foreach ($this->getData() as $response) {
           if (isset($response['template']) && isset($response['themeName'])) {
             if ($response['themeName'] == 'coh-generic-theme') {
-              // If one or more themes are set to generate templates, save a global template for these themes to use.
+              // If one or more themes are set to generate templates, save a
+              // global template for these themes to use.
               $this->saveResponseTemplate($response['template']);
             }
             else {

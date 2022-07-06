@@ -6,11 +6,8 @@
   <exclude-pattern>/e2e-tests/*</exclude-pattern>
   <exclude-pattern>*/tests/src/*</exclude-pattern>
   <rule ref="AcquiaDrupalStrict">
-    <exclude name="Drupal.Files.LineLength"/>
-    <exclude name="Drupal.WhiteSpace.ScopeIndent"/>
     <exclude name="Drupal.Commenting.FunctionComment"/>
     <exclude name="Drupal.Commenting.DocComment"/>
-    <exclude name="Drupal.Arrays.Array"/>
     <exclude name="Drupal.NamingConventions.ValidFunctionName"/>
     <exclude name="Drupal.NamingConventions.ValidClassName"/>
     <exclude name="Drupal.NamingConventions.ValidVariableName"/>
