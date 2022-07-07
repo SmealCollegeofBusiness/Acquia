@@ -1,0 +1,24 @@
+jsonapi_menu_test.user.login:
+  title: 'Login'
+  menu_name: jsonapi-menu-items-test
+  description: 'Login.'
+  route_name: user.login
+jsonapi_menu_test.user.logout:
+  title: 'Logout'
+  menu_name: jsonapi-menu-items-test
+  description: 'Logout.'
+  route_name: user.logout
+  parent: jsonapi_menu_test.open
+jsonapi_menu_test.open:
+  title: 'Home'
+  menu_name: jsonapi-menu-items-test
+  description: 'Home.'
+  route_name: menu_test.menu_name_test
+  weight: -10
+jsonapi_menu_test.user.logout.disabled:
+  title: 'Logout (disabled)'
+  menu_name: jsonapi-menu-items-test
+  description: 'Logout.'
+  route_name: user.logout
+  enabled: 0
+  parent: jsonapi_menu_test.open

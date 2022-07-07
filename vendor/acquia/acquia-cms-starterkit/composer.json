@@ -1,0 +1,71 @@
+{
+    "name": "acquia/acquia-cms-starterkit",
+    "type": "project",
+    "description": "Acquia CMS starterkit cli command.",
+    "keywords": [
+        "cli",
+        "console",
+        "drupal",
+        "acquia_cms",
+        "starterkit"
+    ],
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Acquia Engineering",
+            "homepage": "https://www.acquia.com",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Vishal Khode",
+            "email": "vishal.khode@acquia.com",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "acquia/drupal-environment-detector": "^1.4",
+        "composer/composer": "^2.2",
+        "stecman/symfony-console-completion": "^0.10.1",
+        "symfony/config": "^4.1",
+        "symfony/console": "^4.1",
+        "symfony/dependency-injection": "^4.1",
+        "symfony/http-client": "^4.1",
+        "symfony/http-kernel": "^4.1",
+        "symfony/process": "^4.1",
+        "symfony/yaml": "^4.1"
+    },
+    "require-dev": {
+        "acquia/coding-standards": "^1.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
+        "ergebnis/composer-normalize": "~2.15.0",
+        "phpro/grumphp-shim": "^1.5",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "phpstan/phpstan": "^1.5",
+        "phpunit/phpunit": "^9"
+    },
+    "config": {
+        "allow-plugins": {
+            "cweagans/composer-patches": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "ergebnis/composer-normalize": true,
+            "phpro/grumphp-shim": true,
+            "webdriver-binary/binary-chromedriver": true
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "AcquiaCMS\\Cli\\": "src/"
+        }
+    },
+    "repositories": {
+        "assets": {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "bin": [
+        "bin/acms"
+    ]
+}

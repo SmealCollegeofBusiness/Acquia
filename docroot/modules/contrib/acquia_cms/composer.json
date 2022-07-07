@@ -1,0 +1,166 @@
+{
+    "name": "acquia/acquia_cms",
+    "type": "drupal-module",
+    "description": "An implementation of Drupal 9 for running custom, low code websites on the Acquia platform.",
+    "homepage": "https://github.com/acquia/acquia_cms",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Michael Sherron",
+            "email": "michael.sherron@acquia.com",
+            "role": "Author"
+        },
+        {
+            "name": "Acquia Engineering",
+            "email": "engineering@acquia.org",
+            "role": "Maintainer"
+        }
+    ],
+    "require": {
+        "acquia/acquia-cms-starterkit": "^1.0",
+        "drupal/acquia_claro": "^1.3.2",
+        "drupal/acquia_cms_audio": "^1.3.2",
+        "drupal/acquia_cms_component": "^1.3.1",
+        "drupal/acquia_cms_headless": "^1.3@beta",
+        "drupal/acquia_cms_site_studio": "~1.3.6",
+        "drupal/acquia_cms_starter": "^1.3.0",
+        "drupal/acquia_cms_toolbar": "^1.3.3",
+        "drupal/acquia_cms_tour": "^2.0.0",
+        "drush/drush": "^10 || ^11",
+        "ergebnis/composer-normalize": "^2.9"
+    },
+    "require-dev": {
+        "acquia/coding-standards": "^0.7.0",
+        "axelerant/drupal-quality-checker": "^1.1",
+        "drupal/core-composer-scaffold": "^9.0.0",
+        "drupal/core-dev": "^9",
+        "friendsoftwig/twigcs": "^4.0",
+        "oomphinc/composer-installers-extender": "^1.1 || ^2",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "phpunit/phpunit": "~9.4.0 || ~9.5.0",
+        "weitzman/drupal-test-traits": "^1.5"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "cweagans/composer-patches": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "drupal/core-composer-scaffold": true,
+            "ergebnis/composer-normalize": true,
+            "oomphinc/composer-installers-extender": true,
+            "phpro/grumphp-shim": true,
+            "webdriver-binary/binary-chromedriver": true
+        },
+        "preferred-install": {
+            "drupal/core": "dist"
+        },
+        "process-timeout": 0,
+        "sort-packages": true
+    },
+    "extra": {
+        "drupal-scaffold": {
+            "allowed-packages": [
+                "drupal/core"
+            ],
+            "file-mapping": {
+                "[project-root]/.editorconfig": false,
+                "[project-root]/.gitattributes": false,
+                "[web-root]/.csslintrc": false,
+                "[web-root]/INSTALL.txt": false,
+                "[web-root]/drush/drush.yml": "drush/drush.yml",
+                "[web-root]/example.gitignore": false,
+                "[web-root]/modules/README.txt": false,
+                "[web-root]/profiles/README.txt": false,
+                "[web-root]/robots.txt": false,
+                "[web-root]/sites/README.txt": false,
+                "[web-root]/sites/default/default.settings.php": {
+                    "append": "./patches/d9-acms-settings.patch"
+                },
+                "[web-root]/themes/README.txt": false,
+                "[web-root]/themes/contrib/cohesion-theme/templates/maintenance-page.html.twig": "./patches/maintenance-page.patch",
+                "[web-root]/web.config": false
+            },
+            "locations": {
+                "project-root": ".",
+                "web-root": "./docroot"
+            }
+        },
+        "enable-patching": true,
+        "installer-paths": {
+            "docroot/core": [
+                "type:drupal-core"
+            ],
+            "docroot/libraries/{$name}": [
+                "type:drupal-library",
+                "type:bower-asset",
+                "type:npm-asset"
+            ],
+            "docroot/modules/contrib/{$name}": [
+                "type:drupal-module"
+            ],
+            "docroot/profiles/contrib/{$name}": [
+                "type:drupal-profile"
+            ],
+            "docroot/themes/contrib/{$name}": [
+                "type:drupal-theme"
+            ]
+        },
+        "installer-types": [
+            "bower-asset",
+            "npm-asset"
+        ],
+        "patchLevel": {
+            "drupal/core": "-p2"
+        },
+        "patches": {}
+    },
+    "autoload": {
+        "psr-4": {
+            "Acquia\\Utility\\": "src/Utility"
+        },
+        "classmap": [
+            "src/Composer/ConfigureProject.php"
+        ]
+    },
+    "repositories": {
+        "drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "pre-update-cmd": [
+            "@putenv COMPOSER_MEMORY_LIMIT=2G"
+        ],
+        "post-update-cmd": [
+            "Composer\\Config::disableProcessTimeout",
+            "if [ \"$PIPELINE_ENV\" != \"true\" ]; then composer build:local; fi;"
+        ],
+        "acms:install": [
+            "bash install-acms"
+        ],
+        "build:frontend": [
+            "Composer\\Config::disableProcessTimeout",
+            "cd docroot/themes/contrib/acquia_claro && npm run build"
+        ],
+        "build:local": [
+            "cp -f phpunit.xml ./docroot/core"
+        ],
+        "cohesion:fixture": [
+            "@putenv FILES_DIR=./docroot/sites/default/files",
+            "drush config:export --yes --quiet --destination $TMPDIR/cex",
+            "mkdir -p $FILES_DIR/cohesion/config",
+            "cp -f $TMPDIR/cex/cohesion_* $FILES_DIR/cohesion/config",
+            "tar -c -z -f ./tests/cohesion.tar.gz --directory $FILES_DIR cohesion",
+            "rm -rf $TMPDIR/cex"
+        ],
+        "configure-tarball": "Drupal\\acquia_cms\\Composer\\ConfigureProject::execute",
+        "install:frontend": [
+            "Composer\\Config::disableProcessTimeout",
+            "cd docroot/themes/contrib/acquia_claro && npm install"
+        ],
+        "nuke": "rm -r -f docroot vendor"
+    }
+}

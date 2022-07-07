@@ -4,7 +4,7 @@
     "description": "An implementation of Acquia CMS for running in Acquia Cloud Site Factory.",
     "license": "GPL-2.0-or-later",
     "require": {
-        "acquia/acquia_cms": "^1.0",
+        "acquia/acquia_cms": "^2.0",
         "acquia/blt": "^12.4",
         "drupal/core": "^9.0",
         "drupal/core-composer-scaffold": "^9.0.0",
@@ -14,7 +14,6 @@
         "swichers/acsf-client": "dev-develop",
         "acquia/blt-acsf": "^1.0"
     },
-    "require-dev": {},
     "extra": {
         "drupal-scaffold": {
             "allowed-packages": [
@@ -68,11 +67,7 @@
         "patchLevel": {
             "drupal/core": "-p2"
         },
-        "patches": {
-          "acquia/acquia_cms": {
-            "Auto switch profile from Acquia CMS to minimal": "https://gist.githubusercontent.com/chandan-singh7929/9018a3537dfe2191927aad1d72b1211f/raw/073a303f981272eee3690039ee56795a10c57a14/profile_switch_in_sf_acms.patch"
-          }
-        }
+        "patches": {}
     },
     "autoload": {},
     "repositories": {

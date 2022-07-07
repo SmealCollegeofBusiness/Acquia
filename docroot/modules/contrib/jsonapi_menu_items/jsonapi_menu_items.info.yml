@@ -1,0 +1,13 @@
+name: 'JSON:API Menu items'
+description: Adds a JSON API resource for menu items.
+type: module
+core_version_requirement: ^8.8 || ^9
+dependencies:
+  - drupal:menu_link_content
+  - jsonapi_hypermedia:jsonapi_hypermedia
+  - jsonapi_resources:jsonapi_resources
+
+# Information added by Drupal.org packaging script on 2022-07-06
+version: '1.2.3'
+project: 'jsonapi_menu_items'
+datestamp: 1657144497

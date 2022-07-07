@@ -5,6 +5,12 @@
   padding-top: 30px;
   padding-bottom: 30px;
 }
+.tour-dashboard-table th {
+  text-align: center;
+}
+.tour-dashboard-table td {
+  text-align: center;
+}
 .acms-welcome-modal.ui-dialog .ui-dialog-titlebar {
   padding: 0;
   color: #fff;
@@ -122,16 +128,19 @@
 .section-top .help-text {
   width: 80%;
 }
-.section-top .wizard {
+.section-top .starter-wizard, .section-top .wizard {
+  right: 2.5rem;
   position: absolute;
-  right: 2.75rem;
+}
+.section-top .starter-wizard + .wizard {
+  right: 11.5rem;
 }
 
 @media screen and (max-width: 767px) {
   .section-top {
     flex-direction: column;
   }
-  .section-top .wizard {
+  .section-top .wizard, .section-top .starter-wizard {
     position: inherit;
   }
 }

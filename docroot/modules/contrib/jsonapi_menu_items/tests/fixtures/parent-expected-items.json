@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "type": "menu_link_content--menu_link_content",
+      "id": "jsonapi_menu_test.user.logout",
+      "attributes": {
+        "description": "Logout.",
+        "enabled": true,
+        "expanded": false,
+        "menu_name": "jsonapi-menu-items-test",
+        "meta": [],
+        "options": [],
+        "parent": "jsonapi_menu_test.open",
+        "provider": "jsonapi_menu_items_test",
+        "route": {
+          "name": "user.logout",
+          "parameters": []
+        },
+        "title": "Logout",
+        "url": "%base_pathuser\/logout",
+        "weight": "0"
+      }
+    }
+  ]
+}

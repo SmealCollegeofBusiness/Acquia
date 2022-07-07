@@ -109,11 +109,21 @@ final class DashboardController extends ControllerBase {
     ];
     $total = 0;
     $completed = 0;
-
+    $existing_site_acquia_cms = $this->state->get('existing_site_acquia_cms', FALSE);
+    $show_starter_kit_modal = \Drupal::request()->get('show_starter_kit_modal') ?? FALSE;
     $show_welcome_dialog = $this->state->get('show_welcome_modal', TRUE);
     $show_wizard_modal = $this->state->get('show_wizard_modal', TRUE);
     $wizard_completed = $this->state->get('wizard_completed', FALSE);
+    $starter_kit_wizard_completed = $this->state->get('starter_kit_wizard_completed', FALSE);
+    $starter_kit = $this->state->get('starter_kit', FALSE);
+    $selected_starter_kit = $this->state->get('acquia_cms.starter_kit');
+    $hide_starter_kit_intro_dialog = $this->state->get('hide_starter_kit_intro_dialog');
+    $starter_link_url = Url::fromRoute('acquia_cms_tour.starter_kit_welcome_modal_form');
     $link_url = Url::fromRoute('acquia_cms_tour.welcome_modal_form');
+    $service = \Drupal::service('acquia_cms_tour.starter_kit');
+    $acquia_cms_enterprise_low_code = $service->getMissingModules('acquia_cms_enterprise_low_code');
+    $acquia_cms_community = $service->getMissingModules('acquia_cms_community');
+    $acquia_cms_headless = $service->getMissingModules('acquia_cms_headless');
     if (!$show_welcome_dialog) {
       $link_url = Url::fromRoute('acquia_cms_tour.installation_wizard');
     }
@@ -133,6 +143,30 @@ final class DashboardController extends ControllerBase {
         ]),
       ],
     ]);
+    if(!$existing_site_acquia_cms && !$starter_kit_wizard_completed){
+      $starter_link_url->setOptions([
+        'attributes' => [
+          'class' => [
+            'use-ajax',
+            'button',
+            'button--secondary',
+            'button--small',
+            'acms-starterkit-modal-form',
+          ],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => Json::encode([
+            'width' => 912,
+            'dialogClass' => 'acms-starter-kit-wizard',
+          ]),
+        ],
+      ]);
+      $form['starter_modal_link'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Starter kit set-up'),
+        '#url' => $starter_link_url,
+      ];
+      $form['starter_kit_wizard_completed'] = $starter_kit_wizard_completed;
+    }
 
     // Delegate building each section using plugin class.
     foreach ($this->acquiaCmsTourManager->getDefinitions() as $definition) {
@@ -145,6 +179,7 @@ final class DashboardController extends ControllerBase {
         }
       }
     }
+
     if ($total > 0) {
       $form['help_text'] = [
         '#type' => 'markup',
@@ -156,7 +191,7 @@ final class DashboardController extends ControllerBase {
       ];
       $form['modal_link'] = [
         '#type' => 'link',
-        '#title' => 'Wizard set-up',
+        '#title' => $this->t('Wizard set-up'),
         '#url' => $link_url,
       ];
     }
@@ -178,7 +213,14 @@ final class DashboardController extends ControllerBase {
       ],
       'drupalSettings' => [
         'show_wizard_modal' => $show_wizard_modal,
+        'hide_starter_kit_wizard_modal' => $hide_starter_kit_intro_dialog,
         'wizard_completed' => $wizard_completed,
+        'selected_starter_kit' => $selected_starter_kit,
+        'show_starter_kit_modal' => $show_starter_kit_modal,
+        'existing_site_acquia_cms' => $existing_site_acquia_cms,
+        'acquia_cms_enterprise_low_code' => $acquia_cms_enterprise_low_code,
+        'acquia_cms_community' => $acquia_cms_community,
+        'acquia_cms_headless' => $acquia_cms_headless,
       ],
     ];
     return $build;

@@ -1,0 +1,5 @@
+id: jsonapi-menu-items-test
+label: JSON:API menu items test menu
+description: 'Test menu'
+langcode: en
+locked: true

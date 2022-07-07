@@ -1,0 +1,48 @@
+{
+  "data": [
+    {
+      "type": "menu_link_content--menu_link_content",
+      "id": "menu_link_content:%uuid",
+      "attributes": {
+        "description": null,
+        "enabled": true,
+        "expanded": false,
+        "menu_name": "jsonapi-menu-items-test",
+        "meta": {
+          "entity_id": "1"
+        },
+        "options": [],
+        "parent": "jsonapi_menu_test.user.login",
+        "provider": "menu_link_content",
+        "route": {
+          "name": "menu_test.menu_callback_title",
+          "parameters": []
+        },
+        "title": "%title",
+        "url": "%base_pathmenu_callback_title",
+        "weight": "0"
+      }
+    },
+    {
+      "type": "menu_link_content--menu_link_content",
+      "id": "jsonapi_menu_test.user.logout",
+      "attributes": {
+        "description": "Logout.",
+        "enabled": true,
+        "expanded": false,
+        "menu_name": "jsonapi-menu-items-test",
+        "meta": [],
+        "options": [],
+        "parent": "jsonapi_menu_test.open",
+        "provider": "jsonapi_menu_items_test",
+        "route": {
+          "name": "user.logout",
+          "parameters": []
+        },
+        "title": "Logout",
+        "url": "%base_pathuser\/logout",
+        "weight": "0"
+      }
+    }
+  ]
+}
