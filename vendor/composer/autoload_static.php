@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8
+class ComposerStaticInit589ee8aac5173a94cd6902b52d8228c4
 {
     public static $files = array (
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
@@ -1854,6 +1854,7 @@ class ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8
         'Composer\\Plugin\\Capability\\CommandProvider' => __DIR__ . '/..' . '/composer/composer/src/Composer/Plugin/Capability/CommandProvider.php',
         'Composer\\Plugin\\Capable' => __DIR__ . '/..' . '/composer/composer/src/Composer/Plugin/Capable.php',
         'Composer\\Plugin\\CommandEvent' => __DIR__ . '/..' . '/composer/composer/src/Composer/Plugin/CommandEvent.php',
+        'Composer\\Plugin\\PluginBlockedException' => __DIR__ . '/..' . '/composer/composer/src/Composer/Plugin/PluginBlockedException.php',
         'Composer\\Plugin\\PluginEvents' => __DIR__ . '/..' . '/composer/composer/src/Composer/Plugin/PluginEvents.php',
         'Composer\\Plugin\\PluginInterface' => __DIR__ . '/..' . '/composer/composer/src/Composer/Plugin/PluginInterface.php',
         'Composer\\Plugin\\PluginManager' => __DIR__ . '/..' . '/composer/composer/src/Composer/Plugin/PluginManager.php',
@@ -8620,7 +8621,7 @@ class ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8
         'drupol\\phposinfo\\Enum\\OsName' => __DIR__ . '/..' . '/drupol/phposinfo/src/Enum/OsName.php',
         'drupol\\phposinfo\\OsInfo' => __DIR__ . '/..' . '/drupol/phposinfo/src/OsInfo.php',
         'drupol\\phposinfo\\OsInfoInterface' => __DIR__ . '/..' . '/drupol/phposinfo/src/OsInfoInterface.php',
-        'geoPHP' => __DIR__ . '/..' . '/phayes/geophp/geoPHP.inc',
+        'geoPHP' => __DIR__ . '/..' . '/itamair/geophp/geoPHP.inc',
         'lsolesen\\pel\\Pel' => __DIR__ . '/..' . '/lsolesen/pel/src/Pel.php',
         'lsolesen\\pel\\PelCanonMakerNotes' => __DIR__ . '/..' . '/lsolesen/pel/src/PelCanonMakerNotes.php',
         'lsolesen\\pel\\PelConvert' => __DIR__ . '/..' . '/lsolesen/pel/src/PelConvert.php',
@@ -8722,11 +8723,11 @@ class ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit97a0a18d8e78b1329dc3dc1b00d3f2a8::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit589ee8aac5173a94cd6902b52d8228c4::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit589ee8aac5173a94cd6902b52d8228c4::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit589ee8aac5173a94cd6902b52d8228c4::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit589ee8aac5173a94cd6902b52d8228c4::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit589ee8aac5173a94cd6902b52d8228c4::$classMap;
 
         }, null, ClassLoader::class);
     }

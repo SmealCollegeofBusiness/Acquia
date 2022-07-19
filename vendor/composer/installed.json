@@ -1294,17 +1294,17 @@
         },
         {
             "name": "composer/composer",
-            "version": "2.2.16",
-            "version_normalized": "2.2.16.0",
+            "version": "2.2.17",
+            "version_normalized": "2.2.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/composer.git",
-                "reference": "8c0ee53ff67399b0eec4eee2c5dc5189ec6938a6"
+                "reference": "a8ab5070fb99396e4710baee286478ad697724c2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/composer/zipball/8c0ee53ff67399b0eec4eee2c5dc5189ec6938a6",
-                "reference": "8c0ee53ff67399b0eec4eee2c5dc5189ec6938a6",
+                "url": "https://api.github.com/repos/composer/composer/zipball/a8ab5070fb99396e4710baee286478ad697724c2",
+                "reference": "a8ab5070fb99396e4710baee286478ad697724c2",
                 "shasum": ""
             },
             "require": {
@@ -1334,7 +1334,7 @@
                 "ext-zip": "Enabling the zip extension allows you to unzip archives",
                 "ext-zlib": "Allow gzip compression of HTTP requests"
             },
-            "time": "2022-07-05T14:50:29+00:00",
+            "time": "2022-07-13T13:27:38+00:00",
             "bin": [
                 "bin/composer"
             ],
@@ -1376,7 +1376,7 @@
             "support": {
                 "irc": "ircs://irc.libera.chat:6697/composer",
                 "issues": "https://github.com/composer/composer/issues",
-                "source": "https://github.com/composer/composer/tree/2.2.16"
+                "source": "https://github.com/composer/composer/tree/2.2.17"
             },
             "funding": [
                 {
@@ -3815,18 +3815,18 @@
         },
         {
             "name": "drupal/acquia_cms_page",
-            "version": "1.3.4",
-            "version_normalized": "1.3.4.0",
+            "version": "1.3.5",
+            "version_normalized": "1.3.5.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/acquia_cms_page.git",
-                "reference": "1.3.4"
+                "reference": "1.3.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/acquia_cms_page-1.3.4.zip",
-                "reference": "1.3.4",
-                "shasum": "d5d49b5585d1a893270251a5750c0a94b558ab97"
+                "url": "https://ftp.drupal.org/files/projects/acquia_cms_page-1.3.5.zip",
+                "reference": "1.3.5",
+                "shasum": "b78cf481331cc02e4ec1abb398bc1fc339cb2f06"
             },
             "require": {
                 "drupal/acquia_cms_image": "^1.3.5",
@@ -3837,8 +3837,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "1.3.4",
-                    "datestamp": "1655450549",
+                    "version": "1.3.5",
+                    "datestamp": "1657385180",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "Project has not opted into security advisory coverage!"
@@ -4506,10 +4506,6 @@
             ],
             "authors": [
                 {
-                    "name": "EclipseGc",
-                    "homepage": "https://www.drupal.org/user/61203"
-                },
-                {
                     "name": "abarrios",
                     "homepage": "https://www.drupal.org/user/109765"
                 },
@@ -4528,6 +4524,10 @@
                 {
                     "name": "attilatilman",
                     "homepage": "https://www.drupal.org/user/3528404"
+                },
+                {
+                    "name": "EclipseGc",
+                    "homepage": "https://www.drupal.org/user/61203"
                 },
                 {
                     "name": "japerry",
@@ -5347,27 +5347,27 @@
         },
         {
             "name": "drupal/autologout",
-            "version": "1.3.0",
-            "version_normalized": "1.3.0.0",
+            "version": "1.4.0",
+            "version_normalized": "1.4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/autologout.git",
-                "reference": "8.x-1.3"
+                "reference": "8.x-1.4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/autologout-8.x-1.3.zip",
-                "reference": "8.x-1.3",
-                "shasum": "87733b2042d9dcdee0d8f33d206872208a8c97ea"
+                "url": "https://ftp.drupal.org/files/projects/autologout-8.x-1.4.zip",
+                "reference": "8.x-1.4",
+                "shasum": "f751062f463d0b52df81764f67cee3a0be97825e"
             },
             "require": {
-                "drupal/core": "^8 || ^9"
+                "drupal/core": "^9.2 || ^10"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.3",
-                    "datestamp": "1587193798",
+                    "version": "8.x-1.4",
+                    "datestamp": "1658168199",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -5377,16 +5377,16 @@
             "installation-source": "dist",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0+"
+                "GPL-2.0-or-later"
             ],
             "authors": [
                 {
-                    "name": "AjK",
-                    "homepage": "https://www.drupal.org/user/39030"
-                },
-                {
                     "name": "AjitS",
                     "homepage": "https://www.drupal.org/user/981944"
+                },
+                {
+                    "name": "AjK",
+                    "homepage": "https://www.drupal.org/user/39030"
                 },
                 {
                     "name": "boshtian",
@@ -5399,6 +5399,10 @@
                 {
                     "name": "darksnow",
                     "homepage": "https://www.drupal.org/user/391915"
+                },
+                {
+                    "name": "japerry",
+                    "homepage": "https://www.drupal.org/user/45640"
                 },
                 {
                     "name": "johnennew",
@@ -5555,6 +5559,10 @@
                     "name": "Travis Carden",
                     "homepage": "https://www.drupal.org/user/236758",
                     "email": "travis.carden@gmail.com"
+                },
+                {
+                    "name": "VladimirAus",
+                    "homepage": "https://www.drupal.org/user/673120"
                 }
             ],
             "description": "Provides an API for creating fillable, persistent checklists.",
@@ -5876,27 +5884,27 @@
         },
         {
             "name": "drupal/consumers",
-            "version": "1.12.0",
-            "version_normalized": "1.12.0.0",
+            "version": "1.13.0",
+            "version_normalized": "1.13.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/consumers.git",
-                "reference": "8.x-1.12"
+                "reference": "8.x-1.13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/consumers-8.x-1.12.zip",
-                "reference": "8.x-1.12",
-                "shasum": "c81a7533d3892288becd780f598afbac4665014e"
+                "url": "https://ftp.drupal.org/files/projects/consumers-8.x-1.13.zip",
+                "reference": "8.x-1.13",
+                "shasum": "6cb3a738e09698c539c0cf77c651fe4384eb359f"
             },
             "require": {
-                "drupal/core": "^8 || ^9"
+                "drupal/core": "^8 || ^9 || ^10"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.12",
-                    "datestamp": "1646690558",
+                    "version": "8.x-1.13",
+                    "datestamp": "1657809825",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -5927,17 +5935,17 @@
         },
         {
             "name": "drupal/core",
-            "version": "9.4.1",
-            "version_normalized": "9.4.1.0",
+            "version": "9.4.2",
+            "version_normalized": "9.4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "81489e8f0d5fdcd5d502b561f0f8cdf5ccdda614"
+                "reference": "5a4d6acc99e279f70a914804ff3dd08111707de1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/81489e8f0d5fdcd5d502b561f0f8cdf5ccdda614",
-                "reference": "81489e8f0d5fdcd5d502b561f0f8cdf5ccdda614",
+                "url": "https://api.github.com/repos/drupal/core/zipball/5a4d6acc99e279f70a914804ff3dd08111707de1",
+                "reference": "5a4d6acc99e279f70a914804ff3dd08111707de1",
                 "shasum": ""
             },
             "require": {
@@ -6108,7 +6116,7 @@
                 "drupal/workflows": "self.version",
                 "drupal/workspaces": "self.version"
             },
-            "time": "2022-06-21T20:53:48+00:00",
+            "time": "2022-07-07T01:18:39+00:00",
             "type": "drupal-core",
             "extra": {
                 "drupal-scaffold": {
@@ -6188,14 +6196,14 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/9.4.1"
+                "source": "https://github.com/drupal/core/tree/9.4.2"
             },
             "install-path": "../../docroot/core"
         },
         {
             "name": "drupal/core-composer-scaffold",
-            "version": "9.4.1",
-            "version_normalized": "9.4.1.0",
+            "version": "9.4.2",
+            "version_normalized": "9.4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-composer-scaffold.git",
@@ -6241,7 +6249,7 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-composer-scaffold/tree/9.4.1"
+                "source": "https://github.com/drupal/core-composer-scaffold/tree/9.4.2"
             },
             "install-path": "../drupal/core-composer-scaffold"
         },
@@ -6942,20 +6950,20 @@
                     "homepage": "https://www.drupal.org/node/2348769/committers"
                 },
                 {
-                    "name": "StryKaizer",
-                    "homepage": "https://www.drupal.org/user/462700"
-                },
-                {
-                    "name": "borisson_",
-                    "homepage": "https://www.drupal.org/user/2393360"
-                },
-                {
                     "name": "drunken monkey",
                     "homepage": "https://www.drupal.org/user/205582"
                 },
                 {
                     "name": "mkalkbrenner",
                     "homepage": "https://www.drupal.org/user/124705"
+                },
+                {
+                    "name": "Nick_vh",
+                    "homepage": "https://www.drupal.org/user/122682"
+                },
+                {
+                    "name": "StryKaizer",
+                    "homepage": "https://www.drupal.org/user/462700"
                 }
             ],
             "description": "The Facet module allows site builders to easily create and manage faceted search interfaces.",
@@ -7620,28 +7628,28 @@
         },
         {
             "name": "drupal/geofield",
-            "version": "1.40.0",
-            "version_normalized": "1.40.0.0",
+            "version": "1.41.0",
+            "version_normalized": "1.41.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/geofield.git",
-                "reference": "8.x-1.40"
+                "reference": "8.x-1.41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/geofield-8.x-1.40.zip",
-                "reference": "8.x-1.40",
-                "shasum": "7ab34cd7bda6c4bb9a9ab621d807264242b2a418"
+                "url": "https://ftp.drupal.org/files/projects/geofield-8.x-1.41.zip",
+                "reference": "8.x-1.41",
+                "shasum": "dba35ddfa782cdd59ed07a1b105ee8d104fe59b2"
             },
             "require": {
                 "drupal/core": "^8.8 || ^9 || ^10",
-                "phayes/geophp": "^1.2"
+                "itamair/geophp": "^1.3"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.40",
-                    "datestamp": "1655934637",
+                    "version": "8.x-1.41",
+                    "datestamp": "1657834871",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -7651,23 +7659,23 @@
             "installation-source": "dist",
             "notification-url": "https://packages.drupal.org/8/downloads",
             "license": [
-                "GPL-2.0-or-later"
+                "GPL-2.0+"
             ],
             "authors": [
                 {
+                    "name": "Italo Mairo",
+                    "homepage": "https://www.drupal.org/u/itamair",
+                    "role": "Drupal 8+ Maintainer"
+                },
+                {
                     "name": "Brandon Morrison",
                     "homepage": "https://www.drupal.org/u/brandonian",
-                    "role": "Maintainer"
+                    "role": "Drupal 7 Maintainer"
                 },
                 {
                     "name": "Pablo López",
                     "homepage": "https://www.drupal.org/u/plopesc",
-                    "role": "Maintainer"
-                },
-                {
-                    "name": "Italo Mairo",
-                    "homepage": "https://www.drupal.org/u/itamair",
-                    "role": "Maintainer"
+                    "role": "Drupal 7 Maintainer"
                 },
                 {
                     "name": "phayes",
@@ -8621,18 +8629,18 @@
         },
         {
             "name": "drupal/metatag",
-            "version": "1.19.0",
-            "version_normalized": "1.19.0.0",
+            "version": "1.21.0",
+            "version_normalized": "1.21.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/metatag.git",
-                "reference": "8.x-1.19"
+                "reference": "8.x-1.21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/metatag-8.x-1.19.zip",
-                "reference": "8.x-1.19",
-                "shasum": "d70f59c034e971885ed4969a11bb392f6ab447ee"
+                "url": "https://ftp.drupal.org/files/projects/metatag-8.x-1.21.zip",
+                "reference": "8.x-1.21",
+                "shasum": "677ff7384b557390d4d1a36f335452e8172f741d"
             },
             "require": {
                 "drupal/core": "^9",
@@ -8651,8 +8659,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.19",
-                    "datestamp": "1641496014",
+                    "version": "8.x-1.21",
+                    "datestamp": "1657971667",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -8912,8 +8920,8 @@
                     "role": "Maintainer"
                 },
                 {
-                    "name": "kaushalkishorejaiswal",
-                    "homepage": "https://www.drupal.org/user/2228850"
+                    "name": "Robert Ngo",
+                    "homepage": "https://www.drupal.org/user/610230"
                 }
             ],
             "description": "Track and prune node revisions.",
@@ -10524,17 +10532,17 @@
         },
         {
             "name": "drupal/search_api_db",
-            "version": "1.23.0",
-            "version_normalized": "1.23.0.0",
+            "version": "1.25.0",
+            "version_normalized": "1.25.0.0",
             "require": {
-                "drupal/core": "^8.8 || ^9",
+                "drupal/core": "^9.2 || ^10.0",
                 "drupal/search_api": "*"
             },
             "type": "metapackage",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.23",
-                    "datestamp": "1642935837",
+                    "version": "8.x-1.25",
+                    "datestamp": "1658149514",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -10547,16 +10555,16 @@
             ],
             "authors": [
                 {
-                    "name": "Nick_vh",
-                    "homepage": "https://www.drupal.org/user/122682"
-                },
-                {
                     "name": "borisson_",
                     "homepage": "https://www.drupal.org/user/2393360"
                 },
                 {
                     "name": "drunken monkey",
                     "homepage": "https://www.drupal.org/user/205582"
+                },
+                {
+                    "name": "Nick_vh",
+                    "homepage": "https://www.drupal.org/user/122682"
                 }
             ],
             "description": "Offers an implementation of the Search API that uses database tables for indexing content.",
@@ -10647,10 +10655,6 @@
                     "homepage": "https://www.drupal.org/node/982682/committers"
                 },
                 {
-                    "name": "amateescu",
-                    "homepage": "https://www.drupal.org/user/729614"
-                },
-                {
                     "name": "cspitzlay",
                     "homepage": "https://www.drupal.org/user/419305"
                 },
@@ -10661,6 +10665,10 @@
                 {
                     "name": "mkalkbrenner",
                     "homepage": "https://www.drupal.org/user/124705"
+                },
+                {
+                    "name": "Nick_vh",
+                    "homepage": "https://www.drupal.org/user/122682"
                 }
             ],
             "description": "Offers an implementation of the Search API that uses an Apache Solr server for indexing content.",
@@ -13049,6 +13057,55 @@
             "install-path": "../http-interop/http-factory-guzzle"
         },
         {
+            "name": "itamair/geophp",
+            "version": "1.3",
+            "version_normalized": "1.3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/itamair/geoPHP.git",
+                "reference": "d7bccf9902a62430ceb2ac0771bb1e9d1deac4e9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/itamair/geoPHP/zipball/d7bccf9902a62430ceb2ac0771bb1e9d1deac4e9",
+                "reference": "d7bccf9902a62430ceb2ac0771bb1e9d1deac4e9",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.1.* || 9.5.*"
+            },
+            "time": "2022-07-04T23:09:18+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "classmap": [
+                    "geoPHP.inc"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "Italo Mairo",
+                    "homepage": "https://www.linkedin.com/in/italomairo/",
+                    "role": "Maintanier of this Library Repo"
+                },
+                {
+                    "name": "Patrick Hayes",
+                    "homepage": "https://www.linkedin.com/in/patrickdhayes/",
+                    "role": "Maintanier of original Repositary/Library (https://github.com/phayes/geoPHP)"
+                }
+            ],
+            "description": "GeoPHP is a open-source native PHP library for doing geometry operations. It is written entirely in PHP and can therefore run on shared hosts. It can read and write a wide variety of formats: WKT (including EWKT), WKB (including EWKB), GeoJSON, KML, GPX, GeoRSS). It works with all Simple-Feature geometries (Point, LineString, Polygon, GeometryCollection etc.) and can be used to get centroids, bounding-boxes, area, and a wide variety of other useful information.",
+            "homepage": "https://github.com/itamair/geoPHP",
+            "support": {
+                "source": "https://github.com/itamair/geoPHP/tree/1.3"
+            },
+            "install-path": "../itamair/geophp"
+        },
+        {
             "name": "justinrainbow/json-schema",
             "version": "5.2.12",
             "version_normalized": "5.2.12.0",
@@ -13123,17 +13180,17 @@
         },
         {
             "name": "laminas/laminas-diactoros",
-            "version": "2.12.0",
-            "version_normalized": "2.12.0.0",
+            "version": "2.13.0",
+            "version_normalized": "2.13.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-diactoros.git",
-                "reference": "54d4682ac51c005db15c50543e76796a86606fe9"
+                "reference": "34ba65010be9aa74e159d168c5ecfa5c01e4d956"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-diactoros/zipball/54d4682ac51c005db15c50543e76796a86606fe9",
-                "reference": "54d4682ac51c005db15c50543e76796a86606fe9",
+                "url": "https://api.github.com/repos/laminas/laminas-diactoros/zipball/34ba65010be9aa74e159d168c5ecfa5c01e4d956",
+                "reference": "34ba65010be9aa74e159d168c5ecfa5c01e4d956",
                 "shasum": ""
             },
             "require": {
@@ -13154,15 +13211,15 @@
                 "ext-dom": "*",
                 "ext-gd": "*",
                 "ext-libxml": "*",
-                "http-interop/http-factory-tests": "^0.8.0",
-                "laminas/laminas-coding-standard": "~1.0.0",
-                "php-http/psr7-integration-tests": "^1.1",
+                "http-interop/http-factory-tests": "^0.9.0",
+                "laminas/laminas-coding-standard": "~2.3.0",
+                "php-http/psr7-integration-tests": "^1.1.1",
                 "phpspec/prophecy-phpunit": "^2.0",
-                "phpunit/phpunit": "^9.1",
-                "psalm/plugin-phpunit": "^0.14.0",
-                "vimeo/psalm": "^4.3"
+                "phpunit/phpunit": "^9.5",
+                "psalm/plugin-phpunit": "^0.17.0",
+                "vimeo/psalm": "^4.24.0"
             },
-            "time": "2022-07-06T11:42:36+00:00",
+            "time": "2022-07-07T12:31:03+00:00",
             "type": "library",
             "extra": {
                 "laminas": {
@@ -14349,17 +14406,17 @@
         },
         {
             "name": "onelogin/php-saml",
-            "version": "4.0.1",
-            "version_normalized": "4.0.1.0",
+            "version": "4.1.0",
+            "version_normalized": "4.1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/onelogin/php-saml.git",
-                "reference": "bc0eda0b5f3b26f659efa4e316c0fe56c450673a"
+                "reference": "b22a57ebd13e838b90df5d3346090bc37056409d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/bc0eda0b5f3b26f659efa4e316c0fe56c450673a",
-                "reference": "bc0eda0b5f3b26f659efa4e316c0fe56c450673a",
+                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/b22a57ebd13e838b90df5d3346090bc37056409d",
+                "reference": "b22a57ebd13e838b90df5d3346090bc37056409d",
                 "shasum": ""
             },
             "require": {
@@ -14380,7 +14437,7 @@
                 "ext-openssl": "Install openssl lib in order to handle with x509 certs (require to support sign and encryption)",
                 "ext-zlib": "Install zlib"
             },
-            "time": "2022-06-27T16:14:32+00:00",
+            "time": "2022-07-15T20:44:36+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -14770,49 +14827,6 @@
             "install-path": "../pear/pear_exception"
         },
         {
-            "name": "phayes/geophp",
-            "version": "1.2",
-            "version_normalized": "1.2.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/phayes/geoPHP.git",
-                "reference": "015404e85b602e0df1f91441f8db0f9e98f7e567"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/phayes/geoPHP/zipball/015404e85b602e0df1f91441f8db0f9e98f7e567",
-                "reference": "015404e85b602e0df1f91441f8db0f9e98f7e567",
-                "shasum": ""
-            },
-            "require-dev": {
-                "phpunit/phpunit": "4.1.*"
-            },
-            "time": "2014-12-02T06:11:22+00:00",
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "classmap": [
-                    "geoPHP.inc"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2 or New-BSD"
-            ],
-            "authors": [
-                {
-                    "name": "Patrick Hayes"
-                }
-            ],
-            "description": "GeoPHP is a open-source native PHP library for doing geometry operations. It is written entirely in PHP and can therefore run on shared hosts. It can read and write a wide variety of formats: WKT (including EWKT), WKB (including EWKB), GeoJSON, KML, GPX, GeoRSS). It works with all Simple-Feature geometries (Point, LineString, Polygon, GeometryCollection etc.) and can be used to get centroids, bounding-boxes, area, and a wide variety of other useful information.",
-            "homepage": "https://github.com/phayes/geoPHP",
-            "support": {
-                "issues": "https://github.com/phayes/geoPHP/issues",
-                "source": "https://github.com/phayes/geoPHP/tree/master"
-            },
-            "install-path": "../phayes/geophp"
-        },
-        {
             "name": "phenx/php-font-lib",
             "version": "0.5.4",
             "version_normalized": "0.5.4.0",
@@ -14861,17 +14875,17 @@
         },
         {
             "name": "php-http/discovery",
-            "version": "1.14.2",
-            "version_normalized": "1.14.2.0",
+            "version": "1.14.3",
+            "version_normalized": "1.14.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/discovery.git",
-                "reference": "c8d48852fbc052454af42f6de27635ddd916b959"
+                "reference": "31d8ee46d0215108df16a8527c7438e96a4d7735"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/discovery/zipball/c8d48852fbc052454af42f6de27635ddd916b959",
-                "reference": "c8d48852fbc052454af42f6de27635ddd916b959",
+                "url": "https://api.github.com/repos/php-http/discovery/zipball/31d8ee46d0215108df16a8527c7438e96a4d7735",
+                "reference": "31d8ee46d0215108df16a8527c7438e96a4d7735",
                 "shasum": ""
             },
             "require": {
@@ -14889,7 +14903,7 @@
             "suggest": {
                 "php-http/message": "Allow to use Guzzle, Diactoros or Slim Framework factories"
             },
-            "time": "2022-05-25T07:26:05+00:00",
+            "time": "2022-07-11T14:04:40+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -14925,7 +14939,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-http/discovery/issues",
-                "source": "https://github.com/php-http/discovery/tree/1.14.2"
+                "source": "https://github.com/php-http/discovery/tree/1.14.3"
             },
             "install-path": "../php-http/discovery"
         },
