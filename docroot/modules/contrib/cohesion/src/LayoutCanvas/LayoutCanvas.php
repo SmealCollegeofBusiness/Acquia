@@ -193,6 +193,72 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
   }
 
   /**
+   * Find a property in the layout canvas.
+   *
+   * @param string|array $path_to_property
+   *   The path in the element to get this property. Specify a string if top
+   *   level, or an array to search in leaves.
+   *
+   * @return mixed|null
+   */
+  public function getProperty($path_to_property) {
+    $property_names = [];
+
+    if (is_string($path_to_property)) {
+      $property_names = [$path_to_property];
+    }
+    elseif (is_array($path_to_property)) {
+      $property_names = $path_to_property;
+    }
+
+    $current_pointer = $this;
+    foreach ($property_names as $property_name) {
+      if (is_object($current_pointer) && property_exists($current_pointer, $property_name)) {
+        $current_pointer = $current_pointer->{$property_name};
+      }
+      else {
+        return NULL;
+      }
+    }
+
+    return $current_pointer;
+  }
+
+  /**
+   * Remove a property from the layout canvas
+   *
+   * @param $property_name
+   */
+  public function unsetProperty($path_to_property) {
+    $property_names = [];
+
+    if (is_string($path_to_property)) {
+      $property_names = [$path_to_property];
+    }
+    elseif (is_array($path_to_property)) {
+      $property_names = $path_to_property;
+    }
+
+    $current_pointer = $this;
+    foreach ($property_names as $index => $property_name) {
+      if (is_object($current_pointer) && property_exists($current_pointer, $property_name)) {
+        if($index + 1 === count($property_names)) {
+          unset($current_pointer->{$property_name});
+        } else {
+          $current_pointer = $current_pointer->{$property_name};
+        }
+      }
+      elseif (is_array($current_pointer) && isset($current_pointer[$property_name])) {
+        if($index + 1 === count($property_names)) {
+          unset($current_pointer->{$property_name});
+        } else {
+          $current_pointer = $current_pointer[$property_name];
+        }
+      }
+    }
+  }
+
+  /**
    * Returns all elements in the layout canvas as a flat array.
    *
    * @return \Drupal\cohesion\LayoutCanvas\Element[]
@@ -435,6 +501,7 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
   /**
    * @return array|\Drupal\cohesion\LayoutCanvas\Element[]|mixed
    */
+  #[\ReturnTypeWillChange]
   public function jsonSerialize() {
     $canvas = ['canvas' => $this->canvasElements];
     if (!is_null($this->componentFormElements)) {

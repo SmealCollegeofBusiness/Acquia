@@ -23,6 +23,9 @@ field.formatter.settings.soundcloud_embed:
     height:
       type: string
       label: 'Height'
+    color:
+      type: string
+      label: 'Color'
     options:
       type: mapping
       label: 'Options'
@@ -33,6 +36,12 @@ field.formatter.settings.soundcloud_embed:
         hide_related:
           type: string
           label: 'Hide related'
+        show_artwork:
+          type: string
+          label: 'Show artwork'
+        show_playcount:
+          type: string
+          label: 'Show playcount'
         show_comments:
           type: string
           label: 'Show comments'
@@ -42,3 +51,18 @@ field.formatter.settings.soundcloud_embed:
         show_reposts:
           type: string
           label: 'Show reposts'
+        download:
+          type: string
+          label: 'Show download button'
+        buying:
+          type: string
+          label: 'Show buy button'
+        sharing:
+          type: string
+          label: 'Show share button'
+        show_teaser:
+          type: string
+          label: 'Show SoundCloud Overlays'
+        single_active:
+          type: string
+          label: 'Single active'

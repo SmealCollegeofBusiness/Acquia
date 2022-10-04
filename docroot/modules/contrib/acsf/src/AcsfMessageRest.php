@@ -38,6 +38,7 @@ class AcsfMessageRest extends AcsfMessage {
    */
   protected function sendMessage($url, $method, $endpoint, array $parameters, $username, $password) {
 
+    $error = null;
     $useragent = sprintf('%s.%s %s', $this->ahSite, $this->ahEnv, gethostname());
     $curl = curl_init();
 
@@ -60,7 +61,7 @@ class AcsfMessageRest extends AcsfMessage {
       $query_string = '?' . UrlHelper::buildQuery($parameters);
     }
     elseif (!empty($parameters)) {
-      $data_string = json_encode($parameters);
+      $data_string = json_encode($parameters, JSON_THROW_ON_ERROR);
       curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
       curl_setopt($curl, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
@@ -90,7 +91,7 @@ class AcsfMessageRest extends AcsfMessage {
     $response_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
     curl_close($curl);
 
-    $response_body = json_decode($response, TRUE);
+    $response_body = json_decode($response, TRUE, 512, JSON_THROW_ON_ERROR);
 
     return new AcsfMessageResponseRest($endpoint, $response_code, $response_body);
   }

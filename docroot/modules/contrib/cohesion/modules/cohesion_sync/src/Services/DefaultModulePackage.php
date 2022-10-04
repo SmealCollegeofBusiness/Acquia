@@ -4,6 +4,7 @@ namespace Drupal\cohesion_sync\Services;
 
 use Drupal\cohesion_sync\Exception\PackageSourceMissingPropertiesException;
 use Drupal\Core\Extension\MissingDependencyException;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\File\Exception\DirectoryNotReadyException;
 
 /**
@@ -13,6 +14,25 @@ class DefaultModulePackage implements PackageSourceServiceInterface {
 
   const SUPPORTED_TYPE = 'default_module_package';
   const REQUIRED_PROPERTIES = ['module_name', 'path'];
+
+  /**
+   * ModuleHandler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * DefaultModulePackage constructor.
+   *
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   Module handler service.
+   */
+  public function __construct(
+    ModuleHandlerInterface $moduleHandler
+  ) {
+    $this->moduleHandler = $moduleHandler;
+  }
 
   /**
    * {@inheritdoc}
@@ -44,6 +64,10 @@ class DefaultModulePackage implements PackageSourceServiceInterface {
    *   Thrown if source metadata values are missing.
    */
   public function preparePackage(array $sourceMetadata): string {
+    $isRequired = $sourceMetadata['required'] ?? TRUE;
+    if ($this->moduleHandler->moduleExists($sourceMetadata['module_name']) !== TRUE && !$isRequired) {
+      return "";
+    }
     $this->validateMetadata($sourceMetadata);
 
     $module_path = drupal_get_path('module', $sourceMetadata['module_name']);
@@ -70,7 +94,7 @@ class DefaultModulePackage implements PackageSourceServiceInterface {
     if (!empty($missing_properties)) {
       throw new PackageSourceMissingPropertiesException(self::SUPPORTED_TYPE, $missing_properties, self::REQUIRED_PROPERTIES);
     }
-    if (drupal_check_module($sourceMetadata['module_name']) !== TRUE) {
+    if ($this->moduleHandler->moduleExists($sourceMetadata['module_name']) !== TRUE) {
       throw new MissingDependencyException(sprintf('Unable to install default module package due to missing module %s.', $sourceMetadata['module_name']));
     }
 

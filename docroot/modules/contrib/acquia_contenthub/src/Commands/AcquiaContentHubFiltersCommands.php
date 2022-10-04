@@ -5,7 +5,6 @@ namespace Drupal\acquia_contenthub\Commands;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\Component\Uuid\Uuid;
 use Drush\Commands\DrushCommands;
-use Drush\Log\LogLevel;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 
@@ -65,7 +64,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
 
     $filters = $this->buildCloudFiltersList($webhooks, $webhook, $isInteractive);
     if (empty($filters)) {
-      $this->logger->log(LogLevel::CANCEL, 'There are no cloud filters defined in this subscription.');
+      $this->logger->warning('There are no cloud filters defined in this subscription.');
       return;
     }
 
@@ -97,8 +96,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
     $webhook = $client->getWebHook($url);
 
     if (empty($webhook)) {
-      $this->logger->log(
-        LogLevel::CANCEL,
+      $this->logger->warning(
         'Webhook with following URL {url} or UUID {uuid} not exist.',
         ['url' => $url, 'uuid' => $uuid]
       );
@@ -107,7 +105,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
 
     $webhook_filters = $webhook->getFilters();
     if (!empty($webhook_filters) && in_array($uuid, $webhook_filters)) {
-      $this->logger->log(LogLevel::CANCEL, 'Filter already attached to {url}.', ['url' => $url]);
+      $this->logger->warning('Filter already attached to {url}.', ['url' => $url]);
       return;
     }
 
@@ -121,11 +119,11 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
         'code' => $response['error']['code'],
         'reason' => $response['error']['message'],
       ];
-      $this->logger->log(LogLevel::ERROR, 'Operation failed (code: {code}). {reason}', $context);
+      $this->logger->error('Operation failed (code: {code}). {reason}', $context);
       return;
     }
 
-    $this->logger->log(LogLevel::SUCCESS, 'Filter successfully attached to {url}.', ['url' => $url]);
+    $this->logger->notice('Filter successfully attached to {url}.', ['url' => $url]);
   }
 
   /**
@@ -150,12 +148,12 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
 
     if (empty($webhook) || empty($webhook->getFilters())) {
       $message = 'Webhook with following URL {url} does not exist or no filters attached to this webhook.';
-      $this->logger->log(LogLevel::CANCEL, $message, ['url' => $url]);
+      $this->logger->warning($message, ['url' => $url]);
       return;
     }
 
     if (!in_array($uuid, $webhook->getFilters(), TRUE)) {
-      $this->logger->log(LogLevel::CANCEL, 'Nothing to detach.');
+      $this->logger->warning('Nothing to detach.');
       return;
     }
 
@@ -169,7 +167,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
       'filter' => $uuid,
       'url' => $url,
     ];
-    $this->logger->log(LogLevel::SUCCESS, $message, $context);
+    $this->logger->notice($message, $context);
   }
 
   /**
@@ -222,14 +220,14 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
     $client = $this->clientFactory->getClient();
     $cloudFilters = $client->listFilters();
     if (empty($cloudFilters['data'])) {
-      $this->logger->log(LogLevel::CANCEL, dt('There are no cloud filters defined in this subscription.'));
+      $this->logger->warning(dt('There are no cloud filters defined in this subscription.'));
       return [];
     }
 
     $cloudFilters = $cloudFilters['data'];
 
     if (empty($webhooks)) {
-      $this->logger->log(LogLevel::CANCEL, dt('There are no registered webhooks in this subscription.'));
+      $this->logger->warning(dt('There are no registered webhooks in this subscription.'));
       return [];
     }
 
@@ -240,7 +238,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
 
     $cloudFilters = $this->reduceFilterByWebhook($cloudFilters, $webhooks, $webhook);
     if (empty($cloudFilters)) {
-      $this->logger->log(LogLevel::CANCEL, dt('There are no cloud filters defined in this subscription.'));
+      $this->logger->warning(dt('There are no cloud filters defined in this subscription.'));
       return [];
     }
 

@@ -62,7 +62,7 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
    *
    * @var \Drupal\Core\Config\Config
    */
-  protected $config;
+  protected $chConfig;
 
   /**
    * AcquiaContentHubWebhookInterestCommands constructor.
@@ -77,7 +77,7 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
   public function __construct(ClientFactory $client_factory, ContentHubConnectionManager $connection_manager, ConfigFactoryInterface $config_factory) {
     $this->clientFactory = $client_factory;
     $this->connectionManager = $connection_manager;
-    $this->config = $config_factory->getEditable('acquia_contenthub.admin_settings');
+    $this->chConfig = $config_factory->getEditable('acquia_contenthub.admin_settings');
   }
 
   /**
@@ -160,7 +160,7 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
       return;
     }
     $uuids = explode(',', $this->input()->getOptions()['uuids']);
-    $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
+    $send_update = $this->chConfig->get('send_contenthub_updates') ?? TRUE;
     if ($send_update) {
       $response = $this->client->addEntitiesToInterestList($this->webhookUuid, $uuids);
 
@@ -204,7 +204,7 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
     }
     $uuids = explode(',', $this->input()->getOptions()['uuids']);
     $this->output()->writeln("\n");
-    $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
+    $send_update = $this->chConfig->get('send_contenthub_updates') ?? TRUE;
     if ($send_update) {
       foreach ($uuids as $uuid) {
         $response = $this->client->deleteInterest($uuid, $this->webhookUuid);

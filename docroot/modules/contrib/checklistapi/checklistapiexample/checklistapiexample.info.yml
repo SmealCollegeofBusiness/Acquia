@@ -7,7 +7,7 @@ dependencies:
   - drupal:checklistapi
 configure: checklistapi.checklists.example_checklist
 
-# Information added by Drupal.org packaging script on 2022-07-02
-version: '2.1.0'
+# Information added by Drupal.org packaging script on 2022-07-29
+version: '2.1.1'
 project: 'checklistapi'
-datestamp: 1656794094
+datestamp: 1659116935

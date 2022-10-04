@@ -355,7 +355,7 @@ class BatchImportController extends ControllerBase {
   }
 
   public static function fileImport(CohesionFileStorage $file_storage, string $path, &$context) {
-    $files = $file_storage->getFilesJson();
+    $files = $file_storage->getFiles();
     $file_sync_event = new SiteStudioSyncFilesEvent($files, $path);
     /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher */
     $event_dispatcher = \Drupal::service('event_dispatcher');

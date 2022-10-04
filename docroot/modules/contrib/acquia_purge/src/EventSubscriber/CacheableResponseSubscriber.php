@@ -2,10 +2,10 @@
 
 namespace Drupal\acquia_purge\EventSubscriber;
 
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Drupal\Core\Cache\CacheableResponseInterface;
 use Drupal\purge\EventSubscriber\CacheableResponseSubscriber as PurgeCacheableResponseSubscriber;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -26,11 +26,11 @@ class CacheableResponseSubscriber extends PurgeCacheableResponseSubscriber imple
   /**
    * Add cache tags headers on cacheable responses.
    *
-   * @param \Symfony\Component\HttpKernel\Event\FilterResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   The event to process.
    */
-  public function onRespond(FilterResponseEvent $event) {
-    if (!$event->isMasterRequest()) {
+  public function onRespond(ResponseEvent $event) {
+    if (!$event->isMainRequest()) {
       return;
     }
 

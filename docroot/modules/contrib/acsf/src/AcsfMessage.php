@@ -63,10 +63,8 @@ abstract class AcsfMessage {
 
   /**
    * An optional AcsfConfig object.
-   *
-   * @var \Drupal\acsf\AcsfConfig
    */
-  private $config;
+  private \Drupal\acsf\AcsfConfig $config;
 
   /**
    * Constructor.
@@ -120,7 +118,7 @@ abstract class AcsfMessage {
     }
 
     // Only allow AcsfMessageResponse compatible responses.
-    if (!is_subclass_of($this->response, '\Drupal\acsf\AcsfMessageResponse')) {
+    if (!is_subclass_of($this->response, \Drupal\acsf\AcsfMessageResponse::class)) {
       throw new AcsfMessageMalformedResponseException(sprintf('The message to %s resulted in a malformed response. It should be an AcsfMessageResponse object.', $this->endpoint));
     }
 

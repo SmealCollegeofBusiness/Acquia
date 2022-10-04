@@ -1,0 +1,13 @@
+name: Acquia ContentHub Translations
+type: module
+description: Allows selective language import for entities.
+core_version_requirement: '>=9.2'
+package: Acquia ContentHub (Experimental)
+dependencies:
+  - acquia_contenthub:acquia_contenthub
+  - acquia_contenthub:acquia_contenthub_subscriber
+
+# Information added by Drupal.org packaging script on 2022-09-28
+version: '8.x-2.36'
+project: 'acquia_contenthub'
+datestamp: 1664374717

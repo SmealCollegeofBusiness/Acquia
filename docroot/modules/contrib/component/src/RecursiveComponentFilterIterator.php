@@ -85,7 +85,7 @@ class RecursiveComponentFilterIterator extends \RecursiveFilterIterator {
   /**
    * {@inheritdoc}
    */
-  public function getChildren() {
+  public function getChildren(): ?\RecursiveFilterIterator {
     $filter = parent::getChildren();
     // Pass on the blocklist.
     $filter->blocklist = $this->blocklist;
@@ -97,7 +97,7 @@ class RecursiveComponentFilterIterator extends \RecursiveFilterIterator {
   /**
    * {@inheritdoc}
    */
-  public function accept() {
+  public function accept(): bool {
     $name = $this->current()->getFilename();
     // FilesystemIterator::SKIP_DOTS only skips '.' and '..', but not hidden
     // directories (like '.git').

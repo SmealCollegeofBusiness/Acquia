@@ -300,6 +300,15 @@ class CohesionEndpointController extends ControllerBase {
       // If element_id exists then load the component entity.
       if ($element_id) {
         $entity = Component::load($element_id);
+
+        // If no entity then it must be a custom component.
+        if (!$entity) {
+          // Get the custom component.
+          $custom_component = $this->customComponentsService->getComponent($element_id);
+          // Format as a component.
+          $entity = $this->customComponentsService->formatAsComponent([$custom_component]);
+          $entity = reset($entity);
+        }
       }
 
       $element = $this->createElementArray($entity, $entity_type);

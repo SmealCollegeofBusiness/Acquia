@@ -33,6 +33,9 @@ workbench_email.workbench_email_template.*:
     label:
       type: label
       label: 'Label'
+    format:
+      type: string
+      label: 'Format'
     subject:
       type: label
       label: 'Subject'

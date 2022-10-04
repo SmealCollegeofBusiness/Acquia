@@ -4,6 +4,7 @@ namespace Drupal\imce\Controller;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Drupal\imce\Imce;
 
 /**
@@ -22,7 +23,7 @@ class ImceFrameController extends ControllerBase {
       '#type' => 'inline_template',
       '#template' => '<iframe class="imce-browser" src="{{ url }}"></iframe>',
       '#context' => [
-        'url' => '/imce',
+        'url' => Url::fromRoute('imce.page')->toString(),
       ],
     ];
     $render['#attached']['library'][] = 'imce/drupal.imce.admin';

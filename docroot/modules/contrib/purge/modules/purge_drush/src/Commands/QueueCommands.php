@@ -507,14 +507,28 @@ class QueueCommands extends DrushCommands implements SiteAliasManagerAwareInterf
     do {
       $subproc = Drush::drush($self, 'p:queue-work', [], $opt);
       $subproc->run();
-      if (!is_array($result = json_decode($subproc->getOutput(), TRUE))) {
-        throw new \Exception("Inter-process communication failure!");
+      $subproc_output = $subproc->getOutput();
+      if (!is_array($result = json_decode($subproc_output, TRUE))) {
+        $error_message = "Inter-process communication failure: invalid JSON.";
+        if ($subproc_stderr = $subproc->getErrorOutput()) {
+          $error_message .= "\n\nStandard Error:\n" . $subproc_stderr;
+        }
+        if ($subproc_output) {
+          $output_len = strlen($subproc_output);
+          if ($output_len < 1000) {
+            $error_message .= "\n\nOutput: " . $subproc_output;
+          }
+          else {
+            $error_message .= "\n\nFirst 1000 bytes of output: " . substr($subproc_output, 0, 1000);
+          }
+        }
+        throw new \Exception($error_message);
       }
       $runs[] = $result;
       // Break the loop when finished processing or initially empty.
       if ($result['error'] == 'empty') {
         if (count($runs) === 1) {
-          throw new \Exception(dt("The queue is empty or has only locked items!"));
+          $this->logger()->notice(dt("The initial run found an empty queue, or one with only locked items."));
         }
         break;
       }

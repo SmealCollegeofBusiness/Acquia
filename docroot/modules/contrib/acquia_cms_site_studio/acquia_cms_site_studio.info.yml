@@ -19,7 +19,7 @@ dependencies:
   - drupal:node_revision_delete
   - drupal:sitestudio_page_builder
 
-# Information added by Drupal.org packaging script on 2022-06-28
-version: '1.3.6'
+# Information added by Drupal.org packaging script on 2022-09-28
+version: '1.4.1'
 project: 'acquia_cms_site_studio'
-datestamp: 1656419824
+datestamp: 1664365709

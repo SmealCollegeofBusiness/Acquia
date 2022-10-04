@@ -9,6 +9,8 @@ use Drupal\cohesion_sync\Config\CohesionFileStorage;
 use Drupal\cohesion_sync\Config\CohesionStorageComparer;
 use Drupal\cohesion_sync\Controller\BatchImportController;
 use Drupal\cohesion_sync\Event\SiteStudioSyncFilesEvent;
+use Drupal\cohesion_sync\Exception\LegacyPackageFormatException;
+use Drupal\cohesion_sync\Exception\UnsupportedFileFormatException;
 use Drupal\cohesion_sync\Services\SyncImport;
 use Drupal\cohesion_website_settings\Controller\WebsiteSettingsController;
 use Drupal\config\StorageReplaceDataWrapper;
@@ -25,6 +27,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Cohesion Package Import Command.
  */
 class CohesionSyncImportCommand extends DrushCommands {
+
+  const LEGACY_FORMAT_PATTERN = "%(.*?)\.(yml_|yml)$%";
 
   /**
    * ConfigStorage service.
@@ -134,11 +138,15 @@ class CohesionSyncImportCommand extends DrushCommands {
     if ($path === NULL) {
       $path = COHESION_SYNC_DEFAULT_DIR;
     }
+    elseif ($this->legacyFilename($path)) {
+      $message = 'You are attempting to import legacy format package with the new format command. Legacy package format is not supported by this command. For more information refer to the documentation page: https://sitestudiodocs.acquia.com/6.9/user-guide/deprecating-legacy-package-system';
+      return CommandResult::dataWithExitCode($message, self::EXIT_FAILURE);
+    }
 
     // Determine source directory.
     $source_storage = new CohesionFileStorage($path);
     // Handle the files.
-    $files = $source_storage->getFilesJson();
+    $files = $source_storage->getFiles();
     try {
       $this->handleFileSync($files, $path);
     } catch (\Exception $e) {
@@ -150,6 +158,12 @@ class CohesionSyncImportCommand extends DrushCommands {
     $replacement_storage = new StorageReplaceDataWrapper($active_storage);
     foreach ($source_storage->listAll() as $name) {
       $data = $source_storage->read($name);
+      try {
+        $this->validatePackageFile($data, $name . '.' . $source_storage::getFileExtension());
+      }
+      catch (\Exception $exception) {
+        return CommandResult::dataWithExitCode($exception->getMessage(), self::EXIT_FAILURE);
+      }
       $replacement_storage->replaceData($name, $data);
     }
 
@@ -252,6 +266,34 @@ class CohesionSyncImportCommand extends DrushCommands {
     else {
       $this->yell('No non-config files were imported or updated during sync.');
     }
+  }
+
+  /**
+   * Validates package data. New format yml files will always have uuid.
+   *
+   * @param array $data
+   *
+   * @return void
+   * @throws \Exception
+   */
+  protected function validatePackageFile(array $data, string $filename) {
+    if (array_key_exists('uuid', $data) === FALSE) {
+      if (is_array(reset($data)) && array_key_exists('type', reset($data)) && array_key_exists('export', reset($data))) {
+        throw new LegacyPackageFormatException($filename);
+      }
+      throw new UnsupportedFileFormatException($filename);
+    }
+  }
+
+  /**
+   * Validates filename to not contain ".yml_" or ".yml".
+   *
+   * @param string $filename
+   *
+   * @return bool
+   */
+  protected function legacyFilename(string $filename) {
+    return (bool) preg_match(self::LEGACY_FORMAT_PATTERN, $filename);
   }
 
 }

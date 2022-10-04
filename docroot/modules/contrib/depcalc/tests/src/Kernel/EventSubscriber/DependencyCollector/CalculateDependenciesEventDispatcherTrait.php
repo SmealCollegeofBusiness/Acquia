@@ -28,7 +28,7 @@ trait CalculateDependenciesEventDispatcherTrait {
     $wrapper = new DependentEntityWrapper($entity);
     $dependencies = new DependencyStack();
     $event = new CalculateEntityDependenciesEvent($wrapper, $dependencies);
-    $this->container->get('event_dispatcher')->dispatch(DependencyCalculatorEvents::CALCULATE_DEPENDENCIES, $event);
+    $this->container->get('event_dispatcher')->dispatch($event, DependencyCalculatorEvents::CALCULATE_DEPENDENCIES);
     return $event;
   }
 

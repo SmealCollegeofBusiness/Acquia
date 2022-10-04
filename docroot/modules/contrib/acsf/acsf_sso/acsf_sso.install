@@ -96,13 +96,20 @@ function acsf_sso_install() {
     'idp_single_log_out_service' => $site->factory_url . '/sso/saml2/idp/SingleLogoutService.php',
     'sp_private_key' => $site->saml_keys['sp_private_key'],
     'sp_x509_certificate' => $site->saml_keys['sp_x509_certificate'],
-    'idp_x509_certificate' => $site->saml_keys['idp_x509_certificate'],
     // sp_entity_id is not saved, but is overridden on every bootstrap. This
     // means it will not end up in exported configuration and get copied to
     // other sites; also, login will not work when this module is uninstalled.
     // Other options not mentioned here are fine as having default NULL, and
     // also it does not matter if they're set to a different value.
   ];
+  $samlauth_schema = \Drupal::keyValue('system.schema')->get('samlauth');
+  if ($samlauth_schema >= 8305) {
+    // samlauth v3.3 introduced changes to its configuration.
+    $common_config['idp_certs'] = [$site->saml_keys['idp_x509_certificate']];
+  }
+  else {
+    $common_config['idp_x509_certificate'] = $site->saml_keys['idp_x509_certificate'];
+  }
 
   $config = \Drupal::configFactory()->getEditable('samlauth.authentication');
   foreach ($common_config as $key => $sso_config) {

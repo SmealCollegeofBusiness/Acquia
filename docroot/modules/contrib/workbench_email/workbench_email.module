@@ -158,8 +158,7 @@ function workbench_email_mail($key, &$message, $params) {
   if (strpos($key, 'template::') === 0) {
     // Mailing one of our templates.
     $message['subject'] = $params['subject'];
-    if (\Drupal::moduleHandler()->moduleExists('swiftmailer')) {
-      // If swiftmailer exists, we send in HTML.
+    if ($params['template_format'] == 'html') {
       $message['headers']['Content-Type'] = 'text/html';
       $message['params']['convert'] = TRUE;
       $message['body'][] = $params['body'];

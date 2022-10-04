@@ -83,6 +83,11 @@ class S3FileOriginLocator {
     $uri = $this->getOriginalFileUrl($uri);
     $tracked_s3_file = $this->s3FileMap->getFileByUri($uri);
     if (!$tracked_s3_file) {
+
+      if (file_exists($uri)) {
+        return $this->getLocalS3FileSource();
+      }
+
       $tracked_s3_file = $this->getRemoteFile($uri);
       if (!$tracked_s3_file) {
         return $this->getLocalS3FileSource();
@@ -119,6 +124,7 @@ class S3FileOriginLocator {
     }
 
     // Use the tracker to avoid unnecessary requests to Content Hub.
+    // @codingStandardsIgnoreLine
     $container = \Drupal::getContainer();
     $tracker = $container->has('acquia_contenthub_publisher.tracker') ?
       $container->get('acquia_contenthub_publisher.tracker') : NULL;

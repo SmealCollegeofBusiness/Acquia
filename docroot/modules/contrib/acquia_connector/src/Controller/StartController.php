@@ -18,7 +18,14 @@ class StartController extends ControllerBase {
 
     $build['#title'] = $this->t('Get an Acquia Cloud Free subscription');
 
-    $path = drupal_get_path('module', 'acquia_connector');
+    if (version_compare(\Drupal::VERSION, '9.3', '>=')) {
+      // phpcs:ignore
+      $path = \Drupal::service('extension.path.resolver')->getPath('module', 'acquia_connector');
+    }
+    else {
+      // @phpstan-ignore-next-line
+      $path = drupal_get_path('module', 'acquia_connector');
+    }
 
     $build['#attached']['library'][] = 'acquia_connector/acquia_connector.form';
 
@@ -29,7 +36,16 @@ class StartController extends ControllerBase {
       ],
     ];
     $uri = Url::fromRoute('acquia_connector.setup', [], ['absolute' => TRUE])->toString();
-    $banner = '<a href="' . $uri . '">' . render($banner) . '</a>';
+
+    if (version_compare(\Drupal::VERSION, '9.3', '>=')) {
+      // phpcs:ignore
+      $rendered = \Drupal::service('renderer')->render($banner);
+    }
+    else {
+      // @phpstan-ignore-next-line
+      $rendered = render($banner);
+    }
+    $banner = '<a href="' . $uri . '">' . $rendered . '</a>';
 
     $output = '<div class="an-start-form">';
     $output .= '<div class="an-pg-container">';
@@ -45,7 +61,15 @@ class StartController extends ControllerBase {
         'src' => Url::fromUri('base:' . $path . '/images/icon-library.png', ['absolute' => TRUE])->toString(),
       ],
     ];
-    $output .= '<a href="https://docs.acquia.com" target="_blank">' . render($image) . '</a>';
+    if (version_compare(\Drupal::VERSION, '9.3', '>=')) {
+      // phpcs:ignore
+      $rendered = \Drupal::service('renderer')->render($image);
+    }
+    else {
+      // @phpstan-ignore-next-line
+      $rendered = render($image);
+    }
+    $output .= '<a href="https://docs.acquia.com" target="_blank">' . $rendered . '</a>';
     $output .= '<p class="cell-p">' . $this->t("Tap the collective knowledge of Acquia’s technical support team & partners.") . '</p>';
     $output .= '</div>';
     $output .= '<div class="cell with-arrow an-center">';
@@ -56,7 +80,15 @@ class StartController extends ControllerBase {
         'src' => Url::fromUri('base:' . $path . '/images/icon-tools.png', ['absolute' => TRUE])->toString(),
       ],
     ];
-    $output .= '<a href="https://www.acquia.com/customer-success" target="_blank">' . render($image) . '</a>';
+    if (version_compare(\Drupal::VERSION, '9.3', '>=')) {
+      // phpcs:ignore
+      $rendered = \Drupal::service('renderer')->render($image);
+    }
+    else {
+      // @phpstan-ignore-next-line
+      $rendered = render($image);
+    }
+    $output .= '<a href="https://www.acquia.com/customer-success" target="_blank">' . $rendered . '</a>';
     $output .= '<p class="cell-p">' . $this->t('Enhance and extend your site with an array of <a href=":services" target="_blank">services</a> from Acquia & our partners.', [':services' => 'https://www.acquia.com/products-services/acquia-cloud']) . '</p>';
     $output .= '</div>';
     $output .= '<div class="cell an-right">';
@@ -67,7 +99,15 @@ class StartController extends ControllerBase {
         'src' => Url::fromUri('base:' . $path . '/images/icon-support.png', ['absolute' => TRUE])->toString(),
       ],
     ];
-    $output .= '<a href="https://support.acquia.com" target="_blank">' . render($image) . '</a>';
+    if (version_compare(\Drupal::VERSION, '9.3', '>=')) {
+      // phpcs:ignore
+      $rendered = \Drupal::service('renderer')->render($image);
+    }
+    else {
+      // @phpstan-ignore-next-line
+      $rendered = render($image);
+    }
+    $output .= '<a href="https://support.acquia.com" target="_blank">' . $rendered . '</a>';
     $output .= '<p class="cell-p">' . $this->t("Experienced Drupalists are available to support you whenever you need it.") . '</p>';
     $output .= '</div>';
     $output .= '</div>';

@@ -17,7 +17,7 @@ class MultiresponseNormalizerTest extends UnitTestCase {
    */
   protected $sut;
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->sut = new MultiresponseNormalizer();
   }
@@ -53,8 +53,8 @@ class MultiresponseNormalizerTest extends UnitTestCase {
     $delimiter = substr($parts['boundary'], 1, strlen($parts['boundary']) - 2);
     $this->assertStringStartsWith('--' . $delimiter, $actual['content']);
     $this->assertStringEndsWith('--' . $delimiter . '--', $actual['content']);
-    $this->assertRegExp("/\r\nFoo!\r\n/", $actual['content']);
-    $this->assertRegExp("/\r\nBar\r\n/", $actual['content']);
+    $this->assertMatchesRegularExpression("/\r\nFoo!\r\n/", $actual['content']);
+    $this->assertMatchesRegularExpression("/\r\nBar\r\n/", $actual['content']);
   }
 
 }

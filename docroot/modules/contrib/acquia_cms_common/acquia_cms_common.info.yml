@@ -16,7 +16,6 @@ dependencies:
   - drupal:content_translation
   - drupal:diff
   - drupal:entity_clone
-  - drupal:field_ui
   - drupal:focal_point
   - drupal:language
   - drupal:media
@@ -44,10 +43,9 @@ dependencies:
   - drupal:smart_trim
   - drupal:taxonomy
   - drupal:username_enumeration_prevention
-  - drupal:views_ui
   - drupal:workbench_email
 
-# Information added by Drupal.org packaging script on 2022-07-04
-version: '1.4.6'
+# Information added by Drupal.org packaging script on 2022-09-22
+version: '1.5.0'
 project: 'acquia_cms_common'
-datestamp: 1656942084
+datestamp: 1663875415

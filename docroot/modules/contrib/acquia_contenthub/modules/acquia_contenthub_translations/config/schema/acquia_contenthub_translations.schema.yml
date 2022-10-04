@@ -1,0 +1,38 @@
+acquia_contenthub_translations.settings:
+  type: config_object
+  label: 'Acquia ContentHub translation settings'
+  mapping:
+    selective_language_import:
+      type: boolean
+      label: 'Enable the selective language syndication'
+    override_translation:
+      type: boolean
+      label: 'Allow overriding locally modified translation'
+    undesired_languages:
+      type: sequence
+      label: 'Undesired languages'
+      sequence:
+        type: string
+        label: 'Undesired languages'
+    nt_entity_registry:
+      type: mapping
+      label: 'Non-translatable entity registry'
+      mapping:
+        unspecified:
+          type: sequence
+          label: 'Unspecified entities'
+          sequence:
+            type: acquia_contenthub_translations.nt_entity_registry.unspecified.[%key]
+        handler_mapping:
+          type: sequence
+          label: 'Mapped entities'
+          sequence:
+            type: acquia_contenthub_translations.nt_entity_registry.handler_mapping.[%key]
+
+acquia_contenthub_translations.nt_entity_registry.unspecified.*:
+  label: 'Unspecified list'
+  type: label
+
+acquia_contenthub_translations.nt_entity_registry.handler_mapping.*:
+  label: 'Mapped entities'
+  type: label

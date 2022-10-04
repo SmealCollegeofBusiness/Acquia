@@ -20,7 +20,7 @@ function hook_acsf_registry() {
         // contain a namespace declaration.
         'class' => '\Drupal\your_module\YourClassName',
         // 'path' is necessary only if the location is non-standard:
-        'path' => drupal_get_path('module', 'your_module') . '/classes',
+        'path' => \Drupal::service('extension.list.module')->getPath('your_module') . '/classes',
       ],
     ],
   ];

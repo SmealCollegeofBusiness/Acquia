@@ -15,6 +15,7 @@ use Symfony\Component\Yaml\Yaml as SymfonyYaml;
 class CohesionFileStorage extends FileStorage {
 
   const FILE_INDEX_FILENAME = 'sitestudio_package_files.json';
+  const FILE_METADATA_PREFIX = 'sitestudio_file_metadata';
 
   /**
    * {@inheritDoc}
@@ -154,9 +155,19 @@ class CohesionFileStorage extends FileStorage {
    * @return array
    *   The files info.
    */
-  public function getFilesJson() {
+  public function getFiles() {
     $files = [];
-    if (file_exists($this->directory . '/' . self::FILE_INDEX_FILENAME)) {
+
+    // Attempt to load individual metadata files.
+    $extension = parent::getFileExtension();
+    $metadata_files = parent::listAll(self::FILE_METADATA_PREFIX);
+    foreach ($metadata_files as $metadata_file) {
+      $metadata_file_content = file_get_contents($this->directory . '/' . $metadata_file . '.' . $extension);
+      $files[] = Yaml::decode($metadata_file_content);
+    }
+
+    // If no individual files found and index file exists - use index file.
+    if (empty($files) && file_exists($this->directory . '/' . self::FILE_INDEX_FILENAME)) {
       $files_content = file_get_contents($this->directory . '/' . self::FILE_INDEX_FILENAME);
       if ($files_content) {
         $files = json_decode($files_content, TRUE);
@@ -164,6 +175,13 @@ class CohesionFileStorage extends FileStorage {
     }
 
     return $files;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function listAll($prefix = '') {
+    return array_diff(parent::listAll(), parent::listAll(self::FILE_METADATA_PREFIX));
   }
 
   /**
@@ -188,6 +206,13 @@ class CohesionFileStorage extends FileStorage {
         if ($file instanceof FileInterface) {
           // Builds file entry structure for index.
           $entry = $this->buildFileExportEntry($file);
+          $data = SymfonyYaml::dump($entry, PHP_INT_MAX, 2, SymfonyYaml::DUMP_EXCEPTION_ON_INVALID_TYPE + SymfonyYaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+          try {
+            $this->getFileSystem()->saveData($data, $this->directory . self::FILE_METADATA_PREFIX . '.' . $file->uuid() . '.' . parent::getFileExtension(), FileSystemInterface::EXISTS_REPLACE);
+          }
+          catch (\Exception $e) {
+            throw new InvalidDataTypeException($e->getMessage(), $e->getCode(), $e);
+          }
           $files[$file->getConfigDependencyName()] = $entry;
           $file_destination = $this->directory . $entry['filename'];
 
@@ -195,11 +220,6 @@ class CohesionFileStorage extends FileStorage {
           $exported_files++;
         }
       }
-    }
-
-    if (!empty($files)) {
-      // Saves files index.
-      $this->getFileSystem()->saveData(json_encode($files, JSON_PRETTY_PRINT), $this->directory . self::FILE_INDEX_FILENAME, FileSystemInterface::EXISTS_REPLACE);
     }
 
     return $exported_files;
@@ -236,6 +256,9 @@ class CohesionFileStorage extends FileStorage {
 
     // Get all the field values into the struct.
     foreach ($entity->getFields() as $field_key => $value) {
+      if ($field_key === 'fid') {
+        continue;
+      }
       // Get the value of the field.
       if ($value = $entity->get($field_key)->getValue()) {
         $value = reset($value);

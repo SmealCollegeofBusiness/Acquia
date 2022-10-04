@@ -1,0 +1,100 @@
+services:
+  acquia_contenthub_translations.config:
+    class: Drupal\Core\Config\Config
+    factory: config.factory:getEditable
+    arguments: ['acquia_contenthub_translations.settings']
+
+  acquia_contenthub_translations.undesired_language_registrar:
+    class: Drupal\acquia_contenthub_translations\UndesiredLanguageRegistry\UndesiredLanguageRegistrar
+    arguments: [ '@acquia_contenthub_translations.config', '@acquia_contenthub_translations.logger_channel']
+
+  acquia_contenthub_translations.entity:
+    class: Drupal\acquia_contenthub_translations\Data\EntityTranslations
+    arguments: ['@database']
+
+  acquia_contenthub_translations.tracking:
+    class: Drupal\acquia_contenthub_translations\Data\EntityTranslationsTracker
+    arguments: ['@database']
+
+  acquia_contenthub_translations.manager:
+    class: Drupal\acquia_contenthub_translations\EntityTranslationsManager
+    arguments: ['@acquia_contenthub_translations.entity', '@acquia_contenthub_translations.tracking', '@database']
+
+  acquia_contenthub_translations.logger_channel:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: [ 'acquia_contenthub_translations' ]
+
+  acquia_contenthub_translations.prune_languages_from_cdf:
+    class: Drupal\acquia_contenthub_translations\EventSubscriber\PruneCdf\PruneLanguagesFromCdf
+    arguments: ['@acquia_contenthub_translations.undesired_language_registrar', '@acquia_contenthub_translations.config', '@language_manager', '@acquia_contenthub_translations.logger_channel', '@acquia_contenthub_translations.manager', '@acquia_contenthub_translations.nt_entity_handler.context']
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub_translations.track_translations_on_parse:
+    class: Drupal\acquia_contenthub_translations\EventSubscriber\ParseCdf\TrackTranslations
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub_translations.translation_facilitator:
+    class: Drupal\acquia_contenthub_translations\TranslationFacilitator
+    arguments: [ '@acquia_contenthub_translations.manager' ]
+
+  acquia_contenthub_translations.handler.deletion:
+    class: Drupal\acquia_contenthub_translations\OperationHandler\TranslationDeletionHandler
+    arguments: ['@acquia_contenthub_translations.manager', '@acquia_contenthub_translations.logger_channel']
+
+  acquia_contenthub_translations.handler.update:
+    class: Drupal\acquia_contenthub_translations\OperationHandler\TranslationUpdateHandler
+    arguments: [ '@acquia_contenthub_translations.manager', '@acquia_contenthub_translations.logger_channel', '@acquia_contenthub_translations.config' ]
+
+  acquia_contenthub_translations.parse_cdf.delete_undesired_translations:
+    class: Drupal\acquia_contenthub_translations\EventSubscriber\ParseCdf\DeleteUndesiredTranslations
+    arguments: ['@acquia_contenthub_translations.handler.deletion']
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub_translations.handle_webhook.import_translatable_assets:
+    class: Drupal\acquia_contenthub_translations\EventSubscriber\HandleWebhook\ImportUpdateTranslatableAssets
+    decorates: acquia_contenthub_subscriber.handle_webhook.import_assets
+    arguments:
+      - '@queue'
+      - '@acquia_contenthub_subscriber.tracker'
+      - '@acquia_contenthub_subscriber.logger_channel'
+      - '@config.factory'
+      - '@acquia_contenthub.cdf_metrics_manager'
+      - '@acquia_contenthub_translations.logger_channel'
+      - '@language_manager'
+      - '@acquia_contenthub_translations.undesired_language_registrar'
+
+  acquia_contenthub_translations.entity_data_tamper.normalize_field_values:
+    class: Drupal\acquia_contenthub_translations\EventSubscriber\EntityDataTamper\NormalizeFieldValues
+    arguments: ['@acquia_contenthub_translations.manager']
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub_translations.nt_entity_handler.context:
+    class: Drupal\acquia_contenthub_translations\EntityHandler\NonTranslatableEntityHandlerContext
+    arguments: ['@acquia_contenthub_translations.nt_entity_handler.registry']
+
+  acquia_contenthub_translations.nt_entity_handler.removable:
+    class: Drupal\acquia_contenthub_translations\EntityHandler\Removable
+    tags:
+      - { name: nt_entity_handler, id: removable }
+
+  acquia_contenthub_translations.nt_entity_handler.language_flexible:
+    class: Drupal\acquia_contenthub_translations\EntityHandler\LanguageFlexible
+    arguments: ['@language_manager', '@acquia_contenthub.logger_channel']
+    tags:
+      - { name: nt_entity_handler, id: flexible }
+
+  acquia_contenthub_translations.nt_entity_handler.undefined:
+    class: Drupal\acquia_contenthub_translations\EntityHandler\Unspecified
+    arguments: ['@acquia_contenthub_translations.logger_channel', '@acquia_contenthub_translations.nt_entity_handler.registry']
+    tags:
+      - { name: nt_entity_handler, id: unspecified }
+
+  acquia_contenthub_translations.nt_entity_handler.registry:
+    class: Drupal\acquia_contenthub_translations\EntityHandler\HandlerRegistry
+    arguments:
+      ['@acquia_contenthub_translations.config']

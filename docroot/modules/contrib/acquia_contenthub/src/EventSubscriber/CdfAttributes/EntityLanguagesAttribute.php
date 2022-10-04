@@ -44,6 +44,7 @@ class EntityLanguagesAttribute implements EventSubscriberInterface {
       $cdf = $event->getCdf();
       $metadata = $cdf->getMetadata();
       $metadata['languages'] = $values;
+      $metadata['translatable'] = $entity->isTranslatable();
       $cdf->setMetadata($metadata);
     }
   }

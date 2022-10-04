@@ -31,6 +31,11 @@ final class LinkProviderTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'serialization',
     'jsonapi',
@@ -65,7 +70,7 @@ final class LinkProviderTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     NodeType::create(['type' => 'article', 'name' => 'Article'])->save();
     $node = Node::create(['type' => 'article', 'title' => 'Test Node']);
@@ -143,6 +148,26 @@ final class LinkProviderTest extends BrowserTestBase {
       Cache::invalidateTags(['test_jsonapi_hypermedia_cache_tag']);
       $cache_miss_link = $this->getLink($link_location, $link_key, $expected_on_document_types);
       $this->assertNotSame($cache_hit_link, $cache_miss_link);
+    }
+  }
+
+  /**
+   * Tests that this module works with consumer_image_styles.
+   *
+   * @dataProvider pluginDefinitionTemplates
+   */
+  public function testConsumerImageStylesCompatibility($plugin_template): void {
+    $modules_available = $this->container->get('extension.list.module')
+      ->getAllAvailableInfo();
+
+    if (array_key_exists('consumer_image_styles', $modules_available)) {
+      $this->container->get('module_installer')->install(['consumer_image_styles']);
+      // Ensure we have an up-to-date container.
+      $this->container = $this->kernel->rebuildContainer();
+      $this->testLinkProviders($plugin_template);
+    }
+    else {
+      $this->markTestSkipped('Cannot test compatibility with consumer_image_styles because it is not available.');
     }
   }
 

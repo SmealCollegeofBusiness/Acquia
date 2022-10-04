@@ -51,7 +51,7 @@ class EntityReferenceUser extends EmailField {
         if ($sample_field->getSetting('target_type') !== 'user') {
           continue;
         }
-        $field_options[$entity_type_id . ':' . $field_name] = $sample_field->label() . ' (' . $entity_type->getLabel() . ')';
+        $field_options[$entity_type_id . ':' . $field_name] = $sample_field->getLabel() . ' (' . $entity_type->getLabel() . ')';
       }
     }
     return [

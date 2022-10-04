@@ -7,6 +7,8 @@ use Acquia\ContentHubClient\CDFAttribute;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\CdfAttributesEvent;
 use Drupal\acquia_contenthub\EventSubscriber\CdfAttributes\UserDataCdfAttribute;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\depcalc\DependentEntityWrapper;
 use Drupal\Tests\UnitTestCase;
 use Drupal\user\UserInterface;
@@ -24,6 +26,11 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class UserDataCdfAttributeTest extends UnitTestCase {
 
   /**
+   * Entity uuid.
+   */
+  protected const ENTITY_UUID = '3f0b403c-4093-4caa-ba78-37df21125f09';
+
+  /**
    * Event dispatcher.
    *
    * @var \Symfony\Component\EventDispatcher\EventDispatcher
@@ -38,15 +45,20 @@ class UserDataCdfAttributeTest extends UnitTestCase {
   private $cdf;
 
   /**
+   * User mock entity.
+   *
+   * @var \Drupal\user\UserInterface|\Prophecy\Prophecy\ObjectProphecy
+   */
+  protected $entity;
+
+  /**
    * {@inheritdoc}
    */
   protected function setup(): void {
     parent::setUp();
 
-    $this->cdf = $this->getMockBuilder(CDFObject::class)
-      ->disableOriginalConstructor()
-      ->addMethods([])
-      ->getMock();
+    $this->cdf = new CDFObject('drupal8_content_entity', self::ENTITY_UUID, date('c'), date('c'), self::ENTITY_UUID, []);
+    $this->entity = $this->prophesize(UserInterface::class);
 
     $this->dispatcher = new EventDispatcher();
     $this->dispatcher->addSubscriber(new UserDataCdfAttribute());
@@ -60,20 +72,15 @@ class UserDataCdfAttributeTest extends UnitTestCase {
    *
    * @dataProvider populateUserNameAttributeProvider
    */
-  public function testPopulateUserNameAttribute(array $data) {
-    /** @var \Drupal\user\UserInterface $entity */
-    $entity = $this->getMockBuilder(UserInterface::class)
-      ->disableOriginalConstructor()
-      ->addMethods([])
-      ->getMockForAbstractClass();
+  public function testPopulateUserNameAttribute(array $data): void {
 
-    $entity->method('label')->willReturn($data);
-    $entity->method('getEntityTypeId')->willReturn('user');
-    $entity->method('uuid')->willReturn('3f0b403c-4093-4caa-ba78-37df21125f09');
+    $this->entity->label()->willReturn($data);
+    $this->entity->isAnonymous()->willReturn(TRUE);
+    $this->mockUserEntity();
 
-    $wrapper = new DependentEntityWrapper($entity);
+    $wrapper = new DependentEntityWrapper($this->entity->reveal());
 
-    $event = new CdfAttributesEvent($this->cdf, $entity, $wrapper);
+    $event = new CdfAttributesEvent($this->cdf, $this->entity->reveal(), $wrapper);
     $this->dispatcher->dispatch($event, AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES);
 
     $attribute = $event->getCdf()->getAttribute('username');
@@ -92,20 +99,15 @@ class UserDataCdfAttributeTest extends UnitTestCase {
    *
    * @dataProvider populateUserNameAttributeProvider
    */
-  public function testIsAnonymousAttributePopulation(array $data) {
-    /** @var \Drupal\user\UserInterface $entity */
-    $entity = $this->getMockBuilder(UserInterface::class)
-      ->disableOriginalConstructor()
-      ->onlyMethods([])
-      ->getMockForAbstractClass();
-    $entity->method('label')->willReturn($data);
-    $entity->method('getEntityTypeId')->willReturn('user');
-    $entity->method('isAnonymous')->willReturn(TRUE);
-    $entity->method('uuid')->willReturn('3f0b403c-4093-4caa-ba78-37df21125f09');
+  public function testIsAnonymousAttributePopulation(array $data): void {
+    $this->entity->label()->willReturn($data);
+    $this->entity->isAnonymous()->willReturn(TRUE);
 
-    $wrapper = new DependentEntityWrapper($entity);
+    $this->mockUserEntity();
 
-    $event = new CdfAttributesEvent($this->cdf, $entity, $wrapper);
+    $wrapper = new DependentEntityWrapper($this->entity->reveal());
+
+    $event = new CdfAttributesEvent($this->cdf, $this->entity->reveal(), $wrapper);
     $this->dispatcher->dispatch($event, AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES);
 
     $attribute = $event->getCdf()->getAttribute('is_anonymous');
@@ -128,21 +130,15 @@ class UserDataCdfAttributeTest extends UnitTestCase {
    *
    * @dataProvider populateMailAttributeProvider
    */
-  public function testMailAttributePopulation($user_name, $email) {
-    /** @var \Drupal\user\UserInterface $entity */
-    $entity = $this->getMockBuilder(UserInterface::class)
-      ->disableOriginalConstructor()
-      ->onlyMethods([])
-      ->getMockForAbstractClass();
-    $entity->method('label')->willReturn($user_name);
-    $entity->method('getEntityTypeId')->willReturn('user');
-    $entity->method('isAnonymous')->willReturn(FALSE);
-    $entity->method('getEmail')->willReturn($email);
-    $entity->method('uuid')->willReturn('3f0b403c-4093-4caa-ba78-37df21125f09');
+  public function testMailAttributePopulation(string $user_name, string $email): void {
+    $this->entity->label()->willReturn($user_name);
+    $this->entity->isAnonymous()->willReturn(FALSE);
+    $this->entity->getEmail()->willReturn($email);
+    $this->mockUserEntity();
 
-    $wrapper = new DependentEntityWrapper($entity);
+    $wrapper = new DependentEntityWrapper($this->entity->reveal());
 
-    $event = new CdfAttributesEvent($this->cdf, $entity, $wrapper);
+    $event = new CdfAttributesEvent($this->cdf, $this->entity->reveal(), $wrapper);
     $this->dispatcher->dispatch($event, AcquiaContentHubEvents::POPULATE_CDF_ATTRIBUTES);
 
     $attribute = $event->getCdf()->getAttribute('mail');
@@ -161,7 +157,7 @@ class UserDataCdfAttributeTest extends UnitTestCase {
    * @return array
    *   Data sets.
    */
-  public function populateUserNameAttributeProvider() {
+  public function populateUserNameAttributeProvider(): array {
     return [
       [['user name']],
       [['']],
@@ -174,11 +170,29 @@ class UserDataCdfAttributeTest extends UnitTestCase {
    * @return array
    *   Data sets.
    */
-  public function populateMailAttributeProvider() {
+  public function populateMailAttributeProvider(): array {
     return [
       ['user name', 'example@example.com'],
       ['', 'example@example.com'],
     ];
+  }
+
+  /**
+   * Mocks field definition for the entity.
+   */
+  protected function mockUserEntity(): void {
+    $lang = 'en';
+    $this->entity->getTranslationLanguages()->willReturn([$lang => $lang]);
+    $this->entity->getTranslation($lang)->willReturn($this->entity->reveal());
+    $this->entity->getEntityTypeId()->willReturn('user');
+    $this->entity->uuid()->willReturn(self::ENTITY_UUID);
+    $this->entity->id()->willReturn(1);
+    $field_definition = $this->prophesize(FieldDefinitionInterface::class);
+    $field_name = 'body';
+    $field = $this->prophesize(FieldItemListInterface::class);
+    $field->getValue()->willReturn('');
+    $this->entity->getFieldDefinitions()->willReturn([$field_name => $field_definition->reveal()]);
+    $this->entity->get($field_name)->willReturn($field);
   }
 
 }

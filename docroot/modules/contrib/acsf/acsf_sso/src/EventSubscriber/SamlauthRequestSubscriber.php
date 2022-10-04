@@ -43,7 +43,10 @@ class SamlauthRequestSubscriber implements EventSubscriberInterface {
         'idp_single_log_out_service' => $site->factory_url . '/sso/saml2/idp/SingleLogoutService.php',
         'sp_private_key' => $site->saml_keys['sp_private_key'],
         'sp_x509_certificate' => $site->saml_keys['sp_x509_certificate'],
+        // Only one of the following two needs to be set: idp_x509_certificate
+        // for samlauth <= 3.2 and idp_certs for >= 3.3.
         'idp_x509_certificate' => $site->saml_keys['idp_x509_certificate'],
+        'idp_certs' => [$site->saml_keys['idp_x509_certificate']],
       ];
     }
 
@@ -55,6 +58,7 @@ class SamlauthRequestSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
+    $events = [];
     $events[KernelEvents::REQUEST][] = ['injectSamlConfig'];
     return $events;
   }

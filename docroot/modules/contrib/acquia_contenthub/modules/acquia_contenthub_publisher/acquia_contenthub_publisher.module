@@ -121,7 +121,7 @@ function _acquia_contenthub_publisher_save_publisher_settings_submit(array &$for
  * Implements hook_cron().
  */
 function acquia_contenthub_publisher_cron() {
-  _acquia_contenthub_dispatch_not_confirmed_entities_event();
+  _acquia_contenthub_publisher_dispatch_not_confirmed_entities_event();
 }
 
 /**
@@ -161,7 +161,7 @@ function _acquia_contenthub_publisher_get_threshold_stale_items_options() {
 /**
  * Dispatches "NOT_CONFIRMED_ENTITIES_FOUND" event.
  */
-function _acquia_contenthub_dispatch_not_confirmed_entities_event() {
+function _acquia_contenthub_publisher_dispatch_not_confirmed_entities_event() {
   /** @var \Drupal\Core\Config\Config $config */
   $config = \Drupal::service('config.factory')->get('acquia_contenthub_publisher.settings');
   $threshold_stale_entities = $config->get('threshold_stale_entities');
@@ -204,14 +204,32 @@ function _acquia_contenthub_dispatch_not_confirmed_entities_event() {
 }
 
 /**
- * Implements hook_entity_presave()
+ * Implements hook_entity_presave().
  */
-function acquia_contenthub_publisher_entity_presave(EntityInterface $entity) {
+function acquia_contenthub_publisher_paragraph_presave(ParagraphInterface $entity) {
   // Enforces paragraph entity to have same revision id, if entity not changed.
-  if ($entity instanceof ParagraphInterface && !$entity->isChanged()) {
-    $revision_flag = \Drupal::config('acquia_contenthub_publisher.features')->get('paragraphs_unchanged_disable_revision') ?? TRUE;
-    if ($revision_flag) {
-      $entity->setNewRevision(FALSE);
-    }
+  $revision_flag = \Drupal::config('acquia_contenthub_publisher.features')->get('paragraphs_unchanged_disable_revision') ?? TRUE;
+  if ($revision_flag && !_acquia_contenthub_publisher_is_paragraph_changed($entity)) {
+    $entity->setNewRevision(FALSE);
   }
+}
+
+/**
+ * Checks if current revision of paragraph is updated.
+ *
+ * @param \Drupal\paragraphs\ParagraphInterface $entity
+ *   The paragraph entity.
+ *
+ * @return bool
+ *   Returns true if current version of paragraph is changed.
+ */
+function _acquia_contenthub_publisher_is_paragraph_changed(ParagraphInterface $entity): bool {
+  $original = $entity->original;
+  // Forces direct retrieval from entity storage.
+  $entity->original = NULL;
+  $changed = $entity->isChanged();
+  // Reset to original state.
+  $entity->original = $original;
+
+  return $changed;
 }

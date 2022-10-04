@@ -24,13 +24,13 @@ class AcsfSiteTest extends TestCase {
    * @var int
    */
   // phpcs:disable
-  public $site_id = 12345678;
+  public $site_id = 12_345_678;
   // phpcs:enable
 
   /**
    * Setup.
    */
-  public function setUp() {
+  public function setUp(): void {
     // Simulate the sites.json configuration.
     $GLOBALS['gardens_site_settings']['conf']['acsf_site_id'] = $this->site_id;
 
@@ -49,8 +49,8 @@ class AcsfSiteTest extends TestCase {
       'true' => TRUE,
       'false' => FALSE,
       'string' => 'unit_test_string_value',
-      'int' => mt_rand(0, 64),
-      'float' => mt_rand() / mt_getrandmax(),
+      'int' => random_int(0, 64),
+      'float' => random_int(0, mt_getrandmax()) / mt_getrandmax(),
       'array' => ['foo', 'bar', 'baz', 'qux'],
     ];
 
@@ -64,7 +64,7 @@ class AcsfSiteTest extends TestCase {
    */
   public function testFactoryLoadCache() {
     $site = AcsfSite::load();
-    $this->assertInstanceOf('\Drupal\acsf\AcsfSite', $site);
+    $this->assertInstanceOf(\Drupal\acsf\AcsfSite::class, $site);
 
     $cache = AcsfSite::load();
     $this->assertSame($site, $cache);
@@ -162,7 +162,7 @@ class AcsfSiteTest extends TestCase {
   /**
    * Cleanup Mockery on each test. (PHPUnit 5 does not support listeners.)
    */
-  public function tearDown() {
+  public function tearDown(): void {
     Mockery::close();
   }
 

@@ -13,6 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Defines the form to configure the Content Hub connection settings.
@@ -252,11 +253,12 @@ class ContentHubSettingsForm extends ConfigFormBase {
     if ($webhook_is_disabled) {
       $webhook_description .= ' <b>' . $this->t('To re-enable the webhook please click "Update Public URL" button.') . '</b>';
     }
+    $request = Request::createFromGlobals();
     $form['settings']['webhook'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Publicly Accessible URL'),
       '#required' => TRUE,
-      '#default_value' => $this->settings->getWebhook() ?: $GLOBALS['base_url'],
+      '#default_value' => $this->settings->getWebhook() ?: $request->getSchemeAndHttpHost(),
       '#description' => $webhook_description,
       '#disabled' => $webhook_is_disabled,
     ];

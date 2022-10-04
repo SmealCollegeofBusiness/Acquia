@@ -8,7 +8,6 @@ Soundcloud integration for Drupal.
    bundle.
 3. Under **Media source** select Soundcloud.
 4. Save the bundle.
-5. Add a field to the bundle to store the soundcloud url.
 
 ## Configuration
 
@@ -16,6 +15,11 @@ Soundcloud integration for Drupal.
 2. For the source field selected, select **Soundcloud embed** under **Format**.
 3. Click on the settings icon to configure the embedded player.
 4. Save.
+
+## Player configuration
+1. Type: Visual or Classic
+2. Options: Autoplay, Hide related, Show comments, Show user, Show reposts.
+3. Width and height
 
 ## License
 

@@ -4,12 +4,9 @@ namespace Drupal\acquia_cms_common\Commands;
 
 use Consolidation\AnnotatedCommand\CommandData;
 use Consolidation\AnnotatedCommand\CommandError;
-use Consolidation\AnnotatedCommand\CommandResult;
 use Drupal\acquia_cms_common\Services\AcmsUtilityService;
 use Drupal\acquia_cms_site_studio\Facade\CohesionFacade;
-use Drupal\Component\Serialization\Yaml;
 use Drupal\config\StorageReplaceDataWrapper;
-use Drupal\Core\Config\ConfigManagerInterface;
 use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\StorageComparer;
 use Drupal\Core\Config\StorageInterface;
@@ -89,16 +86,6 @@ final class AcmsConfigImportCommands extends DrushCommands {
   protected $acmsUtilityService;
 
   /**
-   * Get configuration manager.
-   *
-   * @return \Drupal\Core\Config\ConfigManagerInterface
-   *   The ConfigManagerInterface.
-   */
-  public function getConfigManager() {
-    return $this->configManager;
-  }
-
-  /**
    * Get config storage object.
    *
    * @return \Drupal\Core\Config\StorageInterface
@@ -131,8 +118,6 @@ final class AcmsConfigImportCommands extends DrushCommands {
   /**
    * The class constructor.
    *
-   * @param \Drupal\Core\Config\ConfigManagerInterface $configManager
-   *   The ConfigManagerInterface.
    * @param \Drupal\Core\Config\StorageInterface $configStorage
    *   The StorageInterface.
    * @param \Drush\Drupal\Commands\config\ConfigImportCommands $configImportCommands
@@ -147,7 +132,6 @@ final class AcmsConfigImportCommands extends DrushCommands {
    *   The acquia cms service.
    */
   public function __construct(
-    ConfigManagerInterface $configManager,
     StorageInterface $configStorage,
     ConfigImportCommands $configImportCommands,
     TranslationInterface $stringTranslation,
@@ -156,7 +140,6 @@ final class AcmsConfigImportCommands extends DrushCommands {
     AcmsUtilityService $acmsUtilityService
     ) {
     parent::__construct();
-    $this->configManager = $configManager;
     $this->configStorage = $configStorage;
     $this->configImportCommands = $configImportCommands;
     $this->stringTranslation = $stringTranslation;
@@ -260,9 +243,8 @@ final class AcmsConfigImportCommands extends DrushCommands {
    *   Array of acms modules.
    */
   private function getAcmsModules(): array {
-    // Start with the profile itself.
-    $acms_modules = ['acquia_cms'];
-    $acms_extensions = $this->acmsUtilityService->getAcquiaCmsProfileModuleList();
+    $acms_modules = [];
+    $acms_extensions = $this->acmsUtilityService->getAcquiaCmsModuleList();
     foreach ($acms_extensions as $key => $module) {
       if ($module->getType() === 'module') {
         $acms_modules[] = $key;
@@ -306,7 +288,7 @@ final class AcmsConfigImportCommands extends DrushCommands {
    * @throws \Exception
    */
   private function doImport(array $package, string $scope, array $delete_list) {
-    $config_files = $ss_config_files = [];
+    $config_files = $modules = [];
     if (in_array($scope, ['config', 'all'])) {
       foreach ($package as $module) {
         $config_files = array_merge($config_files, $this->getConfigFiles($module));
@@ -320,16 +302,19 @@ final class AcmsConfigImportCommands extends DrushCommands {
 
     // Build site studio packages.
     if (in_array($scope, ['site-studio', 'all'])) {
-      foreach ($package as $module) {
-        $ss_config_files = array_merge($ss_config_files, $this->getSiteStudioPackage($module));
+      foreach ($package as $module_name) {
+        $modules[$module_name] = $this->moduleHandler->getModule($module_name);
       }
+      $ss_packages = $this->cohesionFacade->buildPackageList($modules);
       // Confirm the site studio changes before import.
-      if ($this->buildSiteStudioChangeList($ss_config_files)) {
-        if (!$this->io()->confirm(dt('Import these site studio configuration changes?'))) {
+      if ($this->buildSiteStudioChangeList($ss_packages)) {
+        if (!$this->io()->confirm(dt('Are you sure you want to reset these site studio packages?'))) {
           throw new UserAbortException();
         }
         // Import the site studio configurations.
-        $this->importSiteStudioPackage($ss_config_files);
+        if ($this->cohesionFacade->importSiteStudioPackages($ss_packages)) {
+          drush_backend_batch_process();
+        }
       }
       else {
         $this->io()->success('No site studio package to import.');
@@ -351,12 +336,12 @@ final class AcmsConfigImportCommands extends DrushCommands {
       return FALSE;
     }
     $rows = [];
-    foreach ($ss_config_files as $name) {
-      $rows[] = [$name];
+    foreach ($ss_config_files as $package) {
+      $rows[] = [$package['source']['module_name'], $package['source']['path']];
     }
     // Show warning if site-studio is in scope.
     $this->io()->warning("This can have unintended side effects for existing pages built using previous versions of components, it might literally break them, and should be tested in a non-production environment first.");
-    $this->io()->table(['Configuration'], $rows);
+    $this->io()->table(['Module name', 'Package path'], $rows);
     return TRUE;
   }
 
@@ -377,7 +362,7 @@ final class AcmsConfigImportCommands extends DrushCommands {
 
     // Get optional configuration list for specified module.
     if (file_exists($source_optional)) {
-      $source_storage_dir = ConfigCommands::getDirectory(NULL, $source_optional);
+      $source_storage_dir = ConfigCommands::getDirectory($source_optional);
       $source_storage = new FileStorage($source_storage_dir);
       foreach ($source_storage->listAll() as $name) {
         $config_files[$name] = $source_storage->read($name);
@@ -389,7 +374,7 @@ final class AcmsConfigImportCommands extends DrushCommands {
 
     // Now get default configurations.
     if (file_exists($source_install)) {
-      $source_storage_dir = ConfigCommands::getDirectory(NULL, $source_install);
+      $source_storage_dir = ConfigCommands::getDirectory($source_install);
       $source_storage = new FileStorage($source_storage_dir);
       foreach ($source_storage->listAll() as $name) {
         $config_files[$name] = $source_storage->read($name);
@@ -407,7 +392,7 @@ final class AcmsConfigImportCommands extends DrushCommands {
    */
   private function removeDependentFiles(array &$config_files) {
     $enabled_extensions = $this->acmsUtilityService->getEnabledExtensions();
-    $all_config = $active_storage = $this->getConfigStorage()->listAll();
+    $all_config = $this->getConfigStorage()->listAll();
     $all_config = array_combine($all_config, $all_config);
     foreach ($config_files as $config_name => $data) {
       // Remove configuration where its dependencies cannot be met.
@@ -416,47 +401,6 @@ final class AcmsConfigImportCommands extends DrushCommands {
         unset($config_files[$config_name]);
       }
     }
-  }
-
-  /**
-   * Get the site studio package for given module.
-   *
-   * @param string $module
-   *   The name of module.
-   *
-   * @return array
-   *   The array of site studio package.
-   */
-  private function getSiteStudioPackage(string $module): array {
-    $dir = $this->moduleHandler->getModule($module)->getPath();
-    $list = "$dir/config/dx8/packages.yml";
-    if (file_exists($list)) {
-      $list = file_get_contents($list);
-
-      $map = function (string $package) use ($dir) {
-        return "$dir/$package";
-      };
-      return array_map($map, Yaml::decode($list));
-    }
-    return [];
-  }
-
-  /**
-   * Get all required operations to import site studio packages.
-   *
-   * @param array $packages
-   *   The packages to import.
-   *
-   * @throws \Exception
-   */
-  private function importSiteStudioPackage(array $packages) {
-    $operations = [];
-    foreach ($packages as $package) {
-      $operations = array_merge($operations, $this->cohesionFacade->importPackage($package));
-    }
-    $batch = ['operations' => $operations];
-    batch_set($batch);
-    drush_backend_batch_process();
   }
 
   /**
@@ -492,7 +436,7 @@ final class AcmsConfigImportCommands extends DrushCommands {
     if ($delete_list) {
       foreach ($delete_list as $del_config_item) {
         // Allow for accidental .yml extension.
-        if (substr($del_config_item, -4) === '.yml') {
+        if (substr($del_config_item, '.yml')) {
           $del_config_item = substr($del_config_item, 0, -4);
         }
         if ($source_storage->exists($del_config_item)) {
@@ -500,8 +444,7 @@ final class AcmsConfigImportCommands extends DrushCommands {
         }
       }
     }
-    $config_manager = $this->getConfigManager();
-    $storage_comparer = new StorageComparer($source_storage, $active_storage, $config_manager);
+    $storage_comparer = new StorageComparer($source_storage, $active_storage);
     if (!$storage_comparer->createChangelist()->hasChanges()) {
       $this->logger()->notice(('There are no changes to import.'));
       exit();
@@ -619,21 +562,6 @@ final class AcmsConfigImportCommands extends DrushCommands {
       }
     }
     return TRUE;
-  }
-
-  /**
-   * Execute site studio rebuild after Acquia CMS config reset.
-   *
-   * @hook post-command acms:config-reset
-   */
-  public function acmsConfigResetPostCommand($result, CommandData $commandData) {
-    $scope = $commandData->input()->getOption('scope');
-    if (in_array($scope, ['site-studio', 'all'])) {
-      $this->say(dt('Rebuilding all entities.'));
-      $result = $this->acmsUtilityService->rebuildSiteStudio();
-      $this->yell('Finished rebuilding.');
-      return is_array($result) && isset(array_shift($result)['error']) ? CommandResult::exitCode(self::EXIT_FAILURE) : CommandResult::exitCode(self::EXIT_SUCCESS);
-    }
   }
 
 }

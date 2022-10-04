@@ -1,0 +1,5 @@
+selective_language_import: FALSE
+override_translation: FALSE
+nt_entity_registry:
+  unspecified: {  }
+  handler_mapping: {  }

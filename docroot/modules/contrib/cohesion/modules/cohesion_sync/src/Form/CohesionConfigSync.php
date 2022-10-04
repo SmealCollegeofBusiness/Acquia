@@ -231,7 +231,7 @@ class CohesionConfigSync extends FormBase {
     $source_list = $syncStorage->listAll();
     $storage_comparer = new CohesionStorageComparer($syncStorage, $this->activeStorage, $this->usageUpdateManager);
 
-    $files = $this->syncStorage->getFilesJson();
+    $files = $this->syncStorage->getFiles();
     $path = Settings::get('site_studio_sync', COHESION_SYNC_DEFAULT_DIR);
     $file_sync_event = new SiteStudioSyncFilesEvent($files, $path);
     $this->eventDispatcher->dispatch($file_sync_event::CHANGES, $file_sync_event);

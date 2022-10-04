@@ -142,7 +142,7 @@ class NotConfirmedEntitiesTest extends EntityKernelTestBase {
     $this->setThreshold($threshold);
     $this->setRequestTime($request_time);
 
-    _acquia_contenthub_dispatch_not_confirmed_entities_event();
+    _acquia_contenthub_publisher_dispatch_not_confirmed_entities_event();
 
     $this->assertEquals($expected_items, $this->actualItems);
   }

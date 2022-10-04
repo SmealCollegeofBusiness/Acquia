@@ -115,13 +115,8 @@ class Connection extends DatabaseConnection {
       \PDO::ATTR_STRINGIFY_FETCHES => TRUE,
     ];
 
-    $connection_options += [
-      'immediate_transactions' => FALSE,
-    ];
-    $connection_class = $connection_options['immediate_transactions'] ? __NAMESPACE__ . '\PDOConnection' : '\PDO';
-
     try {
-      $pdo = new $connection_class('sqlite:' . $connection_options['database'], '', '', $connection_options['pdo']);
+      $pdo = new \PDO('sqlite:' . $connection_options['database'], '', '', $connection_options['pdo']);
     }
     catch (\PDOException $e) {
       if ($e->getCode() == static::DATABASE_NOT_FOUND) {

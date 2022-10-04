@@ -5,19 +5,47 @@
  * Install, update and uninstall functions for the acquia_cms_page module.
  */
 
+use Drupal\node\Entity\NodeType;
+use Drupal\user\RoleInterface;
+
 /**
  * Implements hook_install().
  */
 function acquia_cms_page_install() {
-  user_role_grant_permissions('content_author', [
-    'create page content',
-    'edit own page content',
-    'delete own page content',
-  ]);
-  user_role_grant_permissions('content_editor', [
-    'edit any page content',
-    'delete any page content',
-  ]);
+  // Set default node revision delete configuration for Page content type.
+  $moduleHandler = \Drupal::service('module_handler');
+  if ($moduleHandler->moduleExists('node_revision_delete')) {
+    $type = NodeType::load('page');
+    if ($type) {
+      $type->setThirdPartySetting('node_revision_delete', 'minimum_revisions_to_keep', '30');
+      $type->setThirdPartySetting('node_revision_delete', 'minimum_age_to_delete', '0');
+      $type->setThirdPartySetting('node_revision_delete', 'when_to_delete', '0');
+      $type->save();
+    }
+  }
+}
+
+/**
+ * Implements hook_content_model_role_presave_alter().
+ */
+function acquia_cms_page_content_model_role_presave_alter(RoleInterface &$role) {
+  switch ($role->id()) {
+    case 'content_author':
+      foreach ([
+        'create page content',
+        'edit own page content',
+        'delete own page content',
+      ] as $permission) {
+        $role->grantPermission($permission);
+      }
+      break;
+
+    case 'content_editor':
+      foreach (['edit any page content', 'delete any page content'] as $permission) {
+        $role->grantPermission($permission);
+      }
+      break;
+  }
 }
 
 /**
@@ -25,4 +53,48 @@ function acquia_cms_page_install() {
  */
 function acquia_cms_page_module_preinstall($module) {
   \Drupal::service('acquia_cms_common.utility')->setModulePreinstallTriggered($module);
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Update node type conditions from node_type to entity_bundle.
+ */
+function acquia_cms_page_update_8001() {
+  // Load all pattern configuration entities.
+  $pattern_config = \Drupal::configFactory()->getEditable('pathauto.pattern.page');
+
+  // Loop patterns and swap the node_type plugin by the entity_bundle:node
+  // plugin.
+  if ($pattern_config->get('type') === 'canonical_entities:node') {
+    $selection_criteria = $pattern_config->get('selection_criteria');
+    foreach ($selection_criteria as $uuid => $condition) {
+      if ($condition['id'] === 'node_type') {
+        $pattern_config->set("selection_criteria.$uuid.id", 'entity_bundle:node');
+        $pattern_config->save();
+        break;
+      }
+    }
+  }
+}
+
+/**
+ * Remove Page:Node Revision Delete settings if site studio is not installed.
+ */
+function acquia_cms_page_update_8002() {
+  $moduleHandler = \Drupal::service('module_handler');
+  if (!$moduleHandler->moduleExists('node_revision_delete')) {
+    $node = NodeType::load('page');
+    if ($node) {
+      // Getting the config file.
+      $third_party_settings = $node->get('third_party_settings');
+      // Checking if the config exists.
+      if (isset($third_party_settings['node_revision_delete'])) {
+        // Deleting the value from the array.
+        unset($third_party_settings['node_revision_delete']);
+        // Saving the values in the config.
+        $node->set('third_party_settings', $third_party_settings)->save();
+      }
+    }
+  }
 }

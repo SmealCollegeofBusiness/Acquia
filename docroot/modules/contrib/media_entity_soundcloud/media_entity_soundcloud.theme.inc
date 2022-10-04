@@ -29,6 +29,11 @@ function template_preprocess_media_soundcloud_embed(&$variables) {
     $query[$option] = $value == '0' ? 'false' : 'true';
   }
 
+  // Add color.
+  if (!empty($variables['color'])) {
+    $query['color'] = $variables['color'];
+  }
+
   $url = Url::fromUri($uri, ['query' => $query]);
   $variables['url'] = $url->toString();
 }

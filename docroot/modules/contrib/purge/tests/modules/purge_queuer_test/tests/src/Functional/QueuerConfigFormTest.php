@@ -3,7 +3,7 @@
 namespace Drupal\Tests\purge_queuer_test\Functional;
 
 use Drupal\purge_queuer_test\Form\QueuerConfigForm;
-use Drupal\Tests\purge_ui\Functional\Form\Config\QueuerConfigFormTestBase;
+use Drupal\Tests\purge_ui\FunctionalJavascript\Form\Config\QueuerConfigFormTestBase;
 
 /**
  * Tests \Drupal\purge_queuer_test\Form\QueuerConfigForm.

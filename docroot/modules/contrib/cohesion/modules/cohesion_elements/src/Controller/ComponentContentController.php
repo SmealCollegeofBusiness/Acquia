@@ -4,23 +4,75 @@ namespace Drupal\cohesion_elements\Controller;
 
 use Drupal\cohesion\CohesionJsonResponse;
 use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
+use Drupal\cohesion_elements\CustomComponentsService;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\cohesion_elements\Entity\Component;
+use Drupal\cohesion_elements\Entity\ComponentCategory;
 use Drupal\cohesion_elements\Entity\ComponentContent;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Path\PathValidatorInterface;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class CohesionEndpointController.
- *
- * Returns Drupal data to Angular (views, blocks, node lists, etc).
- * See function index() for the entry point.
+ * Component content controller.
  *
  * @package Drupal\cohesion\Controller
  */
 class ComponentContentController extends ControllerBase {
+
+  /**
+   * The language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $language_manager;
+
+  /**
+   * The path validator.
+   *
+   * @var \Drupal\Core\Path\PathValidatorInterface
+   */
+  protected $pathValidator;
+
+  /**
+   * Custom Components service.
+   *
+   * @var \Drupal\cohesion_elements\CustomComponentsService
+   */
+  protected $customComponentsService;
+
+  /**
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   * The language manager.
+   * @param \Drupal\Core\Path\PathValidatorInterface $pathValidator
+   * The path validator.
+   * @param \Drupal\cohesion_elements\CustomComponentsService $customComponentsService
+   * The custom components service.
+   */
+  public function __construct(
+    LanguageManagerInterface $language_manager,
+    PathValidatorInterface $pathValidator,
+    CustomComponentsService $customComponentsService
+  ) {
+    $this->language_manager = $language_manager;
+    $this->pathValidator = $pathValidator;
+    $this->customComponentsService = $customComponentsService;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('language_manager'),
+      $container->get('path.validator'),
+      $container->get('custom.components')
+    );
+  }
 
   /**
    * This is an endpoint to retrieve all instances of a global component.
@@ -42,7 +94,7 @@ class ComponentContentController extends ControllerBase {
 
     if ($exclude_path) {
       /** @var \Drupal\Core\Url $url_object */
-      if ($url_object = \Drupal::service('path.validator')->getUrlIfValid($exclude_path)) {
+      if ($url_object = $this->pathValidator->getUrlIfValid($exclude_path)) {
         $route_parameters = $url_object->getrouteParameters();
 
         if (isset($route_parameters['component_content'])) {
@@ -61,7 +113,7 @@ class ComponentContentController extends ControllerBase {
         continue;
       }
 
-      $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+      $language = $this->language_manager->getCurrentLanguage()->getId();
 
       if ($component_content->hasTranslation($language)) {
         $component_content = $component_content->getTranslation($language);
@@ -75,13 +127,17 @@ class ComponentContentController extends ControllerBase {
         /** @var \Drupal\Core\Entity\Plugin\DataType\EntityAdapter $entityAdapter */
         $entityAdapter = $entityReference->getTarget();
 
-        // Component content entity exists, but no component config.
-        if (!$entityAdapter) {
-          continue;
+        if ($entityAdapter) {
+          /** @var \Drupal\cohesion_elements\Entity\Component $component */
+          $component = $entityAdapter->getValue();
         }
-
-        /** @var \Drupal\cohesion_elements\Entity\Component $component */
-        $component = $entityAdapter->getValue();
+        else {
+          $id = $entityReference->getTargetIdentifier();
+          if ($custom_component = $this->customComponentsService->getComponent($id)) {
+            $formatted_component = $this->customComponentsService->formatAsComponent([$custom_component]);
+            $component = reset($formatted_component);
+          }
+        }
 
         if (!isset($data[$component->id()])) {
           $data[$component->id()] = [
@@ -182,7 +238,7 @@ class ComponentContentController extends ControllerBase {
       }
     }
 
-    $error = !empty($components) ? FALSE : TRUE;
+    $error = empty($components);
     return new CohesionJsonResponse([
       'status' => !$error ? 'success' : 'error',
       'data' => $components,
@@ -249,7 +305,7 @@ class ComponentContentController extends ControllerBase {
           // Create a new component content.
           $component_content = ComponentContent::create([
             'title' => $component_name,
-            'component' => NULL,
+            'component' => $element->getComponentID(),
           ]);
 
           $layout = CohesionLayout::create([
@@ -305,15 +361,26 @@ class ComponentContentController extends ControllerBase {
 
         $entities = $this->entityTypeManager->getStorage($entityType->id())->loadMultiple($query->execute());
 
+        // Format the custom components as components.
+        if ($custom_components = $this->customComponentsService->getComponentsInCategory(ComponentCategory::load($category->id()))) {
+          $custom_components = $this->customComponentsService
+            ->formatAsComponent($custom_components);
+        }
+
+        // Count UI & Custom components.
+        $count = $query->count()->execute() + count($custom_components);
+
         // Build the accordions.
         $build[$entityType->id()][$category->id()]['accordion'] = [
           '#type' => 'details',
           '#open' => FALSE,
-          '#title' => $category->label() . ' (' . $query->count()->execute() . ')',
+          '#title' => $category->label() . ' (' . $count . ')',
         ];
 
+        $all_components = array_merge($entities, $custom_components);
+
         // Build the accordion group tables.
-        $this->buildTable($build[$entityType->id()][$category->id()]['accordion'], $entityType, $category, $entities);
+        $this->buildTable($build[$entityType->id()][$category->id()]['accordion'], $entityType, $category, $all_components);
       }
     }
 

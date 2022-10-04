@@ -3,14 +3,12 @@
 namespace Drupal\acquia_contenthub_publisher\Commands;
 
 use Drupal\acquia_contenthub\Client\ClientFactory;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\Url;
 use Drush\Commands\DrushCommands;
-use Drush\Log\LogLevel;
 
 /**
  * Drush commands for Acquia Content Hub Publishers.
@@ -25,30 +23,28 @@ class AcquiaContentHubPublisherCommands extends DrushCommands {
    * @var \Drupal\Core\Database\Connection
    */
   protected $database;
-  /**
-   * The Content Hub Configuration.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  protected $config;
+
   /**
    * Content Hub Client Factory.
    *
    * @var \Drupal\acquia_contenthub\Client\ClientFactory
    */
   protected $clientFactory;
+
   /**
    * Logger Service.
    *
    * @var \Drupal\Core\Logger\LoggerChannelInterface
    */
-  protected $logger;
+  protected $chLogger;
+
   /**
    * State Service.
    *
    * @var \Drupal\Core\State\StateInterface
    */
   protected $state;
+
   /**
    * Module Handler Service.
    *
@@ -61,8 +57,6 @@ class AcquiaContentHubPublisherCommands extends DrushCommands {
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The Config Factory.
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The Client Factory.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger
@@ -72,11 +66,10 @@ class AcquiaContentHubPublisherCommands extends DrushCommands {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The Module Handler Service.
    */
-  public function __construct(Connection $database, ConfigFactoryInterface $config_factory, ClientFactory $client_factory, LoggerChannelFactoryInterface $logger, StateInterface $state, ModuleHandlerInterface $module_handler) {
+  public function __construct(Connection $database, ClientFactory $client_factory, LoggerChannelFactoryInterface $logger, StateInterface $state, ModuleHandlerInterface $module_handler) {
     $this->database = $database;
-    $this->config = $config_factory->get('acquia_contenthub.admin_settings');
     $this->clientFactory = $client_factory;
-    $this->logger = $logger->get('acquia_contenthub_publisher');
+    $this->chLogger = $logger->get('acquia_contenthub_publisher');
     $this->state = $state;
     $this->moduleHandler = $module_handler;
   }
@@ -90,7 +83,7 @@ class AcquiaContentHubPublisherCommands extends DrushCommands {
   public function upgrade() {
     // Only proceed if there still exists a legacy tracking table.
     if (!$this->database->schema()->tableExists('acquia_contenthub_entities_tracking')) {
-      $this->logger->log(LogLevel::CANCEL, dt('Legacy tracking table does not exist.'));
+      $this->chLogger->warning(dt('Legacy tracking table does not exist.'));
       return;
     }
 
@@ -111,7 +104,7 @@ class AcquiaContentHubPublisherCommands extends DrushCommands {
             '@code' => $response['error']['code'],
             '@reason' => $response['error']['message'],
           ]);
-          $this->logger->log(LogLevel::ERROR, $message);
+          $this->chLogger->error($message);
           return;
         }
       }

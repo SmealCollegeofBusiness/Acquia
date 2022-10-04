@@ -30,7 +30,7 @@ function acsf_sj_requirements($phase) {
       ];
     }
     else {
-      $process = new Process($binary_path);
+      $process = new Process([$binary_path]);
       $success = FALSE;
       $message = '';
 

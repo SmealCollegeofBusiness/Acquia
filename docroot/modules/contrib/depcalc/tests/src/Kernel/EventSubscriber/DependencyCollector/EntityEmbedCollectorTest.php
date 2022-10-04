@@ -2,12 +2,16 @@
 
 namespace Drupal\Tests\depcalc\Kernel\EventSubscriber\DependencyCollector;
 
+use Drupal\Component\Utility\Html;
 use Drupal\depcalc\DependencyStack;
 use Drupal\depcalc\DependentEntityWrapper;
-use Drupal\Tests\entity_embed\Kernel\EntityEmbedFilterTestBase;
+use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 
 /**
- * Class EntityEmbedCollectorTest.
+ * The EntityEmbedCollectorTest class.
  *
  * @requires module entity_embed
  *
@@ -15,7 +19,18 @@ use Drupal\Tests\entity_embed\Kernel\EntityEmbedFilterTestBase;
  *
  * @package Drupal\Tests\depcalc\Kernel\EventSubscriber\DependencyCollector
  */
-class EntityEmbedCollectorTest extends EntityEmbedFilterTestBase {
+class EntityEmbedCollectorTest extends KernelTestBase {
+
+  use NodeCreationTrait;
+  use UserCreationTrait;
+  use ContentTypeCreationTrait;
+
+  /**
+   * The UUID to use for the embedded entity.
+   *
+   * @var string
+   */
+  const EMBEDDED_ENTITY_UUID = 'e7a3e1fe-b69b-417e-8ee4-c80cb7640e63';
 
   /**
    * The UUID to use for the embedded entity.
@@ -54,8 +69,26 @@ class EntityEmbedCollectorTest extends EntityEmbedFilterTestBase {
     parent::setUp();
 
     $this->installEntitySchema('path_alias');
+    $this->installEntitySchema('node');
+    $this->installEntitySchema('user');
+    $this->installConfig('filter');
+    $this->installConfig('node');
 
-    $this->drupalCreateNode([
+    // Create a user with required permissions. Ensure that we don't use user 1
+    // because that user is treated in special ways by access control handlers.
+    $user = $this->createUser([
+      'access content',
+    ]);
+    $this->container->set('current_user', $user);
+
+    // Create a sample node to be embedded.
+    $this->createContentType(['type' => 'page', 'name' => 'Basic page']);
+
+    $this->createNode([
+      'title' => 'Embed Test Node',
+      'uuid' => static::EMBEDDED_ENTITY_UUID,
+    ]);
+    $this->createNode([
       'title' => 'Embed Test Node 2',
       'uuid' => static::EMBEDDED_ENTITY_UUID_2,
     ]);
@@ -79,7 +112,7 @@ class EntityEmbedCollectorTest extends EntityEmbedFilterTestBase {
       $embed_code .= $this->createEmbedCode($embed_attribute);
     }
 
-    $node = $this->drupalCreateNode([
+    $node = $this->createNode([
       'body' => [
         [
           'value' => $embed_code,
@@ -101,6 +134,27 @@ class EntityEmbedCollectorTest extends EntityEmbedFilterTestBase {
       $this->assertArrayHasKey($embed_attribute['data-entity-uuid'], $dependencies);
     }
 
+  }
+
+  /**
+   * Gets an embed code with given attributes.
+   *
+   * @param array $attributes
+   *   The attributes to add.
+   *
+   * @return string
+   *   A string containing a drupal-entity dom element.
+   *
+   * @see EntityEmbedFilterTestBase::createEmbedCode()
+   */
+  protected function createEmbedCode(array $attributes): string {
+    $dom = Html::load('<drupal-entity>This placeholder should not be rendered.</drupal-entity>');
+    $xpath = new \DOMXPath($dom);
+    $drupal_entity = $xpath->query('//drupal-entity')[0];
+    foreach ($attributes as $attribute => $value) {
+      $drupal_entity->setAttribute($attribute, $value);
+    }
+    return Html::serialize($dom);
   }
 
   /**

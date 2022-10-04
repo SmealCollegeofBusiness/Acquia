@@ -142,16 +142,19 @@ class GoogleMapApiKeyForm extends ConfigFormBase {
     $cohesion_module_libraries = \Drupal::keyValue('cohesion.elements.asset.libraries');
     $gmap_lib = $cohesion_module_libraries->get('element_templates.google-map');
 
-    // Alter Google Maps API key.
-    array_walk_recursive($gmap_lib, function (&$value, $key) use (&$form_state) {
-      if ('asset_url' == $key && (strpos($value, 'maps.googleapis.com') !== FALSE) && (strpos($value, 'key') !== FALSE) && $form_state instanceof FormStateInterface) {
-        $url_parts = parse_url($value);
-        $value = str_replace($url_parts['query'], 'key=' . $form_state->getValue("google_map_api_key"), $value);
-      }
-    });
+    // Check if gmap_lib is set and value is in array.
+    if (!empty($gmap_lib) && is_array($gmap_lib)) {
+      // Alter Google Maps API key.
+      array_walk_recursive($gmap_lib, function (&$value, $key) use (&$form_state) {
+        if ('asset_url' == $key && (strpos($value, 'maps.googleapis.com') !== FALSE) && (strpos($value, 'key') !== FALSE) && $form_state instanceof FormStateInterface) {
+          $url_parts = parse_url($value);
+          $value = str_replace($url_parts['query'], 'key=' . $form_state->getValue("google_map_api_key"), $value);
+        }
+      });
 
-    // Override Google Maps API key settings in keyValue storage.
-    $cohesion_module_libraries->set('element_templates.google-map', $gmap_lib);
+      // Override Google Maps API key settings in keyValue storage.
+      $cohesion_module_libraries->set('element_templates.google-map', $gmap_lib);
+    }
 
     // Invalidate "libray_info" tag so that udated map api key is loaded.
     \Drupal::service('cache_tags.invalidator')->invalidateTags(['library_info']);

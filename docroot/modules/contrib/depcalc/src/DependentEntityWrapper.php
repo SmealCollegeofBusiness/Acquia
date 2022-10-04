@@ -3,6 +3,7 @@
 namespace Drupal\depcalc;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
@@ -92,7 +93,7 @@ class DependentEntityWrapper implements DependentEntityWrapperInterface {
     $this->entityTypeId = $entity->getEntityTypeId();
     $this->id = $entity->id();
     $uuid = $entity->uuid();
-    $this->hash = sha1(json_encode($entity->toArray()));
+    $this->hash = $this->calculateHash($entity);
     if (empty($uuid)) {
       throw new \Exception(sprintf("The entity of type %s by id %s does not have a UUID. This indicates a larger problem with your application and should be remedied before attempting to calculate dependencies.", $this->entityTypeId, $this->id));
     }
@@ -101,10 +102,72 @@ class DependentEntityWrapper implements DependentEntityWrapperInterface {
   }
 
   /**
+   * Calculates hash of an entity using its translations.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity in hand.
+   *
+   * @return string
+   *   The calculated sha1 hash.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public function calculateHash(EntityInterface $entity): string {
+    if (!$entity instanceof ContentEntityInterface) {
+      return sha1(json_encode($entity->toArray()));
+    }
+    $langs = array_keys($entity->getTranslationLanguages());
+    $vals = [];
+    foreach ($langs as $lang) {
+      $translation = $entity->getTranslation($lang);
+      $vals[$lang] = $this->getNormalizedEntityArray($translation);
+    }
+
+    return sha1(json_encode($vals));
+  }
+
+  /**
+   * Returns a normalized array of the entity in hand.
+   *
+   * Entity field values are not always representing the actual state. While
+   * in certain cases that could be fine, the hash calculation needs to be
+   * accurate in order to achieve more performant caching.
+   * Reason: https://www.drupal.org/project/drupal/issues/2978521
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity to transform.
+   *
+   * @return array
+   *   The entity field values.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public function getNormalizedEntityArray(ContentEntityInterface $entity): array {
+    $values = [];
+    foreach ($entity->getFieldDefinitions() as $name => $definition) {
+      $val = $entity->get($name)->getValue();
+      if (!empty($val) && ($definition->getType() === 'entity_reference' || $definition->getType() === 'entity_reference_revision')) {
+        $type = $definition->getSetting('target_type');
+        foreach ($val as $i => $item) {
+          $sub_entity = \Drupal::entityTypeManager()->getStorage($type)->load($item['target_id']);
+          if (!$sub_entity) {
+            unset($val[$i]);
+          }
+        }
+
+      }
+      $values[$name] = $val;
+    }
+    return $values;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getEntity() {
-    return \Drupal::service("entity.repository")->loadEntityByUuid($this->getEntityTypeId(), $this->getUuid());
+    return \Drupal::entityTypeManager()->getStorage($this->entityTypeId)->load($this->id);
   }
 
   /**
@@ -158,7 +221,7 @@ class DependentEntityWrapper implements DependentEntityWrapperInterface {
       // Add this dependency to direct child dependency array.
       if ($direct_child && !array_key_exists($dependency->getUuid(), $this->childDependencies)) {
         // Minimal data needed to load this child entity.
-        $this->childDependencies[$dependency->getUuid()] = $dependency->getUuid();
+        $this->childDependencies[$dependency->getUuid()] = $dependency->getHash();
       }
       if (!$stack->hasDependency($dependency->getUuid())) {
         $stack->addDependency($dependency);

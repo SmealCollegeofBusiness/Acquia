@@ -37,3 +37,9 @@ function workbench_email_update_8001() {
 function workbench_email_update_8002() {
 }
 
+/**
+ * Empty update to trigger config schema cache update.
+ */
+function workbench_email_update_8003() {
+}
+

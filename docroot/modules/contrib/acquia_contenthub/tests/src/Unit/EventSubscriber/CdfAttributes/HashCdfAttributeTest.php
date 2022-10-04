@@ -7,7 +7,7 @@ use Acquia\ContentHubClient\CDFAttribute;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\CdfAttributesEvent;
 use Drupal\acquia_contenthub\EventSubscriber\CdfAttributes\HashCdfAttribute;
-use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\depcalc\DependentEntityWrapper;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -22,6 +22,11 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  * @covers \Drupal\acquia_contenthub\EventSubscriber\CdfAttributes\HashCdfAttribute
  */
 class HashCdfAttributeTest extends UnitTestCase {
+
+  /**
+   * Entity uuid.
+   */
+  protected const ENTITY_UUID = '3f0b403c-4093-4caa-ba78-37df21125f09';
 
   /**
    * Event dispatcher.
@@ -58,9 +63,9 @@ class HashCdfAttributeTest extends UnitTestCase {
    *
    * @dataProvider onPopulateAttributesProvider
    */
-  public function testOnPopulateAttributes(string $type, string $uuid, string $created, string $modified, string $origin, array $metadata) {
-    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    $entity = $this->getMockBuilder(ContentEntityInterface::class)
+  public function testOnPopulateAttributes(string $type, string $uuid, string $created, string $modified, string $origin, array $metadata): void {
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $entity */
+    $entity = $this->getMockBuilder(ConfigEntityInterface::class)
       ->disableOriginalConstructor()
       ->getMock();
     $entity->method('uuid')->willReturn($uuid);
@@ -89,24 +94,24 @@ class HashCdfAttributeTest extends UnitTestCase {
    * @return array
    *   Data sets.
    */
-  public function onPopulateAttributesProvider() {
+  public function onPopulateAttributesProvider(): array {
     return [
       [
-        'drupal8_content_entity',
-        '3f0b403c-4093-4caa-ba78-37df21125f09',
+        'drupal8_config_entity',
+        self::ENTITY_UUID,
         date('c'),
         date('c'),
-        '3f0b403c-4093-4caa-ba78-37df21125f09',
+        self::ENTITY_UUID,
         [
           'data' => 'ZW46CiAgdXVpZDogZjc1NzM4OTAtNTRlMi00MmZhLTk2YzQtYTA4ZmZjZTZjOGExCiAgbGFuZ2NvZGU6IGVuCiAgc3RhdHVzOiB0cnVlCiAgZGVwZW5kZW5jaWVzOiB7ICB9CiAgbmFtZTogJ1Rlc3QgQ29udGVudCBUeXBlICMyJwogIHR5cGU6IHRlc3RfY29udGVudF90eXBlMgogIGRlc2NyaXB0aW9uOiBudWxsCiAgaGVscDogbnVsbAogIG5ld19yZXZpc2lvbjogdHJ1ZQogIHByZXZpZXdfbW9kZTogMQogIGRpc3BsYXlfc3VibWl0dGVkOiB0cnVlCg==',
         ],
       ],
       [
-        'drupal8_content_entity',
-        '3f0b403c-4093-4caa-ba78-37df21125f09',
+        'drupal8_config_entity',
+        self::ENTITY_UUID,
         date('c'),
         date('c'),
-        '3f0b403c-4093-4caa-ba78-37df21125f09',
+        self::ENTITY_UUID,
         [
           'data' => 'eyJ1dWlkIjp7InZhbHVlIjp7ImVuIjp7InZhbHVlIjoiZWQ0ZWQ0NzgtMGI5YS00NmU4LWI0OGMtNmVkM2U2ODEyYjdjIn19fSwidHlwZSI6eyJ2YWx1ZSI6eyJlbiI6IjgyMDhmMjA3LTc1YzUtNDU4Yy04M2Q3LWM0ZWM2ZDE0NjMxYSJ9fSwicmV2aXNpb25fdGltZXN0YW1wIjp7InZhbHVlIjp7ImVuIjp7InZhbHVlIjoiMTU3MTMwOTM1MiJ9fX0sInJldmlzaW9uX3VpZCI6eyJ2YWx1ZSI6eyJlbiI6WyI2NGYwZGQ0My1hY2ZjLTQzNTAtYjc1Yy1kOTNlZTkzZWVhYTgiXX19LCJyZXZpc2lvbl9sb2ciOltdLCJzdGF0dXMiOnsidmFsdWUiOnsiZW4iOiIxIn19LCJ1aWQiOnsidmFsdWUiOnsiZW4iOlsiNjRmMGRkNDMtYWNmYy00MzUwLWI3NWMtZDkzZWU5M2VlYWE4Il19fSwidGl0bGUiOnsidmFsdWUiOnsiZW4iOiJcIm8kQnA2ey4sUWVnTnxGPiYuOitjPVV9S0x0ckYuIn19LCJjcmVhdGVkIjp7InZhbHVlIjp7ImVuIjp7InZhbHVlIjoiMTU3MTMwOTM1MiJ9fX0sImNoYW5nZWQiOnsidmFsdWUiOnsiZW4iOnsidmFsdWUiOiIxNTcxMzA5MzUyIn19fSwicHJvbW90ZSI6eyJ2YWx1ZSI6eyJlbiI6IjEifX0sInN0aWNreSI6eyJ2YWx1ZSI6eyJlbiI6IjAifX0sImRlZmF1bHRfbGFuZ2NvZGUiOnsidmFsdWUiOnsiZW4iOiIxIn19LCJyZXZpc2lvbl9kZWZhdWx0Ijp7InZhbHVlIjp7ImVuIjoiMSJ9fSwicmV2aXNpb25fdHJhbnNsYXRpb25fYWZmZWN0ZWQiOnsidmFsdWUiOnsiZW4iOiIxIn19fQ==',
         ],

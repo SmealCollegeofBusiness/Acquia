@@ -10,8 +10,10 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Messenger\Messenger;
 use Drupal\Core\Form\SubformState;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -129,6 +131,33 @@ class TemplateForm extends EntityForm {
       '#type' => 'details',
       '#title' => $this->t('Email contents'),
       '#open' => TRUE,
+    ];
+
+    $form['contents']['format'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Format'),
+      '#options' => [
+        'plain_text' => $this->t('Plain text'),
+        'html' => $this->t('HTML'),
+      ],
+      '#default_value' => $workbench_email_template->getFormat(),
+      '#description' => $this->t('Email message format. <b>Warning:</b> Sending HTML email requires a third party module such as @swiftmailer, @symfony_mailer, @mimemail, or others.', [
+        '@swiftmailer' => Link::fromTextAndUrl($this->t('Swift Mailer'), Url::fromUri('https://www.drupal.org/project/swiftmailer', [
+          'attributes' => [
+            'target' => '_blank',
+          ],
+        ]))->toString(),
+        '@symfony_mailer' => Link::fromTextAndUrl($this->t('Symfony Mailer'), Url::fromUri('https://www.drupal.org/project/symfony_mailer', [
+          'attributes' => [
+            'target' => '_blank',
+          ],
+        ]))->toString(),
+        '@mimemail' => Link::fromTextAndUrl($this->t('Mime mail'), Url::fromUri('https://www.drupal.org/project/mimemail', [
+          'attributes' => [
+            'target' => '_blank',
+          ],
+        ]))->toString(),
+      ]),
     ];
 
     $form['contents']['subject'] = [

@@ -7,6 +7,7 @@ use Drupal\acquia_contenthub\AcquiaContentHubUnregisterHelperTrait;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubConnectionManager;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
+use Drupal\acquia_contenthub\Libs\Traits\ResponseCheckerTrait;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Form\FormBase;
@@ -25,6 +26,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class ContentHubDeleteClientConfirmForm extends FormBase {
 
   use AcquiaContentHubUnregisterHelperTrait;
+  use ResponseCheckerTrait;
 
   /**
    * The Content Hub connection manager.
@@ -217,7 +219,7 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
       return '';
     }
 
-    $remote_webhook = $this->getSelectedWebhookByUuid($remote_settings['webhooks'], $webhook_uuid);
+    $remote_webhook = $this->getSelectedWebhookByUuid($remote_settings['webhooks'] ?? [], $webhook_uuid);
     if (empty($remote_webhook)) {
       $logger->info(sprintf('Local configurations is out of sync, %s (%s) was not registered to Content Hub, but remained in configuration.', $settings->getWebhook(), $webhook_uuid));
       return '';
@@ -316,10 +318,24 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
   protected function unregisterClientNoWebhook(): void {
     $client_settings = $this->client->getSettings();
     $resp = $this->client->deleteClient($client_settings->getUuid());
-    if ($resp && $resp->getStatusCode() === 202) {
+    if ($this->isSuccessful($resp)) {
       $this->logger('acquia_contenthub')->info(
         sprintf('Client %s has been removed, no webhook was registered.', $client_settings->getName())
       );
+      $this->messenger()->addMessage($this->t('Client @name has been removed, no webhook was registered.', ['@name' => $client_settings->getName()]));
+    }
+    else {
+      $this->messenger()->addError('An error occurred during client removal.');
+      $this->logger('acquia_contenthub')->error('Client removal error: status code: @code - response: @resp',
+        [
+          '@code' => $resp->getStatusCode(),
+          '@resp' => (string) $resp->getBody(),
+        ]
+      );
+      // We do not know the nature of the error. The config should not be
+      // deleted in case of non-2xx error codes. A later attempt might
+      // be successful.
+      return;
     }
     $this->getContentHubConfig()->delete();
   }

@@ -1,2 +1,20 @@
 acquia/acquia-cms-starterkit:
   type: project
+
+# Do not install acquia_cms and Lightning modules.
+acquia/acquia_cms: ~
+drupal/lightning_core: ~
+drupal/lightning_api: ~
+drupal/lightning_layout: ~
+drupal/lightning_page: ~
+drupal/lightning_search: ~
+drupal/lightning_media: ~
+drupal/lightning_workflow: ~
+
+# Adding allowed composer plugins for ORCA.
+phpro/grumphp-shim:
+  type: composer-plugin
+webdriver-binary/binary-chromedriver:
+  type: composer-plugin
+wikimedia/composer-merge-plugin:
+  type: composer-plugin

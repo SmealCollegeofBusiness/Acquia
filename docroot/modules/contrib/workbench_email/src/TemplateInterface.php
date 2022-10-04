@@ -12,6 +12,14 @@ use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 interface TemplateInterface extends ConfigEntityInterface, EntityWithPluginCollectionInterface {
 
   /**
+   * Gets the template format.
+   *
+   * @return string
+   *   Template format, plain_text or HTML.
+   */
+  public function getFormat();
+
+  /**
    * Gets the template subject.
    *
    * @return string

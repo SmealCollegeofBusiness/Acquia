@@ -14,7 +14,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class SiteStudioSyncFilesSubscriber implements EventSubscriberInterface {
 
-  const ERROR_MESSAGE = 'Unable to write "%s" file to "%s", please check your permissions.';
+  const URI_ERROR_MESSAGE = 'Unable to parse uri "%s" for file "%s".';
+  const WRITE_ERROR_MESSAGE = 'Unable to write "%s" file to "%s", please check your permissions.';
+  const FILENAME_PATTERN = '%[a-zA-Z0-9\.\-\+\_ \(\)\[\]]+$%';
 
   /**
    * EntityTypeManager service.
@@ -95,11 +97,19 @@ class SiteStudioSyncFilesSubscriber implements EventSubscriberInterface {
    */
   public function handleFileImport(SiteStudioSyncFilesEvent $event) {
     $this->event = $event;
-    foreach ($event->getFiles() as $key => $file) {
-      $destination = substr($file['uri'], 0, strlen($file['uri']) - strlen($file['filename']));
+    foreach ($event->getFiles() as $file) {
+      $uri_filename = $this->getUriFilename($file['uri']);
+      if (empty($uri_filename)) {
+        $event->stopPropagation();
+        $error_message = sprintf(self::URI_ERROR_MESSAGE, $file['filename'], $file['uri']);
+        $this->logger->alert($error_message);
+        throw new \Exception($error_message);
+      }
+
+      $destination = substr($file['uri'], 0, strlen($file['uri']) - strlen($uri_filename));
       if ($this->fileSystem->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY) === FALSE) {
         $event->stopPropagation();
-        $error_message = sprintf(self::ERROR_MESSAGE, $file['filename'], $destination, $key);
+        $error_message = sprintf(self::WRITE_ERROR_MESSAGE, $file['filename'], $destination);
         $this->logger->alert($error_message);
         throw new \Exception($error_message);
       }
@@ -121,7 +131,7 @@ class SiteStudioSyncFilesSubscriber implements EventSubscriberInterface {
     $this->event = $event;
     $this->updatedFiles = [];
     $this->newFiles = [];
-    foreach ($event->getFiles() as $key => $file) {
+    foreach ($event->getFiles() as $file) {
       $existing_file = $this->loadExistingFile($file['uuid']);
 
       if ($existing_file instanceof FileInterface) {
@@ -210,7 +220,9 @@ class SiteStudioSyncFilesSubscriber implements EventSubscriberInterface {
       FileSystemInterface::EXISTS_REPLACE
     );
 
-    unset($incoming_file['fid']);
+    if (isset($incoming_file['fid'])) {
+      unset($incoming_file['fid']);
+    }
     $entity = $this->entityTypeManager
       ->getStorage('file')
       ->create($incoming_file);
@@ -257,6 +269,24 @@ class SiteStudioSyncFilesSubscriber implements EventSubscriberInterface {
    */
   protected function getIncomingFilePath(array $incoming_file) {
     return $this->event->getPath() . '/' . $incoming_file['filename'];
+  }
+
+  /**
+   * Finds and returns the filename from URI string.
+   *
+   * @param string $uri
+   *   Uri string.
+   *
+   * @return string
+   *   Filename part of the URI string.
+   */
+  protected function getUriFilename(string $uri): string {
+    $result = preg_match(self::FILENAME_PATTERN, $uri, $outcome);
+    if ($result === 1) {
+      return $outcome[0];
+    }
+
+    return '';
   }
 
 }

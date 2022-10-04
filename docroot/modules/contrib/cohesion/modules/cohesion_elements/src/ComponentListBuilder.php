@@ -2,7 +2,6 @@
 
 namespace Drupal\cohesion_elements;
 
-use Drupal\cohesion_elements\Entity\Component;
 use Drupal\cohesion_elements\Entity\ComponentCategory;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -82,21 +81,12 @@ class ComponentListBuilder extends ElementsListBuilder {
         $entities = $this->entityTypeManager->getStorage($this->entityType->id())->loadMultiple($query->execute());
 
         // Add custom components.
-        $customComponents = $this->customComponentsService->getComponentsInCategory(ComponentCategory::load($category->id()));
-
-        $customComponentEntities = [];
-        foreach ($customComponents as $customComponent) {
-          $customComponentEntities[$customComponent['machine_name']] = new Component([
-            'id' => $customComponent['machine_name'],
-            'label' => $customComponent['name'],
-            'category' => $customComponent['category']->id(),
-            'json_values' => $customComponent['form'],
-            'custom' => TRUE,
-          ], 'cohesion_component');
+        if ($custom_components = $this->customComponentsService->getComponentsInCategory(ComponentCategory::load($category->id()))) {
+          $custom_components = $this->customComponentsService->formatAsComponent($custom_components);
         }
 
         // Count UI & Custom components.
-        $count = $query->count()->execute() + count($customComponents);
+        $count = $query->count()->execute() + count($custom_components);
 
         // Build the accordions.
         $form[$this->entityType->id()][$category->id()]['accordion'] = [
@@ -106,7 +96,7 @@ class ComponentListBuilder extends ElementsListBuilder {
         ];
 
         // Build the accordion group tables.
-        $this->buildTable($form[$this->entityType->id()][$category->id()]['accordion'], $category, $entities, $customComponentEntities);
+        $this->buildTable($form[$this->entityType->id()][$category->id()]['accordion'], $category, $entities, $custom_components);
       }
     }
 

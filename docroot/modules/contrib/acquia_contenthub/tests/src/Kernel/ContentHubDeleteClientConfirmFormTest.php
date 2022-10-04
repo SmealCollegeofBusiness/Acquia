@@ -7,6 +7,7 @@ use Acquia\ContentHubClient\Settings;
 use Acquia\ContentHubClient\Webhook;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Form\ContentHubDeleteClientConfirmForm;
+use Drupal\acquia_contenthub_publisher\Form\Client\ClientDeleteConfirmForm;
 use Drupal\acquia_contenthub_test\MockDataProvider;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
@@ -14,6 +15,7 @@ use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTr
 use Drupal\Tests\acquia_contenthub\Kernel\Traits\WatchdogAssertsTrait;
 use Prophecy\Argument;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * Tests that Client is deleted if webhook is not available.
@@ -30,6 +32,11 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
 
   use WatchdogAssertsTrait;
   use AcquiaContentHubAdminSettingsTrait;
+
+  /**
+   * Client name.
+   */
+  protected const CLIENT_NAME = 'foo';
 
   /**
    * Content Hub client.
@@ -67,6 +74,13 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
   protected $configFactory;
 
   /**
+   * Client uuid.
+   *
+   * @var string
+   */
+  protected $uuid;
+
+  /**
    * {@inheritdoc}
    */
   protected static $modules = [
@@ -83,33 +97,42 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
   protected function setup(): void {
     parent::setUp();
 
+    $this->uuid = MockDataProvider::randomUuid();
     $this->settings = $this->prophesize(Settings::class);
-    $this->settings->getUuid()->willReturn('3a89ff1b-8869-419d-b931-f2282aca3e88');
-    $this->settings->getName()->willReturn('foo');
+    $this->settings->getUuid()->willReturn($this->uuid);
+    $this->settings->getName()->willReturn(self::CLIENT_NAME);
     $this->settings->getUrl()->willReturn('http://www.example.com');
     $this->settings->getApiKey()->willReturn('apikey');
     $this->settings->getSecretKey()->willReturn('apisecret');
 
     $this->clientFactory = $this->prophesize(ClientFactory::class);
     $this->client = $this->prophesize(ContentHubClient::class);
-    $delete_entity_response = $this->prophesize(ResponseInterface::class);
-    $delete_entity_response->getStatusCode()->willReturn(202);
+
+    $delete_client_response = $this->prophesize(ResponseInterface::class);
+    $delete_client_response->getStatusCode()->willReturn(200);
+    $stream_interface = $this->prophesize(StreamInterface::class);
+    $stream_interface->__toString()->willReturn('Body test data');
+    $delete_client_response->getBody()->willReturn($stream_interface->reveal());
+    $delete_client_response->getHeaders()->willReturn([]);
+    $delete_client_response->getHeader(Argument::any())->willReturn([]);
+    $delete_client_response->getProtocolVersion()->willReturn('');
+    $delete_client_response->withoutHeader(Argument::any())->willReturn($delete_client_response->reveal());
 
     $this->client
       ->getSettings()
       ->willReturn($this->settings->reveal());
 
     $this->client
-      ->deleteClient('3a89ff1b-8869-419d-b931-f2282aca3e88')
+      ->deleteClient($this->uuid)
       ->shouldBeCalled()
-      ->willReturn($delete_entity_response->reveal());
+      ->willReturn($delete_client_response);
 
     $this->client
       ->getWebHooks()
       ->willReturn($this->getWebHooks());
 
     $this->client
-      ->listEntities(['origin' => '3a89ff1b-8869-419d-b931-f2282aca3e88'])
+      ->listEntities(['origin' => $this->uuid])
       ->willReturn(MockDataProvider::mockListEntities());
 
     $this->clientFactory
@@ -135,8 +158,8 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
 
     $this->setConfirmForm();
 
-    $this->assertLogMessage('acquia_contenthub', 'Client foo has been removed, no webhook was registered.');
-    $this->assertLogMessage('acquia_contenthub', 'Local configurations is out of sync, http://www.example.com (3a89ff1b-8869-419d-b931-f2282aca3e88) was not registered to Content Hub, but remained in configuration.');
+    $this->assertLogMessage('acquia_contenthub', 'Client ' . self::CLIENT_NAME . ' has been removed, no webhook was registered.');
+    $this->assertLogMessage('acquia_contenthub', 'Local configurations is out of sync, http://www.example.com (' . $this->uuid . ') was not registered to Content Hub, but remained in configuration.');
 
     $this->assertEmptyConfigs();
   }
@@ -150,7 +173,7 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
 
     $this->setConfirmForm();
 
-    $this->assertLogMessage('acquia_contenthub', 'Client foo has been removed, no webhook was registered.');
+    $this->assertLogMessage('acquia_contenthub', 'Client ' . self::CLIENT_NAME . ' has been removed, no webhook was registered.');
     $this->assertLogMessage('acquia_contenthub', 'Webhook was not registered.');
 
     $this->assertEmptyConfigs();
@@ -165,10 +188,33 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
 
     $this->setConfirmForm();
 
-    $this->assertLogMessage('acquia_contenthub', 'Client foo has been removed, no webhook was registered.');
+    $this->assertLogMessage('acquia_contenthub', 'Client ' . self::CLIENT_NAME . ' has been removed, no webhook was registered.');
     $this->assertLogMessage('acquia_contenthub', 'The webhook is registered to other client. The configuration was outdated');
 
     $this->assertEmptyConfigs();
+  }
+
+  /**
+   * Tests when specific client is deleted.
+   */
+  public function testDeleteRemoteClient(): void {
+    $this->setClientFactory('delete_other_remote_client');
+    $this->assertNotEmptyConfigs();
+
+    $form_state = new FormState();
+    $ch_connection_manager = $this->container->get('acquia_contenthub.connection_manager');
+    $client_factory = $this->container->get('acquia_contenthub.client.factory');
+    $event_dispatcher = $this->container->get('event_dispatcher');
+
+    $client_form = new ClientDeleteConfirmForm($ch_connection_manager, $client_factory, $event_dispatcher);
+    $form = $client_form->buildForm([], $form_state, $this->uuid);
+    $form_state->setTriggeringElement($form['delete_client_without_webhook']);
+    $client_form->submitForm($form, $form_state);
+    $errors = $form_state->getErrors();
+    $this->assertEmpty($errors);
+
+    $this->assertLogMessage('acquia_contenthub', 'Client ' . self::CLIENT_NAME . ' has been removed, no webhook was registered.');
+    $this->assertNotEmptyConfigs();
   }
 
   /**
@@ -236,7 +282,7 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
    *   Represents test case for which client factory service container is set.
    */
   public function setClientFactory(string $case = ''): void {
-    $this->settings->getWebhook('uuid')->willReturn('3a89ff1b-8869-419d-b931-f2282aca3e88');
+    $this->settings->getWebhook('uuid')->willReturn($this->uuid);
     $this->settings->getWebhook()->willReturn('http://www.example.com');
 
     $this->setRemoteSettings($case);
@@ -244,6 +290,12 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
     $this->client
       ->getSettings()
       ->willReturn($this->settings->reveal());
+    $this->client
+      ->getClientByUuid($this->uuid)
+      ->willReturn([
+        'name' => self::CLIENT_NAME,
+        'uuid' => $this->uuid,
+      ]);
     $this->clientFactory
       ->getSettings()
       ->willReturn($this->settings->reveal());
@@ -269,12 +321,12 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
         $this->remoteSettings = [
           'clients' => [
             [
-              'name' => 'foo',
+              'name' => self::CLIENT_NAME,
               'uuid' => '3a89ff1b-8869-419d-b931-f2282aca3e89',
             ],
             [
               'name' => 'not_foo',
-              'uuid' => '3a89ff1b-8869-419d-b931-f2282aca3e88',
+              'uuid' => $this->uuid,
             ],
           ],
           'success' => TRUE,
@@ -284,7 +336,7 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
             'client_uuid' => '7b89ff1b-8869-419d-b931-f2282aca7e99',
             'disable_retries' => FALSE,
             'url' => 'http://www.example.com',
-            'uuid' => '3a89ff1b-8869-419d-b931-f2282aca3e88',
+            'uuid' => $this->uuid,
             'status' => 1,
           ],
           ],
@@ -292,12 +344,13 @@ class ContentHubDeleteClientConfirmFormTest extends KernelTestBase {
         ];
         break;
 
+      case 'delete_other_remote_client':
       case 'no_remote_webhook':
         $this->remoteSettings = [
           'clients' => [
             [
-              'name' => 'foo',
-              'uuid' => '3a89ff1b-8869-419d-b931-f2282aca3e88',
+              'name' => self::CLIENT_NAME,
+              'uuid' => $this->uuid,
             ],
           ],
           'success' => TRUE,

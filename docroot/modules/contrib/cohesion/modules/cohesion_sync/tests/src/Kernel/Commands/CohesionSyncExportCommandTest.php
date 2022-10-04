@@ -6,7 +6,6 @@ use Drupal\cohesion_sync\Commands\CohesionSyncExportCommand;
 use Drupal\cohesion_sync\Config\CohesionFileStorage;
 use Drupal\cohesion_sync\Config\CohesionFullPackageStorage;
 use Drupal\cohesion_sync\Config\CohesionPackageStorage;
-use Drupal\Component\Serialization\Json;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 
@@ -161,9 +160,9 @@ class CohesionSyncExportCommandTest extends EntityKernelTestBase {
     // Standalone image style.
     $this->assertFileNotExists($path . '/' . $image_style_standalone_name . '.yml', 'Standalone image style should not exist');
 
-    $this->assertFileExists($path . '/' . CohesionFileStorage::FILE_INDEX_FILENAME, 'Json for files should exist');
-    $json_file = Json::decode(file_get_contents($path . '/' . CohesionFileStorage::FILE_INDEX_FILENAME));
-    $this->assertArrayHasKey($result->getConfigDependencyName(), $json_file, 'Json for file should contain the file dependency name');
+    $this->assertFileExists($path . '/' . CohesionFileStorage::FILE_METADATA_PREFIX . '.' . $result->uuid() . '.yml', 'YML metadata files should exist');
+    $metadata = Yaml::decode(file_get_contents($path . '/' . CohesionFileStorage::FILE_METADATA_PREFIX . '.' . $result->uuid() . '.yml'));
+    $this->assertEquals($result->uuid(), $metadata['uuid']);
   }
 
 }

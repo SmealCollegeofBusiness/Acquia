@@ -18,7 +18,7 @@ class AcsfMessageTest extends TestCase {
   /**
    * Setup.
    */
-  public function setUp() {
+  public function setUp(): void {
     // The files in this directory can't be autoloaded as long as they don't
     // match their classes' namespaces.
     $files = [
@@ -58,7 +58,7 @@ class AcsfMessageTest extends TestCase {
     // Provide a compatible config object to check that no error is generated.
     // This isn't very precise since any error would make this test fail.
     $config = new AcsfConfigUnitTest('unit_test_site', 'unit_test_env');
-    $this->assertTrue(is_subclass_of($config, '\Drupal\acsf\AcsfConfig'));
+    $this->assertTrue(is_subclass_of($config, \Drupal\acsf\AcsfConfig::class));
     $message = new AcsfMessageUnitTestSuccess('TEST', 'unit_test_endpoint', [], $config);
   }
 

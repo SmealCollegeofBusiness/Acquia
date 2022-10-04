@@ -6,20 +6,29 @@
  */
 
 use Drupal\field\Entity\FieldConfig;
+use Drupal\user\RoleInterface;
 
 /**
- * Implements hook_install().
+ * Implements hook_content_model_role_presave_alter().
  */
-function acquia_cms_article_install() {
-  user_role_grant_permissions('content_author', [
-    'create article content',
-    'edit own article content',
-    'delete own article content',
-  ]);
-  user_role_grant_permissions('content_editor', [
-    'edit any article content',
-    'delete any article content',
-  ]);
+function acquia_cms_article_content_model_role_presave_alter(RoleInterface &$role) {
+  switch ($role->id()) {
+    case 'content_author':
+      foreach ([
+        'create article content',
+        'edit own article content',
+        'delete own article content',
+      ] as $permission) {
+        $role->grantPermission($permission);
+      }
+      break;
+
+    case 'content_editor':
+      foreach (['edit any article content', 'delete any article content'] as $permission) {
+        $role->grantPermission($permission);
+      }
+      break;
+  }
 }
 
 /**
@@ -48,5 +57,28 @@ function acquia_cms_article_update_8002() {
   if ($field instanceof FieldConfig && $field->isRequired()) {
     $field->setRequired(FALSE);
     $field->save();
+  }
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Update node type conditions from node_type to entity_bundle.
+ */
+function acquia_cms_article_update_8003() {
+  // Load all pattern configuration entities.
+  $pattern_config = \Drupal::configFactory()->getEditable('pathauto.pattern.article');
+
+  // Loop patterns and swap the node_type plugin by the entity_bundle:node
+  // plugin.
+  if ($pattern_config->get('type') === 'canonical_entities:node') {
+    $selection_criteria = $pattern_config->get('selection_criteria');
+    foreach ($selection_criteria as $uuid => $condition) {
+      if ($condition['id'] === 'node_type') {
+        $pattern_config->set("selection_criteria.$uuid.id", 'entity_bundle:node');
+        $pattern_config->save();
+        break;
+      }
+    }
   }
 }

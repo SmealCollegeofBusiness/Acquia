@@ -2,19 +2,21 @@
 
 namespace Drupal\acquia_contenthub_publisher\Form;
 
+use Drupal\acquia_contenthub\Libs\Traits\ResponseCheckerTrait;
 use Drupal\Core\Messenger\MessengerInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 
 /**
  * Trait for consistency in subscription manager form.
  */
 trait SubscriptionManagerFormTrait {
 
+  use ResponseCheckerTrait;
+
   /**
    * Returns the success status of the response.
    *
-   * @param \Psr\Http\Message\ResponseInterface $response
+   * @param \Psr\Http\Message\ResponseInterface|null $response
    *   The response object.
    * @param string $operation_label
    *   The label of an operation.
@@ -28,21 +30,20 @@ trait SubscriptionManagerFormTrait {
    * @return bool
    *   Whether the response is successful or is not.
    */
-  protected function isResponseSuccessful(ResponseInterface $response, $operation_label, $item_label, $uuid, MessengerInterface $messenger) {
-    if ((new HttpFoundationFactory())->createResponse($response)->isSuccessful()) {
-      return TRUE;
+  protected function isResponseSuccessful(?ResponseInterface $response, string $operation_label, string $item_label, string $uuid, MessengerInterface $messenger): bool {
+    $isSuccessFul = $this->isSuccessful($response);
+    if (!$isSuccessFul) {
+      $messenger->addError(
+        $this->t('Unable to %operation %item %uuid. Status code: %status_code. Message: %message',
+          [
+            '%operation' => $operation_label,
+            '%item' => $item_label,
+            '%uuid' => $uuid,
+            '%status_code' => $response->getStatusCode(),
+            '%message' => $response->getReasonPhrase(),
+          ]));
     }
-
-    $messenger->addError(
-      $this->t('Unable to %operation %item %uuid. Status code: %status_code. Message: %message',
-        [
-          '%operation' => $operation_label,
-          '%item' => $item_label,
-          '%uuid' => $uuid,
-          '%status_code' => $response->getStatusCode(),
-          '%message' => $response->getReasonPhrase(),
-        ]));
-    return FALSE;
+    return $isSuccessFul;
   }
 
 }

@@ -25,27 +25,11 @@ final class JsonapiHypermediaLinkCollectionNormalizerTest extends KernelTestBase
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'jsonapi',
     'serialization',
     'jsonapi_hypermedia',
   ];
-
-  /**
-   * The normalizer under test.
-   *
-   * @var \Symfony\Component\Serializer\Normalizer\NormalizerInterface
-   */
-  protected $normalizer;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-    $this->normalizer = $this->container->get('serializer.normalizer.link_collection.jsonapi');
-    $this->normalizer->setSerializer($this->container->get('jsonapi.serializer'));
-  }
 
   /**
    * Tests link collection normalization.
@@ -129,7 +113,7 @@ final class JsonapiHypermediaLinkCollectionNormalizerTest extends KernelTestBase
     $actual = $this->getNormalization($link_collection);
     $this->assertCount(2, $actual, var_export($actual, TRUE));
     $normalized_keys = array_keys($actual);
-    $this->assert(array_reduce($normalized_keys, function ($bool, $key) {
+    $this->assertTrue(array_reduce($normalized_keys, function ($bool, $key) {
       return $bool ? strpos($key, 'self--') === 0 : FALSE;
     }, TRUE), var_export($actual, TRUE));
     $this->assertSame([
@@ -189,12 +173,33 @@ final class JsonapiHypermediaLinkCollectionNormalizerTest extends KernelTestBase
   }
 
   /**
+   * Tests that this module works with consumer_image_styles.
+   */
+  public function testConsumerImageStylesCompatibility(): void {
+    $modules_available = $this->container->get('extension.list.module')
+      ->getAllAvailableInfo();
+
+    if (array_key_exists('consumer_image_styles', $modules_available)) {
+      $this->enableModules(['consumers', 'consumer_image_styles']);
+      // Ensure we have an up-to-date container.
+      $this->container = $this->container->get('kernel')->rebuildContainer();
+      $this->testNormalize();
+    }
+    else {
+      $this->markTestSkipped('Cannot test compatibility with consumer_image_styles because it is not available.');
+    }
+  }
+
+  /**
    * Gets a normalized array using the SUT.
    */
   protected function getNormalization(LinkCollection $link_collection) {
-    $normalization = $this->normalizer->normalize($link_collection, 'api_json', []);
-    $this->assertInstanceOf(CacheableNormalization::class, $normalization);
-    return $normalization->getNormalization();
+    $normalization = $this->container->get('jsonapi.serializer')
+      ->normalize(['link_collection' => $link_collection], 'api_json', []);
+    $this->assertIsArray($normalization);
+    $this->assertArrayHasKey('link_collection', $normalization);
+    $this->assertInstanceOf(CacheableNormalization::class, $normalization['link_collection']);
+    return $normalization['link_collection']->getNormalization();
   }
 
   /**

@@ -84,7 +84,18 @@ class AcquiaConnectorCommands extends DrushCommands {
    */
   public function customTestValidate() {
 
-    $modules = \Drupal::moduleHandler()->getImplementations('acquia_connector_spi_test');
+    // Compatibility for Drupal 9.2.
+    if (method_exists(\Drupal::moduleHandler(), 'invokeAllWith')) {
+      $modules = [];
+      \Drupal::moduleHandler()->invokeAllWith('acquia_connector_spi_test', function (callable $hook, string $module) use (&$modules) {
+        // There is minimal overhead since the hook is not invoked.
+        $modules[] = $module;
+      });
+    }
+    else {
+      // @phpstan-ignore-next-line
+      $modules = \Drupal::moduleHandler()->getImplementations('acquia_connector_spi_test');
+    }
     if (!$modules) {
       $this->output->writeln((string) dt('No Acquia SPI custom tests were detected.'));
       return;
@@ -154,19 +165,7 @@ class AcquiaConnectorCommands extends DrushCommands {
    *   Sends Acquia SPI data.
    */
   public function spiSend() {
-    $config = \Drupal::config('acquia_connector.settings');
-    $state_site_name = \Drupal::state()->get('spi.site_name');
-    $state_site_machine_name = \Drupal::state()->get('spi.site_machine_name');
-    // Don't send data if site is blocked or missing components.
-    if ($config->get('spi.blocked') || (is_null($state_site_name) && is_null($state_site_machine_name))) {
-      $this->logger->error('Site is blocked or missing components.');
-      return;
-    }
-
-    $response = \Drupal::service('acquia_connector.spi')->sendFullSpi(ACQUIA_CONNECTOR_ACQUIA_SPI_METHOD_DRUSH);
-    if ($response && isset($response['is_error']) && $response['is_error']) {
-      $this->logger->error('Failed to send SPI data.');
-    }
+    $this->logger->error('This command is deprecated and no longer functions. Please remove from any scripts.');
   }
 
   /**

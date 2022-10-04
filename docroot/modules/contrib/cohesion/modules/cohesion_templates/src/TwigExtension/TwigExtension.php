@@ -266,7 +266,9 @@ class TwigExtension extends \Twig_Extension {
         ]
       ),
       new \Twig_SimpleFunction('isFrontendEditor', [$this, 'isFrontendEditor'], []),
-      new \Twig_SimpleFunction('coh_instanceid', [$this, 'cohInstanceId']),
+      new \Twig_SimpleFunction('coh_instanceid', [$this, 'cohInstanceId'], [
+        'needs_context' => TRUE,
+      ]),
     ];
   }
 
@@ -285,8 +287,31 @@ class TwigExtension extends \Twig_Extension {
   /**
    * Used for tokenized inline styles.
    */
-  public function cohInstanceId() {
-    return 'ssa-instance-' . crc32($this->uuid->generate());
+  public function cohInstanceId($_context) {
+    $instance_name = 'ssa-instance-';
+    $instance_id = '';
+    if (isset($_context['parentContext']['elements'])) {
+      foreach ($_context['parentContext']['elements'] as $element) {
+        if ($element instanceof EntityInterface) {
+          $instance_id .= $element->uuid();
+          break;
+        }
+      }
+    }
+
+    if (isset($_context['parentContext']['componentUuid'])) {
+      $instance_id .= $_context['parentContext']['componentUuid'];
+    }
+
+    if (isset($_context['componentUuid'])) {
+      $instance_id .= $_context['componentUuid'];
+    }
+
+    if ($instance_id == '') {
+      $instance_id = $this->uuid->generate();
+    }
+
+    return $instance_name . $instance_id;
   }
 
   /**

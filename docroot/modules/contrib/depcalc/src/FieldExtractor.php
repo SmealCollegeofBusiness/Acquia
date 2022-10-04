@@ -47,7 +47,7 @@ class FieldExtractor {
       $event = new FilterDependencyCalculationFieldsEvent($entity, ...$fields);
       /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
       $dispatcher = \Drupal::service('event_dispatcher');
-      $dispatcher->dispatch(DependencyCalculatorEvents::FILTER_FIELDS, $event);
+      $dispatcher->dispatch($event, DependencyCalculatorEvents::FILTER_FIELDS);
       $fields = $event->getFields();
     }
     return $fields;

@@ -2,9 +2,10 @@
 
 namespace Drupal\acsf\EventSubscriber;
 
+use Drupal\acsf\AcsfCompatibilityHelper;
 use Drupal\Core\State\StateInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -15,7 +16,7 @@ class AcsfMaintenanceModeSubscriber implements EventSubscriberInterface {
   /**
    * Name of ACSF maintenance mode's response header.
    */
-  const HEADER = 'X-SF-Maintenance';
+  public const HEADER = 'X-SF-Maintenance';
 
   /**
    * The state.
@@ -37,11 +38,11 @@ class AcsfMaintenanceModeSubscriber implements EventSubscriberInterface {
   /**
    * Sets SF maintenance mode header (on successful responses).
    *
-   * @param \Symfony\Component\HttpKernel\Event\FilterResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\KernelEvent $event
    *   The event to process.
    */
-  public function onRespond(FilterResponseEvent $event) {
-    if (!$event->isMasterRequest()) {
+  public function onRespond(KernelEvent $event) {
+    if (!AcsfCompatibilityHelper::checkKernelEventIsMain($event)) {
       return;
     }
 
@@ -55,6 +56,7 @@ class AcsfMaintenanceModeSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
+    $events = [];
     $events[KernelEvents::RESPONSE][] = ['onRespond'];
     return $events;
   }

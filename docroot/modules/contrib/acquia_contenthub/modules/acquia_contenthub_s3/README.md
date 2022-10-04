@@ -18,8 +18,8 @@ This is necessary so that later we can avoid redundant requests towards Content 
 **File location discovery**
 
 The module's responsibility is to locate the files (on the subscriber, and the publisher) that are being syndicated
-through Content Hub. The first source of information is the mapping table, Content Hub will follow, and lastly it'll
-assume local origination. The module will come down to conclusion that the file owned by the site in hand.
+through Content Hub. The first source of information is the mapping table, then the module checks if the file is locally
+available (and assumes local origination), and finally it contacts Content Hub.
 In order to be successful in location discovery the module introduced two new CDF attributes: `ach_bucket` and
 `ach_root_folder`. Therefore, already exported file entities must be syndicated again so that they will contain these
 essential properties.

@@ -99,6 +99,12 @@ _orca_steps: &orca_steps
         echo "Running after success";
         ../orca/bin/ci/after_success.sh;
       fi
+    - |
+      if [ "$ORCA_COVERAGE_ENABLE" = true ]; then
+        cd /ramfs${CI_WORKSPACE}
+        php .acquia/fixup-xml-paths.php /acquia/acquia_contenthub/clover.xml
+        php .acquia/fixup-xml-paths.php /acquia/acquia_contenthub/junit.xml
+      fi
 
 _orca_job: &orca_job
   <<: *orca_steps
@@ -126,7 +132,8 @@ pre_build:
     - args: --env ORCA_JOB=INTEGRATED_UPGRADE_TEST_FROM_PREVIOUS_MINOR
       <<: *orca_job
   isolated_test_on_current:
-    - args: --env ORCA_JOB=ISOLATED_TEST_ON_CURRENT
+    - args: --env ORCA_JOB=ISOLATED_TEST_ON_CURRENT --env ORCA_COVERAGE_ENABLE=true --env ORCA_COVERAGE_CLOVER=/acquia/acquia_contenthub/clover.xml --env ORCA_JUNIT_LOG=/acquia/acquia_contenthub/junit.xml
+      ca_data: /acquia
       <<: *orca_job
   isolated_test_on_current_php8:
     - args: --env ORCA_JOB=ISOLATED_TEST_ON_CURRENT --env JENKINS_PHP_VERSION=8.1
@@ -197,9 +204,9 @@ pre_build:
   # code_analysis is option for sonarqube if you have group and team name added on top of pipeline.yaml
   # https://github.com/acquia/devops-pipeline/commit/b707527f72a56e352e0975ac9482504e34603b7c
   # keeping it commented for future reference in case we need to override the default values provided by sonarqube.
-  # code_analysis:
-  #  required: true
-  #  project_key: acquia.drupal-cloud.content-hub:acquia_contenthub
+  code_analysis:
+    required: true
+    project_key: acquia.drupal-cloud.content-hub:acquia_contenthub
   #  quality_gate:
   #    wait_for_quality_gate: true
   #    max_time_limit: 2

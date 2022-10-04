@@ -6,13 +6,14 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\media\MediaInterface;
 use Drupal\media\MediaSourceBase;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Field\FieldTypePluginManagerInterface;
 
 /**
  * Soundcloud entity media source.
@@ -29,6 +30,8 @@ use Drupal\Core\Field\FieldTypePluginManagerInterface;
  * )
  */
 class Soundcloud extends MediaSourceBase {
+
+  use StringTranslationTrait;
 
   /**
    * Soundcloud attributes.
@@ -82,9 +85,9 @@ class Soundcloud extends MediaSourceBase {
     $attributes = [
       'track_id' => $this->t('The track id - not always available'),
       'playlist_id' => $this->t('The playlist (set) id - not always available'),
-      'source_id' => t('Compound of source type (track or playlist) and id so that it is unique among all SoundCloud media'),
+      'source_id' => $this->t('Compound of source type (track or playlist) and id so that it is unique among all SoundCloud media'),
       'html' => $this->t('HTML embed code'),
-      'thumbnail_uri' => t('URI of the thumbnail'),
+      'thumbnail_uri' => $this->t('URI of the thumbnail'),
     ];
     return $attributes;
   }

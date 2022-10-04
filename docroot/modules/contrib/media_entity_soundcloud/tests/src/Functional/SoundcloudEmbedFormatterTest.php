@@ -27,16 +27,16 @@ class SoundcloudEmbedFormatterTest extends BrowserTestBase {
   /**
    * {@inheritDoc}
    */
-  protected $defaultTheme = 'stable';
+  protected $defaultTheme = 'claro';
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Setup standalone media urls from the settings.
-    $this->config('media.settings')->set('standalone_url', true)->save();
+    $this->config('media.settings')->set('standalone_url', TRUE)->save();
     $this->refreshVariables();
     // Rebuild routes.
     \Drupal::service('router.builder')->rebuild();
@@ -87,7 +87,7 @@ class SoundcloudEmbedFormatterTest extends BrowserTestBase {
 
     $page = $this->getSession()->getPage();
     $page->fillField('name[0][value]', 'Soundcloud');
-    $page->fillField('field_media_soundcloud[0][value]', 'https://soundcloud.com/winguy/billie-jean-remix-ft');
+    $page->fillField('field_media_soundcloud[0][value]', 'https://soundcloud.com/pooriaputak/laelaha');
     $page->pressButton('Save');
 
     // Assert "has been created" text.

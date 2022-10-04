@@ -7,6 +7,7 @@
 
 use Drupal\acsf\AcsfConfigIncompleteException;
 use PHPUnit\Framework\Error\Notice;
+use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,7 +18,7 @@ class AcsfConfigTest extends TestCase {
   /**
    * Setup.
    */
-  public function setUp() {
+  public function setUp(): void {
     // The files in this directory can't be autoloaded as long as they don't
     // match their classes' namespaces.
     $files = [
@@ -47,7 +48,7 @@ class AcsfConfigTest extends TestCase {
   public function testAcsfConfigMissingParameters() {
     // Intentionally avoid providing the required constructor parameters to
     // check that the environment variables are used.
-    $this->expectException(Notice::class);
+    $this->expectException(Warning::class);
     $this->expectExceptionMessage('AH_SITE_GROUP');
     new AcsfConfigUnitTest();
   }
@@ -56,7 +57,7 @@ class AcsfConfigTest extends TestCase {
    * Tests that a PHP error is thrown when not enough params are provided.
    */
   public function testAcsfConfigMissingEnvironment() {
-    $this->expectException(Notice::class);
+    $this->expectException(Warning::class);
     $this->expectExceptionMessage('AH_SITE_ENVIRONMENT');
     new AcsfConfigUnitTest('ah_site_group');
   }
@@ -65,7 +66,7 @@ class AcsfConfigTest extends TestCase {
    * Tests that a PHP error is thrown when not enough params are provided.
    */
   public function testAcsfConfigMissingSiteGroup() {
-    $this->expectException(Notice::class);
+    $this->expectException(Warning::class);
     $this->expectExceptionMessage('AH_SITE_GROUP');
     new AcsfConfigUnitTest(NULL, 'ah_site_environment');
   }

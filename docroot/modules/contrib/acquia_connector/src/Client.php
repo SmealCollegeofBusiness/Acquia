@@ -242,17 +242,7 @@ class Client {
    *   Response result or FALSE.
    */
   public function sendNspi($id, $key, array $body = []) {
-    $body['identifier'] = $id;
-
-    try {
-      $response = $this->nspiCall('/spi-api/site', $body);
-      if (!empty($response['result']['authenticator']) && $this->validateResponse($key, $response['result'], $response['authenticator'])) {
-        return $response['result'];
-      }
-    }
-    catch (ConnectorException $e) {
-      $this->getLogger('acquia connector')->error('Error: ' . $e->getCustomMessage());
-    }
+    $this->getLogger('acquia connector')->error("Acquia Insight is EOL. Please remove sendNspi from your modules/scripts.");
     return FALSE;
   }
 

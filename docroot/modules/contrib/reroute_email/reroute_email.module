@@ -336,7 +336,10 @@ function reroute_email_check_email_by_permission(string $email): bool {
 function reroute_email_split_string(?string $string): array {
 
   // Split string into array of emails.
-  $addresses = preg_split('/[\s,;\n]+/', $string, -1, PREG_SPLIT_NO_EMPTY);
+  $addresses = [];
+  if (!empty($string)) {
+    $addresses = preg_split('/[\s,;\n]+/', $string, -1, PREG_SPLIT_NO_EMPTY);
+  }
 
   // Remove duplications.
   $addresses = array_unique($addresses);

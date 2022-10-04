@@ -1,0 +1,5 @@
+acquia_contenthub_translations.settings:
+  route_name: acquia_contenthub_translations.settings
+  title: 'Acquia ContentHub Translations'
+  weight: 200
+  base_route: acquia_contenthub.admin_settings

@@ -11,7 +11,7 @@ services:
 
   acquia_contenthub_subscriber.handle_webhook.import_assets:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\ImportUpdateAssets
-    arguments: ['@queue', '@event_dispatcher', '@acquia_contenthub_subscriber.tracker', '@acquia_contenthub_subscriber.logger_channel', '@config.factory', '@acquia_contenthub.cdf_metrics_manager']
+    arguments: ['@queue', '@acquia_contenthub_subscriber.tracker', '@acquia_contenthub_subscriber.logger_channel', '@config.factory', '@acquia_contenthub.cdf_metrics_manager']
     tags:
       - { name: event_subscriber }
 

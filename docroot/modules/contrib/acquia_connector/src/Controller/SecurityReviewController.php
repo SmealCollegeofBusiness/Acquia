@@ -115,7 +115,7 @@ class SecurityReviewController extends ControllerBase {
       if (isset($check['module'])) {
         $module = $check['module'];
       }
-      module_load_include('inc', $module, $check['file']);
+      \Drupal::moduleHandler()->loadInclude($module, 'inc', $check['file']);
     }
     $function = $check['callback'];
     if (method_exists($this, $function)) {
@@ -252,7 +252,7 @@ class SecurityReviewController extends ControllerBase {
     $result = TRUE;
     $check_result_value = [];
     $files = [];
-    $site_path = \Drupal::service('site.path');
+    $site_path = \Drupal::getContainer()->getParameter('site.path');
 
     $dir = scandir(DRUPAL_ROOT . '/' . $site_path . '/');
     foreach ($dir as $file) {
@@ -264,7 +264,7 @@ class SecurityReviewController extends ControllerBase {
     $this->moduleHandler()->alter('security_review_temporary_files', $files);
     foreach ($files as $path) {
       $matches = [];
-      if (file_exists($path) && preg_match('/.*(~|\.sw[op]|\.bak|\.orig|\.save)$/', $path, $matches) !== FALSE && !empty($matches)) {
+      if (file_exists($path) && preg_match('/.*(~|\.sw[op]|\.bak|\.orig|\.save)$/', (string) $path, $matches) !== FALSE && !empty($matches)) {
         $result = FALSE;
         $check_result_value[] = $path;
       }

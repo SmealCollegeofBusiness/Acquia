@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\subrequests\Normalizer;
 
+use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\subrequests\Normalizer\JsonBlueprintDenormalizer;
 use Drupal\subrequests\Subrequest;
 use Drupal\subrequests\SubrequestsTree;
@@ -14,12 +15,13 @@ use Psr\Log\LoggerInterface;
  */
 class JsonBlueprintDenormalizerTest extends UnitTestCase {
 
+  use ProphecyTrait;
   /**
    * @var \Drupal\subrequests\Normalizer\JsonBlueprintDenormalizer
    */
   protected $sut;
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $logger = $this->prophesize(LoggerInterface::class);
     $this->sut = new JsonBlueprintDenormalizer($logger->reveal());

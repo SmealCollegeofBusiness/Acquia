@@ -1459,6 +1459,7 @@ class ExportTest extends EntityKernelTestBase {
       ],
       'languages' => ['en'],
       'version' => 2,
+      'translatable' => FALSE,
     ];
     $metadata_expected['field'] = array_merge($metadata_expected['field'], $field_metadata_expected);
     $this->assertEquals($metadata_expected, $metadata);
@@ -1611,6 +1612,7 @@ class ExportTest extends EntityKernelTestBase {
       ],
       'languages' => ['en'],
       'version' => 2,
+      'translatable' => FALSE,
       'user_data' => [],
     ];
     unset($metadata['data']);
@@ -1863,6 +1865,7 @@ class ExportTest extends EntityKernelTestBase {
       ],
       'languages' => ['en'],
       'version' => 2,
+      'translatable' => FALSE,
     ];
     unset($metadata['data']);
     $this->assertEquals($metadata_expected, $metadata);
@@ -2158,6 +2161,7 @@ class ExportTest extends EntityKernelTestBase {
       ],
       'languages' => ['en'],
       'version' => 2,
+      'translatable' => FALSE,
     ];
     unset($metadata['data']);
     $this->assertEquals($metadata_expected, $metadata);

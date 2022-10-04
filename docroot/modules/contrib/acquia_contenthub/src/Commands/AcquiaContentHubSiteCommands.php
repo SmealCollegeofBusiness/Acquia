@@ -10,7 +10,6 @@ use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
 use Drupal\acquia_contenthub\Form\ContentHubSettingsForm;
 use Drupal\Core\Form\FormState;
 use Drush\Commands\DrushCommands;
-use Drush\Log\LogLevel;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -97,13 +96,13 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
     $provider = $this->clientFactory->getProvider();
     if ($provider != 'core_config') {
       $message = dt('Settings are being provided by @provider, and already connected.', ['@provider' => $provider]);
-      $this->logger()->log(LogLevel::CANCEL, $message);
+      $this->logger()->warning($message);
       return;
     }
 
     if (!empty($config_origin)) {
       $message = dt('Site is already connected to Content Hub. Skipping.');
-      $this->logger()->log(LogLevel::CANCEL, $message);
+      $this->logger()->warning($message);
       return;
     }
 
@@ -154,7 +153,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
 
     if (!$client instanceof ContentHubClient) {
       $message = "Couldn't instantiate client. Please check connection settings.";
-      $this->logger->log(LogLevel::CANCEL, $message);
+      $this->logger->warning($message);
       return;
     }
 
@@ -164,7 +163,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
         'Settings are being provided by %provider and cannot be disconnected manually.',
         ['%provider' => $provider]
       );
-      $this->logger->log(LogLevel::CANCEL, $message);
+      $this->logger->warning($message);
       return;
     }
 
@@ -186,7 +185,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
     }
 
     if (empty($webhook_uuid)) {
-      $this->logger->log(LogLevel::ERROR, 'Cannot find webhook UUID.');
+      $this->logger->error('Cannot find webhook UUID.');
       return;
     }
 
@@ -198,7 +197,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
       if ($delete === 'all') {
         $warning_message = dt('This command will delete ALL the entities published by this origin before unregistering the client. There is no way back from this action. It might take a while depending how many entities originated from this site. Are you sure you want to proceed (Y/n)?');
         if ($this->io()->confirm($warning_message) === FALSE) {
-          $this->logger->log(LogLevel::ERROR, 'Cancelled.');
+          $this->logger->error('Cancelled.');
           return;
         }
         foreach ($event->getOrphanedEntities() as $entity) {
@@ -213,14 +212,14 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
         $message = $this->output->writeln(dt('There are @count entities published from this origin. You have to delete/reoriginate those entities before proceeding with the unregistration. If you want to delete those entities and unregister the client, use the following drush command "drush ach-disconnect --delete=all".', [
           '@count' => $event->getOrphanedEntitiesAmount(),
         ]));
-        $this->logger->log(LogLevel::CANCEL, $message);
+        $this->logger->warning($message);
         return;
       }
 
       $this->achConnectionManager->unregister($event);
     }
     catch (\Exception $exception) {
-      $this->logger->log(LogLevel::ERROR, $exception->getMessage());
+      $this->logger->error($exception->getMessage());
     }
 
     $config_factory = \Drupal::configFactory();
@@ -232,7 +231,7 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
       'Successfully disconnected site %site from contenthub',
       ['%site' => $client_name]
     );
-    $this->logger->log(LogLevel::SUCCESS, $message);
+    $this->logger->notice($message);
   }
 
 }

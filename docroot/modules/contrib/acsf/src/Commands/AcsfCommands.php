@@ -46,7 +46,7 @@ class AcsfCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
       // might not be set up yet.
     }
     if (isset($task)) {
-      return json_encode($task);
+      return json_encode($task, JSON_THROW_ON_ERROR);
     }
   }
 
@@ -74,7 +74,7 @@ class AcsfCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
     if ($data) {
       // If data was sent, we can consume it here. Ensure that we are always
       // passing associative arrays here, not objects.
-      $site_info = json_decode(base64_decode($data), TRUE);
+      $site_info = json_decode(base64_decode($data), TRUE, 512, JSON_THROW_ON_ERROR);
       if (!empty($site_info) && is_array($site_info)) {
         // Allow other modules to consume the data.
         $context = $site_info;
@@ -154,7 +154,7 @@ class AcsfCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
       ->execute();
 
     // Reset the cron key.
-    \Drupal::state()->set('system.cron_key', hash('sha256', mt_rand()));
+    \Drupal::state()->set('system.cron_key', hash('sha256', random_int(0, mt_getrandmax())));
 
     // Reset the drupal private key.
     \Drupal::service('private_key')->set('');

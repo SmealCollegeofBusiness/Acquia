@@ -89,7 +89,7 @@ function acquia_contenthub_subscriber_update_82001() {
  *   Name of the module.
  */
 function _acquia_contenthub_subscriber_install_schema(string $module_name) {
-  module_load_install($module_name);
+  \Drupal::moduleHandler()->loadInclude($module_name, 'install');
   $schema = \Drupal::moduleHandler()->invoke($module_name, 'schema');
   foreach ($schema as $name => $table) {
     if (empty($table['module'])) {

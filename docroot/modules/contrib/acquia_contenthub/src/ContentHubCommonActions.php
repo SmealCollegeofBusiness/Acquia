@@ -176,14 +176,9 @@ class ContentHubCommonActions {
     try {
       $client = $this->getClient();
       $entity = $client->getEntity($uuid);
-      if (!$entity instanceof CDFObjectInterface) {
-        if (isset($entity['error']['message'])) {
-          throw new \Exception($entity['error']['message']);
-        }
-
-        throw new \Exception('Unexpected error.');
+      if ($entity instanceof CDFObjectInterface) {
+        return $entity;
       }
-      return $entity;
     }
     catch (\Exception $e) {
       $this->channel

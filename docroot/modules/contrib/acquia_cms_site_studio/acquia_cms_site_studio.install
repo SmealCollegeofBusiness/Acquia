@@ -5,9 +5,11 @@
  * Contains install-time code for the Acquia CMS profile.
  */
 
+use Drupal\cohesion\Controller\AdministrationController;
 use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Installer\InstallerKernel;
 use Drupal\node\Entity\NodeType;
+use Drupal\user\Entity\Role;
 
 /**
  * Implements hook_install().
@@ -21,9 +23,15 @@ function acquia_cms_site_studio_install() {
   // Set default theme as cohesion.
   set_theme_site_studio_as_default();
 
+  // Update cohesion.settings config.
+  update_site_studio_settings();
+
   // Set credentials if module being installed independently.
   if (!InstallerKernel::installationAttempted() && $site_studio_api_key && $site_studio_org_key) {
     set_site_studio_credentials($site_studio_api_key, $site_studio_org_key);
+    if (PHP_SAPI === 'cli') {
+      batch_set(AdministrationController::batchAction(TRUE));
+    }
   }
 
   // Update search & search_fallback views display_options's style
@@ -48,7 +56,7 @@ function acquia_cms_site_studio_install() {
   // If module getting install stand alone.
   if (!InstallerKernel::installationAttempted()) {
     // Trigger save on page body field to update it.
-    if ($module_handler->moduleExists('acquia_cms_page') ) {
+    if ($module_handler->moduleExists('acquia_cms_page')) {
       $config = \Drupal::service('config.factory')->getEditable('field.field.node.page.body');
       if (!empty($config)) {
         $config->save();
@@ -81,6 +89,20 @@ function acquia_cms_site_studio_install() {
     $config->set('node_revision_delete_cron', '50')
       ->set('node_revision_delete_time', '604800')
       ->save();
+  }
+
+  // Set default node revision delete configuration for Page content type.
+  $moduleHandler = \Drupal::service('module_handler');
+  if ($moduleHandler->moduleExists('acquia_cms_page')) {
+    $type = NodeType::load('page');
+    // @todo It's failing on acquia_cms profile, need to revisit.
+    $third_party_settings = $type ? $type->get('third_party_settings') : NULL;
+    if ($type && !isset($third_party_settings['node_revision_delete'])) {
+      $type->setThirdPartySetting('node_revision_delete', 'minimum_revisions_to_keep', '30');
+      $type->setThirdPartySetting('node_revision_delete', 'minimum_age_to_delete', '0');
+      $type->setThirdPartySetting('node_revision_delete', 'when_to_delete', '0');
+      $type->save();
+    }
   }
 
   // Re-write the editor and filter format config from
@@ -125,6 +147,20 @@ function set_theme_site_studio_as_default() {
     ->getEditable('system.theme')
     ->set('default', 'cohesion_theme')
     ->save();
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Reset page field body's label and descritption to default.
+ */
+function acquia_cms_site_studio_uninstall() {
+  $config = \Drupal::service('config.factory')->getEditable('field.field.node.page.body');
+  if (!empty($config)) {
+    $config->set('label', 'Body');
+    $config->set('description', '');
+    $config->save();
+  }
 }
 
 /**
@@ -183,15 +219,12 @@ function acquia_cms_site_studio_update_8003() {
 }
 
 /**
- * Implements hook_uninstall().
- *
- * Reset page field body's label and descritption to default.
+ * Install and update new site studio roles.
  */
-function acquia_cms_site_studio_uninstall() {
-  $config = \Drupal::service('config.factory')->getEditable('field.field.node.page.body');
-  if (!empty($config)) {
-    $config->set('label', 'Body');
-    $config->set('description', '');
-    $config->save();
+function acquia_cms_site_studio_update_8004() {
+  $role = Role::load('developer');
+  if ($role instanceof Role) {
+    $role->set('label', 'Low Code Site Builder');
+    $role->save();
   }
 }

@@ -117,9 +117,7 @@ class EmbeddedImagesCollectorTest extends KernelTestBase {
    * @dataProvider dependenciesCalculationProvider
    */
   public function testDependenciesCalculationWithoutImagesCollector(array $files_ids, array $usages) {
-    $mock = $this->getMockBuilder(EmbeddedImagesCollector::class)
-      ->disableOriginalConstructor()
-      ->getMock();
+    $mock = $this->createMock(EmbeddedImagesCollector::class);
     \Drupal::getContainer()->set('embedded_images.calculator', $mock);
 
     $node = $this->createNode();

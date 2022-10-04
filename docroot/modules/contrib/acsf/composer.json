@@ -13,9 +13,10 @@
         "ext-json": "*"
     },
     "require-dev": {
-        "acquia/coding-standards": "^0.4.0",
+        "acquia/coding-standards": "^1.0",
         "mockery/mockery": "dev-master",
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": "^8.0",
+        "rector/rector": "0.13.x-dev"
     },
     "extra": {
         "branch-alias": {
@@ -27,5 +28,10 @@
             "Drupal\\acsf\\": "src/"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
 }

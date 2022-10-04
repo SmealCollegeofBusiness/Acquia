@@ -2,9 +2,9 @@
 
 namespace Drupal\acquia_cms_common\Services;
 
-use Drupal\cohesion\Drush\DX8CommandHelpers;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\State\StateInterface;
 
 /**
  * Defines a service for ACMS.
@@ -41,46 +41,38 @@ class AcmsUtilityService {
   private static $modulePreinstallTriggered;
 
   /**
+   * The state service.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected $state;
+
+  /**
    * Constructs a new AcmsService object.
    *
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   The ModuleHandlerInterface.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state service.
    */
-  public function __construct(ModuleHandlerInterface $moduleHandler, ConfigFactoryInterface $config_factory) {
+  public function __construct(ModuleHandlerInterface $moduleHandler,
+                              ConfigFactoryInterface $config_factory,
+                              StateInterface $state) {
     $this->moduleHandler = $moduleHandler;
     $this->configFactory = $config_factory;
+    $this->state = $state;
   }
 
   /**
    * Fetch acquia cms profile with list of enabled modules of ACMS.
    */
-  public function getAcquiaCmsProfileModuleList(): array {
+  public function getAcquiaCmsModuleList(): array {
     $profile_modules = $this->moduleHandler->getModuleList();
     return array_filter($profile_modules, function ($key) {
       return str_starts_with($key, 'acquia_cms');
     }, ARRAY_FILTER_USE_KEY);
-  }
-
-  /**
-   * Trigger site studio rebuild on demand.
-   */
-  public function rebuildSiteStudio() {
-    // Forcefully clear the cache after site is installed otherwise site
-    // studio fails to rebuild.
-    drupal_flush_all_caches();
-    // Below code ensures that drush batch process doesn't hang. Unset all the
-    // earlier created batches so that drush_backend_batch_process() can run
-    // without being stuck.
-    // @see https://github.com/drush-ops/drush/issues/3773 for the issue.
-    $batch = &batch_get();
-    $batch = NULL;
-    unset($batch);
-    return DX8CommandHelpers::rebuild([
-      'verbose' => '',
-      'no-cache-clear' => FALSE,
-    ]);
   }
 
   /**
@@ -91,7 +83,8 @@ class AcmsUtilityService {
       $config = $this->configFactory->get('cohesion.settings');
       if ($config->get('api_key') && $config->get('organization_key')) {
         batch_set(install_acms_site_studio_initialize());
-        batch_set(site_studio_import_ui_kit());
+        site_studio_import_ui_kit();
+        update_site_studio_settings();
         return drush_backend_batch_process();
       }
     }
@@ -222,6 +215,29 @@ class AcmsUtilityService {
     if (static::$modulePreinstallTriggered !== NULL) {
       return static::$modulePreinstallTriggered;
     }
+    return NULL;
+  }
+
+  /**
+   * Get selected starter-kit.
+   *
+   * @return string|null
+   *   The starter-kit name or null.
+   */
+  public function getStarterKit(): ?string {
+    // List of available starter kits.
+    $starter_kits = [
+      'acquia_cms_enterprise_low_code' => 'Acquia CMS Enterprise Low Code',
+      'acquia_cms_headless' => 'Acquia CMS Headless' ,
+      'acquia_cms_community' => 'Acquia CMS Community',
+    ];
+
+    // Check for the starter kit selection.
+    if ($starter_kit = $this->state->get('acquia_cms.starter_kit')) {
+      // Return starter-kit value.
+      return $starter_kits[$starter_kit];
+    }
+
     return NULL;
   }
 

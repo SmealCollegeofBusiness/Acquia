@@ -71,4 +71,17 @@ class ClientDeleteConfirmForm extends ContentHubDeleteClientConfirmForm {
     return 'acquia_contenthub_client_delete_confirm_form';
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function unregisterClientNoWebhook(): void {
+    $client_to_delete = $this->client->getClientByUuid($this->uuid);
+    $resp = $this->client->deleteClient($this->uuid);
+    if ($this->isResponseSuccessful($resp, 'delete', 'client', $this->uuid, $this->messenger())) {
+      $this->logger('acquia_contenthub')
+        ->info(sprintf('Client %s has been removed, no webhook was registered.', $client_to_delete['name']));
+      $this->messenger()->addMessage($this->t('Client @name has been removed, no webhook was registered.', ['@name' => $client_to_delete['name']]));
+    }
+  }
+
 }

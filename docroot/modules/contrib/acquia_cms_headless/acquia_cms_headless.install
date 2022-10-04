@@ -5,6 +5,10 @@
  * Install, update and uninstall functions for the acquia_cms_headless module.
  */
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
+
 /**
  * Implements hook_install().
  */
@@ -14,22 +18,91 @@ function acquia_cms_headless_install() {
 
   // Programmatically create a new "headless" user.
   $headless_user->createHeadlessUser();
+
+  // Adds the necessary permissions to roles.
+  add_next_site_permissions();
 }
 
 /**
- * Implements hook_requirements().
+ * Adds the necessary permissions to anonymous & authenticated roles.
+ *
+ * @throws \Drupal\Core\Entity\EntityStorageException
  */
-function acquia_cms_headless_requirements($phase) {
-  $requirements = [];
-
-  if ($phase == 'runtime') {
-    $value = mt_rand(0, 100);
-    $requirements['acquia_cms_headless_status'] = [
-      'title' => t('acquia_cms_headless status'),
-      'value' => t('acquia_cms_headless value: @value', ['@value' => $value]),
-      'severity' => $value > 50 ? REQUIREMENT_INFO : REQUIREMENT_WARNING,
-    ];
+function add_next_site_permissions() {
+  $rolesStorage = \Drupal::entityTypeManager()->getStorage('user_role');
+  $roles = $rolesStorage->loadMultiple([
+    RoleInterface::ANONYMOUS_ID,
+    RoleInterface::AUTHENTICATED_ID,
+  ]);
+  foreach ($roles as $role) {
+    $role->grantPermission('issue subrequests');
+    $role->save();
   }
+}
 
-  return $requirements;
+/**
+ * Install and update new headless roles.
+ */
+function acquia_cms_headless_update_8001() {
+  $role = Role::load('headless');
+  $permissions = [
+    'view any unpublished content',
+    'view latest version',
+    'view all revisions',
+  ];
+  if ($role instanceof Role) {
+    $role->set('label', 'Headless Administrator');
+    foreach ($permissions as $permission) {
+      $role->grantPermission($permission);
+    }
+    $role->trustData()->save();
+  }
+  // Create Frontend site with preview role.
+  $role = Role::create([
+    'id' => 'frontend_site_with_preview',
+    'label' => 'Frontend site with preview',
+    'permissions' => $permissions,
+    'dependencies' => [
+      'enforced' => [
+        'module' => ['acquia_cms_headless'],
+      ],
+    ],
+  ]);
+  $role->trustData()->save();
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Update all consumers and assign content model roles and add
+ * provide `issue subrequests` permission to authenticated & anonymous role.
+ */
+function acquia_cms_headless_update_8002() {
+  $rolesStorage = \Drupal::entityTypeManager()->getStorage('user_role');
+  $query = $rolesStorage->getQuery();
+  $roleIds = $query
+    ->condition('id', ["authenticated", "anonymous", "headless"], 'NOT IN')
+    ->execute();
+  $config = \Drupal::configFactory()->getEditable('acquia_cms_headless.settings');
+  if ($config->get('consumer_uuid')) {
+    $consumer = \Drupal::service('entity.repository')->loadEntityByUuid("consumer", $config->get('consumer_uuid'));
+    if ($consumer instanceof EntityInterface && $consumer->user_id->entity instanceof EntityInterface) {
+      $user = $consumer->user_id->entity;
+      foreach ($roleIds as $roleId) {
+        $user->addRole($roleId);
+      }
+      $user->save();
+    }
+  }
+  add_next_site_permissions();
+}
+
+/**
+ * Disable X-Frame-Options for headless.
+ */
+function acquia_cms_headless_update_8003() {
+  if (\Drupal::moduleHandler()->moduleExists('seckit')) {
+    $config = \Drupal::configFactory()->getEditable('seckit.settings');
+    $config->set("seckit_clickjacking.x_frame", '0')->save();
+  }
 }

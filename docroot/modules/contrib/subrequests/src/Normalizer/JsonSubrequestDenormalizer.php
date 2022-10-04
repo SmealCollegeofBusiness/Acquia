@@ -45,7 +45,7 @@ class JsonSubrequestDenormalizer implements DenormalizerInterface {
       empty($data->body) ? $query : $data->body,
       $master_request->cookies ? $master_request->cookies->all() : [],
       $master_request->files ? $master_request->files->all() : [],
-      [],
+      $master_request->server ? $master_request->server->all() : [],
       empty($data->body) ? '' : Json::encode($data->body)
     );
     // Maintain the same session as in the master request.

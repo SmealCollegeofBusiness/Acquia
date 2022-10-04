@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\subrequests\Unit\Blueprint;
 
+use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\subrequests\Blueprint\BlueprintManager;
 use Drupal\subrequests\Normalizer\JsonBlueprintDenormalizer;
@@ -20,12 +21,13 @@ use Symfony\Component\Serializer\Serializer;
  */
 class BlueprintManagerTest extends UnitTestCase {
 
+  use ProphecyTrait;
   /**
    * @var \Drupal\subrequests\Blueprint\BlueprintManager
    */
   protected $sut;
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $denormalizer = $this->prophesize(JsonBlueprintDenormalizer::class);
     $denormalizer->denormalize(Argument::type('array'), SubrequestsTree::class, 'json', [])

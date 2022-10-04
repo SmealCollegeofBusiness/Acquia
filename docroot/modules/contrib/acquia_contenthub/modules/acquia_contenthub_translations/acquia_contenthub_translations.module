@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * @file
+ * Drupal Module: Acquia Content Hub - Translations.
+ *
+ * Facilitates selective language import on subscriber sites.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\TranslatableInterface;
+use Drupal\language\ConfigurableLanguageInterface;
+
+/**
+ * Implements hook_entity_update().
+ */
+function acquia_contenthub_translations_entity_update(EntityInterface $entity) {
+  _acquia_contenthub_translations_track_translation($entity, 'update');
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function acquia_contenthub_translations_entity_presave(EntityInterface $entity) {
+  if (!$entity instanceof TranslatableInterface || $entity->isNew()) {
+    return;
+  }
+  \Drupal::service('acquia_contenthub_translations.handler.update')->updateTrackedEntity($entity);
+}
+
+/**
+ * Implements hook_entity_translation_insert().
+ */
+function acquia_contenthub_translations_entity_translation_insert(EntityInterface $translation) {
+  _acquia_contenthub_translations_track_translation($translation, 'create');
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function acquia_contenthub_translations_entity_insert(EntityInterface $translation) {
+  _acquia_contenthub_translations_track_translation($translation, 'create');
+}
+
+/**
+ * Tracks translation of an entity in translation tracking.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The entity to enqueue to ContentHub.
+ * @param string $operation
+ *   Operation.
+ */
+function _acquia_contenthub_translations_track_translation(EntityInterface $entity, string $operation): void {
+  /** @var \Drupal\acquia_contenthub_translations\TranslationFacilitator $translation_facilitator */
+  $translation_facilitator = \Drupal::service('acquia_contenthub_translations.translation_facilitator');
+  $translation_facilitator->trackTranslation($entity, $operation);
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function acquia_contenthub_translations_entity_delete(EntityInterface $entity) {
+  if (!$entity instanceof TranslatableInterface) {
+    return;
+  }
+  \Drupal::service('acquia_contenthub_translations.handler.deletion')->deleteTrackedEntity($entity);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for 'configurable_language'.
+ *
+ * Delete the configurable language from undesired languages if tracked.
+ */
+function acquia_contenthub_translations_configurable_language_delete(ConfigurableLanguageInterface $language) {
+  /** @var \Drupal\acquia_contenthub_translations\UndesiredLanguageRegistry\UndesiredLanguageRegistryInterface $undesired_language_registrar */
+  $undesired_language_registrar = \Drupal::service('acquia_contenthub_translations.undesired_language_registrar');
+  $undesired_language_registrar->removeLanguageFromUndesired($language->id());
+}
+
+/**
+ * Implements hook_entity_translation_delete().
+ */
+function acquia_contenthub_translations_entity_translation_delete(EntityInterface $translation) {
+  \Drupal::service('acquia_contenthub_translations.handler.deletion')->deleteTranslation($translation, $translation->language()->getId());
+}

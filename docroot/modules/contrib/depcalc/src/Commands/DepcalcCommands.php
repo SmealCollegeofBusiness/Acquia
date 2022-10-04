@@ -2,7 +2,6 @@
 
 namespace Drupal\depcalc\Commands;
 
-use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\depcalc\Cache\DepcalcCacheBackend;
 use Drush\Commands\DrushCommands;
 
@@ -14,13 +13,6 @@ use Drush\Commands\DrushCommands;
 class DepcalcCommands extends DrushCommands {
 
   /**
-   * Logger Service.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
-   */
-  protected $logger;
-
-  /**
    * The Depcalc Cache backend.
    *
    * @var \Drupal\depcalc\Cache\DepcalcCacheBackend
@@ -30,13 +22,10 @@ class DepcalcCommands extends DrushCommands {
   /**
    * Public Constructor.
    *
-   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
-   *   The Depcalc logger channel.
    * @param \Drupal\depcalc\Cache\DepcalcCacheBackend $depcalc_cache
    *   The Depcalc Cache Backend.
    */
-  public function __construct(LoggerChannelInterface $logger, DepcalcCacheBackend $depcalc_cache) {
-    $this->logger = $logger;
+  public function __construct(DepcalcCacheBackend $depcalc_cache) {
     $this->cache = $depcalc_cache;
   }
 

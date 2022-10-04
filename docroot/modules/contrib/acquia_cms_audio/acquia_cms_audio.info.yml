@@ -9,7 +9,7 @@ dependencies:
   - 'drupal:media_entity_soundcloud'
   - 'field_group:field_group'
 
-# Information added by Drupal.org packaging script on 2022-06-20
-version: '1.3.2'
+# Information added by Drupal.org packaging script on 2022-09-22
+version: '1.4.0'
 project: 'acquia_cms_audio'
-datestamp: 1655717046
+datestamp: 1663875727

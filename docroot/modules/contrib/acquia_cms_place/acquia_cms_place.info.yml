@@ -14,7 +14,7 @@ dependencies:
   - geocoder:geocoder_address
   - geocoder:geocoder_geofield
 
-# Information added by Drupal.org packaging script on 2022-06-13
-version: '1.3.4'
+# Information added by Drupal.org packaging script on 2022-09-22
+version: '1.4.0'
 project: 'acquia_cms_place'
-datestamp: 1655141108
+datestamp: 1663876595

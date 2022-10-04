@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Acquia Content Hub - Translations module install file.
+ */
+
+use Drupal\acquia_contenthub_translations\Data\EntityTranslations;
+use Drupal\acquia_contenthub_translations\Data\EntityTranslationsTracker;
+
+/**
+ * Implements hook_schema().
+ */
+function acquia_contenthub_translations_schema() {
+  $schema[EntityTranslationsTracker::TABLE] = EntityTranslationsTracker::schema();
+  $schema[EntityTranslations::TABLE] = EntityTranslations::schema();
+  return $schema;
+}

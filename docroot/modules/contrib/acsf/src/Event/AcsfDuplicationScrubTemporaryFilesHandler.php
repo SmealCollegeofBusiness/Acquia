@@ -2,6 +2,8 @@
 
 namespace Drupal\acsf\Event;
 
+use Drupal\acsf\AcsfCompatibilityHelper;
+
 /**
  * Handles the scrubbing of Drupal temporary files.
  */
@@ -15,10 +17,12 @@ class AcsfDuplicationScrubTemporaryFilesHandler extends AcsfEventHandler {
 
     $file_storage = \Drupal::entityTypeManager()->getStorage('file');
 
+    $status = AcsfCompatibilityHelper::getFileStatusPermanent();
+
     // Remove all temporary files. As in file_cron(), temporary is encoded as
     // "<> FILE_STATUS_PERMANENT".
     $fids = $file_storage->getQuery()
-      ->condition('status', FILE_STATUS_PERMANENT, '<>')
+      ->condition('status', $status, '<>')
       ->range(0, 1000)
       ->execute();
 

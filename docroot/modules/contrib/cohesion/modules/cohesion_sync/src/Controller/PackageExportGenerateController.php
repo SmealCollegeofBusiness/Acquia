@@ -27,6 +27,7 @@ use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Yaml\Yaml as SymfonyYaml;
 
 /**
  * Handles Package Export Generation.
@@ -277,13 +278,12 @@ class PackageExportGenerateController extends ControllerBase {
 
     $archiver = new ArchiveTar($this->getPackageFileUri($entity->id()), 'gz');
 
-    $index = [];
     foreach ($files as $uuid => $type) {
       $file_entity = $this->entityTypeManager->getStorage('file')->loadByProperties(['uuid' => $uuid]);
       $file = reset($file_entity);
       if ($file instanceof FileInterface) {
         $entry = $this->buildFileExportEntry($file);
-        $index[$file->getConfigDependencyName()] = $entry;
+        $data = SymfonyYaml::dump($entry, PHP_INT_MAX, 2, SymfonyYaml::DUMP_EXCEPTION_ON_INVALID_TYPE + SymfonyYaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
         if (!file_exists($file->getFileUri())) {
           $this->deleteFile($this->getPackageFileUri($entity->id()));
           $this->messenger()->addError($this->t('Cannot export %entity_label entity. File %filename does not exists or is not readable.', [
@@ -296,15 +296,12 @@ class PackageExportGenerateController extends ControllerBase {
         }
         $content = file_get_contents($file->getFileUri());
         $archiver->addString($file->getFilename(), $content, $file->getCreatedTime());
+        $archiver->addString(CohesionFileStorage::FILE_METADATA_PREFIX . '.' . $file->uuid() . '.' . CohesionFileStorage::getFileExtension(), $data);
       }
     }
     foreach ($config as $name) {
       $config_item = $this->cohesionIndividualEntityPackageStorage->read($name);
       $archiver->addString("$name.yml", $this->cohesionFileStorage->encode($config_item));
-    }
-
-    if (!empty($index)) {
-      $archiver->addString(CohesionFileStorage::FILE_INDEX_FILENAME, json_encode($index, JSON_PRETTY_PRINT));
     }
 
     return new RedirectResponse(Url::fromRoute('cohesion_sync.export_all.download', ['filename' => $entity->id() . '.tar.gz'])->toString());
@@ -381,7 +378,7 @@ class PackageExportGenerateController extends ControllerBase {
         $file = reset($file);
         if ($file instanceof FileInterface) {
           $entry = $this->buildFileExportEntry($file);
-          $files[$file->getConfigDependencyName()] = $entry;
+          $data = SymfonyYaml::dump($entry, PHP_INT_MAX, 2, SymfonyYaml::DUMP_EXCEPTION_ON_INVALID_TYPE + SymfonyYaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
           if (!file_exists($file->getFileUri())) {
             $this->deleteFile($this->getPackageFileUri($package['uri']));
             $context['results']['error'] = $this->t('Cannot export package. File %filename does not exists or is not readable.', [
@@ -390,19 +387,11 @@ class PackageExportGenerateController extends ControllerBase {
           }
           $content = file_get_contents($file->getFileUri());
           $archiver->addString($file->getFilename(), $content, $file->getCreatedTime());
+          $archiver->addString(CohesionFileStorage::FILE_METADATA_PREFIX . '.' . $file->uuid() . '.' . CohesionFileStorage::getFileExtension(), $data);
         }
       }
       elseif ($config_item = $this->currentStorage->read($value)) {
         $archiver->addString("$value.yml", $this->cohesionFileStorage->encode($config_item));
-      }
-    }
-
-    if (isset($files)) {
-      if (isset($context['results']['index']) && is_array($context['results']['index'])) {
-        $context['results']['index'] = array_merge($context['results']['index'], $files);
-      }
-      else {
-        $context['results']['index'] = $files;
       }
     }
 
@@ -434,11 +423,6 @@ class PackageExportGenerateController extends ControllerBase {
       $this->messenger()->addError($results['error']);
     }
     elseif ($success) {
-      if (!empty($results['index'])) {
-        $archiver = new ArchiveTar($results['package']['uri'], 'gz');
-        $archiver->addString(CohesionFileStorage::FILE_INDEX_FILENAME, json_encode($results['index'], JSON_PRETTY_PRINT));
-      }
-
       $this->state->set(sprintf(self::getPackageStateKey($results['package']['name'])), TRUE);
       $this->messenger()->addStatus($this->t('Package file has been successfully generated.'));
     }
@@ -483,6 +467,9 @@ class PackageExportGenerateController extends ControllerBase {
 
     // Get all the field values into the struct.
     foreach ($entity->getFields() as $field_key => $value) {
+      if ($field_key === 'fid') {
+        continue;
+      }
       // Get the value of the field.
       if ($value = $entity->get($field_key)->getValue()) {
         $value = reset($value);

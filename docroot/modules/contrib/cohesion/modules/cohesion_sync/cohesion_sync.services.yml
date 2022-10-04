@@ -65,6 +65,8 @@ services:
 
   cohesion_sync.package_source.default_module_package:
     class: Drupal\cohesion_sync\Services\DefaultModulePackage
+    arguments:
+      - '@module_handler'
     tags:
       - { name: sitestudio_package_source, priority: 50}
 

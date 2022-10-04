@@ -60,38 +60,6 @@ function acquia_connector_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_cron().
- */
-function acquia_connector_cron() {
-
-  $config = \Drupal::config('acquia_connector.settings');
-  $state_site_name = \Drupal::state()->get('spi.site_name');
-  $state_site_machine_name = \Drupal::state()->get('spi.site_machine_name');
-  // Don't send data if site is blocked or missing components.
-  if ($config->get('spi.blocked') || (is_null($state_site_name) && is_null($state_site_machine_name))) {
-    return;
-  }
-
-  // Check subscription and send a heartbeat to Acquia.
-  $subscription = new Subscription();
-  $subscription->update();
-
-  // Get the last time we processed data.
-  $last = \Drupal::state()->get('acquia_connector.cron_last', 0);
-
-  // 30 minute interval for sending site profile.
-  $interval = $config->get('cron_interval');
-  if ($config->get('cron_interval_override')) {
-    $interval = $config->get('cron_interval_override');
-  }
-
-  // Determine if the required interval has passed.
-  if ($config->get('spi.use_cron') && ((\Drupal::time()->getRequestTime() - $last) > ($interval * 60))) {
-    \Drupal::service('acquia_connector.spi')->sendFullSpi(ACQUIA_CONNECTOR_ACQUIA_SPI_METHOD_CRON);
-  }
-}
-
-/**
  * Implements hook_toolbar().
  */
 function acquia_connector_toolbar() {
@@ -155,10 +123,10 @@ function acquia_connector_update_status_alter(&$projects) {
   foreach ($projects as $project => $project_info) {
     if ($project == 'drupal') {
       if (isset($subscription['update'])) {
-        $projects[$project]['status'] = isset($subscription['update']['status']) ? $subscription['update']['status'] : t('Unknown');
-        $projects[$project]['releases'] = isset($subscription['update']['releases']) ? $subscription['update']['releases'] : [];
-        $projects[$project]['recommended'] = isset($subscription['update']['recommended']) ? $subscription['update']['recommended'] : '';
-        $projects[$project]['latest_version'] = isset($subscription['update']['latest_version']) ? $subscription['update']['latest_version'] : '';
+        $projects[$project]['status'] = $subscription['update']['status'] ?? t('Unknown');
+        $projects[$project]['releases'] = $subscription['update']['releases'] ?? [];
+        $projects[$project]['recommended'] = $subscription['update']['recommended'] ?? '';
+        $projects[$project]['latest_version'] = $subscription['update']['latest_version'] ?? '';
         // Security updates are a separate piece of data. If we leave it, then
         // core security warnings from drupal.org will also be displayed on the
         // update page.
@@ -228,7 +196,9 @@ function acquia_connector_has_update_service() {
  *   The Exception message.
  */
 function acquia_connector_report_restapi_error($code, $message) {
-  \Drupal::messenger()->addError(t('Error: @message (@errno)', ['@message' => $message, '@errno' => $code]));
+  \Drupal::messenger()->addError(t('Error: @message (@errno)', [
+    '@message' => $message, '@errno' => $code
+  ]));
 }
 
 /**
@@ -317,7 +287,7 @@ function acquia_connector_show_free_tier_promo() {
 
   // Check that we're not on one of our own config pages, all of which are
   // prefixed with admin/config/system/acquia-connector.
-  $current_path = \Drupal::Request()->attributes->get('_system_path');
+  $current_path = ltrim(\Drupal::service('path.current')->getPath(\Drupal::request()), '/');
   if (\Drupal::service('path.matcher')->matchPath($current_path, 'admin/config/system/acquia-connector/*')) {
     return;
   }

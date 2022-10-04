@@ -43,7 +43,7 @@ class DisablePathauto implements EventSubscriberInterface {
   /**
    * Turn off pathauto alias generation for entities being imported.
    *
-   * @param \Drupal\acquia_contenthub\PreEntitySaveEvent $event
+   * @param \Drupal\acquia_contenthub\Event\PreEntitySaveEvent $event
    *   The pre entity save event.
    */
   public function onPreEntitySave(PreEntitySaveEvent $event) {

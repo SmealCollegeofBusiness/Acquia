@@ -14,6 +14,9 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Implementing form SoundcloudForm.
+ */
 class SoundcloudForm extends AddFormBase {
 
   /**
@@ -30,6 +33,8 @@ class SoundcloudForm extends AddFormBase {
    *   The entity type manager.
    * @param \Drupal\media_library\MediaLibraryUiBuilder $library_ui_builder
    *   The media library UI builder.
+   * @param \GuzzleHttp\ClientInterface $http_client
+   *   Http client service.
    * @param \Drupal\media_library\OpenerResolverInterface $opener_resolver
    *   The opener resolver.
    */
@@ -49,6 +54,7 @@ class SoundcloudForm extends AddFormBase {
       $container->get('media_library.opener_resolver')
     );
   }
+
   /**
    * {@inheritdoc}
    */
@@ -67,13 +73,17 @@ class SoundcloudForm extends AddFormBase {
   /**
    * {@inheritDoc}
    */
-  protected function buildInputElement(array $form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  protected function buildInputElement(array $form, FormStateInterface $form_state) {
     $container = [
       '#type' => 'container',
     ];
     $container['soundcloud_url'] = [
       '#type' => 'textfield',
-      '#title' => $this->t("Add Soundcloud Track"),
+      '#title' => $this->t("Add Soundcloud Track URL"),
+      '#maxlength' => 255,
+      '#attributes' => [
+        'placeholder' => 'https://soundcloud.com/path-to-track',
+      ],
     ];
 
     $container['submit'] = [
@@ -105,9 +115,9 @@ class SoundcloudForm extends AddFormBase {
    * Validates a soundcloud url.
    *
    * @param array $form
-   *    The form.
-   * @param FormStateInterface $form_state
-   *    The form state.
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
    *
    * @return void|TRUE
    */
@@ -116,11 +126,13 @@ class SoundcloudForm extends AddFormBase {
     if (preg_match('/https?:\/\/(www\.)?soundcloud\.com\/.*/', $url)) {
       try {
         \Drupal::httpClient()->get($url);
-      } catch (ClientException $e) {
+      }
+      catch (ClientException $e) {
         $form_state->setErrorByName('url', $this->t('Could not connect to the track, please make sure that the url is correct.'));
       }
 
-    } else {
+    }
+    else {
       $form_state->setErrorByName('url', $this->t('Invalid url.'));
     }
   }
@@ -128,14 +140,14 @@ class SoundcloudForm extends AddFormBase {
   /**
    * {@inheritDoc}
    */
-  public function addButtonSubmit(array $form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  public function addButtonSubmit(array $form, FormStateInterface $form_state) {
     $this->processInputValues([$form_state->getValue('soundcloud_url')], $form, $form_state);
   }
 
   /**
    * {@inheritDoc}
    */
-  function getFormId() {
+  public function getFormId() {
     return 'soundcloud_media_add_form';
   }
 }

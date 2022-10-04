@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\acquia_cms_common\Functional;
 
+use Drupal\acquia_cms_common\Facade\PermissionFacade;
 use Drupal\file\FileInterface;
 use Drupal\media\Entity\MediaType;
 use Drupal\Tests\acquia_cms_common\Traits\MediaTestTrait;
@@ -66,6 +67,16 @@ abstract class MediaTypeTestBase extends ContentModelTestBase {
 
     // Ensure that all fields in this media type are translatable.
     $this->assertConfigurableFieldsAreTranslatable('media', $this->mediaType);
+
+    // The content model roles (i.e. content_administrator, content_author
+    // & content_editor) gets created only when any of the content model module
+    // is enabled. @see acquia_cms_common_module_preinstall().
+    // So, we need to create those roles on the fly and
+    // test if it gets created successfully by our facade.
+    $permissionFacadeObj = \Drupal::classResolver(PermissionFacade::class);
+    $this->assertEquals($permissionFacadeObj->addRole('content_administrator'), SAVED_NEW);
+    $this->assertEquals($permissionFacadeObj->addRole('content_author'), SAVED_NEW);
+    $this->assertEquals($permissionFacadeObj->addRole('content_editor'), SAVED_NEW);
   }
 
   /**
@@ -229,11 +240,9 @@ abstract class MediaTypeTestBase extends ContentModelTestBase {
       $value = $this->generateSourceFieldValue($media_type);
     }
 
-    /**
-    * Get the field name from subclases if missing use fallback value
-    */
+    // Get the field name from subclases if missing use fallback value.
     $field = $this->fieldName;
-    if(empty($field)){
+    if (empty($field)) {
       $field = $media_type->getSource()
         ->getSourceFieldDefinition($media_type)
         ->getLabel();

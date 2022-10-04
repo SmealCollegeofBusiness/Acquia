@@ -4,16 +4,21 @@ namespace Drupal\Tests\Kernel;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
+use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\node\Entity\Node;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\paragraphs\Entity\ParagraphsType;
 use Drupal\Tests\acquia_contenthub\Kernel\Traits\FieldTrait;
+use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 
 /**
  * Tests the paragraph entity save revisions.
  *
- * @requires module depcalc paragraphs entity_reference_revisions
+ * @requires module depcalc
+ * @requires module paragraphs
+ * @requires module entity_reference_revisions
  *
  * @group acquia_contenthub_publisher
  */
@@ -22,6 +27,7 @@ class ParagraphEntitySaveTest extends EntityKernelTestBase {
   use ContentTypeCreationTrait;
   use NodeCreationTrait;
   use FieldTrait;
+  use ContentModerationTestTrait;
 
   /**
    * A test node.
@@ -48,6 +54,9 @@ class ParagraphEntitySaveTest extends EntityKernelTestBase {
     'paragraphs',
     'entity_reference_revisions',
     'file',
+    'workflows',
+    'content_moderation',
+    'language',
   ];
 
   /**
@@ -58,9 +67,11 @@ class ParagraphEntitySaveTest extends EntityKernelTestBase {
 
     $this->installEntitySchema('paragraph');
     $this->installSchema('node', ['node_access']);
+    $this->installEntitySchema('content_moderation_state');
     $this->installConfig([
       'filter',
       'node',
+      'content_moderation',
     ]);
 
     $paragraph_type_nested = ParagraphsType::create([
@@ -241,6 +252,92 @@ class ParagraphEntitySaveTest extends EntityKernelTestBase {
   }
 
   /**
+   * Tests paragraphs revision with workflows.
+   */
+  public function testParagraphSaveWithWorkflows(): void {
+    $this->enableWorkflow();
+    $this->node = $this->createNode([
+      'type' => 'article',
+      'title' => 'My node',
+      'node_paragraph_field' => $this->paragraph,
+    ]);
+    $this->node = $this->setEntityField($this->node, 'moderation_state', 'draft');
+
+    $node_original_revision = $this->node->getRevisionId();
+    $paragraph_original_revision = $this->paragraph->getRevisionId();
+
+    // Update the referenced paragraph.
+    $this->paragraph = $this->setEntityField($this->paragraph, 'title', 'New Paragraph Title');
+    $this->node = $this->setEntityField($this->node, 'node_paragraph_field', $this->paragraph);
+
+    $paragraph_new_revision = $this->paragraph->getRevisionId();
+    $node_new_revision = $this->node->getRevisionId();
+
+    $this->assertNotSame($paragraph_new_revision, $paragraph_original_revision);
+    $this->assertNotSame($node_new_revision, $node_original_revision);
+
+    // Setting paragraphs_unchanged_disable_revision flag as TRUE.
+    $config = $this->container->get('config.factory')->getEditable('acquia_contenthub_publisher.features');
+    $config->set('paragraphs_unchanged_disable_revision', TRUE)->save();
+    $this->node->title->value = 'New Title';
+    $this->node->moderation_state->value = 'published';
+    $this->node->save();
+
+    $this->assertSame($this->paragraph->getRevisionId(), $paragraph_new_revision);
+    $this->assertNotSame($this->node->getRevisionId(), $node_new_revision);
+  }
+
+  /**
+   * Tests paragraphs revision with workflows and translations.
+   */
+  public function testParagraphSaveWithWorkflowsTranslation(): void {
+    ConfigurableLanguage::createFromLangcode('en')->save();
+    ConfigurableLanguage::createFromLangcode('hi')->save();
+
+    // Setting paragraphs_unchanged_disable_revision flag as TRUE.
+    $config = $this->container->get('config.factory')->getEditable('acquia_contenthub_publisher.features');
+    $config->set('paragraphs_unchanged_disable_revision', TRUE)->save();
+
+    $this->enableWorkflow();
+    $this->paragraph = Paragraph::create([
+      'type' => 'text_paragraph',
+      'title' => 'My Paragraph',
+    ]);
+    $this->node = Node::create([
+      'type' => 'article',
+      'title' => 'My node',
+      'node_paragraph_field' => $this->paragraph,
+    ]);
+    $this->node = $this->setEntityField($this->node, 'moderation_state', 'published');
+
+    $this->paragraph->addTranslation('hi', [
+      'title' => 'My Paragraph',
+    ]);
+    $this->paragraph->setNewRevision(TRUE);
+    $this->paragraph->save();
+
+    $hi_paragraph = $this->paragraph->getTranslation('hi');
+    $hi_node = $this->node->addTranslation('hi', [
+      'title' => 'My node',
+      'node_paragraph_field' => $hi_paragraph,
+      'moderation_state' => 'draft',
+    ]);
+    $hi_node->setNewRevision(TRUE);
+    $hi_node->save();
+
+    $hi_node->moderation_state->value = 'published';
+    $hi_paragraph->setNewRevision(TRUE);
+    $hi_paragraph->save();
+    $hi_node->save();
+
+    $node_loaded = $this->entityTypeManager->getStorage($hi_node->getEntityTypeId())->loadRevision($hi_node->getRevisionId())->getTranslation('hi');
+
+    $this->assertNotSame($this->node->get('node_paragraph_field')->getValue()[0], $node_loaded->get('node_paragraph_field')->getValue()[0]);
+    $this->assertSame('5', $hi_paragraph->getRevisionId());
+    $this->assertSame('My Paragraph', $hi_paragraph->get('title')->getValue()[0]['value']);
+  }
+
+  /**
    * Sets value of field for given entity.
    *
    * @param \Drupal\Core\Entity\ContentEntityInterface $entity
@@ -261,6 +358,15 @@ class ParagraphEntitySaveTest extends EntityKernelTestBase {
     $entity->save();
 
     return $entity;
+  }
+
+  /**
+   * Enables content moderation workflow.
+   */
+  protected function enableWorkflow(): void {
+    $workflow = $this->createEditorialWorkflow();
+    $workflow->getTypePlugin()->addEntityTypeAndBundle('node', 'article');
+    $workflow->save();
   }
 
 }

@@ -121,6 +121,7 @@ class WorkbenchEmailProcessor extends QueueWorkerBase implements ContainerFactor
       $template = $data->getTemplate();
       $uuid = $data->getUuid();
       if ($entity = $this->entityRepository->loadEntityByUuid($this->targetEntityType, $uuid)) {
+        $format = $template->getFormat();
         $body = $template->getBody();
         /* @var \Drupal\Core\Entity\RevisionableStorageInterface $entity_storage */
         $entity_storage = $this->entityTypeManager->getStorage($this->targetEntityType);
@@ -136,6 +137,7 @@ class WorkbenchEmailProcessor extends QueueWorkerBase implements ContainerFactor
           'body' => $body,
           'template' => $template,
           'subject' => $subject,
+          'template_format' => $format,
           'entity' => $entity,
         ], $replyTo);
       }

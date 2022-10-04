@@ -10,7 +10,7 @@ use Drupal\Tests\UnitTestCase;
 /**
  * @coversDefaultClass \Drupal\acquia_connector\AutoConnector
  *
- * @group Acquia connector
+ * @group acquia_connector
  */
 class AutoConnectorTest extends UnitTestCase {
 

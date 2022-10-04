@@ -217,7 +217,7 @@ class DiscoveryInterfaceController extends ControllerBase {
 
     // Obtain the list of supported entity types and bundles.
     $entity_types_bundles = $this->getSupportedEntityTypesAndBundles();
-    $ember_endpoint = $GLOBALS['base_url'] . '/' . $this->moduleHandler->getModule('acquia_contenthub_curation')->getPath() . '/ember/index.html' . '?' . $query_string;
+    $ember_endpoint = $request->getSchemeAndHttpHost() . '/' . $this->moduleHandler->getModule('acquia_contenthub_curation')->getPath() . '/ember/index.html' . '?' . $query_string;
 
     // Set Client User Agent.
     $module_info = $this->moduleList->getExtensionInfo('acquia_contenthub');
@@ -225,7 +225,7 @@ class DiscoveryInterfaceController extends ControllerBase {
     $drupal_version = (isset($module_info['core'])) ? $module_info['core'] : '0.0.0';
     $client_user_agent = 'AcquiaContentHub/' . $drupal_version . '-' . $module_version;
 
-    $import_endpoint = $GLOBALS['base_url'] . '/acquia-contenthub/';
+    $import_endpoint = $request->getSchemeAndHttpHost() . '/acquia-contenthub/';
     $saved_filters_endpoint = '';
 
     $languages_supported = array_keys($this->languageManager->getLanguages(LanguageInterface::STATE_ALL));

@@ -22,6 +22,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class ImportFileForm extends FormBase {
 
+  const EXTENSIONS = ['tar.gz', 'tgz', 'tar.bz2'];
+  const FILE_EXTENSION_PATTERN = "/.+(\.tar\.gz|\.tgz|\.tar\.bz2){1}$/";
+
   /**
    * The entity manager.
    *
@@ -202,7 +205,7 @@ class ImportFileForm extends FormBase {
       $form['import']['import_tarball'] = [
         '#type' => 'file',
         '#title' => $this->t('Configuration archive'),
-        '#description' => $this->t('Allowed types: @extensions.', ['@extensions' => 'tar.gz tgz tar.bz2']),
+        '#description' => $this->t('Allowed types: @extensions.', ['@extensions' => implode(" ", self::EXTENSIONS)]),
       ];
 
       $form['import']['submit'] = [
@@ -233,8 +236,13 @@ class ImportFileForm extends FormBase {
     if ($form_state->getTriggeringElement()['#name'] == 'import_submit') {
       $all_files = $this->getRequest()->files->get('files', []);
       if (!empty($all_files['import_tarball'])) {
+        /** @var \Symfony\Component\HttpFoundation\File\UploadedFile $file_upload */
         $file_upload = $all_files['import_tarball'];
-        if ($file_upload->isValid()) {
+        // Reject yml or yml_ uploads.
+        if (preg_match(self::FILE_EXTENSION_PATTERN, $file_upload->getClientOriginalName()) !== 1 || !$file_upload->isValid()) {
+          $form_state->setErrorByName('import_tarball', $this->t('Invalid file type'));
+        }
+        else {
           $form_state->setValue('import_tarball', $file_upload->getRealPath());
           return;
         }

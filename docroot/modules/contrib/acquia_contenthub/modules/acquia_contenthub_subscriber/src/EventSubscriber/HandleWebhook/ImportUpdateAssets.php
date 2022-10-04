@@ -9,7 +9,6 @@ use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Queue\QueueFactory;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -25,13 +24,6 @@ class ImportUpdateAssets implements EventSubscriberInterface {
    * @var \Drupal\Core\Queue\QueueInterface
    */
   protected $queue;
-
-  /**
-   * Event dispatcher.
-   *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
-   */
-  protected $dispatcher;
 
   /**
    * The subscription tracker.
@@ -73,8 +65,6 @@ class ImportUpdateAssets implements EventSubscriberInterface {
    *
    * @param \Drupal\Core\Queue\QueueFactory $queue
    *   The queue factory.
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
-   *   Event dispatcher.
    * @param \Drupal\acquia_contenthub_subscriber\SubscriberTracker $tracker
    *   The subscription tracker.
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
@@ -86,14 +76,12 @@ class ImportUpdateAssets implements EventSubscriberInterface {
    */
   public function __construct(
     QueueFactory $queue,
-    EventDispatcherInterface $dispatcher,
     SubscriberTracker $tracker,
     LoggerChannelInterface $logger_channel,
     ConfigFactoryInterface $config_factory,
     CdfMetricsManager $cdf_metrics_manager
   ) {
     $this->queue = $queue->get('acquia_contenthub_subscriber_import');
-    $this->dispatcher = $dispatcher;
     $this->tracker = $tracker;
     $this->channel = $logger_channel;
     $this->config = $config_factory->get('acquia_contenthub.admin_settings');
@@ -123,7 +111,7 @@ class ImportUpdateAssets implements EventSubscriberInterface {
     $client = $event->getClient();
 
     // Nothing to do or log here.
-    if ($payload['crud'] !== 'update') {
+    if (!isset($payload['crud']) || $payload['crud'] !== 'update') {
       return;
     }
 

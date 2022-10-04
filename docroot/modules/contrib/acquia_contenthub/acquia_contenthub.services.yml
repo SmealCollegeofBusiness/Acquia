@@ -402,7 +402,13 @@ services:
     class: Drupal\acquia_contenthub\EventSubscriber\HandleWebhook\Report
     arguments: ['@acquia_contenthub_common_actions', '@extension.list.module']
     tags:
-    - { name: event_subscriber }
+      - { name: event_subscriber }
+
+  acquia_contenthub.handle_webhook.regenerate_shared_secret:
+    class: Drupal\acquia_contenthub\EventSubscriber\HandleWebhook\RegenerateSharedSecret
+    arguments: [ '@acquia_contenthub.config' , '@acquia_contenthub.logger_channel']
+    tags:
+      - { name: event_subscriber }
 
   acquia_contenthub.getcdftype.defaultcdf:
     class: Acquia\ContentHubClient\EventSubscriber\DefaultCDF
@@ -459,12 +465,6 @@ services:
   acquia_contenthub.connection_manager:
     class: Drupal\acquia_contenthub\ContentHubConnectionManager
     arguments: ['@config.factory', '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@acquia_contenthub.settings']
-
-  acquia_contenthub.prune_cdf.handle_channel_languages:
-    class: Drupal\acquia_contenthub\EventSubscriber\PruneCdf\HandleChannelLanguages
-    tags:
-    - { name: event_subscriber }
-    arguments: ['@acquia_contenthub.settings']
 
   acquia_contenthub.focal_point.collector:
     class: Drupal\acquia_contenthub\EventSubscriber\DependencyCollector\FocalPointCollector

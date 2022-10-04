@@ -32,6 +32,7 @@ class AcsfVariablesCommands extends DrushCommands {
    * @option exact Only retrieve the exact variable name specified.
    */
   public function vget($name, array $options = ['exact' => FALSE]) {
+    $variables = [];
     if (!\Drupal::moduleHandler()->moduleExists('acsf_variables')) {
       throw new AcsfException(dt('The acsf_variables module must be enabled.'));
     }

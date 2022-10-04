@@ -10,6 +10,7 @@ use Drupal\acquia_contenthub\Event\ExcludeEntityFieldEvent;
 use Drupal\acquia_contenthub\Event\SerializeAdditionalMetadataEvent;
 use Drupal\acquia_contenthub\Event\SerializeCdfEntityFieldEvent;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\EntityChangedInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -98,7 +99,10 @@ class ContentEntityCreateCdfHandler implements EventSubscriberInterface {
    *   The parameterized entity CDF.
    */
   protected function prepareCdf(ContentEntityInterface $entity, string $uuid, array $dependencies = []): CDFObject {
-    $cdf = new CDFObject('drupal8_content_entity', $entity->uuid(), date('c'), date('c'), $uuid);
+    $created = $this->getCreatedTime($entity);
+    $modified = $this->getModifiedTime($entity);
+
+    $cdf = new CDFObject('drupal8_content_entity', $entity->uuid(), $created, $modified, $uuid);
     $metadata = [
       'default_language' => $entity->language()->getId(),
     ];
@@ -107,6 +111,43 @@ class ContentEntityCreateCdfHandler implements EventSubscriberInterface {
     }
     $cdf->setMetadata($metadata);
     return $cdf;
+  }
+
+  /**
+   * Returns the created time of the entity if it implements ::getCreatedTime.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity in question.
+   *
+   * @return string
+   *   The formatted date.
+   */
+  protected function getCreatedTime(ContentEntityInterface $entity): string {
+    if (!method_exists($entity, 'getCreatedTime')) {
+      return date('c');
+    }
+
+    $created = $entity->getCreatedTime();
+    if (!is_int($created)) {
+      return date('c');
+    }
+
+    return date('c', $created);
+  }
+
+  /**
+   * Returns the modified time of the entity.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity in question.
+   *
+   * @return string
+   *   The formatted date.
+   */
+  protected function getModifiedTime(ContentEntityInterface $entity): string {
+    return !$entity instanceof EntityChangedInterface
+      ? date('c')
+      : date('c', $entity->getChangedTime());
   }
 
   /**

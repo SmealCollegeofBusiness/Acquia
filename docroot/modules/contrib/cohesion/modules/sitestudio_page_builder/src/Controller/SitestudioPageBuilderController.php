@@ -7,6 +7,7 @@ use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\RevisionableEntityBundleInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -48,7 +49,14 @@ class SitestudioPageBuilderController extends ControllerBase {
   protected $moduleHandler;
 
   /**
-   * CohesionController constructor.
+   * The entity repository service
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+  protected $entityRepository;
+
+  /**
+   * SitestudioPageBuilderController constructor.
    *
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
@@ -56,15 +64,22 @@ class SitestudioPageBuilderController extends ControllerBase {
    *   The current user account.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *  The module handler service
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   *  Entity repository service
    */
-  public function __construct(TimeInterface $time, AccountInterface $user, ModuleHandlerInterface $module_handler) {
+  public function __construct(
+    TimeInterface $time,
+    AccountInterface $user,
+    ModuleHandlerInterface $module_handler,
+    EntityRepositoryInterface $entity_repository
+  ) {
     $this->time = $time;
     $this->user = $user;
     $this->moduleHandler = $module_handler;
+    $this->entityRepository = $entity_repository;
   }
 
   /**
-   * The admin landing page (admin/cohesion).
    *
    * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
    *   Controller's container.
@@ -75,14 +90,15 @@ class SitestudioPageBuilderController extends ControllerBase {
     return new static(
       $container->get('datetime.time'),
       $container->get('current_user'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('entity.repository')
     );
   }
 
   /**
    * Save a layout canvas from the frontend editor
    *
-   * Returns a list of worklow state that this entity can now transition to
+   * Returns a list of workflow states that this entity can now transition to
    * (if applicable)
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -105,7 +121,7 @@ class SitestudioPageBuilderController extends ControllerBase {
     }
 
     $data = json_decode($content);
-    if(!$data || !property_exists($data, 'canvases') || !is_object($data->canvases)) {
+    if (!$data || !property_exists($data, 'canvases') || !is_object($data->canvases)) {
       return new CohesionJsonResponse([
         'data' => $this->t('Missing data canvases'),
       ], 400);
@@ -119,7 +135,7 @@ class SitestudioPageBuilderController extends ControllerBase {
       /** @var \Drupal\cohesion_elements\Entity\CohesionLayout $layout_canvas */
       // Load the layout canvas and set the new json values to be saved
       $layout_canvas = CohesionLayout::load($layout_canvas_id);
-      if(!$layout_canvas) {
+      if (!$layout_canvas) {
         return new CohesionJsonResponse([
           'data' => $this->t('Cannot find entity Layout canvas with id: @id', [
             '@id' => $layout_canvas_id,
@@ -129,11 +145,11 @@ class SitestudioPageBuilderController extends ControllerBase {
 
       // Make sure to load the correct translation
       $current_lang = $this->languageManager()->getCurrentLanguage()->getId();
-      if($layout_canvas->hasTranslation($current_lang)) {
+      if ($layout_canvas->hasTranslation($current_lang)) {
         $layout_canvas = $layout_canvas->getTranslation($current_lang);
-      }else {
+      } else {
         return new CohesionJsonResponse([
-          'data' => $this->t('Cannot find tranlaste for langauge %lang for Layout canvas entity id: @id', [
+          'data' => $this->t('Cannot find a translation of language %lang for Layout canvas entity id: @id', [
             '@lang' => $current_lang,
             '@id' => $layout_canvas_id,
           ]),
@@ -144,7 +160,7 @@ class SitestudioPageBuilderController extends ControllerBase {
       $layout_canvas->setNeedsSave(TRUE);
 
       // Check that the json is valid
-      if($errors = $layout_canvas->jsonValuesErrors()) {
+      if ($errors = $layout_canvas->jsonValuesErrors()) {
         return new CohesionJsonResponse([
           'data' => $errors['error'],
         ], 400);
@@ -152,8 +168,14 @@ class SitestudioPageBuilderController extends ControllerBase {
 
       $parent_field_name = $layout_canvas->get('parent_field_name')->get(0)->getValue()['value'];
       // Load the entity that has already been update if it exists
-      if($entity == NULL) {
-        $entity = $layout_canvas->getParentEntity();
+      if ($entity == NULL) {
+        $parent = $layout_canvas->getParentEntity();
+        // Check isRevisionable() and get the active revision.
+        if ($parent->getEntityType()->isRevisionable()) {
+          $entity = $this->entityRepository->getActive($parent->getEntityTypeId(), $parent->id());
+        } else {
+          $entity = $parent;
+        }
       } elseif ($entity !== $layout_canvas->getParentEntity()) {
         // Only process one entity so ignore any layout canvas that doesn't
         // belong to the first entity found.
@@ -180,30 +202,30 @@ class SitestudioPageBuilderController extends ControllerBase {
       }
 
       // Set the moderation state or published state for the entity
-      if(property_exists($data, 'moderationState')){
+      if (property_exists($data, 'moderationState')) {
         $published_state = $data->moderationState;
         if ($moderation_information && $moderation_information->isModeratedEntity($entity)) {
-          if($moderation_information->getWorkflowForEntity($entity)->getTypePlugin()->hasState($published_state)) {
+          if ($moderation_information->getWorkflowForEntity($entity)->getTypePlugin()->hasState($published_state)) {
             $entity->set('moderation_state', $published_state);
           }
         } else {
-          if($published_state == 'published') {
+          if ($published_state == 'published') {
             $entity->setPublished();
-          }elseif($published_state == 'unpublished') {
+          } elseif ($published_state == 'unpublished') {
             $entity->setUnpublished();
           }
         }
       }
     }
 
-    if($entity) {
+    if ($entity) {
       $transition_labels = [];
       $current_state = '';
       $default_value = NULL;
 
       $violations = $entity->validate();
 
-      if(!$entity->access('update')) {
+      if (!$entity->access('update')) {
         return new CohesionJsonResponse([
           'data' => 'Forbidden, you do not have the necessary permissions to edit this content',
         ], 403);
@@ -219,7 +241,7 @@ class SitestudioPageBuilderController extends ControllerBase {
         $entity->save();
       }
       // Get the next transition states if moderated entity
-      if($moderation_information && $moderation_information->isModeratedEntity($entity)) {
+      if ($moderation_information && $moderation_information->isModeratedEntity($entity)) {
         // Get the states the entity can transition into and the current state
         $default = $moderation_information->getOriginalState($entity);
         $current_state = $default->label();
@@ -238,7 +260,7 @@ class SitestudioPageBuilderController extends ControllerBase {
             $transition_labels[$transition_to_state->id()]['selected'] = TRUE;
           }
         }
-      }else {
+      } else {
         $transition_labels['published'] = [
           'state' => 'published',
           'label' => $this->t('Published'),
@@ -248,15 +270,15 @@ class SitestudioPageBuilderController extends ControllerBase {
           'label' => $this->t('Unpublished'),
         ];
 
-        if($entity->isPublished()) {
+        if ($entity->isPublished()) {
           $transition_labels['published']['selected'] = TRUE;
           $current_state = $this->t('Published');
-        }else {
+        } else {
           $transition_labels['unpublished']['selected'] = TRUE;
           $current_state = $this->t('Unpublished');
         }
       }
-    }else{
+    } else {
       return new CohesionJsonResponse([
         'data' => 'An error occurred, the entity for the layout canvas can\'t be found ',
       ], 400);
@@ -277,12 +299,12 @@ class SitestudioPageBuilderController extends ControllerBase {
    * @return array | CohesionJsonResponse
    */
   public function buildLayoutCanvas(Request $request) {
-    if($request->get('canvas_id')) {
+    if ($request->get('canvas_id')) {
       $layoutId = explode('-', $request->get('canvas_id'));
-      if(isset($layoutId[1])) {
+      if (isset($layoutId[1])) {
         $layout_canvas = $request->request->get('layout_canvas');
-        if($layout = CohesionLayout::load($layoutId[1])) {
-          if(!$layout->getParentEntity() || !$layout->getParentEntity()->access('update')) {
+        if ($layout = CohesionLayout::load($layoutId[1])) {
+          if (!$layout->getParentEntity() || !$layout->getParentEntity()->access('update')) {
             return new CohesionJsonResponse([
               'data' => 'Forbidden, you do not have the necessary permissions to edit this content',
             ], 403);
@@ -295,7 +317,7 @@ class SitestudioPageBuilderController extends ControllerBase {
             ], 400);
           }
 
-          $view_builder = \Drupal::entityTypeManager()->getViewBuilder('cohesion_layout');
+          $view_builder = $this->entityTypeManager()->getViewBuilder('cohesion_layout');
           $build = $view_builder->view($layout);
           $content = [
             '#theme' => "sitestudio_build",
@@ -304,7 +326,7 @@ class SitestudioPageBuilderController extends ControllerBase {
           $response = new AjaxResponse();
           $response->addCommand(new SitestudioPageBuilderCommand($content));
           return $response;
-        }else {
+        } else {
           return new CohesionJsonResponse([
             'data' => $this->t("The LayoutCanvas entity with id @id can't be found", ['@id' => $layoutId[1]]),
           ], 400);

@@ -8,7 +8,7 @@ dependencies:
   - drupal:datetime
   - drupal:schema_event
 
-# Information added by Drupal.org packaging script on 2022-06-13
-version: '1.3.4'
+# Information added by Drupal.org packaging script on 2022-09-22
+version: '1.4.0'
 project: 'acquia_cms_event'
-datestamp: 1655140746
+datestamp: 1663875969

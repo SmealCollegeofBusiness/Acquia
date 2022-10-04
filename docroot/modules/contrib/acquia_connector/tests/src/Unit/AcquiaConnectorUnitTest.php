@@ -18,7 +18,7 @@ if (!defined('REQUEST_TIME')) {
 /**
  * @coversDefaultClass \Drupal\acquia_connector\Client
  *
- * @group Acquia connector
+ * @group acquia_connector
  */
 class AcquiaConnectorUnitTest extends UnitTestCase {
 

@@ -2,6 +2,7 @@
 
 namespace Drush\Commands;
 
+use Drupal\acsf\AcsfCompatibilityHelper;
 use Drupal\acsf\AcsfException;
 use Drupal\acsf\AcsfInitHtaccessException;
 use Drupal\acsf\AcsfSite;
@@ -23,27 +24,27 @@ class AcsfInitCommands extends DrushCommands {
   /**
    * Content that we need to add to customers' .htaccess files.
    */
-  const ACSF_HTACCESS_PATCH = 'RewriteCond %{REQUEST_URI} !/sites/g/apc_rebuild.php$';
+  public const ACSF_HTACCESS_PATCH = 'RewriteCond %{REQUEST_URI} !/sites/g/apc_rebuild.php$';
 
   /**
    * The marker that tells us where we need to add our .htaccess patch.
    */
-  const ACSF_HTACCESS_PATCH_MARKER = 'RewriteRule "^(.+/.*|autoload)\.php($|/)" - [F]';
+  public const ACSF_HTACCESS_PATCH_MARKER = 'RewriteRule "^(.+/.*|autoload)\.php($|/)" - [F]';
 
   /**
    * A comment to include with the htaccess patch line.
    */
-  const ACSF_HTACCESS_PATCH_COMMENT = '  # ACSF requirement: allow access to apc_rebuild.php.';
+  public const ACSF_HTACCESS_PATCH_COMMENT = '  # ACSF requirement: allow access to apc_rebuild.php.';
 
   /**
    * Initial delimiter string to enclose code added by acsf-init.
    */
-  const ACSF_INIT_CODE_DELIMITER_START = '// ===== Added by acsf-init, please do not delete. Section start. =====';
+  public const ACSF_INIT_CODE_DELIMITER_START = '// ===== Added by acsf-init, please do not delete. Section start. =====';
 
   /**
    * Closing delimiter string to enclose code added by acsf-init.
    */
-  const ACSF_INIT_CODE_DELIMITER_END = '// ===== Added by acsf-init, please do not delete. Section end. =====';
+  public const ACSF_INIT_CODE_DELIMITER_END = '// ===== Added by acsf-init, please do not delete. Section end. =====';
 
   /**
    * Add the necessary classes.
@@ -51,7 +52,7 @@ class AcsfInitCommands extends DrushCommands {
    * @hook pre-command *
    */
   public function preInit() {
-    $path = dirname(dirname(dirname(__DIR__))) . '/src';
+    $path = dirname(__DIR__, 3) . '/src';
     $classes = [
       'AcsfException',
       'AcsfInitException',
@@ -123,7 +124,7 @@ class AcsfInitCommands extends DrushCommands {
     }
 
     // Copy the required files.
-    $lib_path = sprintf('%s/lib', dirname(dirname(dirname(__FILE__))));
+    $lib_path = sprintf('%s/lib', dirname(__FILE__, 3));
     foreach ($this->getRequiredFiles($repo_root) as $location) {
       $file = $location['filename'];
 
@@ -160,7 +161,7 @@ class AcsfInitCommands extends DrushCommands {
       }
 
       // Chmod the file if required.
-      $mod = isset($location['mod']) ? $location['mod'] : FALSE;
+      $mod = $location['mod'] ?? FALSE;
       if ($mod && chmod($dest, $mod)) {
         $this->logger()->success(dt('Chmod Success: !file', ['!file' => $file]));
       }
@@ -263,7 +264,7 @@ class AcsfInitCommands extends DrushCommands {
     $repo_root = dirname($drupal_root);
     $skip_default_settings = $options['skip-default-settings'];
 
-    $lib_path = sprintf('%s/lib', dirname(dirname(dirname(__FILE__))));
+    $lib_path = sprintf('%s/lib', dirname(__FILE__, 3));
     $error = FALSE;
     foreach ($this->getRequiredFiles($repo_root) as $location) {
       $file = $location['filename'];
@@ -412,6 +413,10 @@ class AcsfInitCommands extends DrushCommands {
       ]));
     }
 
+    // Generate the new passwords.
+    $password_admin = AcsfCompatibilityHelper::generatePassword();
+    $password_site_owner = AcsfCompatibilityHelper::generatePassword();
+
     // The site owner's email address may have been changed on the factory (for
     // instance, if the user updated their email address on the factory and the
     // new email address has not yet been synced to the site). First, try to
@@ -463,7 +468,7 @@ class AcsfInitCommands extends DrushCommands {
     $admin_account->setLastLoginTime(1)
       ->setUsername('Site Factory admin')
       ->setEmail($site_admin_mail)
-      ->setPassword(user_password())
+      ->setPassword($password_admin)
       ->activate()
       ->save();
 
@@ -487,7 +492,7 @@ class AcsfInitCommands extends DrushCommands {
     $site_owner_account->setLastLoginTime(1)
       ->setUsername($site_owner_name)
       ->setEmail($site_owner_mail)
-      ->setPassword(user_password())
+      ->setPassword($password_site_owner)
       ->activate()
       ->save();
 
@@ -568,7 +573,6 @@ class AcsfInitCommands extends DrushCommands {
       'cloud hooks' => sprintf('%s/hooks/common/post-db-copy', $repo_root),
       'cloud hook deploy' => sprintf('%s/hooks/common/pre-web-activate', $repo_root),
       'acquia hook dir' => sprintf('%s/hooks/acquia', $repo_root),
-      'cloud hook samples' => sprintf('%s/hooks/samples', $repo_root),
       'site config logic' => sprintf('%s/sites/g', DRUPAL_ROOT),
       'site env default' => sprintf('%s/sites/default', DRUPAL_ROOT),
     ];
@@ -589,11 +593,6 @@ class AcsfInitCommands extends DrushCommands {
     //   the file. "Executable" files are expected to be owner and group
     //   executable.
     return [
-      [
-        'filename' => 'README.md',
-        'source' => 'cloud_hooks',
-        'dest' => sprintf('%s/hooks', $repo_root),
-      ],
       [
         'filename' => '000-acquia_required_scrub.php',
         'source' => 'cloud_hooks/common/post-db-copy',
@@ -619,16 +618,6 @@ class AcsfInitCommands extends DrushCommands {
         'dest' => sprintf('%s/hooks/acquia', $repo_root),
       ],
       [
-        'filename' => 'acquia-cloud-site-factory-post-db.sh',
-        'source' => 'cloud_hooks/samples',
-        'dest' => sprintf('%s/hooks/samples', $repo_root),
-      ],
-      [
-        'filename' => 'hello-world.sh',
-        'source' => 'cloud_hooks/samples',
-        'dest' => sprintf('%s/hooks/samples', $repo_root),
-      ],
-      [
         'filename' => 'sites.php',
         'source' => 'sites',
         'dest' => sprintf('%s/sites', DRUPAL_ROOT),
@@ -640,15 +629,6 @@ class AcsfInitCommands extends DrushCommands {
       ],
       [
         'filename' => '.gitignore',
-        'source' => 'sites/g',
-        'dest' => sprintf('%s/sites/g', DRUPAL_ROOT),
-      ],
-      // If we ever add functionality to 'drush acsf-init' to remove files which
-      // were copied by previous versions, then IF services.yml is still empty,
-      // it is also a candidate for removal. (If it's not empty anymore, please
-      // remove this comment.)
-      [
-        'filename' => 'services.yml',
         'source' => 'sites/g',
         'dest' => sprintf('%s/sites/g', DRUPAL_ROOT),
       ],

@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\subrequests\Unit;
 
+use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\subrequests\JsonPathReplacer;
 use Drupal\subrequests\Normalizer\JsonSubrequestDenormalizer;
 use Drupal\subrequests\Subrequest;
@@ -21,12 +22,13 @@ use Symfony\Component\Serializer\Serializer;
  */
 class SubrequestsManagerTest extends UnitTestCase {
 
+  use ProphecyTrait;
   /**
    * @var \Drupal\subrequests\SubrequestsManager
    */
   protected $sut;
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $http_kernel = $this->prophesize(HttpKernelInterface::class);
     $http_kernel

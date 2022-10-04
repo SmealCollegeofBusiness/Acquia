@@ -151,7 +151,19 @@ function acquia_connector_requirements($phase) {
           ->toString(),
       ];
 
-      $modules = \Drupal::moduleHandler()->getImplementations('acquia_connector_spi_test');
+      // Compatibility for Drupal 9.2.
+      if (method_exists(\Drupal::moduleHandler(), 'invokeAllWith')) {
+        $modules = [];
+        \Drupal::moduleHandler()->invokeAllWith('acquia_connector_spi_test', function (callable $hook, string $module) use (&$modules) {
+          // There is minimal overhead since the hook is not invoked.
+          $modules[] = $module;
+        });
+      }
+      else {
+        // @phpstan-ignore-next-line
+        $modules = \Drupal::moduleHandler()->getImplementations('acquia_connector_spi_test');
+      }
+
       if (empty($modules)) {
         $description = t('No custom tests were detected in any module.');
         $value       = t('Not implemented (<a href=":help">more information</a>)', $variables);

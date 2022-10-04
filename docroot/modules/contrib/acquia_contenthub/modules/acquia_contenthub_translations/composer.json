@@ -1,0 +1,9 @@
+{
+    "name": "drupal/acquia_contenthub_translations",
+    "type": "drupal-module",
+    "description": "Allows selective language import for entities.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": ">=9.2"
+    }
+}

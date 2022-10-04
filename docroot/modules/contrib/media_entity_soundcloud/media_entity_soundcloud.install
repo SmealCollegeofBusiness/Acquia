@@ -11,7 +11,7 @@ use Drupal\Core\File\FileSystemInterface;
  * Implements hook_install().
  */
 function media_entity_soundcloud_install() {
-  $source = drupal_get_path('module', 'media_entity_soundcloud') . '/images/icons';
+  $source = \Drupal::service('extension.list.module')->getPath('media_entity_soundcloud') . '/images/icons';
   $destination = \Drupal::config('media.settings')->get('icon_base_uri');
   $file_system = \Drupal::service('file_system');
   $file_system->prepareDirectory($destination, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);

@@ -259,7 +259,9 @@ class PackageImportHandler {
         throw new InvalidPackageDefinitionException(gettype($package_entry));
       }
       $sourceService = $this->packageSourceManager->getSourceService($package_entry['type']);
-      $this->packages[] = $sourceService->preparePackage($package_entry['source']);
+      if (($source = $sourceService->preparePackage($package_entry['source']))) {
+        $this->packages[] = $source;
+      }
       if (isset($package_entry['options']['extra-validation']) && $package_entry['options']['extra-validation']) {
         $cohesion_sync_import_options = &drupal_static('cohesion_sync_import_options');
         $cohesion_sync_import_options['extra-validation'] = TRUE;

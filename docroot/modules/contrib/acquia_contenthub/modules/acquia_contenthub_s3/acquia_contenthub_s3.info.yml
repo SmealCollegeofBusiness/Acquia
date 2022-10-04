@@ -6,12 +6,12 @@ type: module
 core_version_requirement: '>=9.2'
 
 dependencies:
-  - s3fs:s3fs (= 3.0-alpha16)
+  - s3fs:s3fs (= 3.0-beta5)
   - drupal:file
   - drupal:system (>= 9.2)
   - acquia_contenthub:acquia_contenthub
 
-# Information added by Drupal.org packaging script on 2022-06-15
-version: '8.x-2.34'
+# Information added by Drupal.org packaging script on 2022-09-28
+version: '8.x-2.36'
 project: 'acquia_contenthub'
-datestamp: 1655277478
+datestamp: 1664374717

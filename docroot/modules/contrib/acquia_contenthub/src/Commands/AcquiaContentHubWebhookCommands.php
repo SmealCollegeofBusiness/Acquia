@@ -7,7 +7,6 @@ use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
 use Drupal\Core\Url;
 use Drush\Commands\DrushCommands;
-use Drush\Log\LogLevel;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -105,28 +104,28 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
               '@code' => $response['error']['code'],
               '@reason' => $response['error']['message'],
             ]);
-            $this->logger->log(LogLevel::ERROR, $message);
+            $this->logger->error($message);
           }
           return;
         }
 
-        $this->logger->log(LogLevel::SUCCESS,
+        $this->logger->notice(
           dt('Registered Content Hub Webhook: @url | @uuid',
             ['@url' => $webhook_url, '@uuid' => $response['uuid']]
-          ));
+         ));
         break;
 
       case 'unregister':
         $webhooks = $client->getWebHooks();
         if (empty($webhooks)) {
-          $this->logger->log(LogLevel::CANCEL, dt('You have no webhooks.'));
+          $this->logger->warning(dt('You have no webhooks.'));
           return;
         }
 
         /** @var \Acquia\ContentHubClient\Webhook $webhook */
         $webhook = $client->getWebHook($webhook_url);
         if (empty($webhook)) {
-          $this->logger->log(LogLevel::CANCEL, dt('Webhook @url not found', ['@url' => $webhook_url]));
+          $this->logger->warning(dt('Webhook @url not found', ['@url' => $webhook_url]));
           return;
         }
 
@@ -169,11 +168,11 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
         }
 
         if (!$success) {
-          $this->logger->log(LogLevel::CANCEL, dt('There was an error unregistering the URL: @url', ['@url' => $webhook_url]));
+          $this->logger->warning(dt('There was an error unregistering the URL: @url', ['@url' => $webhook_url]));
           return;
         }
 
-        $this->logger->log(LogLevel::SUCCESS, dt('Successfully unregistered Content Hub Webhook: @url', ['@url' => $webhook_url]));
+        $this->logger->notice(dt('Successfully unregistered Content Hub Webhook: @url', ['@url' => $webhook_url]));
         break;
 
       case 'list':

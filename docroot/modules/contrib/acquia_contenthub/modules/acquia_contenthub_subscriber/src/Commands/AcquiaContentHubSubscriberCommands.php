@@ -3,14 +3,12 @@
 namespace Drupal\acquia_contenthub_subscriber\Commands;
 
 use Drupal\acquia_contenthub\Client\ClientFactory;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\Url;
 use Drush\Commands\DrushCommands;
-use Drush\Log\LogLevel;
 
 /**
  * Drush commands for Acquia Content Hub subscribers.
@@ -25,12 +23,7 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
    * @var \Drupal\Core\Database\Connection
    */
   protected $database;
-  /**
-   * The Content Hub Configuration.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  protected $config;
+
   /**
    * The Content Hub Client.
    *
@@ -43,13 +36,15 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
    *
    * @var \Drupal\Core\Logger\LoggerChannelInterface
    */
-  protected $logger;
+  protected $chLogger;
+
   /**
    * State Service.
    *
    * @var \Drupal\Core\State\StateInterface
    */
   protected $state;
+
   /**
    * Module Handler Service.
    *
@@ -62,8 +57,6 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
    *
    * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The Config Factory.
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The Client Factory.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger
@@ -73,11 +66,10 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The Module Handler Service.
    */
-  public function __construct(Connection $database, ConfigFactoryInterface $config_factory, ClientFactory $client_factory, LoggerChannelFactoryInterface $logger, StateInterface $state, ModuleHandlerInterface $module_handler) {
+  public function __construct(Connection $database, ClientFactory $client_factory, LoggerChannelFactoryInterface $logger, StateInterface $state, ModuleHandlerInterface $module_handler) {
     $this->database = $database;
-    $this->config = $config_factory->get('acquia_contenthub.admin_settings');
     $this->client = $client_factory->getClient();
-    $this->logger = $logger->get('acquia_contenthub_publisher');
+    $this->chLogger = $logger->get('acquia_contenthub_publisher');
     $this->state = $state;
     $this->moduleHandler = $module_handler;
   }
@@ -93,7 +85,7 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
   public function upgrade() {
     // Only proceed if there still exists a legacy tracking table.
     if (!$this->database->schema()->tableExists('acquia_contenthub_entities_tracking')) {
-      $this->logger->log(LogLevel::CANCEL, dt('Legacy tracking table does not exist.'));
+      $this->chLogger->warning(dt('Legacy tracking table does not exist.'));
       return;
     }
     // Make sure webhook stored is actually registered for this site in Plexus.
@@ -111,7 +103,7 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
             '@code' => $response['error']['code'],
             '@reason' => $response['error']['message'],
           ]);
-          $this->logger->log(LogLevel::ERROR, $message);
+          $this->chLogger->error($message);
           return;
         }
       }
@@ -119,11 +111,11 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
     // Bail out early if legacy filters do not exist.
     $filters = $this->state->get('acquia_contenthub_subscriber_82002_acquia_contenthub_filters', []);
     if (empty($filters)) {
-      $this->logger->alert('This site has no filters to migrate.');
+      $this->chLogger->alert('This site has no filters to migrate.');
     }
     else {
       // Migrating filters.
-      module_load_include('inc', 'acquia_contenthub_subscriber', 'acquia_contenthub_subscriber.filters.migrate');
+      $this->moduleHandler->loadInclude('acquia_contenthub_subscriber', 'inc', 'acquia_contenthub_subscriber.filters.migrate');
       $unmigrated_filters = [];
       $migrated_filters = [];
       foreach ($filters as $contenthub_filter) {
@@ -137,14 +129,14 @@ class AcquiaContentHubSubscriberCommands extends DrushCommands {
         }
       }
       if (!empty($migrated_filters)) {
-        $this->logger->log(LogLevel::INFO, dt('Filters migrated successfully: %filters.', [
+        $this->chLogger->info(dt('Filters migrated successfully: %filters.', [
           '%filters' => implode(',', $migrated_filters),
         ]));
       }
       if (!empty($unmigrated_filters)) {
         // Saving unmigrated filters in state variable.
         $this->state->set('acquia_contenthub_subscriber_82002_unmigrated_filters', $unmigrated_filters);
-        $this->logger->log(LogLevel::WARNING, dt('The following filters could not be properly migrated: %filters.', [
+        $this->chLogger->warning(dt('The following filters could not be properly migrated: %filters.', [
           '%filters' => implode(',', array_column($unmigrated_filters, 'name')),
         ]));
       }

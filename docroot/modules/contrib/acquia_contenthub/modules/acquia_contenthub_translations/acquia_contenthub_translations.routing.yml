@@ -1,0 +1,7 @@
+acquia_contenthub_translations.settings:
+  path: '/admin/config/services/acquia-contenthub/translations'
+  defaults:
+    _title: 'Acquia ContentHub Translations'
+    _form: 'Drupal\acquia_contenthub_translations\Form\ContentHubTranslationsSettingsForm'
+  requirements:
+    _contenthub_ui_access: 'TRUE'

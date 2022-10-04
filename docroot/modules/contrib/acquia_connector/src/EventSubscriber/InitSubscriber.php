@@ -9,8 +9,8 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\update\Controller\UpdateController;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -73,10 +73,10 @@ class InitSubscriber implements EventSubscriberInterface {
   /**
    * Display a message asking the user to connect to Acquia.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   Event.
    */
-  public function onKernelRequest(GetResponseEvent $event) {
+  public function onKernelRequest(RequestEvent $event) {
 
     acquia_connector_auto_connect();
 
@@ -103,10 +103,10 @@ class InitSubscriber implements EventSubscriberInterface {
   /**
    * Refresh subscription information.
    *
-   * @param \Symfony\Component\HttpKernel\Event\FilterControllerEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\ControllerEvent $event
    *   Event.
    */
-  public function onKernelController(FilterControllerEvent $event) {
+  public function onKernelController(ControllerEvent $event) {
     if ($event->getRequest()->attributes->get('_route') != 'update.manual_status') {
       return;
     }

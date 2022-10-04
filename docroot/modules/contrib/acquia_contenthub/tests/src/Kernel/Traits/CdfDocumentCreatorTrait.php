@@ -19,14 +19,16 @@ trait CdfDocumentCreatorTrait {
    *
    * @param string $fixture_filename
    *   Fixture file name.
+   * @param string $module_name
+   *   Module name.
    *
    * @return \Acquia\ContentHubClient\CDFDocument
    *   CDF document.
    *
    * @throws \ReflectionException
    */
-  protected function createCdfDocumentFromFixtureFile(string $fixture_filename): CDFDocument {
-    $data = $this->getCdfData($fixture_filename);
+  protected function createCdfDocumentFromFixtureFile(string $fixture_filename, string $module_name = 'acquia_contenthub'): CDFDocument {
+    $data = $this->getCdfData($fixture_filename, $module_name);
     $document_parts = [];
     foreach ($data['entities'] as $entity) {
       $document_parts[] = $this->populateCdfObject($entity);
@@ -40,13 +42,15 @@ trait CdfDocumentCreatorTrait {
    *
    * @param string $fixture_filename
    *   Fixture filename.
+   * @param string $module_name
+   *   Module name.
    *
    * @return mixed
    *   Decoded data.
    */
-  protected function getCdfData(string $fixture_filename) {
+  protected function getCdfData(string $fixture_filename, string $module_name = 'acquia_contenthub') {
     $version_directory = $this->getDrupalVersion();
-    $path = \Drupal::service('module_handler')->getModule('acquia_contenthub')->getPath();
+    $path = \Drupal::service('module_handler')->getModule($module_name)->getPath();
     $path_to_fixture = sprintf("%s/tests/fixtures/import/$version_directory/%s",
       $path,
       $fixture_filename

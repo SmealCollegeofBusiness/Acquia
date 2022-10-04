@@ -3,6 +3,7 @@
 namespace Drupal\cohesion_elements;
 
 use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
+use Drupal\cohesion_elements\Entity\Component;
 use Drupal\cohesion_elements\Entity\ComponentCategory;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -149,6 +150,31 @@ class CustomComponentsService {
     }
 
     return $componentsInCategory;
+  }
+
+  /**
+   * Format a list of custom component as "components" that can be used within
+   * component lists.
+   *
+   * @param $custom_components
+   *
+   * @return array
+   */
+  public function formatAsComponent($custom_components): array {
+
+    $custom_component_entities = [];
+    foreach ($custom_components as $customComponent) {
+      $custom_component_entities[$customComponent['machine_name']] = new Component([
+        'id' => $customComponent['machine_name'],
+        'uid' => $customComponent['machine_name'],
+        'label' => $customComponent['name'],
+        'category' => $customComponent['category']->id(),
+        'json_values' => json_encode($customComponent['form']),
+        'isCustomComponent' => TRUE,
+      ], 'cohesion_component');
+    }
+
+    return $custom_component_entities;
   }
 
   /**

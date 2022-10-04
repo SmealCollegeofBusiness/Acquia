@@ -31,7 +31,7 @@ class UnitTest extends TestCase {
   /**
    * Setup.
    */
-  public function setUp() {
+  public function setUp(): void {
     // The files in this directory can't be autoloaded as long as they don't
     // match their classes' namespaces.
     $files = [

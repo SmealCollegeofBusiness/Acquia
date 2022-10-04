@@ -19,7 +19,7 @@ class PruneCdfEntitiesEvent extends Event {
   /**
    * The CDF object.
    *
-   * @var \Acquia\ContentHubClient\CDF\CDFObject[]
+   * @var \Acquia\ContentHubClient\CDFDocument
    */
   protected $cdf;
 

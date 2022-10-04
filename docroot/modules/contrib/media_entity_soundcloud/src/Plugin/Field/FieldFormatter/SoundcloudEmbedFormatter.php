@@ -29,6 +29,7 @@ class SoundcloudEmbedFormatter extends FormatterBase {
       'type' => 'visual',
       'width' => '100%',
       'height' => '450',
+      'color' => '#ff5500',
       'options' => [],
     ] + parent::defaultSettings();
   }
@@ -68,6 +69,13 @@ class SoundcloudEmbedFormatter extends FormatterBase {
       '#description' => $this->t('Height (px) of embedded player. Suggested values: 450 for the visual type and 166 for classic.'),
     ];
 
+    $elements['color'] = [
+      '#type' => 'color',
+      '#title' => $this->t('Color'),
+      '#default_value' => $this->getSetting('color'),
+      '#description' => $this->t('Color of the embedded player\'s play button.'),
+    ];
+
     $elements['options'] = [
       '#title' => $this->t('Options'),
       '#type' => 'checkboxes',
@@ -90,6 +98,9 @@ class SoundcloudEmbedFormatter extends FormatterBase {
       ]),
       $this->t('Height: @height', [
         '@height' => $this->getSetting('height'),
+      ]),
+      $this->t('Color: @color', [
+        '@color' => $this->getSetting('color'),
       ]),
     ];
     $options = $this->getSetting('options');
@@ -119,7 +130,9 @@ class SoundcloudEmbedFormatter extends FormatterBase {
             '#width' => $this->getSetting('width'),
             '#height' => $this->getSetting('height'),
             '#type' => $this->getSetting('type'),
+            '#color' => $this->getSetting('color'),
             '#options' => $this->getSetting('options'),
+            '#title' => $media->label(),
           ];
         }
       }
@@ -137,9 +150,16 @@ class SoundcloudEmbedFormatter extends FormatterBase {
     return [
       'auto_play' => $this->t('Autoplay'),
       'hide_related' => $this->t('Hide related'),
+      'show_artwork' => $this->t('Show artwork'),
+      'show_playcount' => $this->t('Show playcount'),
       'show_comments' => $this->t('Show comments'),
       'show_user' => $this->t('Show user'),
       'show_reposts' => $this->t('Show reposts'),
+      'download' => $this->t('Show download button'),
+      'buying' => $this->t('Show buy button'),
+      'sharing' => $this->t('Show share button'),
+      'show_teaser' => $this->t('Show SoundCloud Overlays'),
+      'single_active' => $this->t('Single active: If set to false the multiple players on the page won\'t toggle each other off when playing'),
     ];
   }
 

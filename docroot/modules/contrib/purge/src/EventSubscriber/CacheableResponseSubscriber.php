@@ -5,7 +5,7 @@ namespace Drupal\purge\EventSubscriber;
 use Drupal\Core\Cache\CacheableResponseInterface;
 use Drupal\purge\Plugin\Purge\TagsHeader\TagsHeadersServiceInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -41,29 +41,18 @@ class CacheableResponseSubscriber implements EventSubscriberInterface {
   /**
    * Add cache tags headers on cacheable responses.
    *
-   * @param \Symfony\Component\HttpKernel\Event\FilterResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\ResponseEvent  $event
    *   The event to process.
    */
-  public function onRespond(FilterResponseEvent $event) {
-    if (!$event->isMasterRequest()) {
+  public function onRespond(ResponseEvent $event) {
+    if (!$event->isMainRequest()) {
       return;
     }
 
     // Only set any headers when this is a cacheable response.
     $response = $event->getResponse();
-
-    // Cache tags should be injected only when the response is cacheable. It is
-    // cacheable when dynamic_page_cache module (if enabled) says so.
-    // Alternatively, if dynamic_page_cache module is uninstalled, then we
-    // fallback on testing that at least 'no-cache' cache directive is not
-    // present in the response headers.
-    $cacheTagsNeeded = $response instanceof CacheableResponseInterface;
-    if ($response->headers->has('X-Drupal-Dynamic-Cache')) {
-      $cacheTagsNeeded = $cacheTagsNeeded && $response->headers->get('X-Drupal-Dynamic-Cache') !== 'UNCACHEABLE';
-    }
-    $cacheTagsNeeded = $cacheTagsNeeded && !$response->headers->hasCacheControlDirective('no-cache');
-
-    if ($cacheTagsNeeded) {
+    if ($response instanceof CacheableResponseInterface
+      && !$response->headers->hasCacheControlDirective('no-cache')) {
 
       // Iterate all tagsheader plugins and add a header for each plugin.
       $tags = $response->getCacheableMetadata()->getCacheTags();

@@ -1,5 +1,189 @@
 # Release notes
 
+## 6.9.2
+
+### Duplicate styles on same component 
+
+#### What is it?
+
+Fixes a bug where the same styles or no styles were applied when the same type of component 
+was placed on the page 
+
+#### What impact will there be?
+
+All styles will now come through without any duplicate
+
+#### What actions do I need to take?
+
+`drush cohesion:rebuild`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Exported packages files store metadata in individual files
+
+#### What is it?
+
+Packages exported in new format no longer store all of exported file entity metadata in a single
+`sitestudio_package_files.json` file. Instead each file entity metadata is exported as individual file prefixed with
+`sitestudio_file_metadata` and using `.yml` extension.
+
+#### What impact will there be?
+
+All new package exports will no longer contain `sitestudio_package_files.json` file. Individual metadata files using
+filename format of `sitestudio_file_metadata.<uuid>.yml` will be exported instead.
+
+Any packages that already use `sitestudio_package_files.json` will continue to work as before. If such package is
+exported, metadata from `sitestudio_package_files.json` will be split into individual files after this update.
+
+#### What actions do I need to take?
+
+Export your packages via Drush or Drupal UI and make sure to commit all of the additionally created metadata files, if
+git is used.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 6.9.1
+
+### Creating a component content from a custom component on a layout canvas
+
+#### What is it?
+
+Fixes a bug when creating a component content from a custom component on a layout canvas the newly created component
+content would not appear in the sidebar browser.
+
+#### What impact will there be?
+
+Component contents can be created from a custom component on a layout canvas and they will appear in the sidebar
+browser as expected.
+
+Any existing component contents created from a custom component via the layout canvas will now appear in the
+sidebar browser after running the database update.
+
+#### What actions do I need to take?
+
+Run Drupal update via drush or UI.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Create a component content from a custom component via the UI
+
+#### What is it?
+
+The ability to create a component content from a custom component direct in the UI
+at `Site Studio > Components > Component Content > Create Component Content` rather than from the Layout Canvas.
+
+#### What impact will there be?
+
+Component contents can be created from a custom component directly in the UI as is possible with components and no
+longer has to be created from a Layout Canvas.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Deleting an item from a Pattern repeater that contains a Link field the last item is always deleted
+
+#### What is it?
+Fixes a bug when a Component has a Pattern repeater with a Link field inside the last item would always be deleted.
+
+#### What impact will there be?
+The correct item will now be deleted.
+
+#### What actions do I need to take?
+Run an API import `drush cohesion:import` when upgrading.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Resolves fatal error when using Site Studio and the Component modules together
+
+#### What is it?
+
+Fixes the fatal error `Fatal error: Cannot redeclare _component_build_library()` when both Site Studio and the Component
+modules are installed together.
+
+#### What impact will there be?
+
+Both Site Studio and the Component modules can be installed together.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### A nested component with multiple instances, with inline styles always using the first components styles
+
+#### What is it?
+
+Fixes a bug where inline styles of a nested component with multiple instances of the same component were present. The
+styles are configurable in the component form, but would always use the first instances styles, rather than the styles
+set for that component instance.
+
+#### What impact will there be?
+
+If the component has a configurable form that applies inline styles, the correct styles will be applied for that
+component instance, rather than using the first instances styles.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Transitioning content between moderation states on the Visual page builder resulting in an error
+
+#### What is it?
+
+Fixes a bug when attempting to transition content between moderation states, on the Visual page builder, the user
+receives the error `Invaild state transition from..` although the state transition should be valid. This appeared to
+only occur on content types configured to use revisions.
+
+Transitioning between these states worked as expected on the backend edit page.
+
+#### What impact will there be?
+
+The error `Invaild state transition from..` should only appear when attempting to transition to an invalid state.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Includes "indirect" dependencies when exporting new format packages
+
+#### What is it?
+Fixes a bug where only direct dependencies would only be included in package export.
+
+#### What impact will there be?
+Additional files will be present in new format package exports.
+
+#### What actions do I need to take?
+Run a `sitestudio:package:export` command or use UI to export new format package complete with
+previously missing dependencies.
+
+#### Are there any risks I should be aware of?
+
+None.
+
 ## 6.9.0
 
 ### Machine names are displayed in categories list
@@ -198,6 +382,28 @@ This error will no longer appear and the sidebar editor will load as expected if
 #### What actions do I need to take?
 
 None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 6.8.3
+
+### Slider and Accordion elements behave incorrectly in Visual Page Builder
+
+#### What is it?
+
+The slider should NOT autoplay when VPB is enabled even if it has been configured to do so.
+
+Accordion tabs should not append a hash to the URL when VPB is enabled even if they have been configured to do so.
+
+#### What impact will there be?
+
+User experience editing these elements in the VPB should be improved.
+
+#### What actions do I need to take?
+
+Run an API import `drush cohesion:import` when upgrading.
 
 #### Are there any risks I should be aware of?
 

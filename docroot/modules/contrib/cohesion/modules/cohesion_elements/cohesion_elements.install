@@ -609,7 +609,7 @@ function cohesion_elements_update_8903() {
       ->condition($query_condition)->execute();
 
     // If we have any ids then load and update the component field to have the component id.
-    if($component_content_ids) {
+    if ($component_content_ids) {
       $component_contents = \Drupal\cohesion_elements\Entity\ComponentContent::loadMultiple($component_content_ids);
 
       foreach ($component_contents as $component_content) {
@@ -622,7 +622,7 @@ function cohesion_elements_update_8903() {
 
         // Decode the layout canvas so we can get the component id & update in the database.
         $layout_canvas_values = json_decode($component_id_query->json_values);
-        if($layout_canvas_values->canvas[0]->componentId) {
+        if ($layout_canvas_values->canvas[0]->componentId) {
           Database::getConnection()->update('component_contents_field_data')->fields([
             'component' => $layout_canvas_values->canvas[0]->componentId,
           ])
@@ -632,6 +632,14 @@ function cohesion_elements_update_8903() {
       }
     }
   }
+
+  /**
+   * Update cohesion_component_contents missing references to the component it was created from for custom components
+   */
+    function cohesion_elements_update_8905() {
+      // Re-run update 8904 as this fixes the same issue.
+      cohesion_elements_update_8904();
+    }
 
 /**
  *

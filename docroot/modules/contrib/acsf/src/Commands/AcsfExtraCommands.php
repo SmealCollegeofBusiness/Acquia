@@ -30,10 +30,10 @@ class AcsfExtraCommands extends DrushCommands {
    * @bootstrap root
    */
   public function getFactoryCreds() {
-    if (!class_exists('\Drupal\acsf\AcsfConfigDefault')) {
+    if (!class_exists(\Drupal\acsf\AcsfConfigDefault::class)) {
       // Since there might not be a bootstrap, we need to find our config
       // objects.
-      $include_path = realpath(dirname(__FILE__));
+      $include_path = realpath(__DIR__);
       require_once $include_path . '/src/AcsfConfig.php';
       require_once $include_path . '/src/AcsfConfigDefault.php';
       require_once $include_path . '/src/AcsfConfigIncompleteException.php';
@@ -168,7 +168,7 @@ class AcsfExtraCommands extends DrushCommands {
     if (file_exists($acsf_file_path)) {
       $info_parser = new InfoParser();
       $info = $info_parser->parse($acsf_file_path);
-      $version = isset($info['acsf_version']) ? $info['acsf_version'] : '0.1';
+      $version = $info['acsf_version'] ?? '0.1';
     }
     $this->output()->writeln($version);
   }
@@ -211,7 +211,7 @@ class AcsfExtraCommands extends DrushCommands {
     $arguments = [
       'wid' => $data->object_id,
       'signal' => 1,
-      'state' => isset($data->state) ? $data->state : NULL,
+      'state' => $data->state ?? NULL,
       'data' => $data,
     ];
 

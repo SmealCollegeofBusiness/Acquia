@@ -13,7 +13,7 @@ use Drupal\Core\Config\StorageInterface;
  *
  * @package Drupal\cohesion_sync\Config
  */
-class CohesionFullPackageStorage implements StorageInterface {
+class CohesionFullPackageStorage extends CohesionPackageStorageBase implements StorageInterface {
 
   /**
    * The configuration storage to be cached.
@@ -28,13 +28,6 @@ class CohesionFullPackageStorage implements StorageInterface {
    * @var \Drupal\Core\Config\ConfigManagerInterface
    */
   protected $configManager;
-
-  /**
-   * Array of files that Site Studio config has dependencies on.
-   *
-   * @var array
-   */
-  protected $files;
 
   /**
    * Array of entity types to be included when performing a full export.
@@ -64,48 +57,6 @@ class CohesionFullPackageStorage implements StorageInterface {
     $this->storage = $storage;
     $this->configManager = $config_manager;
     $this->usagePluginManager = $usage_plugin_manager;
-  }
-
-  /**
-   * Gets array of file uuids.
-   *
-   * @return array
-   *   Array of files Site Studio config has dependencies on.
-   */
-  public function getStorageFileList() {
-    if ($this->files === NULL) {
-      $this->buildStorageFileList();
-    }
-
-    return $this->files;
-  }
-
-  /**
-   * Builds a list of files that Site Studio config has dependencies on.
-   */
-  protected function buildStorageFileList() {
-    $this->files = [];
-
-    foreach ($this->listAll() as $name) {
-      $config = $this->read($name);
-      if ($this->configStatus($name) == TRUE) {
-        if (!empty($config['dependencies']['content'])) {
-          foreach ($config['dependencies']['content'] as $dependency) {
-            if (strpos($dependency, 'file:file:') !== FALSE) {
-              $file = explode(':', $dependency);
-              $this->files[$file[2]] = $file[0];
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function exists($name) {
-    return $this->storage->exists($name);
   }
 
   /**
@@ -139,83 +90,11 @@ class CohesionFullPackageStorage implements StorageInterface {
    */
   public function read($name) {
     $entity_type = $this->configManager->getEntityTypeIdByName($name);
-    if (in_array($entity_type, $this->getIncludedEntityTypes())) {
+    if (!is_null($entity_type) && in_array($entity_type, $this->getIncludedEntityTypes())) {
       return $this->storage->read($name);
     }
 
     return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function readMultiple(array $names) {
-    $list = [];
-    foreach ($names as $name) {
-      if ($data = $this->read($name)) {
-        $list[$name] = $data;
-      }
-    }
-    return $list;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function write($name, array $data) {
-    return TRUE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function delete($name) {
-    return TRUE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function rename($name, $new_name) {
-    return TRUE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function encode($data) {
-    return $this->storage->encode($data);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function decode($raw) {
-    return $this->storage->decode($raw);
-  }
-
-  /**
-   * Builds a list of config names based on Site Studio config dependencies.
-   *
-   * @param array $site_studio_config
-   *   List of site studio config entity names.
-   *
-   * @return array
-   *   List of required config names.
-   */
-  protected function buildDependencies(array $site_studio_config): array {
-    $dependencies = [];
-
-    foreach ($site_studio_config as $name) {
-      if ($this->exists($name)) {
-        $config = $this->read($name);
-        if (isset($config['dependencies']['config'])) {
-          $dependencies = array_merge($dependencies, $config['dependencies']['config']);
-        }
-      }
-    }
-
-    return array_unique($dependencies);
   }
 
   /**
@@ -233,49 +112,6 @@ class CohesionFullPackageStorage implements StorageInterface {
     });
 
     return array_values($all_config);
-  }
-
-  /**
-   * Returns the status of config, if config has status.
-   *
-   * @param string $name
-   *   Config name.
-   *
-   * @return bool
-   *   True if status property exists and is set to True.
-   */
-  protected function configStatus(string $name): bool {
-    $config = $this->read($name);
-
-    return (!isset($config['status']) || $config['status'] == TRUE);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function deleteAll($prefix = '') {
-    return TRUE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createCollection($collection) {
-    return $this->storage->createCollection($collection);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getAllCollectionNames() {
-    return $this->storage->getAllCollectionNames();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCollectionName() {
-    return $this->storage->getCollectionName();
   }
 
 }

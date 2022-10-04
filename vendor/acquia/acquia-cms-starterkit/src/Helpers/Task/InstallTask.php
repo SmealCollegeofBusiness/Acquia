@@ -8,8 +8,8 @@ use AcquiaCMS\Cli\Helpers\Task\Steps\DownloadDrupal;
 use AcquiaCMS\Cli\Helpers\Task\Steps\DownloadModules;
 use AcquiaCMS\Cli\Helpers\Task\Steps\EnableModules;
 use AcquiaCMS\Cli\Helpers\Task\Steps\EnableThemes;
+use AcquiaCMS\Cli\Helpers\Task\Steps\InitNextjsApp;
 use AcquiaCMS\Cli\Helpers\Task\Steps\SiteInstall;
-use AcquiaCMS\Cli\Helpers\Task\Steps\SiteStudioPackageImport;
 use AcquiaCMS\Cli\Helpers\Task\Steps\ToggleModules;
 use AcquiaCMS\Cli\Helpers\Task\Steps\ValidateDrupal;
 use AcquiaCMS\Cli\Helpers\Traits\StatusMessageTrait;
@@ -102,18 +102,18 @@ class InstallTask {
   protected $downloadModules;
 
   /**
-   * The site studio package import step object.
-   *
-   * @var \AcquiaCMS\Cli\Helpers\Task\Steps\SiteStudioPackageImport
-   */
-  protected $siteStudioPackageImport;
-
-  /**
    * The toggle modules step object.
    *
    * @var \AcquiaCMS\Cli\Helpers\Task\Steps\ToggleModules
    */
   protected $toggleModules;
+
+  /**
+   * The site studio package import step object.
+   *
+   * @var \AcquiaCMS\Cli\Helpers\Task\Steps\InitNextjsApp
+   */
+  protected $initNextjsApp;
 
   /**
    * User selected bundle.
@@ -139,8 +139,8 @@ class InstallTask {
     $this->enableThemes = $container->get(EnableThemes::class);
     $this->siteInstall = $container->get(SiteInstall::class);
     $this->downloadModules = $container->get(DownloadModules::class);
-    $this->siteStudioPackageImport = $container->get(SiteStudioPackageImport::class);
     $this->toggleModules = $container->get(ToggleModules::class);
+    $this->initNextjsApp = $container->get(InitNextjsApp::class);
   }
 
   /**
@@ -179,18 +179,20 @@ class InstallTask {
       );
     }
     $this->print("Downloading all packages/modules/themes required by the starter-kit:", 'headline');
-
-    // @todo Think if we can configure to download/install modules/themes using yaml configuration.
     $this->acquiaCmsCli->alterModulesAndThemes($this->starterKits[$this->bundle], $args['keys']);
-
     $this->downloadModules->execute($this->starterKits[$this->bundle]);
+
     $this->print("Installing Site:", 'headline');
     $this->siteInstall->execute([
       'no-interaction' => $this->input->getOption('no-interaction'),
       'name' => $this->starterKits[$this->bundle]['name'],
     ]);
+
     $bundle_modules = $this->starterKits[$this->bundle]['modules']['install'] ?? [];
     $modules_list = JsonParser::installPackages($bundle_modules);
+    // Get User password from shared factory.
+    $password = SharedFactory::getData('password');
+    $this->print("User name: admin, User password: $password", 'info');
     $this->print("Enabling modules for the starter-kit:", 'headline');
     $isDemoContent = $args['keys']['demo_content'] ?? '';
     if ($isDemoContent == "yes" && ($key = array_search('acquia_cms_starter', $modules_list)) !== FALSE) {
@@ -202,6 +204,7 @@ class InstallTask {
       'modules' => $modules_list,
       'keys' => $args['keys'],
     ]);
+
     $this->print("Enabling themes for the starter-kit:", 'headline');
     $this->enableThemes->execute([
       'themes' => $this->starterKits[$this->bundle]['themes'],
@@ -219,13 +222,7 @@ class InstallTask {
     // Trigger Site Studio Package import, if acquia_cms_site_studio module
     // is there in active bundle.
     if (in_array('acquia_cms_site_studio', $modules_list)) {
-      if (($siteStudioApiKey && $siteStudioOrgKey) || (getenv('SITESTUDIO_API_KEY') && getenv('SITESTUDIO_ORG_KEY'))) {
-        $this->print("Running Site Studio package import:", 'headline');
-        $this->siteStudioPackageImport->execute([
-          'no-interaction' => $this->input->getOption('no-interaction'),
-        ]);
-      }
-      else {
+      if (!(($siteStudioApiKey && $siteStudioOrgKey) || (getenv('SITESTUDIO_API_KEY') && getenv('SITESTUDIO_ORG_KEY')))) {
         $this->print("Skipped importing Site Studio Packages." .
           PHP_EOL .
           "You can set the key later from: /admin/cohesion/configuration/account-settings & import Site Studio packages.",
@@ -243,6 +240,21 @@ class InstallTask {
       $this->enableModules->execute([
         'modules' => ['acquia_cms_starter'],
         'keys' => $args['keys'],
+      ]);
+    }
+
+    $isNextjsApp = $args['keys']['nextjs_app'] ?? '';
+    // Initialize: NextJs application, create consumer, create nextjs site,
+    // write/display nextjs site environment variables.
+    if ($isNextjsApp == "yes") {
+      $this->print("Initiating NextJs App for the starter-kit:", 'headline');
+      $isNextjsAppSiteUrl = $args['keys']['nextjs_app_site_url'] ?? '';
+      $isNextjsAppSiteName = $args['keys']['nextjs_app_site_name'] ?? '';
+      $isNextjsAppEnvFile = $args['keys']['nextjs_app_env_file'] ?? '';
+      $this->initNextjsApp->execute([
+        '--site-url' => $isNextjsAppSiteUrl,
+        '--site-name' => $isNextjsAppSiteName,
+        '--env-file' => $isNextjsAppEnvFile,
       ]);
     }
   }

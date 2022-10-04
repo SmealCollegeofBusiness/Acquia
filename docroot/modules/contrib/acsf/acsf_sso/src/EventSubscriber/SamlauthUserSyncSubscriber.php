@@ -16,8 +16,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class SamlauthUserSyncSubscriber implements EventSubscriberInterface {
 
-  const ATTRIBUTE_NAME_ROLES = 'roles';
-  const ATTRIBUTE_NAME_IS_OWNER = 'is_owner';
+  public const ATTRIBUTE_NAME_ROLES = 'roles';
+  public const ATTRIBUTE_NAME_IS_OWNER = 'is_owner';
 
   /**
    * The EntityTypeManager service.

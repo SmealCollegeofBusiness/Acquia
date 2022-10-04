@@ -247,7 +247,7 @@ class VariablesController extends ControllerBase {
           }
         }
         // D8 implementation "config.name:variable.name".
-        elseif (preg_match('/^([^\s]+):([^\s]+)$/ui', $key, $regs)) {
+        elseif (preg_match('/^([^\s]+):([^\s]+)$/ui', (string) $key, $regs)) {
           $config_name = $regs[1];
           $variable_name = $regs[2];
           \Drupal::configFactory()->getEditable($config_name)->set($variable_name, $value);

@@ -1,7 +1,7 @@
 services:
   acquia_purge.platforminfo:
     class: Drupal\acquia_purge\AcquiaCloud\PlatformInfo
-    arguments: ['@site.path', '@settings', '@state']
+    arguments: ['%site.path%', '@settings', '@state']
     public: true
   acquia_purge.tagsheaders.cacheable_response_subscriber:
     class: Drupal\acquia_purge\EventSubscriber\CacheableResponseSubscriber

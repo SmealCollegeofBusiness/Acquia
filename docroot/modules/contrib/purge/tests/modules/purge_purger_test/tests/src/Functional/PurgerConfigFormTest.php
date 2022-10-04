@@ -3,7 +3,7 @@
 namespace Drupal\Tests\purge_purger_test\Functional;
 
 use Drupal\purge_purger_test\Form\PurgerConfigForm;
-use Drupal\Tests\purge_ui\Functional\Form\Config\PurgerConfigFormTestBase;
+use Drupal\Tests\purge_ui\FunctionalJavascript\Form\Config\PurgerConfigFormTestBase;
 
 /**
  * Tests \Drupal\purge_purger_test\Form\PurgerConfigForm.

@@ -1,4 +1,12 @@
 <?php
+
+/**
+ * @file
+ * Drupal Module: Acquia ContentHub Site Health.
+ *
+ * Provides audits for known incompatibilities between Drupal and ContentHub.
+ */
+
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**

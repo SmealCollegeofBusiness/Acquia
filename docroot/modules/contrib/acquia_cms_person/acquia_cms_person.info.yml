@@ -7,7 +7,7 @@ dependencies:
   - drupal:acquia_cms_place
   - drupal:scheduler
 
-# Information added by Drupal.org packaging script on 2022-06-13
-version: '1.3.4'
+# Information added by Drupal.org packaging script on 2022-09-28
+version: '1.4.1'
 project: 'acquia_cms_person'
-datestamp: 1655140913
+datestamp: 1664365842

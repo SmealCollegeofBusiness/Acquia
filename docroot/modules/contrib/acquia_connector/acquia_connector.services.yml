@@ -4,6 +4,11 @@ services:
     arguments: ['@config.factory', '@state', '@cache.default', '@acquia_connector.spi']
     tags:
       - {name: event_subscriber}
+  acquia_connector.kernel_request.codestudio_message:
+    class: Drupal\acquia_connector\EventSubscriber\KernelRequest\CodeStudioMessage
+    arguments: ['@messenger']
+    tags:
+      - {name: event_subscriber}
   acquia_connector.client:
     class: Drupal\acquia_connector\Client
     arguments: ['@config.factory', '@state']

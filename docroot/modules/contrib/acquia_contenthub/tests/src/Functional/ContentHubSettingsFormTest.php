@@ -4,6 +4,7 @@ namespace Drupal\Tests\acquia_contenthub\Functional;
 
 use Drupal\acquia_contenthub_test\MockDataProvider;
 use Drupal\Tests\BrowserTestBase;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests the Content Hub settings form.
@@ -112,7 +113,8 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
     $session->buttonNotExists('Update Public URL');
     $session->buttonNotExists('Unregister Site');
     // Test prefilled webhook field.
-    $session->fieldValueEquals('webhook', $GLOBALS['base_url']);
+    $request = Request::createFromGlobals();
+    $session->fieldValueEquals('webhook', $request->getSchemeAndHttpHost());
   }
 
   /**

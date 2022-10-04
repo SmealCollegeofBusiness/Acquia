@@ -3,21 +3,17 @@
 namespace Drupal\acquia_connector\Controller;
 
 use Drupal\acquia_connector\Client;
-use Drupal\acquia_connector\Helper\Storage;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Html;
-use Drupal\Core\Access\AccessResultAllowed;
-use Drupal\Core\Access\AccessResultForbidden;
 use Drupal\Core\Config\BootstrapConfigStorageFactory;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Database;
 use Drupal\Core\DrupalKernel;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Logger\RfcLogLevel;
-use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Site\Settings;
-use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\path_alias\AliasManagerInterface;
 use Drupal\user\Entity\Role;
@@ -144,7 +140,7 @@ class SpiController extends ControllerBase {
       'last_users'         => $this->config('acquia_connector.settings')->get('spi.send_node_user') ? $this->getLastUsers() : [],
       'extra_files'        => $this->checkFilesPresent(),
       'ssl_login'          => $this->checkLogin(),
-      'distribution'       => isset($drupal_version['distribution']) ? $drupal_version['distribution'] : '',
+      'distribution'       => $drupal_version['distribution'] ?? '',
       'base_version'       => $drupal_version['base_version'],
       'build_data'         => $drupal_version,
       'roles'              => Json::encode(user_roles()),
@@ -166,10 +162,32 @@ class SpiController extends ControllerBase {
     // are no modules implementing it - some alerts are simpler if we know we
     // don't have to worry about node access.
     // Check for node grants modules.
-    $additional_data['node_grants_modules'] = $this->moduleHandler()->getImplementations('node_grants');
+    // Compatibility for Drupal 9.2.
+    if (method_exists(\Drupal::moduleHandler(), 'invokeAllWith')) {
+      $additional_data['node_grants_modules'] = [];
+      \Drupal::moduleHandler()->invokeAllWith('node_grants', function (callable $hook, string $module) use (&$modules) {
+        // There is minimal overhead since the hook is not invoked.
+        $additional_data['node_grants_modules'][] = $module;
+      });
+    }
+    else {
+      // @phpstan-ignore-next-line
+      $additional_data['node_grants_modules'] = \Drupal::moduleHandler()->getImplementations('node_grants');
+    }
 
     // Check for node access modules.
-    $additional_data['node_access_modules'] = $this->moduleHandler()->getImplementations('node_access');
+    // Compatibility for Drupal 9.2.
+    if (method_exists(\Drupal::moduleHandler(), 'invokeAllWith')) {
+      $additional_data['node_grants_modules'] = [];
+      \Drupal::moduleHandler()->invokeAllWith('node_access', function (callable $hook, string $module) use (&$modules) {
+        // There is minimal overhead since the hook is not invoked.
+        $additional_data['node_access_modules'][] = $module;
+      });
+    }
+    else {
+      // @phpstan-ignore-next-line
+      $additional_data['node_access_modules'] = \Drupal::moduleHandler()->getImplementations('node_access');
+    }
 
     if (!empty($security_review_results)) {
       $additional_data['security_review'] = $security_review_results['security_review'];
@@ -880,7 +898,7 @@ class SpiController extends ControllerBase {
     $db_tasks = new $db_class();
     // Webserver detection is based on name being before the slash, and
     // version being after the slash.
-    preg_match('!^([^/]+)(/.+)?$!', $server->get('SERVER_SOFTWARE'), $webserver);
+    preg_match('!^([^/]+)(/.+)?$!', (string) $server->get('SERVER_SOFTWARE'), $webserver);
 
     if (isset($webserver[1]) && stristr($webserver[1], 'Apache') && function_exists('apache_get_version')) {
       $webserver[2] = apache_get_version();
@@ -905,8 +923,8 @@ class SpiController extends ControllerBase {
 
     $platform = [
       'php'               => PHP_VERSION,
-      'webserver_type'    => isset($webserver[1]) ? $webserver[1] : '',
-      'webserver_version' => isset($webserver[2]) ? $webserver[2] : '',
+      'webserver_type'    => $webserver[1] ?? '',
+      'webserver_version' => $webserver[2] ?? '',
       'php_extensions'    => get_loaded_extensions(),
       'php_quantum'       => $php_quantum,
       'database_type'     => (string) $db_tasks->name(),
@@ -929,7 +947,13 @@ class SpiController extends ControllerBase {
    */
   private function getModules() {
     $modules = \Drupal::service('extension.list.module')->reset()->getList();
-    uasort($modules, 'system_sort_modules_by_info_name');
+    if (method_exists(ModuleExtensionList::class, 'sortByName')) {
+      uasort($modules, [ModuleExtensionList::class, 'sortByName']);
+    }
+    else {
+      // @phpstan-ignore-next-line
+      uasort($modules, 'system_sort_modules_by_info_name');
+    }
 
     $result = [];
     $keys_to_send = ['name', 'version', 'package', 'core', 'project'];
@@ -937,7 +961,7 @@ class SpiController extends ControllerBase {
       $info = [];
       $info['status'] = $module->status;
       foreach ($keys_to_send as $key) {
-        $info[$key] = isset($module->info[$key]) ? $module->info[$key] : '';
+        $info[$key] = $module->info[$key] ?? '';
       }
       $info['filename'] = $module->getPathname();
       if (empty($info['project']) && $module->origin == 'core') {
@@ -1001,27 +1025,8 @@ class SpiController extends ControllerBase {
    *   otherwise return NSPI response array.
    */
   public function sendFullSpi($method = '') {
-    $spi = self::get($method);
-
-    if ($this->checkEnvironmentChange()) {
-      $this->getLogger('acquia spi')->error('SPI data not sent, site environment change detected.');
-      $this->messenger()->addError($this->t('SPI data not sent, site environment change detected. Please <a href="@environment_change">indicate how you wish to proceed</a>.', [
-        '@environment_change' => Url::fromRoute('acquia_connector.environment_change')->toString(),
-      ]));
-      return FALSE;
-    }
-
-    $storage = new Storage();
-    $response = $this->client->sendNspi($storage->getIdentifier(), $storage->getKey(), $spi);
-
-    if ($response === FALSE) {
-      return FALSE;
-    }
-
-    $this->handleServerResponse($response);
-    \Drupal::state()->set('acquia_connector.cron_last', \Drupal::time()->getRequestTime());
-
-    return $response;
+    $this->getLogger('acquia spi')->error('Acquia Insight is EOL. Please remove this method call from your module/scripts.');
+    return FALSE;
   }
 
   /**
@@ -1038,28 +1043,12 @@ class SpiController extends ControllerBase {
     \Drupal::service('page_cache_kill_switch')->trigger();
     $method = ACQUIA_CONNECTOR_ACQUIA_SPI_METHOD_CALLBACK;
 
-    // Insight's set variable feature will pass method insight.
-    if ($request->query->has('method') && ($request->query->get('method') === ACQUIA_CONNECTOR_ACQUIA_SPI_METHOD_INSIGHT)) {
-      $method = ACQUIA_CONNECTOR_ACQUIA_SPI_METHOD_INSIGHT;
-    }
-
-    $response = $this->sendFullSpi($method);
-
-    if ($request->get('destination')) {
-      $this->spiProcessMessages($response);
-      $route_match = RouteMatch::createFromRequest($request);
-      return $this->redirect($route_match->getRouteName(), $route_match->getRawParameters()->all());
-    }
-
     $headers = [
       'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
       'Content-Type' => 'text/plain',
       'Cache-Control' => 'no-cache',
       'Pragma' => 'no-cache',
     ];
-    if (empty($response['body'])) {
-      return new Response('', Response::HTTP_BAD_REQUEST, $headers);
-    }
 
     return new Response('', Response::HTTP_OK, $headers);
   }
@@ -1067,197 +1056,19 @@ class SpiController extends ControllerBase {
   /**
    * Parses and displays messages from the NSPI response.
    *
-   * @param array|mixed $response
+   * @param array $response
    *   Response array from NSPI.
-   */
-  public function spiProcessMessages($response) {
-    if (empty($response['body'])) {
-      $this->messenger()->addError($this->t('Error sending SPI data. Consult the logs for more information.'));
-      return;
-    }
-
-    $message_type = 'status';
-
-    if (isset($response['body']['spi_data_received']) && $response['body']['spi_data_received'] === TRUE) {
-      $this->messenger()->addStatus($this->t('SPI data sent.'));
-    }
-
-    if (!empty($response['body']['nspi_messages'])) {
-      $this->messenger()->addStatus($this->t('Acquia Subscription returned the following messages. Further information may be in the logs.'));
-      foreach ($response['body']['nspi_messages'] as $nspi_message) {
-        if (!empty($response['body']['spi_error'])) {
-          $message_type = $response['body']['spi_error'];
-        }
-        $this->messenger()->addMessage(Html::escape($nspi_message), (string) $message_type);
-      }
-    }
-
-    if (!empty($response['body']['spi_environment_changes'])) {
-      $this->configFactory
-        ->getEditable('acquia_connector.settings')
-        ->set('spi.environment_changes', Json::decode($response['body']['spi_environment_changes']))
-        ->save();
-    }
-  }
-
-  /**
-   * Act on specific elements of SPI update server response.
    *
-   * @param array $spi_response
-   *   Array response from SpiController->send().
-   */
-  private function handleServerResponse(array $spi_response) {
-
-    $config_set = $this->configFactory->getEditable('acquia_connector.settings');
-    $changed_action = $this->config('acquia_connector.settings')->get('spi.environment_changed_action');
-    $config_set->clear('spi.environment_changed_action')->save();
-    $site_uuid = $this->config('acquia_connector.settings')->get('spi.site_uuid');
-
-    // Set site_uuid if it changed or if it hasn't been previously captured.
-    if (isset($spi_response['body']['site_uuid']) && (is_null($site_uuid) || $spi_response['body']['site_uuid'] != $site_uuid)) {
-      $config_set->set('spi.site_uuid', $spi_response['body']['site_uuid'])->save();
-    }
-
-    // Wipe the site_uuid if it is set locally, but NSPI is trying to create a
-    // new site.
-    if (isset($spi_response['body']['site_uuid']) && empty($spi_response['body']['site_uuid']) && !is_null($site_uuid)) {
-      $config_set->clear('spi.site_uuid')->save();
-    }
-
-    $spi_environment_changes = isset($spi_response['body']['spi_environment_changes']) ? Json::decode($spi_response['body']['spi_environment_changes']) : [];
-    $site_blocked = array_key_exists('blocked', $spi_environment_changes) || !empty($spi_response['site_revoked']);
-
-    // Address any actions taken based on a site environment change.
-    if (!empty($changed_action) || $site_blocked) {
-      if ($changed_action == 'create' && isset($spi_response['body']['site_uuid'])) {
-        $config_set->set('spi.site_uuid', $spi_response['body']['site_uuid'])->save();
-      }
-      elseif (($changed_action == 'block' && array_key_exists('spi_error', $spi_response['body']) && empty($spi_response['body']['spi_error'])) || $site_blocked) {
-        $config_set->set('spi.blocked', TRUE)->save();
-      }
-      elseif ($changed_action == 'unblock' && array_key_exists('spi_error', $spi_response['body']) && empty($spi_response['body']['spi_error'])) {
-        $config_set->set('spi.blocked', FALSE)->save();
-      }
-
-      // If there were no errors, clear any pending actions.
-      if (empty($spi_response['body']['spi_error'])) {
-        $config_set->clear('spi.environment_changes')->save();
-      }
-    }
-
-    // Check result for command to update SPI definition.
-    $update = isset($spi_response['body']['update_spi_definition']) ? $spi_response['body']['update_spi_definition'] : FALSE;
-    if ($update === TRUE) {
-      $this->updateDefinition();
-    }
-    // Check for set_variables command.
-    $set_variables = isset($spi_response['body']['set_variables']) ? $spi_response['body']['set_variables'] : FALSE;
-    if ($set_variables !== FALSE) {
-      $variablesController = new VariablesController();
-      $variablesController->setVariables($set_variables);
-    }
-    // Log messages.
-    $messages = isset($spi_response['body']['nspi_messages']) ? $spi_response['body']['nspi_messages'] : FALSE;
-    if ($messages !== FALSE) {
-      $this->getLogger('acquia spi')->notice('SPI update server response messages: @messages', ['@messages' => implode(', ', $messages)]);
-    }
-  }
-
-  /**
-   * Checks if NSPI server has an updated SPI data definition.
+   * @deprecated in acquia_connector:3.0.5 and is removed from
+   *   acquia_connector:4.0.0. You can safely remove any calls to this method,
+   *   as Acquia Insight is now EOL.
    *
-   * If it does, then this function updates local copy of SPI definition data.
-   *
-   * @return bool
-   *   True if SPI definition data has been updated.
+   * @see https://www.drupal.org/node/3300034
    */
-  private function updateDefinition() {
-    $core_version = substr(\Drupal::VERSION, 0, 1);
-    $spi_def_end_point = '/spi_def/get/' . $core_version;
-
-    $response = $this->client->getDefinition($spi_def_end_point);
-
-    if (!$response) {
-      $this->getLogger('acquia spi')->error('Failed to obtain latest SPI data definition.');
-      return FALSE;
-    }
-    else {
-      $response_data = $response;
-      $expected_data_types = [
-        'drupal_version' => 'string',
-        'timestamp' => 'string',
-        'acquia_spi_variables' => 'array',
-      ];
-      // Make sure that $response_data contains everything expected.
-      foreach ($expected_data_types as $key => $values) {
-        if (!array_key_exists($key, $response_data) || gettype($response_data[$key]) != $expected_data_types[$key]) {
-          $this->getLogger('acquia spi')
-            ->error('Received SPI data definition does not match expected pattern while checking "@key". Received and expected data: @data', [
-              '@key' => $key,
-              '@data' => var_export(array_merge(['expected_data' => $expected_data_types], ['response_data' => $response_data]), TRUE),
-            ]);
-          return FALSE;
-        }
-      }
-      if ($response_data['drupal_version'] != $core_version) {
-        $this->getLogger('acquia spi')->notice('Received SPI data definition does not match with current version of your Drupal installation. Data received for Drupal @version', ['@version' => $response_data['drupal_version']]);
-        return FALSE;
-      }
-    }
-
-    // NSPI response is in expected format.
-    if ((int) $response_data['timestamp'] > (int) $this->state()->get('acquia_spi_data.def_timestamp', 0)) {
-      // Compare stored variable names to incoming and report on update.
-      $old_vars = $this->state()->get('acquia_spi_data.def_vars', []);
-      $new_vars = $response_data['acquia_spi_variables'];
-      $new_optional_vars = 0;
-      foreach ($new_vars as $new_var_name => $new_var) {
-        // Count if received from NSPI optional variable is not present in old
-        // local SPI definition or if it already was in old SPI definition, but
-        // was not optional.
-        if ($new_var['optional'] && !array_key_exists($new_var_name, $old_vars) ||
-          $new_var['optional'] && isset($old_vars[$new_var_name]) && !$old_vars[$new_var_name]['optional']) {
-          $new_optional_vars++;
-        }
-      }
-      // Clean up waived vars that are not exposed by NSPI anymore.
-      $waived_spi_def_vars = $this->state()->get('acquia_spi_data.def_waived_vars', []);
-      $changed_bool = FALSE;
-      foreach ($waived_spi_def_vars as $key => $waived_var) {
-        if (!in_array($waived_var, $new_vars)) {
-          unset($waived_spi_def_vars[$key]);
-          $changed_bool = TRUE;
-        }
-      }
-
-      if ($changed_bool) {
-        $this->state()->set('acquia_spi_data.def_waived_vars', $waived_spi_def_vars);
-      }
-      // Finally, save SPI definition data.
-      if ($new_optional_vars > 0) {
-        $this->state()->set('acquia_spi_data.new_optional_data', 1);
-      }
-      $this->state()->set('acquia_spi_data.def_timestamp', (int) $response_data['timestamp']);
-      $this->state()->set('acquia_spi_data.def_vars', $response_data['acquia_spi_variables']);
-      return TRUE;
-    }
-    return FALSE;
-  }
-
-  /**
-   * Access callback check for SPI send independent call.
-   */
-  public function sendAccess() {
-    $request = \Drupal::request();
-    $storage = new Storage();
-    $acquia_key = $storage->getKey();
-    if (!empty($acquia_key) && $request->get('key')) {
-      $key = sha1(\Drupal::service('private_key')->get());
-      if ($key === $request->get('key')) {
-        return AccessResultAllowed::allowed();
-      }
-    }
-    return AccessResultForbidden::forbidden();
+  public function spiProcessMessages(array $response) {
+    $this->messenger()
+      ->addError($this->t('The spiProcessMessages method is no longer supported, you can remove any custom calls to Acquia Insight.'));
+    return [];
   }
 
 }

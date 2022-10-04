@@ -43,6 +43,7 @@ use Drupal\workbench_email\TemplateInterface;
  *   config_export = {
  *     "id",
  *     "label",
+ *     "format",
  *     "subject",
  *     "body",
  *     "bundles",
@@ -65,6 +66,13 @@ class Template extends ConfigEntityBase implements TemplateInterface {
    * @var string
    */
   protected $label;
+
+  /**
+   * The Email template format.
+   *
+   * @var string
+   */
+  protected $format;
 
   /**
    * Body with value and format keys.
@@ -118,6 +126,13 @@ class Template extends ConfigEntityBase implements TemplateInterface {
    * @var string[]
    */
   protected $bundles = [];
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormat() {
+    return $this->format;
+  }
 
   /**
    * {@inheritdoc}

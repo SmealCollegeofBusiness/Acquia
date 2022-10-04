@@ -28,10 +28,8 @@ class SjApiClient implements SjClientInterface {
 
   /**
    * Scheduled Job's binaries path.
-   *
-   * @var string
    */
-  private $binary;
+  private ?string $binary;
 
   /**
    * Constructs the ACSF SJ Client.
@@ -151,21 +149,21 @@ class SjApiClient implements SjClientInterface {
      * Argument order:
      * TIMESTAMP DOMAIN [DRUSH_COMMAND] [DRUSH_EXECUTABLE] [DRUSH_OPTIONS...]
      */
-    $arguments = '';
+    $arguments = [];
     if (!empty($reason)) {
-      $arguments .= sprintf('--reason=%s ', escapeshellarg($reason));
+      $arguments[] = sprintf('--reason=%s ', escapeshellarg($reason));
     }
     if (!empty($timeout) && is_numeric($timeout)) {
-      $arguments .= sprintf('--max-exec-time=%ds ', $timeout);
+      $arguments[] = sprintf('--max-exec-time=%ds ', $timeout);
     }
-    $arguments .= sprintf(
-      '%d %s %s %s %s',
-      intval($timestamp),
-      escapeshellarg($domain),
-      escapeshellarg($drush_command),
-      escapeshellarg($drush_executable),
-      escapeshellarg($drush_options)
-    );
+    $arguments[] = intval($timestamp);
+    // We don't escape these as Symfony console should escape them and we don't
+    // want double escaping.
+    $arguments[] = $domain;
+    $arguments[] = $drush_command;
+    $arguments[] = $drush_executable;
+    $arguments[] = $drush_options;
+
     return $arguments;
   }
 
@@ -173,7 +171,7 @@ class SjApiClient implements SjClientInterface {
    * Executes the sjadd command.
    *
    * @param string $command_arguments
-   *   The arguments to the sjadd command, already escaped for shell execution.
+   *   The arguments to the sjadd command, for shell execution.
    *
    * @return bool
    *   Whether the command was executed successfully.
@@ -189,12 +187,12 @@ class SjApiClient implements SjClientInterface {
 
     $exit_code = -1;
     if (!$error) {
-      $command = sprintf('%s %s', $this->binary, $command_arguments);
+      array_unshift($command_arguments , $this->binary);
       // Possibly one retry.
       for ($retry = 0; $retry < 2 && $exit_code !== 0; $retry++) {
         if ($retry) {
           $this->logger->log(LogLevel::WARNING, "Command '@command' will be re-run; it exited with code @code:\n@error", [
-            '@command' => $command,
+            '@command' => implode(' ', $command_arguments),
             '@code' => $exit_code,
             '@error' => $error,
           ]);
@@ -203,7 +201,7 @@ class SjApiClient implements SjClientInterface {
         }
 
         try {
-          $process = new Process($command);
+          $process = new Process($command_arguments);
           // We're hardcoding a timeout of 10 seconds for just scheduling the
           // job (rather than for executing the scheduled job).
           $process->setTimeout(10);
@@ -223,7 +221,7 @@ class SjApiClient implements SjClientInterface {
       // This message is not completely accurate for code -1, but that's OK.
       // @error can be any single or multi-line output, so place on a new line.
       $this->logger->log(LogLevel::ERROR, "Command '@command' exited with code @code:\n@error", [
-        '@command' => $command ?? '-',
+        '@command' => implode(' ', $command_arguments) ?? '-',
         '@code' => $exit_code,
         '@error' => $error,
       ]);

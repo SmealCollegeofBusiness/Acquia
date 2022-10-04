@@ -3,11 +3,11 @@ type: module
 description: 'Handles VCS-based themes on Acquia Cloud Site Factory.'
 package: Acquia Cloud Site Factory
 core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 dependencies:
  - acsf_variables
 
-# Information added by Drupal.org packaging script on 2022-03-23
-version: '8.x-2.72'
+# Information added by Drupal.org packaging script on 2022-09-07
+version: '8.x-2.73'
 project: 'acsf'
-datestamp: 1648038273
+datestamp: 1662552841

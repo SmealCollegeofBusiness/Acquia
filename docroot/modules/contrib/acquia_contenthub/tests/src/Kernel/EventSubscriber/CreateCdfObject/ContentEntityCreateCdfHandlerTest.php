@@ -195,6 +195,44 @@ class ContentEntityCreateCdfHandlerTest extends KernelTestBase {
   }
 
   /**
+   * @covers ::onCreateCdf
+   * @covers ::getCreatedTime
+   * @covers ::getModifiedTime
+   */
+  public function testModifiedAndCreatedDateOnMultipleUpdates(): void {
+    $this->installSchema('node', ['node_access']);
+    $this->createContentType([
+      'type' => 'test',
+    ]);
+
+    $time = time();
+    $node = Node::create([
+      'created' => $time,
+      'changed' => $time,
+      'title' => 'Test',
+      'type' => 'test',
+    ]);
+    $node->save();
+
+    $event = $this->triggerOnCdfEvent($node);
+    $cdf = $event->getCdf($node->uuid());
+    $this->assertEquals($cdf->getCreated(), date('c', $time));
+    $this->assertEquals($cdf->getModified(), date('c', $time));
+
+    $changed = $time + 500;
+    $node->setChangedTime($changed)->save();
+    $event = $this->triggerOnCdfEvent($node);
+    $cdf = $event->getCdf($node->uuid());
+    $this->assertEquals($cdf->getModified(), date('c', $changed));
+
+    $created = $time + 1000;
+    $node->setCreatedTime($created)->save();
+    $event = $this->triggerOnCdfEvent($node);
+    $cdf = $event->getCdf($node->uuid());
+    $this->assertEquals($cdf->getCreated(), date('c', $created));
+  }
+
+  /**
    * Exclude field on the fly event subscriber.
    *
    * @param \Drupal\acquia_contenthub\Event\ExcludeEntityFieldEvent $event
@@ -294,7 +332,7 @@ class ContentEntityCreateCdfHandlerTest extends KernelTestBase {
       'default_language' => 'en',
       'field_text'  => 'Custom test field',
     ];
-    $data = array_merge($data, $values);
+    $data = array_replace($data, $values);
 
     // Create node.
     $entity = Node::create($data);

@@ -4,6 +4,8 @@ namespace Drupal\acquia_cms_common\Commands;
 
 use Consolidation\AnnotatedCommand\CommandData;
 use Consolidation\AnnotatedCommand\CommandError;
+use Consolidation\OutputFormatters\Options\FormatterOptions;
+use Consolidation\OutputFormatters\StructuredData\PropertyList;
 use Consolidation\SiteAlias\SiteAliasManagerAwareInterface;
 use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 use Drupal\acquia_cms_common\Services\AcmsUtilityService;
@@ -243,6 +245,36 @@ class AcmsCommands extends DrushCommands implements SiteAliasManagerAwareInterfa
    */
   public function importSiteStudioPackages() {
     $this->acmsUtilityService->siteStudioPackageImport();
+  }
+
+  /**
+   * Display starter-kit name.
+   *
+   * @command acms:starter-kit
+   * @aliases askt
+   * @usage acms:starter-kit
+   *   Display starter kit value.
+   */
+  public function starterKit($filter = '', $options = [
+    'project' => self::REQ,
+    'format' => 'table',
+  ]) {
+    if ($starter_kit = $this->acmsUtilityService->getStarterKit()) {
+      $data['starter-kit'] = $starter_kit;
+      $result = new PropertyList($data);
+      $result->addRendererFunction(
+        function ($key, $cellData, FormatterOptions $options, $rowData) {
+          if ($key == 'first') {
+              return "<comment>$cellData</>";
+          }
+          return $cellData;
+        }
+      );
+
+      return $result;
+    }
+
+    return $this->output()->writeln('Starter-kit is not installed yet.');
   }
 
 }

@@ -24,29 +24,40 @@ class TestStatusController extends ControllerBase {
   public function testStatus($log = FALSE) {
     $custom_data = [];
 
+    $results = [];
     // Iterate through modules which contain hook_acquia_spi_test().
-    foreach ($this->moduleHandler()->getImplementations('acquia_connector_spi_test') as $module) {
-      $function = $module . '_acquia_connector_spi_test';
-      if (function_exists($function)) {
+    // @todo Fix after Drupal 9.4 is minimum version.
+    if (method_exists($this->moduleHandler, 'invokeAllWith')) {
+      $this->moduleHandler->invokeAllWith('acquia_connector_spi_test', function (callable $hook, string $module) use (&$results) {
+        $results[$module] = $this->testValidate($hook());
+      });
+    }
+    else {
+      // @phpstan-ignore-next-line
+      foreach ($this->moduleHandler->getImplementations('acquia_connector_spi_test') as $module) {
+        $function = $module . '_acquia_connector_spi_test';
+        if (function_exists($function)) {
+          $results[$module] = $this->testValidate($function());
+        }
+      }
+    }
 
-        $result = $this->testValidate($function());
-        if (!$result['result']) {
-          $custom_data[$module] = $result;
-
-          foreach ($result['failure'] as $test_name => $test_failures) {
-            foreach ($test_failures as $test_param => $test_value) {
-              $variables = [
-                '@module'     => $module,
-                '@message'    => $test_value['message'],
-                '@param_name' => $test_param,
-                '@test'       => $test_name,
-                '@value'      => $test_value['value'],
-              ];
-              // Only log if we're performing a full validation check.
-              if ($log) {
-                $this->messenger()->addError($this->t("Custom test validation failed for @test in @module and has been logged: @message for parameter '@param_name'; current value '@value'.", $variables));
-                $this->getLogger('acquia spi test')->notice("<em>Custom test validation failed</em>: @message for parameter '@param_name'; current value '@value'. (<em>Test '@test_name' in module '@module_name'</em>)", $variables);
-              }
+    foreach ($results as $module => $result) {
+      if (!$result['result']) {
+        $custom_data[$module] = $result;
+        foreach ($result['failure'] as $test_name => $test_failures) {
+          foreach ($test_failures as $test_param => $test_value) {
+            $variables = [
+              '@module'     => $module,
+              '@message'    => $test_value['message'],
+              '@param_name' => $test_param,
+              '@test'       => $test_name,
+              '@value'      => $test_value['value'],
+            ];
+            // Only log if we're performing a full validation check.
+            if ($log) {
+              $this->messenger()->addError($this->t("Custom test validation failed for @test in @module and has been logged: @message for parameter '@param_name'; current value '@value'.", $variables));
+              $this->getLogger('acquia spi test')->notice("<em>Custom test validation failed</em>: @message for parameter '@param_name'; current value '@value'. (<em>Test '@test_name' in module '@module_name'</em>)", $variables);
             }
           }
         }

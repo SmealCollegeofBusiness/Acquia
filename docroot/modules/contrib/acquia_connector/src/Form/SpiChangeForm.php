@@ -195,10 +195,6 @@ class SpiChangeForm extends ConfigFormBase {
       $this->state->set('spi.site_machine_name', $values['machine_name']);
     }
     parent::submitForm($form, $form_state);
-
-    // Send information as soon as the key/identifier pair is submitted.
-    $response = \Drupal::service('acquia_connector.spi')->sendFullSpi(ACQUIA_CONNECTOR_ACQUIA_SPI_METHOD_CREDS);
-    \Drupal::service('acquia_connector.spi')->spiProcessMessages($response);
     $form_state->setRedirect('system.status');
   }
 

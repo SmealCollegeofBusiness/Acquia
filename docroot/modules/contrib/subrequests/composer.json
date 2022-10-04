@@ -4,7 +4,7 @@
   "type": "drupal-module",
   "require": {
     "galbar/jsonpath": "^1.0",
-    "drupal/core": "^8 || ^9"
+    "drupal/core": "^8 || ^9 || ^10"
   },
   "require-dev": {
     "justinrainbow/json-schema": "^5.2"

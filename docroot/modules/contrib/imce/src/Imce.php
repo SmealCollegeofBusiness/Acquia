@@ -195,7 +195,7 @@ class Imce {
    * Returns name filtering regexp from a profile conf.
    */
   public static function nameFilterInConf(array $conf) {
-    $filters = $conf['name_filters'] ?? [];
+    $filters = isset($conf['name_filters']) ? $conf['name_filters'] : [];
     if (empty($conf['allow_dot_files'])) {
       $filters[] = '^\.|\.$';
     }

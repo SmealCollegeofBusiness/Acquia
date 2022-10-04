@@ -75,7 +75,7 @@ class ConfigEntityDependencyCollector extends BaseDependencyCollector {
           if ($sub_entity) {
             $sub_wrapper = new DependentEntityWrapper($sub_entity);
             $config_dependency_event = new FilterDependencyConfigEntityEvent($sub_wrapper);
-            $dispatcher->dispatch(DependencyCalculatorEvents::FILTER_CONFIG_ENTITIES, $config_dependency_event);
+            $dispatcher->dispatch($config_dependency_event, DependencyCalculatorEvents::FILTER_CONFIG_ENTITIES);
             if (!$config_dependency_event->isCalculable()) {
               continue;
             }
