@@ -11,12 +11,21 @@ use Drupal\Core\Config\StorageInterface;
  */
 abstract class CohesionPackageStorageBase implements StorageInterface {
 
+  const DEPENDENCY_TYPES = ['config', 'content'];
+
   /**
    * Files array.
    *
    * @var array
    */
   public $files = [];
+
+  /**
+   * Dependencies array.
+   *
+   * @var array
+   */
+  public $dependencies = [];
 
   /**
    * Gets array of file uuids.
@@ -40,43 +49,49 @@ abstract class CohesionPackageStorageBase implements StorageInterface {
   protected function buildStorageFileList() {
     $this->files = [];
 
-    foreach ($this->listAll() as $name) {
-      $content_dependencies = $this->getContentDependencies($name);
-      foreach ($content_dependencies as $dependency) {
-        if (strpos($dependency, 'file:file:') !== FALSE) {
-          $file = explode(':', $dependency);
-          if (isset($this->files[$file[2]]) === FALSE) {
-            $this->files[$file[2]] = $file[0];
-          }
+    $content_dependencies = $this->getContentDependencies($this->listAll());
+    foreach ($content_dependencies as $dependency) {
+      if (strpos($dependency, 'file:file:') !== FALSE) {
+        $file = explode(':', $dependency);
+        if (isset($this->files[$file[2]]) === FALSE) {
+          $this->files[$file[2]] = $file[0];
         }
       }
     }
   }
 
   /**
-   * Returns all 'config' type dependencies of config entity $id.
+   * Returns all 'config' type dependencies of $config array.
    *
-   * @param string $id
-   *   Config entity id.
+   * @param array $config
+   *   Config entities ids
    *
    * @return array
-   *   Array of config entity ids.
+   *   Array of config dependencies.
    */
-  protected function getConfigDependencies(string $id): array {
-    return $this->getDependencyFromIdByTypeRecursively($id, 'config');
+  protected function getConfigDependencies(array $config): array {
+    if (empty($this->dependencies)) {
+      $this->buildDependencies($config);
+    }
+
+    return $this->dependencies['config'] ?? [];
   }
 
   /**
-   * Returns all 'config' type dependencies of config entity $id.
+   * Returns all 'content' type dependencies of $config array.
    *
-   * @param string $id
-   *   Config entity id.
+   * @param array $config
+   *   Config entities ids.
    *
    * @return array
-   *   Array of content dependencies ('file:file:uuid' for file entities).
+   *   Array of content dependencies.
    */
-  protected function getContentDependencies(string $id) {
-    return $this->getDependencyFromIdByTypeRecursively($id, 'content');
+  protected function getContentDependencies(array $config) {
+    if (empty($this->dependencies)) {
+      $this->buildDependencies($config);
+    }
+
+    return $this->dependencies['content'] ?? [];
   }
 
   /**
@@ -89,23 +104,29 @@ abstract class CohesionPackageStorageBase implements StorageInterface {
    *
    * @return array
    */
-  protected function getDependencyFromIdByTypeRecursively(string $id, string $type) {
-    $dependencies = [];
+  protected function buildDependenciesRecursively(string $id) {
 
     if (!$this->exists($id)) {
-      return $dependencies;
+      return [];
     }
 
     $config = $this->read($id);
-    if (isset($config['dependencies'][$type])) {
-      foreach ($config['dependencies'][$type] as $dependency) {
-        $dependencies[] = $dependency;
-        $inherited_dependencies = $this->getDependencyFromIdByTypeRecursively($dependency, $type);
-        $dependencies = array_merge($dependencies, $inherited_dependencies);
+    foreach (self::DEPENDENCY_TYPES as $type) {
+      if (isset($config['dependencies'][$type])) {
+        foreach ($config['dependencies'][$type] as $dependency) {
+          if (in_array($dependency, $this->dependencies[$type])) {
+            continue;
+          }
+          $this->dependencies[$type][] = $dependency;
+          $this->buildDependenciesRecursively($dependency);
+        }
+      }
+      if (!empty($this->dependencies[$type])) {
+        $this->dependencies[$type] = array_unique($this->dependencies[$type]);
       }
     }
 
-    return array_unique($dependencies);
+    return $this->dependencies;
   }
 
   /**
@@ -189,21 +210,18 @@ abstract class CohesionPackageStorageBase implements StorageInterface {
    *
    * @param array $site_studio_config
    *   List of site studio config entity names.
-   *
-   * @return array
-   *   List of required config names.
    */
-  protected function buildDependencies(array $site_studio_config): array {
-    $dependencies = [];
+  protected function buildDependencies(array $site_studio_config) {
+    $this->dependencies = [
+      'config' => [],
+      'content' => [],
+    ];
 
     foreach ($site_studio_config as $name) {
       if ($this->exists($name)) {
-        $inherited_dependencies = $this->getConfigDependencies($name);
-        $dependencies = array_merge($dependencies, $inherited_dependencies);
+        $this->buildDependenciesRecursively($name);
       }
     }
-
-    return array_unique($dependencies);
   }
 
   /**

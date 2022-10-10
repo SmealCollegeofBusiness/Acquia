@@ -253,7 +253,7 @@ class CohesionSyncImportCommand extends DrushCommands {
    * @param array $files
    *   Array of files from the file index.
    * @param string $path
-   *   Path of the the package that is being imported.
+   *   Path of the package that is being imported.
    */
   protected function handleFileSync(array $files, string $path) {
     $file_sync_event = new SiteStudioSyncFilesEvent($files, $path);

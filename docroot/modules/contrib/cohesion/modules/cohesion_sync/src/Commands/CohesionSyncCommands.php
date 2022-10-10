@@ -53,7 +53,7 @@ class CohesionSyncCommands extends DrushCommands {
    */
   public function export(array $options = ['filename-prefix' => NULL]) {
 
-    $this->warn('You are using deprecated package export command which will be removed in Site Studio 7.0.0. For more information refer to documentation at https://sitestudiodocs.acquia.com/6.9/user-guide/deprecating-legacy-package-system');
+    $this->warn('You are using a deprecated package export command which will be removed in a future version of Site Studio. For more information refer to documentation at https://sitestudiodocs.acquia.com/6.9/user-guide/deprecating-legacy-package-system');
 
     $filename_prefix = $options['filename-prefix'];
 
@@ -106,7 +106,7 @@ class CohesionSyncCommands extends DrushCommands {
     'no-maintenance' => NULL,
   ]) {
 
-    $this->warn('You are using deprecated package import command which will be removed in Site Studio 7.0.0. For more information refer to documentation at https://sitestudiodocs.acquia.com/6.9/user-guide/deprecating-legacy-package-system');
+    $this->warn('You are using a deprecated package import command which will be removed in a future version of Site Studio. For more information refer to documentation at https://sitestudiodocs.acquia.com/6.9/user-guide/deprecating-legacy-package-system');
 
     // Get options.
     $overwrite_all = $options['overwrite-all'];

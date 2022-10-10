@@ -288,11 +288,11 @@ class CohesionFullPackageStorageTest extends UnitTestCase {
       ],
     ];
 
-    $this->configs['config_with.file.disabled'] = [
+    $this->configs['config_with.file.dependency_2'] = [
       'entity_type' => 'cohesion_component',
       'exists' => TRUE,
       'data' => [
-        'status' => FALSE,
+        'status' => TRUE,
         'dependencies' => [
           'content' => [
             'file:file:dependency_4',
@@ -301,7 +301,7 @@ class CohesionFullPackageStorageTest extends UnitTestCase {
       ],
     ];
 
-    $this->configs['config_dependency_1_with_file'] = [
+    $this->configs['config_with.file.dependency_3'] = [
       'entity_type' => 'cohesion_component',
       'exists' => TRUE,
       'data' => [
@@ -322,6 +322,7 @@ class CohesionFullPackageStorageTest extends UnitTestCase {
       'dependency_1' => 'file',
       'dependency_2' => 'file',
       'dependency_5' => 'file',
+      'dependency_4' => 'file',
     ];
     $this->assertArrayEquals($excepted, $this->storage->getStorageFileList(), 'getStorageFileList should contain file dependency');
 

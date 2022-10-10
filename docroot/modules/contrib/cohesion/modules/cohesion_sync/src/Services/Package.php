@@ -68,8 +68,13 @@ class Package implements PackageSourceServiceInterface {
         self::REQUIRED_PROPERTIES
       );
     }
+
+    if (strpos($sourceMetadata['path'], '/') !== 0) {
+      $sourceMetadata['path'] = DRUPAL_ROOT . '/' . $sourceMetadata['path'];
+    }
+
     if (!is_dir($sourceMetadata['path']) || !is_readable($sourceMetadata['path'])) {
-      throw new DirectoryNotReadyException(sprintf('Directory "%s" is not found.', $sourceMetadata['path']));
+      throw new DirectoryNotReadyException(sprintf('Directory "%s" is not found or is unreadable.', $sourceMetadata['path']));
     }
   }
 

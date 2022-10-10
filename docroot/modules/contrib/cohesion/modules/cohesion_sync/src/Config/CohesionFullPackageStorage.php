@@ -102,7 +102,7 @@ class CohesionFullPackageStorage extends CohesionPackageStorageBase implements S
    */
   public function listAll($prefix = 'cohesion') {
     $site_studio_config = $this->storage->listAll($prefix);
-    $required_drupal_config = $this->buildDependencies($site_studio_config);
+    $required_drupal_config = $this->getConfigDependencies($site_studio_config);
 
     $all_config = array_unique(array_merge($site_studio_config, $required_drupal_config));
 

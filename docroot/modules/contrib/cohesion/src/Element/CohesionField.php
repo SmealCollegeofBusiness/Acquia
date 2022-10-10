@@ -129,6 +129,12 @@ class CohesionField extends FormElement {
     $json_values = NULL;
     // Add the json values.
     if($element['#entity'] instanceof EntityJsonValuesInterface && $element['#entity']->isLayoutCanvas()) {
+
+      // If state exists - apply to the entity.
+      if ($form_state_json_values = $form_state->getValue('field_layout_canvas')[0]['target_id']) {
+        !is_numeric($form_state_json_values) ?? $element['#entity']->setJsonValue($form_state_json_values);
+      }
+
       if($payload = \Drupal::service('cohesion.utils')->getPayloadForLayoutCanvasDataMerge($element['#entity'])) {
         $response = \Drupal::service('cohesion.api_client')->layoutCanvasDataMerge($payload);
 
@@ -142,7 +148,7 @@ class CohesionField extends FormElement {
       }
     }
 
-    if(is_null($json_values)) {
+    if(empty($json_values)) {
       $json_values = json_decode($element['#json_values']);
     }
 

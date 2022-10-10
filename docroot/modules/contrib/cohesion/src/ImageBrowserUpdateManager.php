@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepository;
 use Drupal\Core\Extension\ModuleHandler;
 use Drupal\file\FileInterface;
+use Drupal\media\MediaInterface;
 
 /**
  * Defines the image browser update manager.
@@ -166,8 +167,7 @@ class ImageBrowserUpdateManager {
       // Load the entity by UUID in the token.
       try {
         $entity = $this->entityRepository->loadEntityByUuid($token[1], $token[2]);
-      }
-      catch (\Exception $e) {
+      } catch (\Exception $e) {
         return FALSE;
       }
 
@@ -186,6 +186,19 @@ class ImageBrowserUpdateManager {
 
           // This is a media entity reference (Entity Browser).
           case 'media':
+
+            // Checking for Acquia DAM assets and using original embeds.
+            if ($entity instanceof MediaInterface && strpos($entity->getSource()->getPluginId(), 'acquia_dam_asset') === 0) {
+              ['asset_id' => $asset_id, 'version_id' => $version_id] = $entity->getSource()->getSourceFieldValue($entity);
+              $uri = "acquia-dam://$asset_id/$version_id";
+
+              return [
+                'path' => $uri,
+                'label' => $entity->label(),
+              ];
+
+            }
+
             if ($image_uri = $entity->getSource()->getMetadata($entity, 'thumbnail_uri')) {
               return [
                 'path' => $image_uri,

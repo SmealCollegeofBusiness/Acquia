@@ -86,7 +86,7 @@ class CohesionIndividualEntityPackageStorage extends CohesionPackageStorageBase 
     }
     $site_studio_config = $this->entity->getDependencies()['config'] ?? [];
     $site_studio_config[] = $this->entity->getConfigDependencyName();
-    $required_drupal_config = $this->buildDependencies($site_studio_config);
+    $required_drupal_config = $this->getConfigDependencies($site_studio_config);
 
     $all_config = array_unique(array_merge($site_studio_config, $required_drupal_config));
 

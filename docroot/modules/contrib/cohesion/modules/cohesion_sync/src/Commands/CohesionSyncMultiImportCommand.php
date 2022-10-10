@@ -32,13 +32,13 @@ class CohesionSyncMultiImportCommand extends DrushCommands {
   }
 
   /**
-   * Import Cohesion packages from sync.
+   * Import multiple packages based on package manifest.
    *
    * @param array $options
    *   An associative array of options whose values come from cli.
    *
    * @option path
-   *   Specify path to a directory with package files.
+   *   Path to package manifest.
    *
    * @validate-module-enabled cohesion_sync
    *
@@ -49,23 +49,21 @@ class CohesionSyncMultiImportCommand extends DrushCommands {
     'path' => NULL,
   ]) {
 
+    $path = $options['path'];
+
+    if (strpos($path, '/') !== 0) {
+      // Path is relative to where the cmd was called.
+      $path = $this->getConfig()->cwd() . '/' . $path;
+    }
+
     try {
-      $result = $this->packageImportHandler->importPackagesFromPath($options['path']);
+      $result = $this->packageImportHandler->importPackagesFromPath($path);
     }
     catch (\Exception $exception) {
       $this->warn($exception->getMessage(), 40, 'red');
       return CommandResult::exitCode(self::EXIT_FAILURE);
     }
-
     drush_backend_batch_process();
-
-    $cohesion_file_sync_messages = &drupal_static('suppress_drupal_messages');
-    if (isset($cohesion_file_sync_messages['new_files']) || isset($cohesion_file_sync_messages['updated_files'])) {
-      $this->yell(sprintf('Imported %s new and updated %s existing non-config files.', $cohesion_file_sync_messages['new_files'], $cohesion_file_sync_messages['updated_files']));
-    }
-    else {
-      $this->yell('No non-config files were imported or updated during sync.');
-    }
 
     return is_array($result) && isset(array_shift($result)['error']) ? CommandResult::exitCode(self::EXIT_FAILURE) : CommandResult::exitCode(self::EXIT_SUCCESS);
   }

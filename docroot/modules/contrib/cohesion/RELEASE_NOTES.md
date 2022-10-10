@@ -1,13 +1,88 @@
 # Release notes
 
-## 6.9.2
+## 6.9.3
 
-### Duplicate styles on same component 
+### Layout canvas changes are lost when server side validation and refresh takes place
 
 #### What is it?
 
-Fixes a bug where the same styles or no styles were applied when the same type of component 
-was placed on the page 
+When using a required checkbox or radio button field in a content type, form validation will trigger a page refresh
+causing layout canvas changes to be lost if the required field is not populated.
+
+#### What impact will there be?
+
+Form validation will retain layout canvas changes regardless of page refresh.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Any new component created by saving from the layout canvas cannot be used.
+
+#### What is it?
+
+Creating a component from within the layout canvas ellipsis menu results in a broken component that cannot be used.
+
+#### What impact will there be?
+
+Components can successfully be created from within the layout canvas ellipsis menu.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Resolves package export crashing when handling recursive config dependencies
+
+#### What is it?
+
+Fixes a bug where the package export process would crash if a recursive config dependency was encountered.
+
+#### What impact will there be?
+
+Recursive config dependencies will be handled without issues
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Adds support for relative paths to sitestudio:package:multi-import
+
+#### What is it?
+
+Fixes a bug where the `sitestudio:package:multi-import` would only work with absolute paths. After this change both absolute and relative paths are supported.
+
+#### What impact will there be?
+
+Relative paths will be allowed to be used both as argument to the `sitestudio:package:multi-import` command and as package definitions in multi-package manifest file.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 6.9.2
+
+### Duplicate styles on same component
+
+#### What is it?
+
+Fixes a bug where the same styles or no styles were applied when the same type of component
+was placed on the page
 
 #### What impact will there be?
 

@@ -32,6 +32,7 @@ use Drupal\Core\Theme\Registry;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Utility\Error;
 use Drupal\Core\Utility\Token;
+use Drupal\image\Entity\ImageStyle;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use Twig\Markup as TwigMarkup;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -42,6 +43,8 @@ use Drupal\Core\Cache\CacheableMetadata;
  * @package Drupal\cohesion_templates\TwigExtension
  */
 class TwigExtension extends \Twig_Extension {
+
+  const EXTERNAL_URI_SCHEMES = ['s3', 'acquia-dam'];
 
   /**
    * The renderer.
@@ -1150,6 +1153,17 @@ class TwigExtension extends \Twig_Extension {
     $file_uri = html_entity_decode(stripcslashes($file_uri));
     if (!\Drupal::service('stream_wrapper_manager')->isValidUri($file_uri)) {
       return $file_uri;
+    }
+
+    // Use external URLs for images stored in Acquia DAM or Amazon S3.
+    if (in_array(StreamWrapperManager::getScheme($file_uri), self::EXTERNAL_URI_SCHEMES)) {
+      $image_style_instance = ImageStyle::load($image_style);
+      if ($image_style_instance instanceof ImageStyle) {
+        $url = $image_style_instance->buildUrl($file_uri);
+      } else {
+        $url = file_create_url($file_uri);
+      }
+      return $url;
     }
 
     // Try and load the given image style.

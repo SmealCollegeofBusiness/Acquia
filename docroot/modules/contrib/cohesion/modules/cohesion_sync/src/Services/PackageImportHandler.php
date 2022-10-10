@@ -193,6 +193,7 @@ class PackageImportHandler {
    * @return bool
    *   TRUE if batch was set successfully.
    *
+   * @throws \Drupal\cohesion_sync\Exception\PackageListEmptyOrMissing
    * @throws \Exception
    */
   public function importPackagesFromPath(string $package_list_path): bool {
@@ -232,17 +233,19 @@ class PackageImportHandler {
    *
    * @return array
    *   Package list.
+   *
+   * @throws \Drupal\cohesion_sync\Exception\PackageListEmptyOrMissing
+   * @throws \Symfony\Component\Yaml\Exception\ParseException
    */
   protected function readPackageList(string $package_list_path): array {
-
     if (file_exists($package_list_path)) {
       $package_list = Yaml::parse(file_get_contents($package_list_path));
-      if ($package_list === NULL) {
-        throw new PackageListEmptyOrMissing($package_list_path);
+      if ($package_list !== NULL) {
+        return $package_list;
       }
     }
 
-    return $package_list;
+    throw new PackageListEmptyOrMissing($package_list_path);
   }
 
   /**

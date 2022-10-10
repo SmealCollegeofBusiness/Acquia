@@ -32,7 +32,7 @@ class MediaLibraryImageBrowser extends ImageBrowserPluginBase {
       ->getBundleInfo('media');
 
     foreach ($bundles as $key => $bundle) {
-      $options[$key] = $bundle['label'];
+      $options[$key] = $bundle['label'] . ' (' . $key . ')';
     }
 
     $index = $config_object[$browser_type]['cohesion_media_lib_types'] ?? [];
