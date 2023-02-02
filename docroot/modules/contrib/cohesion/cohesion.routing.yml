@@ -1,5 +1,5 @@
 cohesion.settings:
-  path: 'admin/cohesion'
+  path: '/admin/cohesion'
   defaults:
     _controller: '\Drupal\cohesion\Controller\CohesionController::index'
     _title: 'Site Studio'
@@ -7,7 +7,7 @@ cohesion.settings:
     _permission: 'administer cohesion'
 
 cohesion.developer:
-  path: 'admin/cohesion/developer'
+  path: '/admin/cohesion/developer'
   defaults:
     _controller: '\Drupal\cohesion\Controller\AdministrationController::index'
     _title: 'Developer tool'
@@ -23,7 +23,7 @@ cohesion.settings.styles:
     _permission: 'administer base styles+administer custom styles+administer style helpers'
 
 cohesion.configuration:
-  path: 'admin/cohesion/configuration'
+  path: '/admin/cohesion/configuration'
   defaults:
     _controller: '\Drupal\cohesion\Controller\AdministrationController::index'
     _title: 'Configuration'
@@ -31,7 +31,7 @@ cohesion.configuration:
     _permission: 'administer cohesion settings'
 
 cohesion.configuration.batch:
-  path: 'admin/cohesion/configuration/batch'
+  path: '/admin/cohesion/configuration/batch'
   defaults:
     _controller: '\Drupal\cohesion\Controller\AdministrationController::batchAction'
     _title: 'Site Studio assets import and create entities'
@@ -39,7 +39,7 @@ cohesion.configuration.batch:
     _permission: 'administer cohesion settings'
 
 cohesion.configuration.account_settings:
-  path: 'admin/cohesion/configuration/account-settings'
+  path: '/admin/cohesion/configuration/account-settings'
   defaults:
     _form: '\Drupal\cohesion\Form\AccountSettingsForm'
     _title: 'Account settings'
@@ -47,7 +47,7 @@ cohesion.configuration.account_settings:
     _permission: 'administer cohesion settings'
 
 cohesion.configuration.google_map_api_key:
-  path: 'admin/cohesion/configuration/google-map-api-key'
+  path: '/admin/cohesion/configuration/google-map-api-key'
   defaults:
     _form: '\Drupal\cohesion\Form\GoogleMapApiKeyForm'
     _title: 'Google Maps API key'
@@ -56,7 +56,7 @@ cohesion.configuration.google_map_api_key:
     _permission: 'administer cohesion settings'
 
 cohesion.configuration.elements_settings:
-  path: 'admin/cohesion/configuration/elements-settings'
+  path: '/admin/cohesion/configuration/elements-settings'
   defaults:
     _form: '\Drupal\cohesion\Form\ElementsSettingsForm'
     _title: 'Elements settings'
@@ -72,7 +72,7 @@ cohesion.configuration.system_settings:
     _permission: 'administer cohesion settings'
 
 cohesion.configuration.rebuild:
-  path: 'admin/cohesion/developer/rebuild'
+  path: '/admin/cohesion/developer/rebuild'
   defaults:
     _form: '\Drupal\cohesion\Form\CohesionResetStylesheetForm'
     _title: 'Rebuild'
@@ -264,18 +264,6 @@ drupal_data_endpoint.entity_browser_url:
   requirements:
     _user_is_logged_in: 'TRUE'
     _content_type_format: json
-
-# Media library
-cohesion.media_library_ui:
-  path: '/cohesion-media-library'
-  defaults:
-    _controller: 'cohesion.media_library.ui_builder:buildUi'
-  requirements:
-    _module_dependencies: 'media_library'
-    _user_is_logged_in: 'TRUE'
-    _custom_access: 'cohesion.media_library.ui_builder:checkAccess'
-  options:
-    _admin_route: 'TRUE'
 
 #
 # Drupal views related cohesion endpoints

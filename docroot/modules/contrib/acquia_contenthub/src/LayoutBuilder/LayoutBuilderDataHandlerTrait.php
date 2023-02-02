@@ -21,7 +21,7 @@ trait LayoutBuilderDataHandlerTrait {
   /**
    * Prepares Layout Builder sections to be serialized.
    *
-   * @param \Drupal\layout_builder\Section[] $sections
+   * @param \Drupal\layout_builder\Section ...$sections
    *   Sections for layout.
    *
    * @return array

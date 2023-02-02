@@ -19,6 +19,9 @@ use Psr\Http\Message\ResponseInterface;
  */
 class DeleteEntityTest extends EntityKernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'user',
     'system',
@@ -95,6 +98,10 @@ class DeleteEntityTest extends EntityKernelTestBase {
     $this->client->getSettings()->willReturn($this->settings->reveal());
     $this->client->deleteEntity(Argument::any())->willReturn($deleteEntityResponse->reveal());
     $this->client->deleteInterest(Argument::any(), $origin_uuid)->willReturn($deleteInterestResponse->reveal());
+
+    $this->client
+      ->addEntitiesToInterestListBySiteRole(Argument::any(), Argument::any(), Argument::any())
+      ->willReturn($this->prophesize(ResponseInterface::class));
 
     $this->factory = $this->prophesize(ClientFactory::class);
     $this->factory->isConfigurationSet()->willReturn(TRUE);

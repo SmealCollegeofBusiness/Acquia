@@ -285,7 +285,7 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
     parent::postDelete($storage, $entities);
     foreach ($entities as $entity) {
       $config_entities = \Drupal::service('config.manager')
-        ->findConfigEntityDependentsAsEntities('config', [$entity->getConfigDependencyName()]);
+        ->findConfigEntityDependenciesAsEntities('config', [$entity->getConfigDependencyName()]);
       \Drupal::service('cohesion_usage.update_manager')->removeUsage($entity);
       /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $dependent_entity */
       $dx8_no_send_to_api = &drupal_static('dx8_no_send_to_api');
@@ -329,10 +329,10 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
       if (strpos($entity_id, 'cohesion_') !== FALSE) {
         if ($storage = \Drupal::service('entity_type.manager')->getStorage($entity_id)) {
           if ($enabled) {
-            $ids = $storage->getQuery()->condition('status', $enabled)->execute();
+            $ids = $storage->getQuery()->accessCheck(TRUE)->condition('status', $enabled)->execute();
           }
           else {
-            $ids = $storage->getQuery()->execute();
+            $ids = $storage->getQuery()->accessCheck(TRUE)->execute();
           }
           $ids = array_keys($ids);
 
@@ -399,7 +399,7 @@ abstract class CohesionConfigEntityBase extends ConfigEntityBase implements Cohe
       ];
     }
 
-    return render($markup);
+    return \Drupal::service('renderer')->render($markup);
   }
 
   /**

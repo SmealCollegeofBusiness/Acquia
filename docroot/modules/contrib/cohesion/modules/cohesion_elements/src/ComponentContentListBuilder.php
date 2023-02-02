@@ -8,8 +8,9 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityListBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\RedirectDestinationInterface;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
+use Drupal\Core\Routing\RouteObjectInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -39,21 +40,34 @@ class ComponentContentListBuilder extends EntityListBuilder {
    *   The date formatter service.
    * @param \Drupal\Core\Routing\RedirectDestinationInterface $redirect_destination
    *   The redirect destination service.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   *   Renderer service.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, DateFormatterInterface $date_formatter, RedirectDestinationInterface $redirect_destination) {
+  public function __construct(
+    EntityTypeInterface $entity_type,
+    EntityStorageInterface $storage,
+    DateFormatterInterface $date_formatter,
+    RedirectDestinationInterface $redirect_destination,
+    RendererInterface $renderer
+  ) {
     parent::__construct($entity_type, $storage);
 
     $this->dateFormatter = $date_formatter;
     $this->redirectDestination = $redirect_destination;
+    $this->render = $renderer;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
-    return new static($entity_type, $container->get('entity_type.manager')->getStorage($entity_type->id()), $container->get('date.formatter'), $container->get('redirect.destination'));
+    return new static(
+      $entity_type,
+      $container->get('entity_type.manager')->getStorage($entity_type->id()),
+      $container->get('date.formatter'),
+      $container->get('redirect.destination'),
+      $container->get('renderer')
+    );
   }
 
   /**
@@ -173,7 +187,7 @@ class ComponentContentListBuilder extends EntityListBuilder {
       ];
     }
 
-    return render($markup);
+    return $this->render->render($markup);
   }
 
 }

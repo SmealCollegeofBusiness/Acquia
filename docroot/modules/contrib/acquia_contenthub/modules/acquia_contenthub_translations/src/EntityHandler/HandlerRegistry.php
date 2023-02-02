@@ -25,6 +25,11 @@ class HandlerRegistry {
   public const ENTITY_HANDLERS_CONFIG_KEY = 'nt_entity_registry.handler_mapping';
 
   /**
+   * Path to overridden handler mapping in acquia_contenthub_translation config.
+   */
+  public const OVERRIDDEN_HANDLERS_CONFIG_KEY = 'nt_override_registry';
+
+  /**
    * Default settings for specific non-translatable files.
    *
    * @var string[]
@@ -124,6 +129,18 @@ class HandlerRegistry {
   }
 
   /**
+   * Adds entities to the overridden entities list.
+   *
+   * @param string ...$entity_type
+   *   The entity type to add.
+   */
+  public function addEntityToOverriddenRegistry(string ...$entity_type): void {
+    $current = $this->getOverriddenHandlerMapping();
+    $current = array_unique(array_merge($current, $entity_type));
+    $this->config->set(static::OVERRIDDEN_HANDLERS_CONFIG_KEY, $current)->save();
+  }
+
+  /**
    * Returns the current entity mapping.
    *
    * @return array
@@ -131,6 +148,16 @@ class HandlerRegistry {
    */
   public function getHandlerMapping(): array {
     return $this->config->get(static::ENTITY_HANDLERS_CONFIG_KEY) ?? [];
+  }
+
+  /**
+   * Returns the current overridden handler mapping.
+   *
+   * @return array
+   *   Overridden handler mapping.
+   */
+  public function getOverriddenHandlerMapping(): array {
+    return $this->config->get(static::OVERRIDDEN_HANDLERS_CONFIG_KEY) ?? [];
   }
 
 }

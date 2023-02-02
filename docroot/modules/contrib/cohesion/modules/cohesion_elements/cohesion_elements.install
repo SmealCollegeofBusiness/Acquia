@@ -338,7 +338,7 @@ function cohesion_elements_update_8308() {
  */
 function cohesion_elements_update_8601() {
   // Overwrite the existing entity config.
-  $config_path = drupal_get_path('module', 'cohesion_elements') . '/config/optional';
+  $config_path = \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion_elements') . '/config/optional';
   $source = new FileStorage($config_path);
   $config_storage = \Drupal::service('config.storage');
   $source = $source->read('image.style.dx8_component_preview');
@@ -450,7 +450,7 @@ function cohesion_elements_update_8602() {
   }
 
   // Overwrite the existing entity config.
-  $config_path = drupal_get_path('module', 'cohesion_elements') . '/config/install';
+  $config_path = \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion_elements') . '/config/install';
   $source = new FileStorage($config_path);
   $config_storage = \Drupal::service('config.storage');
 
@@ -496,7 +496,9 @@ function cohesion_elements_update_8604(){
 
   foreach ($entity_types as $entity_type){
     $component_ids = \Drupal::entityTypeManager()->getStorage($entity_type)->getQuery()
-      ->sort('label', 'asc')->execute();
+      ->accessCheck(TRUE)
+      ->sort('label', 'asc')
+      ->execute();
     $components = \Drupal\cohesion_elements\Entity\Component::loadMultiple($component_ids);
     $weight = 0;
     foreach ($components as $component){
@@ -606,7 +608,9 @@ function cohesion_elements_update_8903() {
       ->condition('component', NULL , 'IS NULL');
 
     $component_content_ids = \Drupal::entityTypeManager()->getStorage('component_content')->getQuery()
-      ->condition($query_condition)->execute();
+      ->accessCheck(TRUE)
+      ->condition($query_condition)
+      ->execute();
 
     // If we have any ids then load and update the component field to have the component id.
     if ($component_content_ids) {

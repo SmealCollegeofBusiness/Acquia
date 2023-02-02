@@ -80,7 +80,7 @@ class PackageForm extends EntityForm {
       'machine_name' => [
         '#type' => 'ajax_machine_name',
         '#title' => $this->t('Machine name'),
-        '#default_value' => str_replace($this->entity->getEntityMachineNamePrefix(), '', $this->entity->id()),
+        '#default_value' => !empty($this->entity->id()) ? str_replace($this->entity->getEntityMachineNamePrefix(), '', $this->entity->id()) : '',
         '#maxlength' => 32 - strlen($this->entity->getEntityMachineNamePrefix()),
         '#required' => FALSE,
         '#access' => TRUE,

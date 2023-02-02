@@ -254,7 +254,9 @@ class Component extends CohesionElementEntityBase implements CohesionSettingsInt
     foreach ($entities as $entity) {
       // Delete any component contents for this component.
       $storage = \Drupal::entityTypeManager()->getStorage('component_content');
-      $query = $storage->getQuery()->condition('component', $entity->id());
+      $query = $storage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('component', $entity->id());
 
       $ids = $query->execute();
       $entities = $storage->loadMultiple($ids);

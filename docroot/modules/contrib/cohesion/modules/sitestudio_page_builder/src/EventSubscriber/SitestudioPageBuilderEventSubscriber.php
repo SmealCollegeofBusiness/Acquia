@@ -10,6 +10,7 @@ use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -97,6 +98,13 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
   protected $entityRepository;
 
   /**
+   * File URL generator service.
+   *
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
    * SitestudioPageBuilderEventSubscriber constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -119,6 +127,8 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
    *  The cohesion api client service
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
    *  Entity repository service
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
+   *  File URL generator service.
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
@@ -130,7 +140,8 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
     ModuleHandlerInterface $module_handler,
     CohesionUtils $cohesion_utils,
     CohesionApiClient $cohesion_api_client,
-    EntityRepositoryInterface $entity_repository
+    EntityRepositoryInterface $entity_repository,
+    FileUrlGeneratorInterface $fileUrlGenerator
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->user = $user;
@@ -142,6 +153,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
     $this->cohesionUtils = $cohesion_utils;
     $this->cohesionApiClient = $cohesion_api_client;
     $this->entityRepository = $entity_repository;
+    $this->fileUrlGenerator = $fileUrlGenerator;
   }
 
   /**
@@ -188,7 +200,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
 
     if(isset($lib['js'][0]['data'])) {
       $event->addUrl('frontend-builder-js', [
-        'url' => file_url_transform_relative(file_create_url($lib['js'][0]['data'])),
+        'url' => $this->fileUrlGenerator->generateString($lib['js'][0]['data']),
         'method' => 'GET',
       ]);
     }
@@ -200,7 +212,7 @@ class SitestudioPageBuilderEventSubscriber implements EventSubscriberInterface {
       foreach ($lib['js'] as $js) {
         if (isset($js['data'])) {
           $urls[] = [
-            'url' => file_url_transform_relative(file_create_url($js['data'])),
+            'url' => $this->fileUrlGenerator->generateString($js['data']),
             'method' => 'GET',
           ];
         }

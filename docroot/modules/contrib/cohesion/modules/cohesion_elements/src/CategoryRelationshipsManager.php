@@ -52,10 +52,11 @@ class CategoryRelationshipsManager {
     if (empty($category_storage->load($category_id)) && !empty($category_storage->loadMultiple()) || empty($category_storage->loadMultiple())) {
 
       // Is this category in use anywhere?
-      $query = $element_storage->getQuery()->condition('category', $category_id, '=');
+      $query = $element_storage->getQuery()
+        ->accessCheck(TRUE)
+        ->condition('category', $category_id, '=');
 
       if ($entity_ids = $query->execute()) {
-
         $this->createUncategorized($category_storage, $default_category_id);
 
         // Set all the elements to use this new category.

@@ -99,8 +99,6 @@ class ObjectFactory {
   /**
    * Creates ContentHubClient instance.
    *
-   * @param array $config
-   *   Config.
    * @param \Psr\Log\LoggerInterface $logger
    *   Logger instance.
    * @param \Acquia\ContentHubClient\Settings $settings
@@ -109,6 +107,8 @@ class ObjectFactory {
    *   HmacAuthMiddleware instance.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
    *   Event dispatcher instance.
+   * @param array $config
+   *   Config.
    * @param string $api_version
    *   API version.
    *
@@ -116,11 +116,11 @@ class ObjectFactory {
    *   ContentHubClient instance.
    */
   public static function getCHClient( // phpcs:ignore
-    array $config,
     LoggerInterface $logger,
     Settings $settings,
     HmacAuthMiddleware $middleware,
     EventDispatcherInterface $dispatcher,
+    array $config,
     string $api_version = 'v2'
   ): ContentHubClient {
     return new ContentHubClient($logger, $settings, $middleware,

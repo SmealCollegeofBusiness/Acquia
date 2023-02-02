@@ -7,6 +7,7 @@ use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\DumpAssets;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTrait;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\ContentHubClientTestTrait;
 use Drupal\Tests\acquia_contenthub\Kernel\Traits\RequestTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
@@ -25,6 +26,7 @@ use Drupal\Tests\node\Traits\NodeCreationTrait;
 class DumpAssetsTest extends EntityKernelTestBase {
 
   use AcquiaContentHubAdminSettingsTrait;
+  use ContentHubClientTestTrait;
   use ContentTypeCreationTrait;
   use NodeCreationTrait;
   use RequestTrait;
@@ -131,7 +133,8 @@ class DumpAssetsTest extends EntityKernelTestBase {
       'types' => $types,
     ];
 
-    $event = new HandleWebhookEvent($this->createSignedRequest(), $payload, $key, $this->clientFactory->getClient());
+    $client = $this->getMockedContentHubClient();
+    $event = new HandleWebhookEvent($this->createSignedRequest(), $payload, $key, $client->reveal());
     $this->dumpAssets->onHandleWebhook($event);
 
     $response = ($method == 'assertNotEmpty') ? $event->getResponse()->getBody()->getContents() : $event->getResponse()->getContent();

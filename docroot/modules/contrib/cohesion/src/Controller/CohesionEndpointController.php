@@ -18,9 +18,11 @@ use Drupal\Core\Entity\EntityRepository;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Utility\Error;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\file\FileRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -91,6 +93,20 @@ class CohesionEndpointController extends ControllerBase {
   protected $user;
 
   /**
+   * File Url Generator service.
+   *
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
+   * Drupal file repository service.
+   *
+   * @var \Drupal\file\FileRepositoryInterface
+   */
+  protected $fileRepository;
+
+  /**
    * CohesionEndpointController constructor.
    *
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
@@ -103,6 +119,12 @@ class CohesionEndpointController extends ControllerBase {
    *   Request Stack.
    * @param \Drupal\cohesion_elements\CustomComponentsService
    *   Custom Components Service.
+   * @param \Drupal\Core\Session\AccountInterface $user
+   *   Current user.
+   * @param \Drupal\file\FileRepositoryInterface $fileRepository
+   *   File Repository.
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
+   *   File Url Generator service.
    */
   public function __construct(
     EntityFieldManagerInterface $entity_field_manager,
@@ -111,7 +133,9 @@ class CohesionEndpointController extends ControllerBase {
     CohesionUtils $cohesion_utils,
     RequestStack $requestStack,
     CustomComponentsService $customComponentsService,
-    AccountInterface $user
+    AccountInterface $user,
+    FileRepositoryInterface $fileRepository,
+    FileUrlGeneratorInterface $fileUrlGenerator
   ) {
     $this->entityFieldManager = $entity_field_manager;
     $this->entityTypeBundleInfo = $entity_type_bundle_info;
@@ -120,6 +144,8 @@ class CohesionEndpointController extends ControllerBase {
     $this->customComponentsService = $customComponentsService;
     $this->request = $requestStack->getCurrentRequest();
     $this->user = $user;
+    $this->fileUrlGenerator = $fileUrlGenerator;
+    $this->fileRepository = $fileRepository;
 
     $this->helper = new CohesionEndpointHelper($this->user);
   }
@@ -135,7 +161,9 @@ class CohesionEndpointController extends ControllerBase {
       $container->get('cohesion.utils'),
       $container->get('request_stack'),
       $container->get('custom.components'),
-      $container->get('current_user')
+      $container->get('current_user'),
+      $container->get('file.repository'),
+      $container->get('file_url_generator')
     );
   }
 
@@ -246,6 +274,7 @@ class CohesionEndpointController extends ControllerBase {
     $bundle_access = ($request->query->get('bundle_access')) ?: 'all';
     $element_id = ($request->query->get('element_id')) ?: '';
     $access_elements = ($request->query->get('access_elements')) === 'false' ? FALSE : TRUE;
+    $isCustomComponentBuilder = $request->query->get('custom_component_builder', FALSE);
 
     // Get list of categories relating to the element type.
     $type_map = [
@@ -270,7 +299,13 @@ class CohesionEndpointController extends ControllerBase {
 
     // Get list of entities matching the specified type.
     $storage = $this->entityTypeManager()->getStorage($entity_type);
-    $query = $storage->getQuery()->condition('status', TRUE)->condition('selectable', TRUE)->sort('category', 'asc')->sort('label', 'asc')->sort('weight', 'asc');
+    $query = $storage->getQuery()
+      ->accessCheck(TRUE)
+      ->condition('status', TRUE)
+      ->condition('selectable', TRUE)
+      ->sort('category', 'asc')
+      ->sort('label', 'asc')
+      ->sort('weight', 'asc');
     $ids = $query->execute();
 
     // Do we need to exclude a component?
@@ -289,7 +324,7 @@ class CohesionEndpointController extends ControllerBase {
     $entities = $storage->loadMultiple($ids);
     foreach ($entities as $entity) {
 
-      if ($this->helperAccessFilter($entity, $access_elements)) {
+      if ($this->helperAccessFilter($entity, $access_elements, $isCustomComponentBuilder)) {
         continue;
       }
 
@@ -533,7 +568,9 @@ class CohesionEndpointController extends ControllerBase {
     $components = [];
     $custom_components = [];
     // Get the uid of the component from the request.
-    $uids = $request->query->get('uids');
+    $request_uids = $request->query->get('uids');
+    $uids = explode(',', $request_uids);
+
     if (is_array($uids)) {
       foreach ($uids as $uid) {
         if ($component_entity = $this->entityTypeManager()->getStorage('cohesion_component')->load($uid)) {
@@ -691,13 +728,13 @@ class CohesionEndpointController extends ControllerBase {
       'label' => $content['label'],
       'category' => $content['category'],
       'status' => $content['status'],
-      'preview_image' => isset($content['preview_image']) ? $content['preview_image'] : FALSE,
+      'preview_image' => $content['preview_image'] ?? FALSE,
       'json_values' => $content['json_values'],
       'selectable' => TRUE,
       'modified' => TRUE,
     ];
     // Save the element.
-    list($error, $message) = $this->helper->saveElement($values, $content);
+    [$error, $message] = $this->helper->saveElement($values, $content);
 
     return new CohesionJsonResponse([
       'status' => $error ? 'error' : 'success',
@@ -719,10 +756,10 @@ class CohesionEndpointController extends ControllerBase {
     $data = $dx8_form_utils->loadDX8FormSelectItems();
     $content = Json::decode($request->getContent());
 
-    $type = isset($content['type']) ? $content['type'] : NULL;
-    $item_id = isset($content['itemID']) ? $content['itemID'] : NULL;
-    $field_group_id = isset($content['fieldGroupId']) ? $content['fieldGroupId'] : NULL;
-    $field_id = isset($content['fieldId']) ? $content['fieldId'] : NULL;
+    $type = $content['type'] ?? NULL;
+    $item_id = $content['itemID'] ?? NULL;
+    $field_group_id = $content['fieldGroupId'] ?? NULL;
+    $field_id = $content['fieldId'] ?? NULL;
 
     $type = $request->query->get('type') ?: $type;
     $item_id = $request->query->get('itemID') ?: $item_id;
@@ -730,7 +767,7 @@ class CohesionEndpointController extends ControllerBase {
     $field_id = $request->query->get('fieldId') ?: $field_id;
 
     if (!is_null($type) && !is_null($item_id) && !is_null($field_group_id) && !is_null($field_id)) {
-      $results = isset($data[$type]['options'][$item_id]['options'][$field_group_id]['options'][$field_id]) ? $data[$type]['options'][$item_id]['options'][$field_group_id]['options'][$field_id] : NULL;
+      $results = $data[$type]['options'][$item_id]['options'][$field_group_id]['options'][$field_id] ?? NULL;
 
       if (in_array(strtolower($type), [
         'context_visibility',
@@ -753,14 +790,22 @@ class CohesionEndpointController extends ControllerBase {
    *
    * @param \Drupal\cohesion_elements\Entity\CohesionElementEntityBase $entity
    * @param int $access_elements
+   * @param bool $isCustomComponentBuilder
    *
    * @return bool
    */
-  private function helperAccessFilter(CohesionElementEntityBase $entity, $access_elements) {
+  private function helperAccessFilter(CohesionElementEntityBase $entity, $access_elements, $isCustomComponentBuilder) {
     // Do we need to search the helper for elements?
-    if ($entity->getEntityTypeId() == 'cohesion_helper' && $access_elements == FALSE) {
-      // Helper contains elements, so should be filtered out.
-      return $entity->getLayoutCanvasInstance()->hasElements();
+    if ($entity->getEntityTypeId() == 'cohesion_helper') {
+      if ($isCustomComponentBuilder) {
+        // If not a form helper then filter out on the custom component builder.
+        return !$entity->getLayoutCanvasInstance()->isFormHelper();
+      }
+
+      if ($access_elements == FALSE) {
+        // Helper contains elements, so should be filtered out.
+        return $entity->getLayoutCanvasInstance()->hasElements();
+      }
     }
 
     return FALSE;
@@ -777,7 +822,7 @@ class CohesionEndpointController extends ControllerBase {
    */
   protected function componentListFilter(CohesionElementEntityBase $entity, $type_access = NULL, $bundle_access = NULL) {
     if (method_exists($entity, 'getAvailabilityData')) {
-      list($types, $bundles) = $entity->getAvailabilityData();
+      [$types, $bundles] = $entity->getAvailabilityData();
       if (!(in_array($type_access, $types) && in_array($bundle_access, $bundles)) && !(empty($bundles) && empty($types)) && !($type_access == 'all' || $bundle_access == 'all') && !(in_array($type_access, $types) && empty($bundles))) {
         return FALSE;
       }
@@ -798,7 +843,7 @@ class CohesionEndpointController extends ControllerBase {
 
     if ($image = \Drupal::service('cohesion_image_browser.update_manager')->decodeToken($reference)) {
       if ($image['path']) {
-        $image['path'] = file_create_url($image['path']);
+        $image['path'] = $this->fileUrlGenerator->generateAbsoluteString($image['path']);
       }
 
       // Decoded the token, found the entity and extracted the image path.
@@ -837,7 +882,7 @@ class CohesionEndpointController extends ControllerBase {
       if (empty($files) && file_exists($uri)) {
         $contents = file_get_contents($uri);
         /** @var \Drupal\file\Entity\File $file */
-        $file = file_save_data($contents, $uri, FileSystemInterface::EXISTS_REPLACE);
+        $file = $this->fileRepository->writeData($contents, $uri, FileSystemInterface::EXISTS_REPLACE);
         $file->setPermanent();
         $file->save();
       }
@@ -849,7 +894,7 @@ class CohesionEndpointController extends ControllerBase {
           return new CohesionJsonResponse([
             'data' => [
               'reference' => '[media-reference:file:' . $file->uuid() . ']',
-              'preview' => file_create_url($file->getFileUri()),
+              'preview' => $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri()),
             ],
           ]);
 

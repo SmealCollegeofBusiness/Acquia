@@ -10,7 +10,7 @@ dependencies:
   - drupal:system (>= 9.2)
   - paragraphs
 
-# Information added by Drupal.org packaging script on 2022-09-28
-version: '8.x-2.36'
+# Information added by Drupal.org packaging script on 2022-12-14
+version: '3.0.3'
 project: 'acquia_contenthub'
-datestamp: 1664374717
+datestamp: 1671020586

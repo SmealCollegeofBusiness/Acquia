@@ -16,6 +16,13 @@ use GuzzleHttp\Exception\RequestException;
 class CohesionApiClient {
 
   /**
+   * Request uuid.
+   *
+   * @var string
+   */
+  protected $uuid;
+
+  /**
    *
    */
   public function buildStyle($payload) {
@@ -83,6 +90,7 @@ class CohesionApiClient {
    */
   public function requestHeaders() {
     $cohesion_configs = \Drupal::config('cohesion.settings');
+    $this->uuid = \Drupal::service('uuid')->generate();
 
     return [
       'dx8-env' => !empty($_ENV['AH_PRODUCTION']) && $_ENV['AH_PRODUCTION'] === 1 ? 'production' : Settings::get('dx8_env', 'non-production'),
@@ -92,6 +100,7 @@ class CohesionApiClient {
       'dx8-organization-key' => $cohesion_configs->get('organization_key'),
       'dx8-base-root' => $GLOBALS['base_root'],
       'dx8-version' => \Drupal::service('cohesion.api.utils')->getApiVersionNumber(),
+      'X-Request-ID' => $this->uuid,
     ];
   }
 
@@ -180,8 +189,8 @@ class CohesionApiClient {
         if (!$response_data['error']) {
           $response_data['error'] = substr(strip_tags($exception), 0, 1024);
         }
-        \Drupal::logger('api-call-error')->error($response_data['error']);
 
+        \Drupal::logger('api-call-error')->error($response_data['error'] . '. Request ID: ' . $this->uuid);
       }
       else {
         // Retry the request.

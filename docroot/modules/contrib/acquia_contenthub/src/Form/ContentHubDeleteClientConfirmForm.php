@@ -7,6 +7,7 @@ use Drupal\acquia_contenthub\AcquiaContentHubUnregisterHelperTrait;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubConnectionManager;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
+use Drupal\acquia_contenthub\Libs\RouteChecker;
 use Drupal\acquia_contenthub\Libs\Traits\ResponseCheckerTrait;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Config\Config;
@@ -280,6 +281,10 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getTriggeringElement()['#name'] === 'subscription') {
+      if (!$this->canRedirect()) {
+        $form_state->setRedirect('acquia_contenthub.admin_settings');
+        return;
+      }
       $form_state->setRedirect('acquia_contenthub.subscription_settings');
       return;
     }
@@ -302,11 +307,17 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
     }
 
     try {
-      $this->chConnectionManager->unregister($this->event);
+      $success = $this->chConnectionManager->unregister($this->event);
     }
     catch (\Exception $e) {
       $this->messenger()->addError($this->t('Error during unregistration: @error_message', ['@error_message' => $e->getMessage()]));
       return;
+    }
+
+    if (!$success) {
+      $this->messenger()->addError(
+        $this->t('Unregistration has been failed. Check the logs for more information')
+      );
     }
 
     $form_state->setRedirect('acquia_contenthub.admin_settings');
@@ -345,6 +356,18 @@ class ContentHubDeleteClientConfirmForm extends FormBase {
    */
   public function getFormId() {
     return 'contenthub_delete_client_confirmation';
+  }
+
+  /**
+   * Checks if user can be redirected to subscription settings.
+   *
+   * The requirement is to have acquia_contenthub_publisher enabled.
+   *
+   * @return bool
+   *   TRUE if the user can be redirected to subscription settings.
+   */
+  protected function canRedirect(): bool {
+    return RouteChecker::exists('acquia_contenthub.subscription_settings');
   }
 
 }

@@ -17,6 +17,7 @@ class ComponentContentTest extends EntityKernelTestBase {
    * {@inheritdoc}
    */
   public static $modules = [
+    'file',
     'cohesion',
     'cohesion_elements',
     'entity_reference_revisions',
@@ -41,9 +42,9 @@ class ComponentContentTest extends EntityKernelTestBase {
   public function testViewMode() {
     $storage = \Drupal::entityTypeManager()->getStorage('entity_view_mode');
     $view_mode = $storage->load("component_content.cohesion");
-    $this->assertNotEqual($view_mode, FALSE);
-    $this->assertEqual($view_mode->id(), 'component_content.cohesion');
-    $this->assertEqual($view_mode->get('targetEntityType'), 'component_content');
+    $this->assertNotEquals($view_mode, FALSE);
+    $this->assertEquals($view_mode->id(), 'component_content.cohesion');
+    $this->assertEquals($view_mode->get('targetEntityType'), 'component_content');
   }
 
 }

@@ -53,6 +53,7 @@ function cohesion_custom_styles_update_8402(&$variables) {
 
       if ($parent = $storage->load($id)) {
         $children_styles = $storage->getQuery()
+          ->accessCheck(TRUE)
           ->condition('parent', $parent->getClass(), '=')
           ->sort('label', 'ASC')
           ->sort('weight', 'ASC')
@@ -101,3 +102,4 @@ function _update_custom_styles_weight($config_key, $weight = 0) {
 
   }
 }
+

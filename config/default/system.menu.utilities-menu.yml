@@ -1,0 +1,8 @@
+uuid: c08b3b0a-b174-4e64-84a2-4b9f760680ed
+langcode: en
+status: true
+dependencies: {  }
+id: utilities-menu
+label: 'Utilities menu'
+description: ''
+locked: false

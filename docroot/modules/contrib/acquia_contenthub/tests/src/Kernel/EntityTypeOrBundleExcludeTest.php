@@ -23,6 +23,7 @@ class EntityTypeOrBundleExcludeTest extends QueueingTestBase {
   protected static $modules = [
     'node',
     'user',
+    'acquia_contenthub_server_test',
   ];
 
   /**

@@ -124,7 +124,7 @@ class CustomStylesEndpointController extends ControllerBase {
       $storage = $this->entityTypeManager()->getStorage('cohesion_custom_style');
 
       // Top level query.
-      $query = $storage->getQuery()->sort('weight')->notExists('parent');
+      $query = $storage->getQuery()->accessCheck(TRUE)->sort('weight')->notExists('parent');
 
       if ($custom_style_type) {
         // Add Generic custom style to all custom style list.
@@ -137,7 +137,7 @@ class CustomStylesEndpointController extends ControllerBase {
       // Get only enabled custom styles
       // And custom styles with enable selection turned off so we can catch
       // selectable children but keep the order (parent/children)
-      $entity_ids = $query->condition('status', TRUE)->execute();
+      $entity_ids = $query->condition('status', TRUE)->accessCheck(TRUE)->execute();
 
       // Execute the query.
       if (($entities = $storage->loadMultiple($entity_ids))) {
@@ -152,7 +152,13 @@ class CustomStylesEndpointController extends ControllerBase {
           }
 
           // Build the children.
-          $child_ids = $storage->getQuery()->condition('parent', $entity->getClass())->condition('status', TRUE)->condition('selectable', TRUE)->sort('weight')->execute();
+          $child_ids = $storage->getQuery()
+            ->accessCheck(TRUE)
+            ->condition('parent', $entity->getClass())
+            ->condition('status', TRUE)
+            ->condition('selectable', TRUE)
+            ->sort('weight')
+            ->execute();
 
           $child_objects = [];
           if (count($child_ids) > 0) {

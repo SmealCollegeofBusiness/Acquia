@@ -73,7 +73,7 @@ class IsPathAliasForUnpublishedContentTest extends UnitTestCase {
          * Anonymous keys() function.
          *
          * @return string[]
-         *   Array of keys.
+         *   Array of entity keys.
          */
         public function keys(): array {
           return [

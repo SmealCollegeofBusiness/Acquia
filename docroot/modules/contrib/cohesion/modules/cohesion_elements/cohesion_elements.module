@@ -57,14 +57,14 @@ function cohesion_elements_library_info_alter(&$libraries, $extension) {
         // Add the js assets to the library.
         if (isset($library_info['js'])) {
           foreach ($library_info['js'] as $library) {
-            $url = file_create_url($library['asset_url']);
+            $url = \Drupal::service('file_url_generator')->generateAbsoluteString($library['asset_url']);
             $asset_url = (isset($url) && (strpos($url, $base_url) !== FALSE)) ? str_replace($base_url, '', $url) : $url;
             // Replace StreamWrapper with its base path for translation.
             // see _locale_parse_js_file in locale.module.
             $library['asset_url'] = $asset_url;
             $libraries[$library_key]['js'][$library['asset_url']] = [
               'weight' => (isset($library['weight']) && $library['weight'] < 0) ? $library['weight'] : 0,
-              'minified' => isset($library['minified']) ? $library['minified'] : FALSE,
+              'minified' => $library['minified'] ?? FALSE,
             ];
           }
         }
@@ -72,10 +72,10 @@ function cohesion_elements_library_info_alter(&$libraries, $extension) {
         // Add the css assets to the library.
         if (isset($library_info['css'])) {
           foreach ($library_info['css'] as $library) {
-            $weight = isset($library['weight']) ? $library['weight'] : 'theme';
+            $weight = $library['weight'] ?? 'theme';
 
             $libraries[$library_key]['css'][$weight][$library['asset_url']] = [
-              'minified' => isset($library['minified']) ? $library['minified'] : FALSE,
+              'minified' => $library['minified'] ?? FALSE,
             ];
           }
         }
@@ -161,7 +161,6 @@ function preprocess_cohesion_elements_component(&$variables) {
       'componentFieldsValues',
       'template',
       'coh_repeater_val',
-      'componentUuid',
       'parentContext',
     ];
 
@@ -485,30 +484,6 @@ function cohesion_elements_form_field_ui_field_storage_add_form_alter(array &$fo
 }
 
 /**
- * Implements hook_form_BASE_FORM_ID_alter() for \Drupal\node\NodeForm.
- *
- * Changes vertical tabs to container.
- */
-function cohesion_elements_form_component_content_edit_form_alter(&$form, FormStateInterface $form_state) {
-
-  $theme = \Drupal::theme()->getActiveTheme()->getName();
-
-  if ($theme == 'seven') {
-    $form['#theme'] = ['node_edit_form'];
-    $form['#attached']['library'][] = 'seven/node-form';
-
-    $form['advanced']['#type'] = 'container';
-    $form['meta']['#type'] = 'container';
-    $form['meta']['#access'] = TRUE;
-    $form['meta']['changed']['#wrapper_attributes']['class'][] = 'container-inline';
-    $form['meta']['author']['#wrapper_attributes']['class'][] = 'container-inline';
-
-    $form['revision_information']['#type'] = 'container';
-    $form['revision_information']['#group'] = 'meta';
-  }
-}
-
-/**
  * Implements hook_preprocess_image_widget().
  */
 function cohesion_elements_preprocess_image_widget(&$variables) {
@@ -654,10 +629,11 @@ function cohesion_elements_user_cancel($edit, $account, $method) {
     case 'user_cancel_block_unpublish':
 
       // Unpublish component contents (current revisions).
-      module_load_include('inc', 'cohesion_elements', 'cohesion_elements.admin');
+      \Drupal::moduleHandler()
+        ->loadInclude('inc', 'cohesion_elements', 'cohesion_elements.admin');
       $component_content = \Drupal::entityQuery('component_content')
-        ->condition('uid', $account
-          ->id())
+        ->accessCheck(TRUE)
+        ->condition('uid', $account->id())
         ->execute();
       component_contents_mass_update($component_content, [
         'status' => 0,
@@ -667,10 +643,11 @@ function cohesion_elements_user_cancel($edit, $account, $method) {
     case 'user_cancel_reassign':
 
       // Anonymize component content (current revisions).
-      module_load_include('inc', 'cohesion_elements', 'cohesion_elements.admin');
+      \Drupal::moduleHandler()
+        ->loadInclude('inc', 'cohesion_elements', 'cohesion_elements.admin');
       $component_content = \Drupal::entityQuery('component_content')
-        ->condition('uid', $account
-          ->id())
+        ->accessCheck(TRUE)
+        ->condition('uid', $account->id())
         ->execute();
       component_contents_mass_update($component_content, [
         'uid' => 0,

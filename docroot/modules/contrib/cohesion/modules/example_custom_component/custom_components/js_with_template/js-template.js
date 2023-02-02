@@ -1,10 +1,10 @@
 // CSS/JS ONLY
-(function ($, Drupal, drupalSettings) {
+(function ($, Drupal, once, drupalSettings) {
     "use strict";
 
     Drupal.behaviors.purejs = {
         attach: function (context) {
-            $(".js_with_template").once().each(function() {
+            $(once('js-template', '.js_with_template')).each(function() {
                 const content = JSON.parse($(this).attr('data-ssa-custom-component'));
 
                 const template = $(this).find(".custom-component")
@@ -15,6 +15,6 @@
             });
         }
     };
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal, once, drupalSettings);
 
 

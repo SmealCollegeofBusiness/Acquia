@@ -3,14 +3,14 @@
  * @preserve
  **/
 
-(function ($, Drupal, drupalSettings) {
+(function ($, Drupal, once, drupalSettings) {
   Drupal.behaviors.fileValidateAutoAttach = {
     attach: function attach(context, settings) {
       var $context = $(context);
       var elements = void 0;
 
       function initFileValidation(selector) {
-        $context.find(selector).once('fileValidate').on('change.fileValidate', {extensions: elements[selector]}, Drupal.file.validateExtension);
+        $(once('fileValidate', $context.find(selector))).on('change.fileValidate', {extensions: elements[selector]}, Drupal.file.validateExtension);
       }
 
       if (settings.file && settings.file.elements) {
@@ -23,7 +23,7 @@
       var elements = void 0;
 
       function removeFileValidation(selector) {
-        $context.find(selector).removeOnce('fileValidate').off('change.fileValidate', Drupal.file.validateExtension);
+        $(once.remove('fileValidate', $context.find(selector))).off('change.fileValidate', Drupal.file.validateExtension)
       }
 
       if (trigger === 'unload' && settings.file && settings.file.elements) {
@@ -36,11 +36,11 @@
   Drupal.behaviors.fileAutoUpload = {
     attach: function attach(context) {
       // Trigger the AJAX form validation.
-      $(context).find('#edit-legacy-import input[type="file"]').once('auto-file-upload').on('change.autoFileUpload', Drupal.file.triggerUpload);
+      $(once('auto-file-upload', '#edit-legacy-import input[type="file"]', context)).on('change.autoFileUpload', Drupal.file.triggerUpload);
     },
     detach: function detach(context, settings, trigger) {
       if (trigger === 'unload') {
-        $(context).find('#edit-legacy-import input[type="file"]').removeOnce('auto-file-upload').off('.autoFileUpload');
+        $(once.remove('auto-file-upload', '#edit-legacy-import input[type="file"]', context)).off('.autoFileUpload');
       }
     }
   };
@@ -146,4 +146,4 @@
       }
     }
   };
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal, once, drupalSettings);

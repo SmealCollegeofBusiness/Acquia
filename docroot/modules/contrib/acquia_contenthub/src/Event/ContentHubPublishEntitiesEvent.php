@@ -31,7 +31,7 @@ class ContentHubPublishEntitiesEvent extends Event {
    *
    * @param string $key_entity_uuid
    *   The key entity that this set of entities was calculated from.
-   * @param \Drupal\depcalc\DependentEntityWrapperInterface[] $dependencies
+   * @param \Drupal\depcalc\DependentEntityWrapperInterface ...$dependencies
    *   The dependency wrappers.
    */
   public function __construct($key_entity_uuid, DependentEntityWrapperInterface ...$dependencies) {  //@codingStandardsIgnoreLine

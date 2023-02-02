@@ -60,9 +60,10 @@ function acquia_cms_common_install() {
   $config->set('enable_export_filtering', TRUE);
   $config->save(TRUE);
 
-  // Uninstall page_cache module in favour of memcache.
+  $module_installer = \Drupal::service('module_installer');
   if ($module_handler->moduleExists('page_cache')) {
-    \Drupal::service('module_installer')->uninstall(['page_cache']);
+    // Uninstall page_cache module in favour of memcache.
+    $module_installer->uninstall(['page_cache']);
   }
 
   /*
@@ -77,9 +78,13 @@ function acquia_cms_common_install() {
     $config->setPluginsEnabled(['cee22bc3fe' => 'acquia_purge']);
   }
 
-  // Install the syslog module.
-  $module_installer = \Drupal::service('module_installer');
-  $module_installer->install(['syslog']);
+  // Install the syslog module and purge sub-modules.
+  $module_installer->install([
+    'syslog',
+    'purge_processor_lateruntime',
+    'purge_processor_cron',
+    'purge_ui',
+  ]);
 }
 
 /**
@@ -151,11 +156,30 @@ function acquia_cms_common_update_8002() {
  * Implements hook_content_model_role_presave_alter().
  */
 function acquia_cms_common_content_model_role_presave_alter(RoleInterface &$role) {
-  if (\Drupal::moduleHandler()->moduleExists('shield')) {
-    switch ($role->id()) {
-      case 'user_administrator':
-        $role->grantPermission('administer shield');
-        break;
-    }
+  // Update permissions to specified role on the basis of the module.
+  $modules_permission = [
+    'shield' => 'administer shield',
+    'honeypot' => 'administer honeypot',
+    'captcha' => 'administer CAPTCHA settings',
+    'recaptcha' => 'administer recaptcha',
+  ];
+  switch ($role->id()) {
+    case 'user_administrator':
+      foreach ($modules_permission as $module => $permission) {
+        if (\Drupal::moduleHandler()->moduleExists($module)) {
+          $role->grantPermission($permission);
+        }
+      }
+      break;
   }
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Add referenced image view mode.
+ */
+function acquia_cms_common_update_8003() {
+  // Add referenced image view mode.
+  _acquia_cms_common_rewrite_configuration('core.entity_view_mode.node.referenced_image', 'acquia_cms_common');
 }

@@ -1,0 +1,13 @@
+uuid: 9311cf21-fde8-46f8-9165-cf49ed6ca0a5
+langcode: en
+status: true
+dependencies: {  }
+label: Arial
+id: arial
+json_values: '{"inuse":false,"systemfont":true,"name":"Arial","uid":"arial","fontStack":"Arial, ''Helvetica Neue'', Helvetica, sans-serif","smoothing":{"firefox":false,"webkit":false},"variable":"$coh-font-arial","class":".coh-font-arial"}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0041
+locked: false
+modified: true
+selectable: true
+source: null

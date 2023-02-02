@@ -92,6 +92,7 @@ class AcquiaContentHubSettingsCommands extends DrushCommands {
           $settings->getSecretKey() ?? '',
           $settings->getUuid() ?? '',
           $settings->getSharedSecret() ?? '',
+          // @phpstan-ignore-next-line
           $provider ?? '',
           $in_use_provider === $provider ? 'Yes' : 'No',
         ];

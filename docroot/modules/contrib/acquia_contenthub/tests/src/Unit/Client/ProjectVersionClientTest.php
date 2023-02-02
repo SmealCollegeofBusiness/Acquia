@@ -79,7 +79,7 @@ class ProjectVersionClientTest extends UnitTestCase {
 
     $pv_client = new ProjectVersionClient($client->reveal(), $this->loggerChannel);
     $versions = $pv_client->getContentHubReleases();
-    $this->assertEquals('8.x-2.25', $versions['latest']);
+    $this->assertEquals('3.0.1', $versions['latest']);
   }
 
   /**
@@ -95,8 +95,8 @@ class ProjectVersionClientTest extends UnitTestCase {
                 <short_name>acquia_contenthub</short_name>
                 <releases>
                     <release>
-                        <name>acquia_contenthub 8.x-2.25</name>
-                        <version>8.x-2.25</version>
+                        <name>acquia_contenthub 3.0.1</name>
+                        <version>3.0.1</version>
                         <security covered="1">Covered by Drupal\'s security advisory policy</security>
                     </release>
                 </releases>

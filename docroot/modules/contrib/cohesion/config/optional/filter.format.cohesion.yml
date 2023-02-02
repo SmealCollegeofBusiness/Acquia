@@ -3,19 +3,17 @@ status: true
 dependencies:
   module:
     - editor
-_core:
-  default_config_hash: '-B7eofOPg7bG6-7Mm9RCMXA9a5Lbi4DHnwHOPoGoPAQ'
-name: Site Studio
+name: 'Site Studio'
 format: cohesion
 weight: 0
 filters:
   filter_html:
     id: filter_html
     provider: filter
-    status: false
+    status: true
     weight: -10
     settings:
-      allowed_html: '<a class href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type> <li> <dl> <dt> <dd> <h4 id> <h5 id> <h6 id> <img src alt data-entity-type data-entity-uuid> <h1 class="heading-2 heading-1"> <h2 id class="heading-3"> <span class="red-pill blue-pill"> <h3 id class="heading-4">'
+      allowed_html: '<br> <p class="text-align-left text-align-center text-align-right text-align-justify"> <h1 class="text-align-left text-align-center text-align-right text-align-justify"> <h2 class="text-align-left text-align-center text-align-right text-align-justify"> <h3 class="text-align-left text-align-center text-align-right text-align-justify"> <h4 class="text-align-left text-align-center text-align-right text-align-justify"> <h5 class="text-align-left text-align-center text-align-right text-align-justify"> <h6 class="text-align-left text-align-center text-align-right text-align-justify"> <strong> <em> <u> <pre class="text-align-left text-align-center text-align-right text-align-justify"> <code class="language-*"> <blockquote> <a href> <ul> <ol reversed start> <li>'
       filter_html_help: true
       filter_html_nofollow: false
   editor_file_reference:

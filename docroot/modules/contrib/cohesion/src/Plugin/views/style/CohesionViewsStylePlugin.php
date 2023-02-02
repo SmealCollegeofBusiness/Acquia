@@ -104,6 +104,7 @@ class CohesionViewsStylePlugin extends StylePluginBase {
 
     // Master template selection.
     $master_template_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_master_templates')->getQuery()
+      ->accessCheck(TRUE)
       ->execute();
     $master_template_storage = \Drupal::service('entity_type.manager')->getStorage('cohesion_master_templates');
     $master_templates = $master_template_storage->loadMultiple($master_template_ids);
@@ -146,7 +147,7 @@ class CohesionViewsStylePlugin extends StylePluginBase {
    */
   public function render() {
     if ($this->usesRowPlugin() && empty($this->view->rowPlugin)) {
-      debug('Drupal\views\Plugin\views\style\StylePluginBase: Missing row plugin');
+      trigger_error('Drupal\views\Plugin\views\style\StylePluginBase: Missing row plugin', E_WARNING);
       return FALSE;
     }
 
@@ -193,7 +194,7 @@ class CohesionViewsStylePlugin extends StylePluginBase {
     $output = [];
     $theme_functions = $this->view->buildThemeFunctions($this->groupingTheme);
     foreach ($sets as $set) {
-      $level = isset($set['level']) ? $set['level'] : 0;
+      $level = $set['level'] ?? 0;
 
       $row = reset($set['rows']);
       // Render as a grouping set.

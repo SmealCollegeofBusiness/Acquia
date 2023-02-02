@@ -165,6 +165,7 @@ class RebuildInuseBatch {
         foreach ($uuids_list as $uuids) {
 
           $ids = $entity_type_storage->getQuery()
+            ->accessCheck(FALSE)
             ->condition('status', TRUE)
             ->condition('modified', TRUE)
             ->condition('uuid', $uuids, 'IN')
@@ -180,10 +181,12 @@ class RebuildInuseBatch {
         foreach ($uuids_list as $uuids) {
 
           $content_ids = $entity_type_storage->getQuery()
+            ->accessCheck(FALSE)
             ->condition('uuid', $uuids, 'IN')
             ->execute();
 
           $ids = $this->entityTypeManager->getStorage('cohesion_layout')->getQuery()
+            ->accessCheck(FALSE)
             ->condition('parent_type', $entity_type_id)
             ->condition('parent_id', $content_ids, 'IN')
             ->execute();

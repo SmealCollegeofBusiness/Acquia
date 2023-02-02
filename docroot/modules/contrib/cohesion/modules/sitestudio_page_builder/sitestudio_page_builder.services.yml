@@ -12,6 +12,7 @@ services:
       - '@cohesion.utils'
       - '@cohesion.api_client'
       - '@entity.repository'
+      - '@file_url_generator'
     tags:
       - { name: 'event_subscriber' }
 

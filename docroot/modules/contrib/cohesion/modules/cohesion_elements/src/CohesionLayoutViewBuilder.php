@@ -68,7 +68,7 @@ class CohesionLayoutViewBuilder extends EntityViewBuilder {
     // Let other module alter the view build
     $event = new CohesionLayoutViewBuilderEvent($build, $entity);
     $event_dispatcher = \Drupal::service('event_dispatcher');
-    $event_dispatcher->dispatch($event::ALTER, $event);
+    $event_dispatcher->dispatch($event, $event::ALTER);
     $build = $event->getBuild();
 
     return $build;

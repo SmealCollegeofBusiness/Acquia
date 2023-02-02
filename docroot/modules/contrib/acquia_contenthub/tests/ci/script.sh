@@ -11,6 +11,10 @@
 
 cd "$(dirname "$0")" || exit; source _includes.sh
 
+if [[ "$ORCA_JOB" == "STRICT_DEPRECATED_CODE_SCAN" ]]; then
+  phpstan analyse /ramfs/acquia/acquia_contenthub -c /ramfs/acquia/acquia_contenthub/phpstan.neon
+fi
+
 # Restrict to the DEPLOY job.
 [[ "$DEPLOY" ]] || exit 0
 

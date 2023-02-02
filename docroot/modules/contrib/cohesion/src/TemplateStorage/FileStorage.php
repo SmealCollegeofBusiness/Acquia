@@ -10,6 +10,7 @@ use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Template\Loader\FilesystemLoader;
+use Twig\Source;
 
 /**
  * Defines a template storage service that stores templates in the file system.
@@ -79,21 +80,21 @@ final class FileStorage extends TemplateStorageBase {
   /**
    * {@inheritdoc}
    */
-  public function getSourceContext($name) {
+  public function getSourceContext($name): Source {
     return $this->fileSystemLoader->getSourceContext($name);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getCacheKey($name) {
+  public function getCacheKey($name): string {
     return $this->fileSystemLoader->getCacheKey($name);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isFresh($name, $time) {
+  public function isFresh($name, $time): bool {
     return $this->fileSystemLoader->isFresh($name, $time);
   }
 

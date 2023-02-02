@@ -36,7 +36,7 @@ class UserRepository implements UserRepositoryInterface {
 
       return $user;
     }
-    throw OAuthServerException::invalidCredentials();
+    return NULL;
   }
 
 }

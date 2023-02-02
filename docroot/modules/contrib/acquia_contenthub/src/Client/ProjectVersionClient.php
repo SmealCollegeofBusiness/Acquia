@@ -85,7 +85,9 @@ class ProjectVersionClient {
     $versions = [];
     $url = $this->fetchUrl . '/' . $project_name . '/current';
     try {
-      $data = (string) $this->httpClient
+      /** @var \Drupal\advisory_feed_test\AdvisoriesTestHttpClient $http_client */
+      $http_client = $this->httpClient;
+      $data = (string) $http_client
         ->get($url, ['headers' => ['Accept' => 'text/xml']])
         ->getBody();
       $versions = $this->parseXml($data, $drupal_version);

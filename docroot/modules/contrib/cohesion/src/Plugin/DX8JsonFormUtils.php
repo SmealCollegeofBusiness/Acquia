@@ -195,7 +195,7 @@ class DX8JsonFormUtils {
         continue;
       }
 
-      $select_field_id = isset($result['selectUuid']) ? $result['selectUuid'] : $result['key'];
+      $select_field_id = $result['selectUuid'] ?? $result['key'];
 
       $data[$select_field_id] = $result;
     }
@@ -285,7 +285,7 @@ class DX8JsonFormUtils {
         continue;
       }
 
-      $select_field_id = isset($result['selectUuid']) ? $result['selectUuid'] : $result['key'];
+      $select_field_id = $result['selectUuid'] ?? $result['key'];
       $data[$select_field_id] = $result;
     }
     return $data;

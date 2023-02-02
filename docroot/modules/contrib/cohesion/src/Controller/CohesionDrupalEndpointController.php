@@ -309,7 +309,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
     $data = [];
     if ($input = $request->query->get('q')) {
       $input_string = Tags::explode($input);
-      $typed_string = mb_strtolower(array_pop($input_string));
+      $typed_string = mb_strtolower(array_pop($input_string) ?? '');
       $target_type = $request->attributes->get('entity_type');
       $entity_storage = $this->entityTypeManager->getStorage($target_type);
 
@@ -328,7 +328,8 @@ class CohesionDrupalEndpointController extends ControllerBase {
 
       // Search via everything else, if not already found via entity ID or UUID.
       if (strlen($typed_string) > 0 && !count($data)) {
-        $bundles = $request->query->get('bundles');
+        $request_bundles = $request->query->get('bundles') ?: [];
+        $bundles = explode(',', $request_bundles);
         $selection_handler = $request->attributes->get('selection_handler');
         $selection_settings = [
           'match_operator' => 'CONTAINS',
@@ -416,7 +417,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
     $language = $this->languageManager()->getCurrentLanguage()->getId();
 
     $input_string = Tags::explode($input);
-    $typed_string = mb_strtolower(array_pop($input_string));
+    $typed_string = strtolower(array_pop($input_string) ?? '');
 
     $query_split = explode('::', $typed_string);
     if (isset($query_split[0])) {
@@ -651,7 +652,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
     $restrict = $request->query->get('restrict', []);
     $storage = \Drupal::service('entity_type.manager')
       ->getStorage('entity_view_mode');
-    $entity_ids = $storage->getQuery()->execute();
+    $entity_ids = $storage->getQuery()->accessCheck(TRUE)->execute();
     $entities = $storage->loadMultiple($entity_ids);
     $entity_types_definition = \Drupal::service('entity_type.manager')
       ->getDefinitions();
@@ -766,17 +767,17 @@ class CohesionDrupalEndpointController extends ControllerBase {
    * @return \Drupal\cohesion\CohesionJsonResponse
    */
   public function getEntityBrowserUrl(Request $request) {
-
     $entity_browser_id = $request->query->get('entity_browser_id');
     $entity_type = $request->query->get('entity_type');
-    $target_bundles_ids = $request->query->get('target_bundles');
+    $request_target_bundles_ids = $request->query->get('target_bundles');
+    $target_bundles_ids = $request_target_bundles_ids !== NULL ? explode(',', $request_target_bundles_ids) : [];
     $data = [];
 
     if ($this->moduleHandler()
       ->moduleExists('media_library') && $entity_browser_id == 'media_library') {
 
       // If the media types are not set then allow all.
-      if (!isset($target_bundles_ids)) {
+      if (!$target_bundles_ids) {
         $target_bundles_ids = [];
         $media_types = \Drupal::service('entity_type.bundle.info')
           ->getBundleInfo('media');
@@ -790,8 +791,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
       $selected_type = array_shift($target_bundles_ids);
       $media_lib_state = MediaLibraryState::create('media_library.opener.cohesion', $allowed_types, $selected_type, 1);
 
-      $url = Url::fromRoute('cohesion.media_library_ui', [
-        'coh_clean_page' => 'true',
+      $url = Url::fromRoute('media_library.ui', [
         'media_library_opener_id' => 'media_library.opener.cohesion',
         'media_library_allowed_types' => $allowed_types,
         'media_library_selected_type' => $media_lib_state->getSelectedTypeId(),
@@ -801,6 +801,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
 
       $data = [
         'url' => $url,
+        'key' => 'media-library',
       ];
 
       return new CohesionJsonResponse([
@@ -828,7 +829,6 @@ class CohesionDrupalEndpointController extends ControllerBase {
             $url = Url::fromUserInput($display->path(), [
               'query' => [
                 'uuid' => $display->getUuid(),
-                'coh_clean_page' => 'true',
               ],
             ])->toString();
 
@@ -860,6 +860,7 @@ class CohesionDrupalEndpointController extends ControllerBase {
             $data = [
               'url' => $url,
               'uuid' => $display->getUuid(),
+              'key' => 'entity-browser',
               'cardinality' => 1,
               'selection_mode' => EntityBrowserElement::SELECTION_MODE_APPEND,
             ];

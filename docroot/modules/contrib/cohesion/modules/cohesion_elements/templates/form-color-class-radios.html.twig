@@ -20,8 +20,8 @@
 ]
 %}
 <fieldset class="coh-category-color-fieldset">
+  <legend class="coh-category-color-legend">{{ 'Color'|t }}</legend>
   <div{{ attributes.addClass(classes) }}>
-    <legend class="coh-category-color-legend">{{ 'Color'|t }}</legend>
     {% for item in element['#options'] %}
       <div class="coh-category-color-item {{ item }}">
           <input class="coh-category-color-input" id="coh-component-{{ item }}" name="{{ element['#name'] }}" type="radio" value="{{ item }}" {% if element['#value'] == item %}checked{% endif %}/>

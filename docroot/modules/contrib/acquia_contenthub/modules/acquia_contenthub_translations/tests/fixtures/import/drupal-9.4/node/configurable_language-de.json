@@ -1,0 +1,60 @@
+{
+    "entities": [
+        {
+            "uuid": "8d3300ac-60d5-4f45-b57c-9321ec78adc1",
+            "type": "drupal8_config_entity",
+            "created": "2022-10-17T07:50:46+00:00",
+            "modified": "2022-10-17T07:50:46+00:00",
+            "origin": "ce0312f0-3ff5-42d3-45c0-e205d9b6af76",
+            "attributes": {
+                "label": {
+                    "type": "array<string>",
+                    "value": {
+                        "en": "German",
+                        "und": "German"
+                    }
+                },
+                "entity_type": {
+                    "type": "keyword",
+                    "value": {
+                        "und": "configurable_language"
+                    }
+                },
+                "entity_type_label": {
+                    "type": "string",
+                    "value": {
+                        "und": "Langue"
+                    }
+                },
+                "channels": {
+                    "type": "array<reference>",
+                    "value": {
+                        "und": []
+                    }
+                },
+                "hash": {
+                    "type": "string",
+                    "value": {
+                        "und": "2afa1529ecd02bcc9514d2c6fcafa2302fa9f17b"
+                    }
+                },
+                "base_url": {
+                    "type": "string",
+                    "value": {
+                        "und": "http:\/\/pub\/fr"
+                    }
+                }
+            },
+            "metadata": {
+                "default_language": "en",
+                "dependencies": {
+                    "module": [
+                        "language"
+                    ]
+                },
+                "data": "ZW46CiAgdXVpZDogOGQzMzAwYWMtNjBkNS00ZjQ1LWI1N2MtOTMyMWVjNzhhZGMxCiAgbGFuZ2NvZGU6IGVuCiAgc3RhdHVzOiB0cnVlCiAgZGVwZW5kZW5jaWVzOiB7ICB9CiAgaWQ6IGRlCiAgbGFiZWw6IEdlcm1hbgogIGRpcmVjdGlvbjogbHRyCiAgd2VpZ2h0OiAyCiAgbG9ja2VkOiBmYWxzZQo=",
+                "langcode": "de"
+            }
+        }
+    ]
+}

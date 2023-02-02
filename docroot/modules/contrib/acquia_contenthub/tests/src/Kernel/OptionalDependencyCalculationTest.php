@@ -4,6 +4,7 @@ namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 use Drupal\acquia_contenthub_publisher\Event\ContentHubEntityEligibilityEvent;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
@@ -20,6 +21,7 @@ class OptionalDependencyCalculationTest extends KernelTestBase {
   use NodeCreationTrait;
   use ContentTypeCreationTrait;
   use UserCreationTrait;
+  use AcquiaContentHubAdminSettingsTrait;
 
   /**
    * {@inheritdoc}
@@ -51,6 +53,9 @@ class OptionalDependencyCalculationTest extends KernelTestBase {
   public function setup(): void {
     parent::setUp();
     $this->installSchema('acquia_contenthub_publisher', ['acquia_contenthub_publisher_export_tracking']);
+
+    $this->createAcquiaContentHubAdminSettings();
+
     $this->installConfig('node');
     $this->installConfig('field');
     $this->installConfig('filter');

@@ -116,6 +116,7 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
     if (empty($entity_type) || empty($id)) {
       throw new \Exception(dt("Missing required parameters: entity_type and entity_id (or entity_uuid)"));
     }
+    /** @var \Drupal\Core\Entity\EntityStorageInterface|null $storage */
     $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
     if (empty($storage)) {
       throw new \Exception(sprintf("The provided entity_type = '%s' does not exist.", $entity_type));
@@ -191,6 +192,7 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
    */
   protected function auditEntityCdf(EntityInterface $entity, string $origin, string $remote_origin, string $hash, string $remote_hash, array $dependencies, array $remote_dependencies, CDFObjectInterface $cdf, CDFObjectInterface $remote_cdf) {
     // Obtaining the record in the Publisher Tracking Table.
+    /** @var mixed $tracked_entity */
     $tracked_entity = $this->tracker->getRecord($entity->uuid());
     $tracked_state = strtoupper($tracked_entity->status);
     if ($tracked_entity->status === PublisherTracker::QUEUED) {
@@ -200,7 +202,7 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
         $tracked_label = sprintf("<comment>Entity is already in the Publisher Queue with item_id = %s.</comment>", $queue_id);
       }
       else {
-        $tracked_label = sprintf("<error>Entity is reported as Queued but is not in the Publisher Queue. Requires a re-export.</error>", $queue_id);
+        $tracked_label = sprintf("<error>Entity is reported as Queued but is not in the Publisher Queue. Requires a re-export.</error>");
         $this->setResults(self::NEEDS_REEXPORT);
       }
     }
@@ -216,7 +218,7 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
 
     // Verifying the origin matches remote origin.
     if ($origin !== $remote_origin) {
-      $origin_label = sprintf('<error>Remote CDF was exported from another origin. Requires re-origination or purge to fix.</error>', $tracked_entity->hash);
+      $origin_label = sprintf('<error>Remote CDF was exported from another origin. Requires re-origination or purge to fix.</error>');
       $this->setResults(self::RE_ORIGINATE);
     }
     else {
@@ -345,6 +347,9 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
       $dependencies_check = FALSE;
       // Check if we can get the remote entity.
       $remote_entity = $this->client->getEntity($ruuid);
+      $remote_type = '';
+      $rentity_type = '';
+      $remote_bundle = '';
       if ($remote_entity) {
         $remote_type = $this->getTypeShort($remote_entity->getType());
         $rentity_type = $remote_entity->getAttribute('entity_type')->getValue()['und'];
@@ -530,6 +535,7 @@ class AcquiaContentHubPublisherAuditEntityCommands extends DrushCommands {
       $this->output->writeln('<error>* Client site ORIGIN does not match published Entity ORIGIN:</error>');
       $this->output->writeln(sprintf('You are trying to publish an entity with an origin (%s) that does not have ownership over the entity with UUID = "%s" (origin = "%s")', $origin, $cdf->getUuid(), $remote_origin));
       $this->output->writeln('Are you sure you are in the correct site?")');
+      /** @var \Acquia\ContentHubClient\CDF\ClientCDFObject $owner */
       $owner = $this->client->getEntity($remote_origin);
       if ($owner instanceof CDFObjectInterface) {
         $webhook = $owner->getWebhook();

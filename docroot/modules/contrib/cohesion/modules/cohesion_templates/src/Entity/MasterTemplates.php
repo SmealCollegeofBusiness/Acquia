@@ -120,7 +120,10 @@ class MasterTemplates extends CohesionTemplateBase implements CohesionSettingsIn
 
     if ($this->get('default') === TRUE) {
       $default_templates_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_master_templates')->getQuery()
-        ->condition('default', TRUE)->condition('id', $this->id(), '<>')->execute();
+        ->accessCheck(TRUE)
+        ->condition('default', TRUE)
+        ->condition('id', $this->id(), '<>')
+        ->execute();
 
       $default_templates = $this->loadMultiple($default_templates_ids);
       foreach ($default_templates as $default_template) {

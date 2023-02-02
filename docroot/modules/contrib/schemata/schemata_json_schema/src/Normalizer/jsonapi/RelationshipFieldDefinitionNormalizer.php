@@ -44,7 +44,7 @@ class RelationshipFieldDefinitionNormalizer extends ListDataDefinitionNormalizer
   /**
    * {@inheritdoc}
    */
-  public function supportsNormalization($data, $format = NULL) {
+  public function supportsNormalization($data, $format = NULL, array $context = []): bool {
     if (!parent::supportsNormalization($data, $format)) {
       return FALSE;
     }
@@ -60,11 +60,11 @@ class RelationshipFieldDefinitionNormalizer extends ListDataDefinitionNormalizer
   public function normalize($entity, $format = NULL, array $context = []) {
     $cardinality = $entity->getFieldStorageDefinition()->getCardinality();
     $context['cardinality'] = $cardinality;
-    /* @var $entity \Drupal\Core\Field\FieldDefinitionInterface */
+    /** @var \Drupal\Core\Field\FieldDefinitionInterface $entity */
     $normalized = [
       'properties' => [
         'relationships' => [
-          'description' => t('Entity relationships'),
+          'description' => $this->t('Entity relationships'),
           'properties' => [$context['name'] => $this->normalizeRelationship($entity)],
           'type' => 'object',
         ],
@@ -102,10 +102,13 @@ class RelationshipFieldDefinitionNormalizer extends ListDataDefinitionNormalizer
       'type' => 'object',
       'required' => ['type', 'id'],
       'properties' => [
-        'type' => ['type' => 'string', 'title' => t('Referenced resource')],
+        'type' => [
+          'type' => 'string',
+          'title' => $this->t('Referenced resource'),
+        ],
         'id' => [
           'type' => 'string',
-          'title' => t('Resource ID'),
+          'title' => $this->t('Resource ID'),
           'format' => 'uuid',
           'maxLength' => 128,
         ],
@@ -115,7 +118,6 @@ class RelationshipFieldDefinitionNormalizer extends ListDataDefinitionNormalizer
     $cardinality = $field_definition
       ->getFieldStorageDefinition()
       ->getCardinality();
-    /* @var $entity \Drupal\Core\TypedData\DataReferenceDefinitionInterface */
     if ($target_entity_type = $field_definition->getSetting('target_type')) {
       $handler_settings = $field_definition->getSetting('handler_settings');
       $target_bundles = empty($handler_settings['target_bundles']) ?
@@ -127,7 +129,6 @@ class RelationshipFieldDefinitionNormalizer extends ListDataDefinitionNormalizer
             $target_entity_type,
             $bundle ?: $target_entity_type
           );
-          return $resource_type->getTypeName();
         },
         $target_bundles
       );

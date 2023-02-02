@@ -28,7 +28,7 @@ services:
 
   acquia_contenthub.client.factory:
     class: Drupal\acquia_contenthub\Client\ClientFactory
-    arguments: ['@event_dispatcher', '@logger.factory', '@extension.list.module', '@config.factory']
+    arguments: ['@event_dispatcher', '@acquia_contenthub.logger_channel', '@extension.list.module', '@config.factory', '@acquia_contenthub.platform_checker']
 
   acquia_contenthub.file_scheme_handler.manager:
     class: Drupal\acquia_contenthub\Plugin\FileSchemeHandler\FileSchemeHandlerManager
@@ -447,11 +447,6 @@ services:
     tags:
       - { name: event_subscriber }
 
-  acquia_contenthub.settings:
-    class: Acquia\ContentHubClient\Settings
-    factory: acquia_contenthub.client.factory:getSettings
-    public: false
-
   acquia_contenthub.logger_channel:
     class: Drupal\Core\Logger\LoggerChannel
     factory: logger.factory:get
@@ -464,7 +459,7 @@ services:
 
   acquia_contenthub.connection_manager:
     class: Drupal\acquia_contenthub\ContentHubConnectionManager
-    arguments: ['@config.factory', '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@acquia_contenthub.settings']
+    arguments: ['@config.factory', '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@module_handler']
 
   acquia_contenthub.focal_point.collector:
     class: Drupal\acquia_contenthub\EventSubscriber\DependencyCollector\FocalPointCollector
@@ -491,6 +486,19 @@ services:
     class: Drupal\acquia_contenthub\Client\ProjectVersionClient
     arguments: ['@http_client', '@acquia_contenthub.logger_channel']
 
+  acquia_contenthub.event_logger:
+    class: Drupal\acquia_contenthub\Libs\Logging\ContentHubEventLogger
+    arguments: [ '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@uuid' ]
+
+  acquia_contenthub.valid_ssl.client_cdf.attribute:
+    class: Drupal\acquia_contenthub\EventSubscriber\CdfAttributes\ValidSslAttribute
+    arguments: [ '@request_stack', '@acquia_contenthub.ssl_factory' ]
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub.ssl_factory:
+    class: Drupal\acquia_contenthub\SslCertificateFactory
+
   acquia_contenthub.cdf_metrics_manager:
     class: Drupal\acquia_contenthub\Client\CdfMetricsManager
     arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.config', '@acquia_contenthub.logger_channel', '@event_dispatcher' ]
@@ -501,3 +509,7 @@ services:
 
   acquia_contenthub.drupal_bridge:
     class: Drupal\acquia_contenthub\Libs\Common\DrupalVersionCompatibilityBridge
+
+  acquia_contenthub.platform_checker:
+    class: Drupal\acquia_contenthub\Libs\Common\PlatformCompatibilityChecker
+    arguments: [ '@messenger', '@acquia_contenthub.logger_channel' ]

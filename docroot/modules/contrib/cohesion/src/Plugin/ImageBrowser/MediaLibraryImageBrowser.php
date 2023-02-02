@@ -42,7 +42,7 @@ class MediaLibraryImageBrowser extends ImageBrowserPluginBase {
       '#title' => t('Media types selectable in the Media Library'),
       '#description' => t('If none are selected, all will be allowed.'),
       '#required' => FALSE,
-      '#default_value' => isset($index) ? $index : '',
+      '#default_value' => $index ?? '',
       '#options' => $options,
     ];
 
@@ -112,8 +112,7 @@ class MediaLibraryImageBrowser extends ImageBrowserPluginBase {
 
       $media_lib_state = MediaLibraryState::create('media_library.opener.cohesion', $allowed_types, $selected_type, 1);
 
-      $url = Url::fromRoute('cohesion.media_library_ui', [
-        'coh_clean_page' => 'true',
+      $url = Url::fromRoute('media_library.ui', [
         'media_library_opener_id' => 'media_library.opener.cohesion',
         'media_library_allowed_types' => $allowed_types,
         'media_library_selected_type' => $media_lib_state->getSelectedTypeId(),
@@ -122,9 +121,10 @@ class MediaLibraryImageBrowser extends ImageBrowserPluginBase {
       ])->toString();
 
       $attachments['drupalSettings']['cohesion']['imageBrowser'] = [
-        // Add the image browser iFrame URL.
+        // Add the image browser URL, title & key for front-end app.
         'url' => $url,
         'title' => $this->getName(),
+        'key' => 'media-library',
       ];
     }
   }

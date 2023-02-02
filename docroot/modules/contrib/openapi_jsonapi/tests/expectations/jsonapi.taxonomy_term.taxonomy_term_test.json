@@ -150,10 +150,7 @@
                                 }
                             },
                             "required": [
-                                "drupal_internal__tid",
-                                "drupal_internal__revision_id",
-                                "name",
-                                "revision_translation_affected"
+                                "name"
                             ]
                         },
                         "relationships": {
@@ -347,6 +344,13 @@
                         "description": "The JSON:API module allows you to sort collections based on properties in the resource or in nested resources. <a href=\"https:\/\/www.drupal.org\/docs\/8\/modules\/jsonapi\/sorting\">Learn more in the documentation<\/a>."
                     },
                     {
+                        "name": "resourceVersion",
+                        "required": false,
+                        "in": "query",
+                        "type": "string",
+                        "description": "The JSON:API module exposes entity revisions as resource versions. <a href=\"https://www.drupal.org/docs/8/modules/jsonapi/revisions\">Learn more in the documentation</a>."
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "type": "array",
@@ -452,8 +456,16 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
+                    },
+                    {
+                        "name": "resourceVersion",
+                        "required": false,
+                        "in": "query",
+                        "type": "string",
+                        "description": "The JSON:API module exposes entity revisions as resource versions. <a href=\"https://www.drupal.org/docs/8/modules/jsonapi/revisions\">Learn more in the documentation</a>."
                     }
                 ],
                 "responses": {
@@ -473,7 +485,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     }
                 ],
@@ -491,7 +504,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     },
                     {
@@ -516,8 +530,16 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
+                    },
+                    {
+                        "name": "resourceVersion",
+                        "required": false,
+                        "in": "query",
+                        "type": "string",
+                        "description": "The JSON:API module exposes entity revisions as resource versions. <a href=\"https://www.drupal.org/docs/8/modules/jsonapi/revisions\">Learn more in the documentation</a>."
                     }
                 ],
                 "responses": {
@@ -595,7 +617,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     }
                 ],
@@ -613,8 +636,16 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
+                    },
+                    {
+                        "name": "resourceVersion",
+                        "required": false,
+                        "in": "query",
+                        "type": "string",
+                        "description": "The JSON:API module exposes entity revisions as resource versions. <a href=\"https://www.drupal.org/docs/8/modules/jsonapi/revisions\">Learn more in the documentation</a>."
                     }
                 ],
                 "responses": {
@@ -670,7 +701,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     },
                     {
@@ -772,7 +804,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     },
                     {
@@ -876,8 +909,16 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
+                    },
+                    {
+                        "name": "resourceVersion",
+                        "required": false,
+                        "in": "query",
+                        "type": "string",
+                        "description": "The JSON:API module exposes entity revisions as resource versions. <a href=\"https://www.drupal.org/docs/8/modules/jsonapi/revisions\">Learn more in the documentation</a>."
                     }
                 ],
                 "responses": {
@@ -896,7 +937,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     }
                 ],
@@ -914,8 +956,16 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
+                    },
+                    {
+                        "name": "resourceVersion",
+                        "required": false,
+                        "in": "query",
+                        "type": "string",
+                        "description": "The JSON:API module exposes entity revisions as resource versions. <a href=\"https://www.drupal.org/docs/8/modules/jsonapi/revisions\">Learn more in the documentation</a>."
                     }
                 ],
                 "responses": {
@@ -966,7 +1016,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     },
                     {
@@ -1058,7 +1109,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     },
                     {
@@ -1152,8 +1204,16 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
+                    },
+                    {
+                        "name": "resourceVersion",
+                        "required": false,
+                        "in": "query",
+                        "type": "string",
+                        "description": "The JSON:API module exposes entity revisions as resource versions. <a href=\"https://www.drupal.org/docs/8/modules/jsonapi/revisions\">Learn more in the documentation</a>."
                     }
                 ],
                 "responses": {
@@ -1172,7 +1232,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     }
                 ],
@@ -1190,8 +1251,16 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
+                    },
+                    {
+                        "name": "resourceVersion",
+                        "required": false,
+                        "in": "query",
+                        "type": "string",
+                        "description": "The JSON:API module exposes entity revisions as resource versions. <a href=\"https://www.drupal.org/docs/8/modules/jsonapi/revisions\">Learn more in the documentation</a>."
                     }
                 ],
                 "responses": {
@@ -1242,7 +1311,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     },
                     {
@@ -1334,7 +1404,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the taxonomy_term taxonomy_term_test"
                     },
                     {

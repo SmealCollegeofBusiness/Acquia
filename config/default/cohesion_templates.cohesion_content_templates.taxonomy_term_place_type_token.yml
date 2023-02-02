@@ -1,0 +1,18 @@
+uuid: 5158a791-c4cd-41e0-8568-83990a44922c
+langcode: en
+status: false
+dependencies: {  }
+label: 'Token (Taxonomy_term, Place Type)'
+id: taxonomy_term_place_type_token
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: taxonomy_term
+bundle: place_type
+view_mode: token
+master_template: ''

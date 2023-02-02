@@ -80,6 +80,7 @@ class TranslationUpdateHandler {
 
       // Revert to the original translation values.
       /** @var \Drupal\Core\Entity\ContentEntityInterface $original */
+      // @phpstan-ignore-next-line
       $original = $entity->original;
       $orig_translation = $original->getTranslation($lang);
       $fields = $orig_translation->getTranslatableFields();
@@ -131,6 +132,7 @@ class TranslationUpdateHandler {
 
     // Revert to the original translation values.
     /** @var \Drupal\Core\Entity\ContentEntityInterface $original */
+    // @phpstan-ignore-next-line
     $original = $entity->original;
     if (!$original->hasTranslation($lang)) {
       return TRUE;

@@ -50,7 +50,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity_type openapi_test_entity_type"
                     }
                 ],

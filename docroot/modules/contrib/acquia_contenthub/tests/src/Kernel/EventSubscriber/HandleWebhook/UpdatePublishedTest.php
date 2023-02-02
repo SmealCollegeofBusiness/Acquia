@@ -7,6 +7,7 @@ use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook\UpdatePublished;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\node\Entity\Node;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -19,6 +20,8 @@ use Symfony\Component\HttpFoundation\Request;
  * @package Drupal\Tests\acquia_contenthub\Kernel\EventSubscriber\HandleWebhook
  */
 class UpdatePublishedTest extends EntityKernelTestBase {
+
+  use AcquiaContentHubAdminSettingsTrait;
 
   /**
    * Update published instance.
@@ -66,12 +69,16 @@ class UpdatePublishedTest extends EntityKernelTestBase {
     'node',
   ];
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
   protected function setUp(): void {
     parent::setUp();
 
     $this->installSchema('acquia_contenthub_publisher', ['acquia_contenthub_publisher_export_tracking']);
 
-    $this->configFactory = $this->container->get('config.factory');
     $this->createAcquiaContentHubAdminSettings();
     $this->clientFactory = $this->container->get('acquia_contenthub.client.factory');
 
@@ -88,41 +95,25 @@ class UpdatePublishedTest extends EntityKernelTestBase {
   }
 
   /**
-   * Get Acquia Content Hub settings.
-   *
-   * @return mixed
-   *   Acquia Content Hub admin settings.
-   */
-  public function createAcquiaContentHubAdminSettings() {
-    $admin_settings = $this->configFactory
-      ->getEditable('acquia_contenthub.admin_settings');
-
-    return $admin_settings
-      ->set('client_name', 'test-client')
-      ->set('origin', '00000000-0000-0001-0000-123456789123')
-      ->set('api_key', '12312321312321')
-      ->set('secret_key', '12312321312321')
-      ->set('hostname', 'https://example.com')
-      ->set('shared_secret', '12312321312321')
-      ->save();
-  }
-
-  /**
    * Tests entity updated status.
    *
    * @param mixed $args
    *   Data.
    *
    * @dataProvider dataProvider
+   *
+   * @throws \ReflectionException
    */
   public function testUpdatePublished(...$args) {
     $key = new Key('id', 'secret');
     $request = Request::createFromGlobals();
 
+    $client = $this->clientFactory->getClient();
+
     $payload = [
       'crud' => 'update',
       'status' => 'successful',
-      'initiator' => $this->clientFactory->getSettings()->getUuid(),
+      'initiator' => $client->getSettings()->getUuid(),
       'assets' => [
         [
           'type' => $args[0],
@@ -130,7 +121,7 @@ class UpdatePublishedTest extends EntityKernelTestBase {
         ],
       ],
     ];
-    $event = new HandleWebhookEvent($request, $payload, $key, $this->clientFactory->getClient());
+    $event = new HandleWebhookEvent($request, $payload, $key, $client);
     $this->updatePublished->onHandleWebhook($event);
 
     $entity_status = $this->getStatusByUuid($args[1]);

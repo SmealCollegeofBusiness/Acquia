@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * @file
+ * Drupal Module: Acquia ContentHub - Dashboard.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function acquia_contenthub_dashboard_theme($existing, $type, $theme, $path) {
+  return [
+    'page__admin__acquia_contenthub__contenthub_dashboard' => [
+      'template' => 'page--admin--acquia-contenthub--contenthub-dashboard',
+      'base hook' => 'page',
+    ],
+    'html__admin__acquia_contenthub__contenthub_dashboard' => [
+      'template' => 'html--admin--acquia-contenthub--contenthub-dashboard',
+      'base hook' => 'html',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function acquia_contenthub_dashboard_form_acquia_contenthub_admin_settings_alter(&$form, FormStateInterface $form_state) {
+  /** @var \Drupal\Core\Extension\ModuleHandlerInterface $module_handler */
+  $module_handler = \Drupal::service('module_handler');
+  if (!$module_handler->moduleExists('acquia_contenthub_subscriber')) {
+    return;
+  }
+
+  $form['webhook_details']['automatic_publisher_discovery'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Automatic Publisher Discovery'),
+    '#description' => t('By enabling this checkbox Content Hub will extend the CORS parameters.'),
+    '#default_value' => \Drupal::config('acquia_contenthub_dashboard.settings')
+      ->get('auto_publisher_discovery'),
+    '#weight' => -10,
+  ];
+
+  if (!empty($form['actions']['#suffix'])) {
+    $form['actions']['#suffix'] = strip_tags($form['actions']['#suffix']) . ' Also it will extend the CORS settings.';
+  }
+  $form['#submit'][] = '_acquia_contenthub_dashboard_update_webhook_filters';
+  $form['actions']['updatewebhook']['#submit'][] = '_acquia_contenthub_dashboard_update_webhook_filters';
+}
+
+/**
+ * Register/Updates webhook with auto publisher discovery filter.
+ *
+ * @param array $form
+ *   The form.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The form state.
+ *
+ * @throws \Exception
+ */
+function _acquia_contenthub_dashboard_update_webhook_filters(array &$form, FormStateInterface $form_state): void {
+  $auto_pub_discovery = (bool) $form_state->getValue('automatic_publisher_discovery');
+  /** @var \Drupal\acquia_contenthub_dashboard\AutoPublisherDiscoveryFilterHandler $auto_pub_filter_handler */
+  $auto_pub_filter_handler = \Drupal::service('acquia_contenthub_dashboard.auto_pub_filter_handler');
+  $auto_pub_filter_handler->updateDefaultClientPublisherFilterToWebhook($auto_pub_discovery);
+}

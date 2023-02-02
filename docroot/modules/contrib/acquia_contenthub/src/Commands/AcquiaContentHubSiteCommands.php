@@ -117,17 +117,16 @@ class AcquiaContentHubSiteCommands extends DrushCommands {
     $secret_key = $options['secret_key'] ?? $io->ask(
         dt('What is your Content Hub API Secret?')
       );
-    $client_uuid = \Drupal::service('uuid')->generate();
+
     $client_name = $options['client_name'] ?? $io->ask(
         dt('What is the client name for this site?'),
-        $client_uuid
       );
 
     $form_state = (new FormState())->setValues([
       'hostname' => $hostname,
       'api_key' => $api_key,
       'secret_key' => $secret_key,
-      'client_name' => sprintf("%s_%s", $client_name, $client_uuid),
+      'client_name' => $client_name,
       'op' => t('Save configuration'),
     ]);
 

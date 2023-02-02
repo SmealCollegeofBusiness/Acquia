@@ -4,7 +4,7 @@ namespace Drupal\cohesion\EventSubscriber;
 
 use Drupal\Core\Render\HtmlResponse;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -19,10 +19,10 @@ class CohesionHtmlResponseSubscriber implements EventSubscriberInterface {
   /**
    * Adds markers to the response necessary for the BigPipe render strategy.
    *
-   * @param \Symfony\Component\HttpKernel\Event\FilterResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   The event to process.
    */
-  public function onRespondEarly(FilterResponseEvent $event) {
+  public function onRespondEarly(ResponseEvent $event) {
 
     $response = $event->getResponse();
     if (!$response instanceof HtmlResponse) {

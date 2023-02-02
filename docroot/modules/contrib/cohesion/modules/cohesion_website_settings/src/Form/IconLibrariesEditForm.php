@@ -33,7 +33,7 @@ class IconLibrariesEditForm extends WebsiteSettingsGroupFormBase {
     $libraries = json_decode($form_state->getValue('json_values'));
 
     if (isset($libraries->iconLibraries)) {
-      list($this->in_use_list, $this->changed_entities) = $this->getEntityGroupsPlugin()->saveFromModel($libraries);
+      [$this->in_use_list, $this->changed_entities] = $this->getEntityGroupsPlugin()->saveFromModel($libraries);
 
       // (Optionally) run color rebuild batch for entities using changed colors.
       if (count($this->in_use_list)) {

@@ -1,12 +1,11 @@
-name: Test decoule router
+name: Test decoupled router
 description: Perform alterations before to return the router info.
 type: module
-package: testing
-core_version_requirement: ^8.8 || ^9
+package: Testing
 dependencies:
   - decoupled_router:decoupled_router
 
-# Information added by Drupal.org packaging script on 2021-09-18
-version: '2.0.3'
+# Information added by Drupal.org packaging script on 2022-11-30
+version: '2.0.4'
 project: 'decoupled_router'
-datestamp: 1631977520
+datestamp: 1669803948

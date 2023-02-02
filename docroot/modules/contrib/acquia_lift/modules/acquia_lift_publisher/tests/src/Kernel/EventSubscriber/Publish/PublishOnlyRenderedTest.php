@@ -21,9 +21,10 @@ use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\RandomGeneratorTrait;
 use PHPUnit\Framework\AssertionFailedError;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
- * Class PublishOnlyRenderedTest.
+ * Tests the Publish Only Rendered content.
  *
  * @group acquia_lift_publisher
  *
@@ -33,6 +34,7 @@ use Prophecy\Argument;
  */
 class PublishOnlyRenderedTest extends KernelTestBase {
 
+  use ProphecyTrait;
   use ContentTypeCreationTrait;
   use NodeCreationTrait;
   use RandomGeneratorTrait;
@@ -97,7 +99,7 @@ class PublishOnlyRenderedTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installSchema('acquia_contenthub_publisher', ['acquia_contenthub_publisher_export_tracking']);

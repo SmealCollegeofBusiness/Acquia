@@ -148,7 +148,7 @@ class S3FileMap {
    * @return object|null
    *   The \stdClass or NULL if the file wasn't recorded.
    */
-  public function getFileByUuid(string $file_uuid): ?\stdClass {
+  public function getFileByUuid(string $file_uuid): ?object {
     $object = $this->database->select(self::TABLE_NAME, 'acs3')
       ->fields('acs3')
       ->condition('acs3.file_uuid', $file_uuid, '=')
@@ -173,7 +173,7 @@ class S3FileMap {
    *     - root_folder
    *     - origin_uuid
    */
-  public function getFileByUri(string $uri): ?\stdClass {
+  public function getFileByUri(string $uri): ?object {
     $query = $this->database->select(S3FileMap::TABLE_NAME, 'acs3');
     $query->join('file_managed', 'fm', 'fm.uuid = acs3.file_uuid');
     $object = $query->fields('fm', ['uuid'])

@@ -33,7 +33,10 @@ class ElementsController {
       return [];
     }
 
-    $category_entities = $storage->getQuery()->sort('weight')->execute();
+    $category_entities = $storage->getQuery()
+      ->accessCheck(TRUE)
+      ->sort('weight')
+      ->execute();
     $categories = [];
 
     if ($category_entities = $storage->loadMultiple($category_entities)) {
@@ -64,7 +67,10 @@ class ElementsController {
   public static function getElementPreviewImageURL($entity_type, $element_id) {
     // Get list of entities matching the specified type.
     $storage = \Drupal::entityTypeManager()->getStorage($entity_type);
-    $query = $storage->getQuery()->condition('id', $element_id, '=')->range(0, 1);
+    $query = $storage->getQuery()
+      ->accessCheck(TRUE)
+      ->condition('id', $element_id, '=')
+      ->range(0, 1);
     $ids = $query->execute();
     $entities = $storage->loadMultiple($ids);
     foreach ($entities as $id => $entity) {

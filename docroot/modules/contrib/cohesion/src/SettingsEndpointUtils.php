@@ -66,7 +66,7 @@ class SettingsEndpointUtils {
         $elements = [];
 
         foreach ($category['elements'] as $element_id) {
-          $elements[$element_id] = isset($asset_data[$element_id]) ? $asset_data[$element_id] : [];
+          $elements[$element_id] = $asset_data[$element_id] ?? [];
         }
         // Assign new elements.
         $results[$key]['children'] = array_values($elements);
@@ -192,7 +192,7 @@ class SettingsEndpointUtils {
               if (isset($vals['fonts'])) {
                 foreach ($vals['fonts'] as $icon_library) {
                   if (isset($icon_library['library']['type']) && $icon_library['library']['type'] == 'import') {
-                    $urls[] = isset($icon_library['library']['url']) ? $icon_library['library']['url'] : NULL;
+                    $urls[] = $icon_library['library']['url'] ?? NULL;
                   }
                 }
               }
@@ -350,7 +350,11 @@ class SettingsEndpointUtils {
         if ($id) {
           try {
             if ($storage = $this->entityTypeManager->getStorage('cohesion_website_settings')) {
-              $entityId = $storage->getQuery()->condition("status", 1)->condition("id", $id, '=')->execute();
+              $entityId = $storage->getQuery()
+                ->accessCheck(TRUE)
+                ->condition("status", 1)
+                ->condition("id", $id, '=')
+                ->execute();
               if ($entityId) {
                 /** @var \Drupal\cohesion_website_settings\Entity\WebsiteSettings $website_settings */
                 $website_settings = $storage->load(reset($entityId));
@@ -394,7 +398,10 @@ class SettingsEndpointUtils {
     else {
       try {
         if ($storage = $this->entityTypeManager->getStorage('cohesion_website_settings')) {
-          $ids = $storage->getQuery()->condition('status', 1)->execute();
+          $ids = $storage->getQuery()
+            ->accessCheck(TRUE)
+            ->condition('status', 1)
+            ->execute();
           if ($ids) {
             $website_settings_ids = $storage->loadMultiple($ids);
           }
@@ -428,9 +435,9 @@ class SettingsEndpointUtils {
               $file_content = file_get_contents($file_path);
               $file_content = json_decode($file_content);
               // Set key to prevent storing duplicate content.
-              $content_key = isset($library['library']['name']) ? $library['library']['name'] : $basename;
-              $library_type = isset($library['library']['type']) ? $library['library']['type'] : 'custom';
-              $font_family = isset($library['library']['fontFamilyName']) ? $library['library']['fontFamilyName'] : NULL;
+              $content_key = $library['library']['name'] ?? $basename;
+              $library_type = $library['library']['type'] ?? 'custom';
+              $font_family = $library['library']['fontFamilyName'] ?? NULL;
 
               // Add it to a keyed array (by icon label).
               if (!$font_family) {
@@ -505,7 +512,7 @@ class SettingsEndpointUtils {
       '@group' => ucfirst(str_replace('_', ' ', $data['element_group'])),
     ]);
 
-    $element_group = isset($data['element_group']) ? $data['element_group'] : NULL;
+    $element_group = $data['element_group'] ?? NULL;
 
     $exclude_groups = ['global_libraries', 'element_templates'];
     $uri = '/group/' . $element_group;
@@ -522,8 +529,8 @@ class SettingsEndpointUtils {
     if (($results = Json::decode($content))) {
 
       foreach ($results as $result) {
-        $id = isset($result['id']) ? $result['id'] : NULL;
-        $label = isset($result['label']) ? $result['label'] : NULL;
+        $id = $result['id'] ?? NULL;
+        $label = $result['label'] ?? NULL;
 
         // Make sure all code hitting the database is JSON decoded and can be
         // serialized.
@@ -554,9 +561,9 @@ class SettingsEndpointUtils {
             'element_id' => $id,
             'element_label' => $label,
             'element_group' => $element_group,
-            'feature_id' => isset($result['feature_id']) ? $result['feature_id'] : '1.0',
-            'element_weight' => isset($result['weight']) ? $result['weight'] : 0,
-            'element_element' => isset($result['element']) ? $result['element'] : NULL,
+            'feature_id' => $result['feature_id'] ?? '1.0',
+            'element_weight' => $result['weight'] ?? 0,
+            'element_element' => $result['element'] ?? NULL,
           ];
           $this->apiElementStorage->cohUpsert($update_data);
         }
@@ -621,7 +628,7 @@ class SettingsEndpointUtils {
       'assets' => COHESION_ASSETS_PATH,
       'json' => COHESION_DEFAULT_PATH,
     ];
-    $cohesion_asset_path = isset($paths[$type]) ? $paths[$type] : NULL;
+    $cohesion_asset_path = $paths[$type] ?? NULL;
     // Loop through the assets within the js or css section.
     foreach ($asset[$type] as $key => $library) {
       if ($library['external'] === FALSE && $cohesion_asset_path) {
@@ -654,8 +661,9 @@ class SettingsEndpointUtils {
       preg_match_all('#[.\[\]]*\[([a-zA-Z_]+)\][.\[\]]*#', $library['asset_url'], $matches);
       if (isset($matches[1])) {
         foreach ($matches[1] as $keyi => $config_key) {
-          $config_value = \Drupal::config('cohesion.settings')->get($config_key);
-          $asset[$type][$keyi]['asset_url'] = str_replace($matches[0][$keyi], $config_value, $library['asset_url']);
+          if ($config_value = \Drupal::config('cohesion.settings')->get($config_key)) {
+            $asset[$type][$keyi]['asset_url'] = str_replace($matches[0][$keyi], $config_value, $library['asset_url']);
+          }
         }
       }
     }

@@ -32,7 +32,7 @@ class SCSSVariableEntityGroups extends EntityGroupsPluginBase {
 
       // Does the entity already exist?
       $query = \Drupal::entityQuery('cohesion_scss_variable');
-      $query->condition('id', $variable->uid);
+      $query->condition('id', $variable->uid)->accessCheck(TRUE);
       $entity_ids = $query->execute();
 
       // No? Then create and save it.
@@ -49,7 +49,7 @@ class SCSSVariableEntityGroups extends EntityGroupsPluginBase {
     }
 
     // Delete any removed entities.
-    $query = \Drupal::entityQuery('cohesion_scss_variable');
+    $query = \Drupal::entityQuery('cohesion_scss_variable')->accessCheck(TRUE);
     if ($entity_ids = $query->execute()) {
       foreach ($variables->SCSSVariables as $variable) {
         if (isset($entity_ids[$variable->uid])) {

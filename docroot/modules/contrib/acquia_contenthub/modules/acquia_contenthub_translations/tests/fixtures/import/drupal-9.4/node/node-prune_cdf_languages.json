@@ -164,6 +164,7 @@
           "fr",
           "es"
         ],
+        "translatable": true,
         "version": 2
       }
     },
@@ -368,6 +369,7 @@
         "languages": [
           "en"
         ],
+        "translatable": true,
         "version": 2
       }
     },

@@ -7,7 +7,7 @@ services:
   acquia_contenthub_subscriber.logger_channel:
     class: Drupal\Core\Logger\LoggerChannel
     factory: logger.factory:get
-    arguments: [ 'acquia_contenthub_subscriber' ]
+    arguments: ['acquia_contenthub_subscriber']
 
   acquia_contenthub_subscriber.handle_webhook.import_assets:
     class: Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook\ImportUpdateAssets
@@ -92,6 +92,10 @@ services:
     arguments: ['@database']
     tags:
       - { name: event_subscriber }
+
+  acquia_contenthub_subscriber.ch_logger:
+    class: Drupal\acquia_contenthub_subscriber\ContentHubImportLogger
+    arguments: [ '@acquia_contenthub_subscriber.logger_channel', '@acquia_contenthub.event_logger']
 
   acquia_contenthub_subscriber.cdf_importer:
     class: Drupal\acquia_contenthub_subscriber\CdfImporter

@@ -5,7 +5,7 @@ namespace Drupal\cohesion;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepository;
-use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\file\FileInterface;
 use Drupal\media\MediaInterface;
 
@@ -17,7 +17,7 @@ use Drupal\media\MediaInterface;
 class ImageBrowserUpdateManager {
 
   /**
-   * Holds the ImageBrowser plugin manager sevice.
+   * Holds the ImageBrowser plugin manager service.
    *
    * @var \Drupal\cohesion\ImageBrowserPluginManager
    */
@@ -26,7 +26,7 @@ class ImageBrowserUpdateManager {
   /**
    * Holds the module handler service.
    *
-   * @var \Drupal\Core\Extension\ModuleHandler
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
@@ -58,7 +58,12 @@ class ImageBrowserUpdateManager {
    * @param \Drupal\Core\Extension\ModuleHandler $moduleHandler
    * @param \Drupal\Core\Entity\EntityRepository $entityRepository
    */
-  public function __construct(ConfigFactoryInterface $configFactory, ImageBrowserPluginManager $pluginManager, ModuleHandler $moduleHandler, EntityRepository $entityRepository) {
+  public function __construct(
+    ConfigFactoryInterface $configFactory,
+    ImageBrowserPluginManager $pluginManager,
+    ModuleHandlerInterface $moduleHandler,
+    EntityRepository $entityRepository
+  ) {
     $this->pluginManager = $pluginManager;
     $this->moduleHandler = $moduleHandler;
     $this->entityRepository = $entityRepository;
@@ -74,8 +79,7 @@ class ImageBrowserUpdateManager {
         if (!$this->moduleHandler->moduleExists($this->pluginInstanceConfig->getModule())) {
           $this->pluginInstanceConfig = NULL;
         }
-      }
-      catch (\Exception $e) {
+      } catch (\Exception $e) {
         $this->pluginInstanceConfig = NULL;
       }
     }
@@ -89,8 +93,7 @@ class ImageBrowserUpdateManager {
         if (!$this->moduleHandler->moduleExists($this->pluginInstanceContent->getModule())) {
           $this->pluginInstanceContent = NULL;
         }
-      }
-      catch (\Exception $e) {
+      } catch (\Exception $e) {
         $this->pluginInstanceContent = NULL;
       }
     }

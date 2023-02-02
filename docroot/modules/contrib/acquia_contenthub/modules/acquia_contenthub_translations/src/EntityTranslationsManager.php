@@ -62,8 +62,8 @@ class EntityTranslationsManager implements EntityTranslationManagerInterface {
    * {@inheritdoc}
    */
   public function getTrackedEntity(string $entity_uuid): ?TrackedEntity {
-    if (isset(static::$cache[$entity_uuid])) {
-      return static::$cache[$entity_uuid];
+    if (isset(self::$cache[$entity_uuid])) {
+      return self::$cache[$entity_uuid];
     }
 
     $query = $this->database->select($this->tracker::tableName(), 'et')
@@ -95,7 +95,7 @@ class EntityTranslationsManager implements EntityTranslationManagerInterface {
     }
 
     $entity = new TrackedEntity($this, $normalized);
-    static::$cache[$entity_uuid] = $entity;
+    self::$cache[$entity_uuid] = $entity;
 
     return $entity;
   }
@@ -132,7 +132,7 @@ class EntityTranslationsManager implements EntityTranslationManagerInterface {
       'changed' => $time,
     ];
     $entity = new TrackedEntity($this, $values);
-    static::$cache[$uuid] = $entity;
+    self::$cache[$uuid] = $entity;
     return $entity;
   }
 
@@ -200,7 +200,7 @@ class EntityTranslationsManager implements EntityTranslationManagerInterface {
 
     $this->tracker->update($entity->uuid(), ['values' => $changed]);
 
-    unset(static::$cache[$entity->uuid()]);
+    unset(self::$cache[$entity->uuid()]);
   }
 
 }

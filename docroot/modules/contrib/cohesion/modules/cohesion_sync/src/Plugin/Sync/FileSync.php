@@ -8,6 +8,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -221,7 +222,7 @@ class FileSync extends SyncPluginBase {
         $entity = File::create([
           'uri' => $uri,
           'uuid' => $entry['uuid'],
-          'status' => FILE_STATUS_PERMANENT,
+          'status' => FileInterface::STATUS_PERMANENT,
           'langcode' => $entry['langcode'],
         ]);
       }

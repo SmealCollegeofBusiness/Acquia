@@ -50,7 +50,9 @@ class ExistingUser implements EventSubscriberInterface {
       // If the uuids are the same, these are the same user.
       return;
     }
-    if ($account->getEmail() !== $event->getEntity()->getEmail()) {
+    /** @var \Drupal\user\UserInterface $user_entity */
+    $user_entity = $event->getEntity();
+    if ($account->getEmail() !== $user_entity->getEmail()) {
       /** @var \Drupal\user\Entity\User $entity */
       $entity = $event->getEntity();
       $username = $this->generateUsername(self::GENERATED_USER_PATTERN, $cdf->getUuid(), $username);
@@ -64,7 +66,7 @@ class ExistingUser implements EventSubscriberInterface {
    *
    * @param string $pattern
    *   Pattern to use to generate username.
-   * @param string[] $pattern_arguments
+   * @param string ...$pattern_arguments
    *   The arguments to use with the pattern.
    *
    * @return bool|string
@@ -86,6 +88,7 @@ class ExistingUser implements EventSubscriberInterface {
       throw new \Exception(sprintf("Mismatched number of pattern arguments to pattern expectations while attempting to generate username. Expected %d; received %d", $count, $arguments_count));
     }
 
+    /** @var string $username */
     $username = sprintf($pattern, ...$pattern_arguments);
 
     if (empty($username)) {

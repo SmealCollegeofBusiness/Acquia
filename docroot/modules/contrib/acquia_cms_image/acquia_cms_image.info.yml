@@ -12,7 +12,7 @@ dependencies:
   - drupal:focal_point
   - drupal:default_content
 
-# Information added by Drupal.org packaging script on 2022-09-22
-version: '1.4.0'
+# Information added by Drupal.org packaging script on 2022-12-19
+version: '1.5.3'
 project: 'acquia_cms_image'
-datestamp: 1663876087
+datestamp: 1671442903

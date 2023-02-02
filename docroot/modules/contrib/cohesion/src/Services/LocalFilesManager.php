@@ -2,15 +2,18 @@
 
 namespace Drupal\cohesion\Services;
 
+use Drupal\cohesion\ExceptionLoggerTrait;
 use Drupal\Component\FileSecurity\FileSecurity;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\File\Exception\FileException;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
+use Drupal\file\FileRepositoryInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -24,6 +27,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  */
 class LocalFilesManager {
   use StringTranslationTrait;
+  use ExceptionLoggerTrait;
 
   /**
    * Wether the stylesheet json is stored in the key value storage or in files.
@@ -54,6 +58,20 @@ class LocalFilesManager {
   protected $cohesionUtils;
 
   /**
+   * Drupal File Repository service.
+   *
+   * @var \Drupal\file\FileRepositoryInterface
+   */
+  protected $fileRepository;
+
+  /**
+   * Cohesion channel logger.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $logger;
+
+  /**
    * LocalFilesManager constructor.
    *
    * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
@@ -64,7 +82,16 @@ class LocalFilesManager {
    * @param \Drupal\cohesion\Services\CohesionUtils $cohesion_utils
    * @param \Symfony\Component\HttpFoundation\Session\Session $session
    */
-  public function __construct(TranslationInterface $stringTranslation, ConfigFactoryInterface $configFactory, KeyValueFactoryInterface $keyValueFactory, SharedTempStoreFactory $shared_store_factory, CohesionUtils $cohesion_utils, Session $session) {
+  public function __construct(
+    TranslationInterface $stringTranslation,
+    ConfigFactoryInterface $configFactory,
+    KeyValueFactoryInterface $keyValueFactory,
+    SharedTempStoreFactory $shared_store_factory,
+    CohesionUtils $cohesion_utils,
+    Session $session,
+    FileRepositoryInterface $fileRepository,
+    LoggerChannelFactoryInterface $channelFactory
+  ) {
     $this->stringTranslation = $stringTranslation;
     $this->stylesheetJsonKeyvalue = $configFactory->get('cohesion.settings')->get('stylesheet_json_storage_keyvalue');
     $this->keyValueStore = $keyValueFactory->get('sitestudio');
@@ -82,6 +109,8 @@ class LocalFilesManager {
       $this->sharedTempStore = $shared_store_factory->get('sitestudio');
     }
     $this->cohesionUtils = $cohesion_utils;
+    $this->fileRepository = $fileRepository;
+    $this->logger = $channelFactory->get('cohesion');
   }
 
   /**
@@ -158,7 +187,7 @@ class LocalFilesManager {
 
     foreach ($this->cohesionUtils->getCohesionEnabledThemes() as $theme_info) {
 
-      $styles = ['base', 'theme', 'grid', 'icons'];
+      $styles = ['base', 'theme', 'grid', 'icons', 'prefixed'];
 
       foreach ($styles as $style) {
         $from = $this->getStyleSheetFilename($style, $theme_info->getName());
@@ -198,6 +227,7 @@ class LocalFilesManager {
       'theme' => "theme/{$theme_filemane}-stylesheet.min.css",
       'grid' => "cohesion-responsive-grid-settings.css",
       'icons' => "cohesion-icon-libraries.css",
+      'prefixed' => "prefixed/cohesion-prefixed-ckeditor-stylesheet.css",
     ];
 
     $tmp_uris = [
@@ -206,6 +236,7 @@ class LocalFilesManager {
       'theme' => "{$theme_filemane}-theme-stylesheet.min.css",
       'grid' => 'cohesion-responsive-grid-settings.css',
       'icons' => 'cohesion-icon-libraries.css',
+      'prefixed' => 'cohesion-prefixed-ckeditor-stylesheet.css',
     ];
 
     if (array_key_exists($type, $cohesion_uris) && array_key_exists($type, $tmp_uris)) {
@@ -337,14 +368,19 @@ class LocalFilesManager {
       $file_get = file_get_contents($tmp_file);
       $filename = basename($tmp_file);
       $filename = preg_replace("/[^a-zA-Z0-9-_.]/", "", basename($filename));
-      $file = file_save_data($file_get, 'public://cohesion/' . $filename);
-      if ($file) {
+      try {
+        $file = $this->fileRepository->writeData($file_get, 'public://cohesion/' . $filename);
+
         @ unlink($tmp_file);
         $return_object = new \stdClass();
         $return_object->type = 'file';
         $return_object->uri = $file->getFileUri();
         $return_object->uuid = $file->uuid();
+
         return $return_object;
+      }
+      catch (\Exception $exception) {
+        $this->logException($exception);
       }
     }
     return FALSE;

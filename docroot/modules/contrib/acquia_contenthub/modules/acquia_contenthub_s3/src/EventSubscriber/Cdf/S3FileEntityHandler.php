@@ -16,7 +16,7 @@ class S3FileEntityHandler implements EventSubscriberInterface {
   /**
    * The s3 file mapper.
    *
-   * @var \Drupal\acquia_contenthub_s3\S3FileMap
+   * @var \Drupal\acquia_contenthub_s3\S3FileMapper
    */
   protected $s3FileMapper;
 

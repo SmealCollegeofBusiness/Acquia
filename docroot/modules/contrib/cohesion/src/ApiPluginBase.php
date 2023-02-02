@@ -533,6 +533,7 @@ abstract class ApiPluginBase extends PluginBase implements ApiPluginInterface, C
           $style_types = [
             'base',
             'theme',
+            'prefixed',
           ];
 
           foreach ($style_types as $section_name) {

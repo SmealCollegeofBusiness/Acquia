@@ -9,9 +9,9 @@
 
 namespace League\OAuth2\Server\Entities\Traits;
 
-use DateTime;
-use Lcobucci\JWT\Builder;
-use Lcobucci\JWT\Signer\Key;
+use DateTimeImmutable;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token;
 use League\OAuth2\Server\CryptKey;
@@ -21,24 +21,61 @@ use League\OAuth2\Server\Entities\ScopeEntityInterface;
 trait AccessTokenTrait
 {
     /**
+     * @var CryptKey
+     */
+    private $privateKey;
+
+    /**
+     * @var Configuration
+     */
+    private $jwtConfiguration;
+
+    /**
+     * Set the private key used to encrypt this access token.
+     */
+    public function setPrivateKey(CryptKey $privateKey)
+    {
+        $this->privateKey = $privateKey;
+    }
+
+    /**
+     * Initialise the JWT Configuration.
+     */
+    public function initJwtConfiguration()
+    {
+        $this->jwtConfiguration = Configuration::forAsymmetricSigner(
+            new Sha256(),
+            InMemory::plainText($this->privateKey->getKeyContents(), $this->privateKey->getPassPhrase() ?? ''),
+            InMemory::plainText('empty', 'empty')
+        );
+    }
+
+    /**
      * Generate a JWT from the access token
-     *
-     * @param CryptKey $privateKey
      *
      * @return Token
      */
-    public function convertToJWT(CryptKey $privateKey)
+    private function convertToJWT()
     {
-        return (new Builder())
-            ->setAudience($this->getClient()->getIdentifier())
-            ->setId($this->getIdentifier(), true)
-            ->setIssuedAt(time())
-            ->setNotBefore(time())
-            ->setExpiration($this->getExpiryDateTime()->getTimestamp())
-            ->setSubject($this->getUserIdentifier())
-            ->set('scopes', $this->getScopes())
-            ->sign(new Sha256(), new Key($privateKey->getKeyPath(), $privateKey->getPassPhrase()))
-            ->getToken();
+        $this->initJwtConfiguration();
+
+        return $this->jwtConfiguration->builder()
+            ->permittedFor($this->getClient()->getIdentifier())
+            ->identifiedBy($this->getIdentifier())
+            ->issuedAt(new DateTimeImmutable())
+            ->canOnlyBeUsedAfter(new DateTimeImmutable())
+            ->expiresAt($this->getExpiryDateTime())
+            ->relatedTo((string) $this->getUserIdentifier())
+            ->withClaim('scopes', $this->getScopes())
+            ->getToken($this->jwtConfiguration->signer(), $this->jwtConfiguration->signingKey());
+    }
+
+    /**
+     * Generate a string representation from the access token
+     */
+    public function __toString()
+    {
+        return $this->convertToJWT()->toString();
     }
 
     /**
@@ -47,7 +84,7 @@ trait AccessTokenTrait
     abstract public function getClient();
 
     /**
-     * @return DateTime
+     * @return DateTimeImmutable
      */
     abstract public function getExpiryDateTime();
 
@@ -60,4 +97,9 @@ trait AccessTokenTrait
      * @return ScopeEntityInterface[]
      */
     abstract public function getScopes();
+
+    /**
+     * @return string
+     */
+    abstract public function getIdentifier();
 }

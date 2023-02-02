@@ -7,6 +7,7 @@
  * Publisher exports content from your Drupal site to Content Hub services.
  */
 
+use Drupal\acquia_contenthub\Exception\EntityOriginMismatchException;
 use Drupal\acquia_contenthub_publisher\ContentHubPublisherEvents;
 use Drupal\acquia_contenthub_publisher\Event\NotConfirmedEntitiesFoundEvent;
 use Drupal\acquia_contenthub_publisher\PublisherTracker;
@@ -52,6 +53,9 @@ function acquia_contenthub_publisher_entity_delete(EntityInterface $entity) {
   $common = \Drupal::service('acquia_contenthub_common_actions');
   try {
     $common->deleteRemoteEntity($uuid);
+  }
+  catch (EntityOriginMismatchException $exc) {
+    \Drupal::logger('acquia_contenthub')->info($exc->getMessage());
   }
   catch (\Exception $e) {
     \Drupal::logger('acquia_contenthub')->error('@error_message', ['@error_message' => $e->getMessage()]);
@@ -226,6 +230,7 @@ function acquia_contenthub_publisher_paragraph_presave(ParagraphInterface $entit
 function _acquia_contenthub_publisher_is_paragraph_changed(ParagraphInterface $entity): bool {
   $original = $entity->original;
   // Forces direct retrieval from entity storage.
+  // @phpstan-ignore-next-line
   $entity->original = NULL;
   $changed = $entity->isChanged();
   // Reset to original state.

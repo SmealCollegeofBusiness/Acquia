@@ -58,7 +58,9 @@ class CohesionContentTemplatesListController extends ControllerBase {
    */
   public function listing($entity_type) {
 
-    $templates_ids = $this->entityTypeManager->getStorage('cohesion_content_templates')->getQuery()->execute();
+    $templates_ids = $this->entityTypeManager->getStorage('cohesion_content_templates')->getQuery()
+      ->accessCheck(TRUE)
+      ->execute();
 
     if ($templates_ids) {
       $candidate_template_storage = $this->entityTypeManager->getStorage('cohesion_content_templates');

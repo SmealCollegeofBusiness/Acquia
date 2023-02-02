@@ -115,12 +115,17 @@ class ElementsListBuilder extends CohesionListBuilder implements FormInterface {
     $reflector = new \ReflectionClass($this->entityType->getClass());
     $category_type_id = $reflector->getConstant('CATEGORY_ENTITY_TYPE_ID');
 
-    $categories_query = $this->entityTypeManager->getStorage($category_type_id)->getQuery()->sort('weight', 'asc');
+    $categories_query = $this->entityTypeManager->getStorage($category_type_id)->getQuery()
+      ->accessCheck(TRUE)
+      ->sort('weight', 'asc');
 
     if ($categories = $this->entityTypeManager->getStorage($category_type_id)->loadMultiple($categories_query->execute())) {
       foreach ($categories as $category) {
 
-        $query = $this->entityTypeManager->getStorage($this->entityType->id())->getQuery()->condition('category', $category->id())->sort('weight', 'asc');
+        $query = $this->entityTypeManager->getStorage($this->entityType->id())->getQuery()
+          ->accessCheck(TRUE)
+          ->condition('category', $category->id())
+          ->sort('weight', 'asc');
 
         $entities = $this->entityTypeManager->getStorage($this->entityType->id())->loadMultiple($query->execute());
 
@@ -164,7 +169,7 @@ class ElementsListBuilder extends CohesionListBuilder implements FormInterface {
       '#header' => ($entities) ? $this->buildHeader() : [],
       '#title' => $category->label(),
       '#rows' => [],
-      '#empty' => $this->t('There are no @label yet.', ['@label' => mb_strtolower($this->entityType->getLabel())]),
+      '#empty' => $this->t('There are no @label yet.', ['@label' => mb_strtolower($this->entityType->getLabel() ?? '')]),
       '#cache' => [
         'contexts' => $this->entityType->getListCacheContexts(),
         'tags' => $this->entityType->getListCacheTags(),

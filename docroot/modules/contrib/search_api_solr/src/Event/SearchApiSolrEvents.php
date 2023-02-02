@@ -6,6 +6,7 @@ namespace Drupal\search_api_solr\Event;
  * Defines events for the Search API Solr module.
  *
  * You can also leverage any solarium event:
+ *
  * @see https://solarium.readthedocs.io/en/stable/customizing-solarium/#plugin-system
  * @see https://github.com/solariumphp/solarium/blob/master/src/Core/Event/Events.php
  */
@@ -119,6 +120,15 @@ final class SearchApiSolrEvents {
    * @see \Drupal\search_api_solr\Event\PostSetFacetsEvent
    */
   const POST_SET_FACETS = PostSetFacetsEvent::class;
+
+  /**
+   * Fired before a value gets indexed as language fallback.
+   *
+   * @Event
+   *
+   * @see \Drupal\search_api_solr\Event\PreAddLanguageFallbackFieldEvent
+   */
+  const PRE_ADD_LANGUAGE_FALLBACK_FIELD = PreAddLanguageFallbackFieldEvent::class;
 
   /**
    * Fired before any Search API fields gets mapped to a Solr document.

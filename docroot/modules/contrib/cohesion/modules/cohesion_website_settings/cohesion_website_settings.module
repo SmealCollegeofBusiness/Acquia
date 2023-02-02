@@ -4,6 +4,8 @@
  * @file
  */
 
+use Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Route;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\cohesion_website_settings\Entity\WebsiteSettings;
@@ -107,6 +109,8 @@ function cohesion_website_settings_batch_import_finished($success, $results, $op
   \Drupal::service('asset.js.collection_optimizer')->deleteAll();
   _drupal_flush_css_js();
   drupal_static_reset();
+
+  return new RedirectResponse(Url::fromRoute('cohesion.configuration.account_settings')->toString());
 }
 
 /**

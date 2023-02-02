@@ -19,3 +19,14 @@ function smart_trim_help($route_name, RouteMatchInterface $route_match) {
       return $output;
   }
 }
+
+/**
+ * Implements hook_field_migration_field_formatter_info().
+ */
+function smart_trim_field_migration_field_formatter_info() {
+  return [
+    'text' => ['smart_trim_format' => 'smart_trim'],
+    'text_long' => ['smart_trim_format' => 'smart_trim'],
+    'text_with_summary' => ['smart_trim_format' => 'smart_trim'],
+  ];
+}

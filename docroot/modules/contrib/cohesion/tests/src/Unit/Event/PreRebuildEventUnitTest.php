@@ -6,7 +6,7 @@ use Drupal\cohesion\Event\PreRebuildEvent;
 use Drupal\cohesion\Event\SiteStudioEvents;
 use Drupal\Tests\Component\EventDispatcher\TestEventSubscriber;
 use Drupal\Tests\UnitTestCase;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -69,7 +69,7 @@ class PreRebuildEventTest extends UnitTestCase {
 
     // Setup event
     $this->event = new PreRebuildEvent();
-    $this->return = $this->dispatcher->dispatch(self::PRE_REBUILD, $this->event);
+    $this->return = $this->dispatcher->dispatch($this->event, self::PRE_REBUILD);
   }
 
   /**
@@ -77,7 +77,7 @@ class PreRebuildEventTest extends UnitTestCase {
    */
   public function testEvent() {
     $this->assertTrue($this->dispatcher->hasListeners(self::PRE_REBUILD));
-    $this->assertInstanceOf(Event::class, $this->dispatcher->dispatch(self::PRE_REBUILD, new PreRebuildEvent()));
+    $this->assertInstanceOf(Event::class, $this->dispatcher->dispatch(new PreRebuildEvent(), self::PRE_REBUILD));
     $this->assertSame($this->event, $this->return);
   }
 

@@ -8,6 +8,7 @@ use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\FailedImportEvent;
 use Drupal\acquia_contenthub\Event\LoadLocalEntityEvent;
 use Drupal\acquia_contenthub\Event\PreEntitySaveEvent;
+use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -60,7 +61,10 @@ class CreateStubs implements EventSubscriberInterface {
    */
   public function onImportFailure(FailedImportEvent $event, string $event_name, EventDispatcherInterface $dispatcher) {
     if (static::$count === $event->getCount()) {
-      $exception = new \Exception("Potential infinite recursion call interrupted in CreateStubs event subscriber.");
+      $exception = new ContentHubImportException(
+        'Potential infinite recursion call interrupted in CreateStubs event subscriber.',
+        ContentHubImportException::INFINITE_RECURSION
+      );
       $event->setException($exception);
       return;
     }
@@ -179,7 +183,7 @@ class CreateStubs implements EventSubscriberInterface {
    *   The CDF object.
    * @param string $uuid
    *   The incoming UUID.
-   * @param \Drupal\Depcalc\DependencyStack $stack
+   * @param \Drupal\depcalc\DependencyStack $stack
    *   The dependency stack.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
    *   The dispatcher.

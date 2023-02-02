@@ -52,6 +52,7 @@ class CreateNewRevision implements EventSubscriberInterface {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function onPreEntitySave(PreEntitySaveEvent $event) {
+    /** @var \Drupal\node\NodeTypeInterface $entity */
     $entity = $event->getEntity();
     // Check whether the entity is configured to create a new revision
     // every time it is saved or if we're saving an entity that

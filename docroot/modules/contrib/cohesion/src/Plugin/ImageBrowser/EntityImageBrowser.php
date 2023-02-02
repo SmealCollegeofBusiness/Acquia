@@ -42,7 +42,7 @@ class EntityImageBrowser extends ImageBrowserPluginBase {
     $default_entity_browser = isset($options['media_browser']) ? 'media_browser' : FALSE;
 
     // Build the form partial.
-    $index = isset($config_object[$browser_type]['dx8_entity_browser']) ? $config_object[$browser_type]['dx8_entity_browser'] : $default_entity_browser;
+    $index = $config_object[$browser_type]['dx8_entity_browser'] ?? $default_entity_browser;
     $form['dx8_entity_browser_' . $browser_type] = [
       '#type' => 'select',
       '#title' => t('Entity browser'),
@@ -103,6 +103,7 @@ class EntityImageBrowser extends ImageBrowserPluginBase {
             $attachments['drupalSettings']['cohesion']['imageBrowser'] = [
               'url' => $url,
               'title' => $this->getName(),
+              'key' => 'entity-browser',
             ];
 
             // Tell the entity browser the count and cardinality (how many

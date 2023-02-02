@@ -1,4 +1,4 @@
-(function ($, Drupal, drupalSettings) {
+(function ($, Drupal, once, drupalSettings) {
   var destroyEvent, reAttachEvent;
   if ( typeof window.CustomEvent !== "function" ) {
     // Polyfill for IE11 creating events.
@@ -99,26 +99,24 @@
         // The page is embedded in an iframe on the same origin, so probably the style preview. Don't load vpb.
         return;
       }
-      $('body', context)
-          .once('initSiteStudio')
-          .each(function() {
+      $(once('initSiteStudio', 'body', context)).each(function() {
             if ($('[data-ssa-canvas]').length > 0) {
 
               if (isPageBuilderEnabled()) {
                 enablePageBuilder();
               }
 
-              $('#coh-builder-btn').on('click', ()=> {
+              $('body').on('click', '#coh-builder-btn', ()=> {
                 if (!isPageBuilderEnabled()) {
                   enablePageBuilder();
                 }
               });
 
-              $('#ssa-builder-toggle').removeClass('hidden');
+              $('body #ssa-builder-toggle').removeClass('hidden');
             } else {
-              $('#ssa-builder-toggle').addClass('hidden');
+              $('body #ssa-builder-toggle').addClass('hidden');
             }
           });
     }
   };
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal, once, drupalSettings);

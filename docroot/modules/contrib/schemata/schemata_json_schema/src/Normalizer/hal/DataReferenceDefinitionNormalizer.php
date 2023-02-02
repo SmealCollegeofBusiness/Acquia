@@ -50,23 +50,21 @@ class DataReferenceDefinitionNormalizer extends JsonDataReferenceDefinitionNorma
    * {@inheritdoc}
    */
   public function normalize($entity, $format = NULL, array $context = []) {
-    /* @var $entity \Drupal\Core\TypedData\DataReferenceDefinitionInterface */
+    /** @var \Drupal\Core\TypedData\DataReferenceDefinitionInterface $entity */
     if (!$this->validateEntity($entity)) {
       return [];
     }
 
     // Collect data about the reference field.
     $parentProperty = $this->extractPropertyData($context['parent'], $context);
-    $property = $this->extractPropertyData($entity, $context);
     $target_type = $entity->getConstraint('EntityType');
-    $target_bundles = isset($context['settings']['handler_settings']['target_bundles']) ?
-      $context['settings']['handler_settings']['target_bundles'] : [];
+    $target_bundles = $context['settings']['handler_settings']['target_bundles'] ?? [];
 
     // Build the relation URI, which is used as the property key.
     $field_uri = $this->linkManager->getRelationUri(
       $context['entityTypeId'],
       // Drupal\Core\Entity\Entity::bundle() returns Entity Type ID by default.
-      isset($context['bundleId']) ? $context['bundleId'] : $context['entityTypeId'],
+      $context['bundleId'] ?? $context['entityTypeId'],
       $context['name'],
       $context
     );

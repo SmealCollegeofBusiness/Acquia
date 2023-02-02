@@ -36,8 +36,8 @@ function cohesion_style_guide_form_system_theme_settings_alter(&$form, FormState
       $form['#attached']['drupalSettings']['cohesion']['parentEntityForm']['json_values'] = json_decode($style_guide_manager_json_values['parent']);
       $form['#attached']['drupalSettings']['cohesion']['fieldPreview'] = $style_guide_manager_handler->tokensCanBePreview();
 
-      $form['#attached']['drupalSettings']['cohesion']['canvas_preview_css'] = drupal_get_path('module', 'cohesion_elements') . '/css/canvas-preview.css';
-      $form['#attached']['drupalSettings']['cohesion']['canvas_preview_js'] = drupal_get_path('module', 'cohesion_elements') . '/js/canvas-preview.js';
+      $form['#attached']['drupalSettings']['cohesion']['canvas_preview_css'] = \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion_elements') . '/css/canvas-preview.css';
+      $form['#attached']['drupalSettings']['cohesion']['canvas_preview_js'] = \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion_elements') . '/js/canvas-preview.js';
 
       $form['cohesion'] = [
         // Drupal\cohesion\Element\CohesionField.
@@ -105,6 +105,7 @@ function cohesion_style_guide_token_info() {
   $style_guide_storage = \Drupal::entityTypeManager()
     ->getStorage('cohesion_style_guide');
   $style_guide_ids = $style_guide_storage->getQuery()
+    ->accessCheck(TRUE)
     ->sort('weight')
     ->condition('status', TRUE)
     ->execute();

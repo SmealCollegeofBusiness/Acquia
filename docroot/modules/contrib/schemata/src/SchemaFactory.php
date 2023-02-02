@@ -80,19 +80,17 @@ class SchemaFactory {
    *   A Schema object which can be processed as a Rest Resource response.
    */
   public function create($entity_type, $bundle = NULL) {
+    // Only content entities are supported.
     try {
-      $entity_type_plugin = $this->getSourceEntityPlugin($entity_type);
+      $this->getSourceEntityPlugin($entity_type);
     }
-    catch(\Exception $e) {
-      $this->logger->error($e->getMessage());
-      // @todo Handle these exceptions in https://www.drupal.org/node/2868562.
+    catch (\InvalidArgumentException | PluginNotFoundException $e) {
+      $this->logger->warning($e->getMessage());
       return NULL;
     }
 
-    if ($entity_type_plugin->getBundleEntityType()) {
-      $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
-    }
-    if (!empty($bundle) && !array_key_exists($bundle, $bundles)) {
+    $bundles = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
+    if (!empty($bundle) && !empty($bundles) && !array_key_exists($bundle, $bundles)) {
       $this->logger->warning('Specified Entity Bundle "%bundle" does not exist.', [
         '%bundle' => $bundle,
       ]);
@@ -166,7 +164,5 @@ class SchemaFactory {
 
     return $entity_type_plugin;
   }
-
-
 
 }

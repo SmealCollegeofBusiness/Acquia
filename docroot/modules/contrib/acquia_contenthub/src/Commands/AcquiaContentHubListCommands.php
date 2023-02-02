@@ -127,7 +127,7 @@ class AcquiaContentHubListCommands extends DrushCommands {
     // Building the filters.
     $filters = $options['filters'];
     if (isset($filters)) {
-      $filters = isset($filters) ? explode(",", $filters) : FALSE;
+      $filters = explode(",", $filters);
       foreach ($filters as $key => $filter) {
         [$name, $value] = explode("=", $filter);
         $filters[$name] = $value;

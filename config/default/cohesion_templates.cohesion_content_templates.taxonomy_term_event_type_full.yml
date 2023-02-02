@@ -1,0 +1,18 @@
+uuid: 9d627178-c73f-42f8-8e01-09babe728fae
+langcode: en
+status: false
+dependencies: {  }
+label: 'Taxonomy term page (Taxonomy_term, Event Type)'
+id: taxonomy_term_event_type_full
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: taxonomy_term
+bundle: event_type
+view_mode: full
+master_template: ''

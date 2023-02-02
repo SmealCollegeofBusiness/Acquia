@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file
+ * Acquia Content Hub - Dashboard module install file.
+ */
+
+use Acquia\ContentHubClient\ContentHubClient;
+
+/**
+ * Implements hook_install().
+ *
+ * Sets allowed origins.
+ *
+ * @throws \Exception
+ */
+function acquia_contenthub_dashboard_install() {
+  /** @var \Drupal\acquia_contenthub\Client\ClientFactory $factory */
+  $factory = \Drupal::service('acquia_contenthub.client.factory');
+  $client = $factory ? $factory->getClient() : NULL;
+  if (!$client instanceof ContentHubClient) {
+    return;
+  }
+
+  /** @var \Drupal\Core\Extension\ModuleHandlerInterface $module_handler */
+  $module_handler = \Drupal::service('module_handler');
+  if (!$module_handler->moduleExists('acquia_contenthub_subscriber')) {
+    return;
+  }
+
+  /** @var \Drupal\acquia_contenthub_dashboard\AutoPublisherDiscoveryFilterHandler $auto_pub_filter */
+  $auto_pub_filter = \Drupal::service('acquia_contenthub_dashboard.auto_pub_filter_handler');
+  $auto_pub_filter->updateDefaultClientPublisherFilterToWebhook(TRUE);
+}

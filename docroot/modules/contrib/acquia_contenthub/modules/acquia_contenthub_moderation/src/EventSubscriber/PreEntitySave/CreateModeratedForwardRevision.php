@@ -127,7 +127,9 @@ class CreateModeratedForwardRevision implements EventSubscriberInterface {
     if ($entity instanceof RevisionableInterface && $entity->isNewRevision()) {
       // Make it a forward revision if import moderation state is
       // not a "published" state.
-      $published_state = $workflow->getTypePlugin()->getState($import_moderation_state)->isPublishedState();
+      /** @var \Drupal\content_moderation\ContentModerationState $moderation_state */
+      $moderation_state = $workflow->getTypePlugin()->getState($import_moderation_state);
+      $published_state = $moderation_state->isPublishedState();
       if (!$published_state) {
         $entity->isDefaultRevision(FALSE);
       }

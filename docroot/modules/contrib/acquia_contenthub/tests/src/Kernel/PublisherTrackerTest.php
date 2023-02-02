@@ -68,7 +68,6 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
     $this->assertNotEmpty($hash_before);
 
     $status = $this->getTrackingTableColByUuid($this->node->uuid(), 'status');
-    // Nullifies hashes in the Publisher Tracker.
     $this->publisherTracker->nullifyHashes([$status], ['node'], [$this->node->uuid()]);
 
     $hash_after = $this->getTrackingTableColByUuid($this->node->uuid(), 'hash');
@@ -82,7 +81,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function testIsTracked() {
+  public function testIsTracked(): void {
     $is_tracked = $this->publisherTracker->isTracked($this->node->uuid());
     $this->assertTrue($is_tracked);
   }
@@ -95,7 +94,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Exception
    */
-  public function testSetQueueItemByUuid() {
+  public function testSetQueueItemByUuid(): void {
     $expected_queue_id = 1;
 
     $this->publisherTracker->setQueueItemByUuid($this->node->uuid(), $expected_queue_id);
@@ -111,7 +110,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Exception
    */
-  public function testDelete() {
+  public function testDelete(): void {
     $this->publisherTracker->delete('entity_uuid', $this->node->uuid());
 
     $is_deleted = $this->getTrackingTableColByUuid($this->node->uuid());
@@ -125,7 +124,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function testGetRecord() {
+  public function testGetRecord(): void {
     $record = $this->publisherTracker->getRecord($this->node->uuid());
     $this->assertIsObject($record);
   }
@@ -137,7 +136,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function testGet() {
+  public function testGet(): void {
     $record = $this->publisherTracker->get($this->node->uuid());
     $this->assertIsObject($record);
   }
@@ -149,7 +148,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function testGetQueueId() {
+  public function testGetQueueId(): void {
     $uuid = $this->node->uuid();
 
     // Queue id should not be empty when node is created.
@@ -173,7 +172,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Exception
    */
-  public function testInsertOrUpdate() {
+  public function testInsertOrUpdate(): void {
     // Status is set to queued whenever a new entity is created.
     $queued_status = $this->getTrackingTableColByUuid($this->node->uuid(), 'status');
     $this->assertEquals($queued_status, 'queued');
@@ -220,7 +219,7 @@ class PublisherTrackerTest extends NullifyQueueIdTest {
   /**
    * {@inheritDoc}
    */
-  public function tearDown() {
+  public function tearDown(): void {
     $this->node->delete();
     $this->queue->deleteQueue();
 

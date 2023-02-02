@@ -4,6 +4,7 @@ namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 use Acquia\ContentHubClient\CDF\CDFObject;
 use Acquia\ContentHubClient\CDF\CDFObjectInterface;
+use Acquia\ContentHubClient\ContentHubLoggingClient;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Component\Uuid\Uuid;
@@ -148,27 +149,14 @@ class ExportTest extends EntityKernelTestBase {
     $this->installEntitySchema('file');
     $this->installSchema('file', ['file_usage']);
     $this->installSchema('user', ['users_data']);
-    $this->installConfig([
-      'acquia_contenthub',
-      'acquia_contenthub_publisher',
-      'system',
-      'field',
-      'node',
-      'file',
-      'user',
-      'taxonomy',
-    ]);
 
     $origin_uuid = '00000000-0000-0001-0000-123456789123';
-
     $configFactory = $this->container->get('config.factory');
-    $config = $configFactory->getEditable('acquia_contenthub.admin_settings');
-    $config->set('origin', $origin_uuid);
-    $config->set('send_contenthub_updates', TRUE);
-    $config->save();
+    $contenthub_client = $this->getMockBuilder('\Acquia\ContentHubClient\ContentHubClient')
+      ->disableOriginalConstructor()
+      ->getMock();
 
-    // Acquia ContentHub export queue service.
-    $this->contentHubQueue = $this->container->get('acquia_contenthub_publisher.acquia_contenthub_export_queue');
+    $contenthub_logging_client = $this->prophesize(ContentHubLoggingClient::class);
 
     $cdf_object = $this->getMockBuilder(CDFObjectInterface::class)
       ->disableOriginalConstructor()
@@ -183,9 +171,6 @@ class ExportTest extends EntityKernelTestBase {
     $response->method('getStatusCode')
       ->willReturn(202);
 
-    $contenthub_client = $this->getMockBuilder('\Acquia\ContentHubClient\ContentHubClient')
-      ->disableOriginalConstructor()
-      ->getMock();
     $contenthub_client->method('putEntities')
       ->with($this->captureArg($this->cdfObject))
       ->willReturn($response);
@@ -203,7 +188,9 @@ class ExportTest extends EntityKernelTestBase {
     $contenthub_client_factory
       ->method('getClient')
       ->willReturn($contenthub_client);
-    $this->container->set('acquia_contenthub.client.factory', $contenthub_client_factory);
+
+    $contenthub_client_factory->method('getLoggingClient')
+      ->willReturn($contenthub_logging_client->reveal());
 
     $contenthub_settings = $this->getMockBuilder('\Acquia\ContentHubClient\Settings')
       ->disableOriginalConstructor()
@@ -211,11 +198,35 @@ class ExportTest extends EntityKernelTestBase {
     $contenthub_settings->method('getUuid')
       ->willReturn($origin_uuid);
 
+    $contenthub_settings->method('getWebhook')
+      ->willReturn($origin_uuid);
+
     $contenthub_client_factory->method('getSettings')
       ->willReturn($contenthub_settings);
 
     $contenthub_client->method('getSettings')
       ->willReturn($contenthub_settings);
+
+    $this->container->set('acquia_contenthub.client.factory', $contenthub_client_factory);
+
+    $this->installConfig([
+      'acquia_contenthub',
+      'acquia_contenthub_publisher',
+      'system',
+      'field',
+      'node',
+      'file',
+      'user',
+      'taxonomy',
+    ]);
+
+    $config = $configFactory->getEditable('acquia_contenthub.admin_settings');
+    $config->set('origin', $origin_uuid);
+    $config->set('send_contenthub_updates', TRUE);
+    $config->save();
+
+    // Acquia ContentHub export queue service.
+    $this->contentHubQueue = $this->container->get('acquia_contenthub_publisher.acquia_contenthub_export_queue');
 
     $common = $this->getMockBuilder(ContentHubCommonActions::class)
       ->setConstructorArgs([

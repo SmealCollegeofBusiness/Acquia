@@ -1,0 +1,18 @@
+uuid: f804ff37-cef8-408c-81a8-ae77f509b28e
+langcode: en
+status: false
+dependencies: {  }
+label: 'Full content (Node, Place)'
+id: node_place_full
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: place
+view_mode: full
+master_template: ''

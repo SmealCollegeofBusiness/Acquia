@@ -89,7 +89,7 @@ class CustomStylesForm extends CohesionStyleBuilderForm {
     $form['details']['class_name']['#title'] = $this->t('Class Name') . ' ';
     $form['details']['class_name']['#attributes']['class'] = ['class-name'];
     $form['details']['class_name']['#description_display'] = 'before';
-    $form['details']['class_name']['#default_value'] = str_replace(custom_style_class_prefix, '', $this->entity->get('class_name'));
+    $form['details']['class_name']['#default_value'] = str_replace(custom_style_class_prefix, '', $this->entity->get('class_name') ?? '');
     $form['details']['class_name']['#type'] = 'machine_name';
     $form['details']['class_name']['#required'] = FALSE;
     $form['details']['class_name']['#disabled'] = !$this->entity->isNew();
@@ -128,11 +128,12 @@ class CustomStylesForm extends CohesionStyleBuilderForm {
       '#weight' => 1,
     ];
 
-    if ($custom_style_type->getElement() != '' || $custom_style_type->id() == 'generic') {
+    // Available in CKEditor as block
+    if ($custom_style_type->getElement() != '') {
       // Is the custom type type available in the WYSIWYG?
       $form['available_in_wysiwyg'] = [
         '#type' => 'checkbox',
-        '#title' => $this->t('Make available in WYSIWYG editor'),
+        '#title' => $this->t('Make available in CKEditor editor as block style'),
         '#maxlength' => 255,
         '#default_value' => $this->entity->get('available_in_wysiwyg'),
         '#disabled' => FALSE,
@@ -147,10 +148,31 @@ class CustomStylesForm extends CohesionStyleBuilderForm {
       ];
     }
 
+    // Available in CKEditor as inline
+    if ($custom_style_type->getElement() != '' || $custom_style_type->id() == 'generic') {
+      $form['available_in_wysiwyg_inline'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Make available in CKEditor editor as text style'),
+        '#maxlength' => 255,
+        '#default_value' => $this->entity->get('available_in_wysiwyg_inline'),
+        '#disabled' => FALSE,
+        '#access' => TRUE,
+        '#weight' => 9,
+      ];
+    }
+    else {
+      $form['available_in_wysiwyg_inline'] = [
+        '#type' => 'hidden',
+        '#default_value' => FALSE,
+      ];
+    }
+
+    // The custom style is a extended custom style
     if ($this->entity->getParentId()) {
       $parent_entity = \Drupal::entityTypeManager()->getStorage('cohesion_custom_style')->load($this->entity->getParentId());
       if ($parent_entity && !$parent_entity->status()) {
         $form['available_in_wysiwyg']['#disabled'] = TRUE;
+        $form['available_in_wysiwyg_inline']['#disabled'] = TRUE;
         $form['status']['#disabled'] = TRUE;
         $form['selectable']['#disabled'] = TRUE;
       }
@@ -212,7 +234,10 @@ class CustomStylesForm extends CohesionStyleBuilderForm {
     if ($form_state->getValue('original_class_name') !== $this->entity->getClass()) {
 
       $storage = $this->entityTypeManager->getStorage('cohesion_custom_style');
-      $ids = $storage->getQuery()->condition('parent', $form_state->getValue('original_class_name'))->execute();
+      $ids = $storage->getQuery()
+        ->accessCheck(TRUE)
+        ->condition('parent', $form_state->getValue('original_class_name') ?? '')
+        ->execute();
 
       // Loop over the children.
       foreach ($storage->loadMultiple($ids) as $child_entity) {
@@ -241,7 +266,7 @@ class CustomStylesForm extends CohesionStyleBuilderForm {
    * @return bool
    */
   public function checkMachineName($value) {
-    $query = \Drupal::entityQuery('cohesion_custom_style');
+    $query = \Drupal::entityQuery('cohesion_custom_style')->accessCheck(TRUE);
     $query->condition('class_name', custom_style_class_prefix . $value);
     $entity_ids = $query->execute();
 
@@ -272,7 +297,7 @@ class CustomStylesForm extends CohesionStyleBuilderForm {
   public function checkUniqueMachineName($value) {
 
     $query = $this->entityTypeManager->getStorage('cohesion_custom_style')->getQuery();
-    $query->condition('class_name', custom_style_class_prefix . $value);
+    $query->condition('class_name', custom_style_class_prefix . $value)->accessCheck(TRUE);
     $entity_ids = $query->execute();
 
     return count($entity_ids) > 0;

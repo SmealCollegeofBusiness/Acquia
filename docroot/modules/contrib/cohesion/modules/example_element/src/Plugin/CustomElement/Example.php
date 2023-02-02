@@ -24,7 +24,7 @@ class Example extends CustomElementPluginBase {
       'mytextfield' => [
         // This is the bootstrap class name that will be applied to the
         // wrapping column.
-        'htmlClass' => 'col-xs-12',
+        'htmlClass' => 'ssa-grid-col-12',
         // All form elements require a title.
         'title' => 'Title of my text field.',
         // The field type.
@@ -35,7 +35,7 @@ class Example extends CustomElementPluginBase {
         'validationMessage' => 'This field is required.',
       ],
       'myselectfield' => [
-        'htmlClass' => 'col-xs-12',
+        'htmlClass' => 'ssa-grid-col-12',
         'type' => 'select',
         'title' => 'Title of my select field',
         // These fields are specific to this form field type.
@@ -48,7 +48,7 @@ class Example extends CustomElementPluginBase {
         'defaultValue' => 'option1',
       ],
       'mynumberselectfield' => [
-        'htmlClass' => 'col-xs-12',
+        'htmlClass' => 'ssa-grid-col-12',
         'type' => 'select',
         'title' => 'Title of my number select field',
         // These fields are specific to this form field type.
@@ -61,7 +61,7 @@ class Example extends CustomElementPluginBase {
         'defaultValue' => 200,
       ],
       'mycheckboxfield' => [
-        'htmlClass' => 'col-xs-6',
+        'htmlClass' => 'ssa-grid-col-6',
         'type' => 'checkbox',
         'title' => 'Title of my checkbox field',
         // These fields are specific to this form field type.
@@ -69,7 +69,7 @@ class Example extends CustomElementPluginBase {
         'defaultValue' => TRUE,
       ],
       'myothercheckboxfield' => [
-        'htmlClass' => 'col-xs-6',
+        'htmlClass' => 'ssa-grid-col-6',
         'type' => 'checkbox',
         'title' => 'Title of my other checkbox field',
         // These fields are specific to this form field type.
@@ -77,19 +77,19 @@ class Example extends CustomElementPluginBase {
         'defaultValue' => FALSE,
       ],
       'myimagefield' => [
-        'htmlClass' => 'col-xs-12',
+        'htmlClass' => 'ssa-grid-col-12',
         'type' => 'image',
         'title' => 'Title of my image field',
         // These fields are specific to this form field type.
         'buttonText' => 'Some button',
       ],
       'mytextareafield' => [
-        'htmlClass' => 'col-xs-12',
+        'htmlClass' => 'ssa-grid-col-12',
         'type' => 'textarea',
         'title' => 'Title of my text area field.',
       ],
       'mywysiwygfield' => [
-        'htmlClass' => 'col-xs-12',
+        'htmlClass' => 'ssa-grid-col-12',
         'type' => 'wysiwyg',
         'title' => 'Title of my WYSIWYG field.',
         'defaultValue' => [

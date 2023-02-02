@@ -3,10 +3,12 @@
 namespace Drupal\acquia_contenthub;
 
 use Acquia\ContentHubClient\ContentHubClient;
-use Acquia\ContentHubClient\Settings;
+use Acquia\ContentHubClient\Syndication\SyndicationStatus;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
+use Drupal\acquia_contenthub\Libs\InterestList\InterestListTrait;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Url;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -18,6 +20,8 @@ use Symfony\Component\HttpFoundation\Response;
  * @package Drupal\acquia_contenthub
  */
 class ContentHubConnectionManager {
+
+  use InterestListTrait;
 
   /**
    * Default cloud filter prefix.
@@ -50,16 +54,23 @@ class ContentHubConnectionManager {
   /**
    * The acquia_contenthub logger channel.
    *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
 
   /**
    * The Content Hub settings.
    *
-   * @var \Acquia\ContentHubClient\Settings
+   * @var \Acquia\ContentHubClient\Settings|null
    */
   protected $settings;
+
+  /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
 
   /**
    * ContentHubConnectionManager constructor.
@@ -70,14 +81,15 @@ class ContentHubConnectionManager {
    *   The ContentHub client factory.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger channel.
-   * @param \Acquia\ContentHubClient\Settings $settings
-   *   The settings object constructed from Content Hub settings form.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ClientFactory $factory, LoggerInterface $logger, Settings $settings) {
+  public function __construct(ConfigFactoryInterface $config_factory, ClientFactory $factory, LoggerInterface $logger, ModuleHandlerInterface $module_handler) {
     $this->configFactory = $config_factory;
     $this->client = $factory->getClient();
     $this->logger = $logger;
-    $this->settings = $settings;
+    $this->settings = $this->client ? $this->client->getSettings() : NULL;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -120,6 +132,7 @@ class ContentHubConnectionManager {
     $response = $this->client->addWebhook($webhook_url);
     if (isset($response['success']) && $response['success'] === FALSE) {
       if (isset($response['error']['code']) && $response['error']['code'] === self::WEBHOOK_ALREADY_EXISTS) {
+        /** @var \Acquia\ContentHubClient\Webhook $wh */
         $wh = $this->client->getWebHook($webhook_url);
         $response['uuid'] = $wh->getUuid();
       }
@@ -196,6 +209,12 @@ class ContentHubConnectionManager {
       return $this->registerWebhook($webhook_url);
     }
 
+    $saved_webhook_url = $this->settings->getWebhook('url');
+    if ($saved_webhook_url === $webhook_url && $this->webhookIsRegistered($webhook_url)) {
+      $this->logger->info('The webhook @webhook did not change. Please update the webhook and try again.', ['@webhook' => $webhook_url]);
+      return [];
+    }
+
     if ($this->webhookIsRegistered($webhook_url)) {
       $this->logger->error('The webhook @webhook has already been registered!', ['@webhook' => $webhook_url]);
       return [];
@@ -204,7 +223,7 @@ class ContentHubConnectionManager {
     $options['url'] = $webhook_url;
     $response = $this->handleResponse($this->client->updateWebhook($this->settings->getWebhook('uuid'), $options));
     if (!isset($response['success'])) {
-      $this->logger->error('Unexpected error occurred during webhook update. Response: @resp', ['@resp' => print_r($response)]);
+      $this->logger->error('Unexpected error occurred during webhook update. Response: @resp', ['@resp' => print_r($response, TRUE)]);
       return [];
     }
 
@@ -286,7 +305,6 @@ class ContentHubConnectionManager {
    *   TRUE, if un-registration is successful, FALSE otherwise.
    */
   public function unregisterWebhook(AcquiaContentHubUnregisterEvent $event, bool $delete_orphaned_filters = FALSE): bool {
-
     $resp = $this->client->deleteWebhook($event->getWebhookUuid());
     if ($resp instanceof ResponseInterface && $resp->getStatusCode() !== Response::HTTP_OK) {
       $this->logger->error('Could not unregister webhook: @e_message', ['@e_message' => $resp->getReasonPhrase()]);
@@ -350,12 +368,12 @@ class ContentHubConnectionManager {
    * @param string $filter_name
    *   The name of the filter.
    *
-   * @return array
+   * @return array|null
    *   The response of the attempt.
    *
    * @throws \Exception
    */
-  protected function createDefaultFilter(string $filter_name) {
+  protected function createDefaultFilter(string $filter_name): ?array {
     $filter = $this->client->getFilterByName($filter_name);
     // Only create default filter if it does not exist yet for the current
     // client.
@@ -510,50 +528,102 @@ class ContentHubConnectionManager {
   /**
    * Synchronizes this webhook's interest list with tracking table.
    */
-  public function syncWebhookInterestListWithTrackingTables() {
-    $database = \Drupal::database();
-    $module_handler = \Drupal::moduleHandler();
+  public function syncWebhookInterestListWithTrackingTables(): void {
     $config = $this->getContentHubConfig();
-    $webhook_uuid = $config->get("webhook.uuid");
+    $webhook_uuid = $config->get('webhook.uuid');
     $send_update = $config->get('send_contenthub_updates') ?? TRUE;
 
-    // If subscriber.
-    if ($module_handler->moduleExists('acquia_contenthub_subscriber')) {
-      $query = $database->select('acquia_contenthub_subscriber_import_tracking', 't')
-        ->fields('t', ['entity_uuid']);
-      $query->condition('status', 'imported');
-      $results = $query->execute()->fetchAll();
-      $uuids = [];
-      foreach ($results as $result) {
-        $uuids[] = $result->entity_uuid;
-      }
-      if (!empty($uuids) && $send_update) {
-        $this->client->addEntitiesToInterestList($webhook_uuid, $uuids);
-        $this->logger->notice('Added @count imported entities to interest list for webhook uuid = "@webhook_uuid".', [
-          '@count' => count($uuids),
-          '@webhook_uuid' => $webhook_uuid,
-        ]);
-      }
+    if ($this->moduleHandler->moduleExists('acquia_contenthub_subscriber')) {
+      $this->syncSubscriber($webhook_uuid, $send_update);
     }
 
-    // If publisher.
-    if ($module_handler->moduleExists('acquia_contenthub_publisher')) {
-      $query = $database->select('acquia_contenthub_publisher_export_tracking', 't')
-        ->fields('t', ['entity_uuid']);
-      $query->condition('status', ['imported', 'confirmed'], 'IN');
-      $results = $query->execute()->fetchAll();
-      $uuids = [];
-      foreach ($results as $result) {
-        $uuids[] = $result->entity_uuid;
-      }
-      if (!empty($uuids) && $send_update) {
-        $this->client->addEntitiesToInterestList($webhook_uuid, $uuids);
-        $this->logger->notice('Added @count exported entities to interest list for webhook uuid = "@webhook_uuid".', [
-          '@count' => count($uuids),
-          '@webhook_uuid' => $webhook_uuid,
-        ]);
-      }
+    if ($this->moduleHandler->moduleExists('acquia_contenthub_publisher')) {
+      $this->syncPublisher($webhook_uuid, $send_update);
     }
+  }
+
+  /**
+   * Syncs subscriber tracking table and interest list.
+   *
+   * @param string $webhook_uuid
+   *   Webhook uuid to send the interest list to.
+   * @param bool $send_update
+   *   Update control.
+   */
+  public function syncSubscriber(string $webhook_uuid, bool $send_update): void {
+    $uuids = $this->getTrackedItemsFromSubscriber();
+    if (empty($uuids) || !$send_update) {
+      return;
+    }
+
+    $interest_list = $this->buildInterestList(
+      $uuids,
+      SyndicationStatus::IMPORT_SUCCESSFUL,
+      'manual'
+    );
+    $this->client->addEntitiesToInterestListBySiteRole($webhook_uuid, 'SUBSCRIBER', $interest_list);
+    $this->logger->notice(sprintf(
+      'Added %d imported entities to interest list for webhook uuid = "%s".',
+      count($uuids),
+      $webhook_uuid
+    ));
+  }
+
+  /**
+   * Syncs publisher tracking table and interest list.
+   *
+   * @param string $webhook_uuid
+   *   Webhook uuid to send the interest list to.
+   * @param bool $send_update
+   *   Update control.
+   */
+  public function syncPublisher(string $webhook_uuid, bool $send_update): void {
+    $uuids = $this->getConfirmedTrackedItemsFromPublisher();
+    if (empty($uuids) || !$send_update) {
+      return;
+    }
+
+    $interest_list = $this->buildInterestList(
+      $uuids,
+      SyndicationStatus::EXPORT_SUCCESSFUL,
+      'manual'
+    );
+    $this->client->addEntitiesToInterestListBySiteRole($webhook_uuid, 'PUBLISHER', $interest_list);
+    $this->logger->notice(sprintf(
+      'Added %d exported entities to interest list for webhook uuid = "%s".',
+      count($uuids),
+      $webhook_uuid
+    ));
+  }
+
+  /**
+   * Returns an array of tracked items from subscriber tracking table.
+   *
+   * @return array
+   *   Entity uuids.
+   */
+  public function getTrackedItemsFromSubscriber(): array {
+    $database = \Drupal::database();
+    $query = $database->select('acquia_contenthub_subscriber_import_tracking', 't')
+      ->fields('t', ['entity_uuid']);
+    $query->condition('status', 'imported');
+    $results = $query->execute()->fetchAllAssoc('entity_uuid');
+    return array_keys($results);
+  }
+
+  /**
+   * Returns an array of tracked items from publisher tracking table.
+   *
+   * @return array
+   *   Entity uuids.
+   */
+  public function getConfirmedTrackedItemsFromPublisher(): array {
+    $database = \Drupal::database();
+    $query = $database->select('acquia_contenthub_publisher_export_tracking', 't')
+      ->fields('t', ['entity_uuid']);
+    $query->condition('status', ['imported', 'confirmed'], 'IN');
+    $results = $query->execute()->fetchAllAssoc('entity_uuid');
+    return array_keys($results);
   }
 
 }

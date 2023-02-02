@@ -195,7 +195,7 @@ class CustomStylesListBuilder extends CohesionListBuilder implements FormInterfa
       '#header' => ($style_entities) ? $this->buildHeader() : [],
       '#title' => $group_title,
       '#rows' => [],
-      '#empty' => $this->t('There are no @label yet.', ['@label' => mb_strtolower($this->entityType->getLabel())]),
+      '#empty' => $this->t('There are no @label yet.', ['@label' => mb_strtolower($this->entityType->getLabel() ?? '')]),
       '#cache' => [
         'contexts' => $this->entityType->getListCacheContexts(),
         'tags' => $this->entityType->getListCacheTags(),

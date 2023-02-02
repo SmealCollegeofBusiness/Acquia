@@ -48,6 +48,7 @@ abstract class ContentHubQueueFormTestBase extends BrowserTestBase {
     parent::setUp();
 
     $this->createAcquiaContentHubAdminSettings();
+    $this->config('acquia_contenthub.admin_settings')->set('send_contenthub_updates', FALSE)->save();
     $authorizedUser = $this->drupalCreateUser([
       'administer acquia content hub',
     ]);

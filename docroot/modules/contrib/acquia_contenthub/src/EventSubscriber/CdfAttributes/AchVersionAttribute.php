@@ -66,9 +66,7 @@ class AchVersionAttribute implements EventSubscriberInterface {
     $ach_attributes['current'] = $this->getAchVersion();
     $ch_latest_versions = $this->pvClient->getContentHubReleases();
     if (!empty($ch_latest_versions)) {
-      $ch_latest_version = $ch_latest_versions['latest'];
-      $ch_latest_version = substr($ch_latest_version, strpos($ch_latest_version, '-') + 1);
-      $ach_attributes['latest'] = $ch_latest_version;
+      $ach_attributes['latest'] = $ch_latest_versions['latest'];
     }
     $cdf->addAttribute('ch_version', CDFAttribute::TYPE_ARRAY_STRING);
     $attribute = $cdf->getAttribute('ch_version');

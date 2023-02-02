@@ -2,13 +2,14 @@
 
 namespace Drupal\Tests\schemata\Functional;
 
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\node\Entity\NodeType;
+use Drupal\schemata\SchemaFactory;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\schemata\SchemaUrl;
 use Drupal\Tests\BrowserTestBase;
-use League\JsonReference\Dereferencer;
 
 /**
  * Sets up functional testing for Schemata.
@@ -20,14 +21,14 @@ abstract class SchemataBrowserTestBase extends BrowserTestBase {
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Schema Factory.
    *
    * @var \Drupal\schemata\SchemaFactory
    */
-  protected $schemaFactory;
+  protected SchemaFactory $schemaFactory;
 
   /**
    * Dereferenced Schema Static Cache.
@@ -36,14 +37,17 @@ abstract class SchemataBrowserTestBase extends BrowserTestBase {
    *
    * @see ::requestSchemaByUrl()
    */
-  protected $schemaCache = [];
-
-  protected $defaultTheme = 'classy';
+  protected array $schemaCache = [];
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static $modules = [
     'user',
     'field',
     'filter',
@@ -59,7 +63,7 @@ abstract class SchemataBrowserTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->entityTypeManager = $this->container->get('entity_type.manager');
     $this->schemaFactory = $this->container->get('schemata.schema_factory');
@@ -103,36 +107,6 @@ abstract class SchemataBrowserTestBase extends BrowserTestBase {
   }
 
   /**
-   * Retrieve the schema by URL and dereference for use.
-   *
-   * Dereferencing a schema processes references to external schema documents
-   * and prepares it to be used as a validation authority.
-   *
-   * This will static cache the schema so the same schema resource will not be
-   * retrieved and processed more than once per test run.
-   *
-   * @param string $url
-   *   Absolute URL to a JSON Schema resource.
-   *
-   * @return object
-   *   Dereferenced schema object.
-   *
-   * @todo Evaluate PSR-16 cache support built into Dereferencer.
-   *
-   * @see http://json-reference.thephpleague.com/caching
-   */
-  protected function getDereferencedSchema($url) {
-    if (empty($this->schemaCache[$url])) {
-      $dereferencer = Dereferencer::draft4();
-      // By definition of the JSON Schema spec, schemas use this key to refer
-      // to the schema to which they conform.
-      $this->schemaCache[$url] = $dereferencer->dereference($url);
-    }
-
-    return $this->schemaCache[$url];
-  }
-
-  /**
    * Requests a Schema via HTTP, ready for session assertions.
    *
    * @param string $format
@@ -148,27 +122,6 @@ abstract class SchemataBrowserTestBase extends BrowserTestBase {
   protected function getRawSchemaByOptions($format, $entity_type_id, $bundle_id = NULL) {
     $url = SchemaUrl::fromOptions('schema_json', $format, $entity_type_id, $bundle_id)->toString();
     return $this->drupalGet($url);
-  }
-
-  /**
-   * Requests a dereferenced Schema via HTTP.
-   *
-   * Dereferencing a schema processes references to external schema documents
-   * and prepares it to be used as a validation authority.
-   *
-   * @param string $format
-   *   The described format.
-   * @param string $entity_type_id
-   *   Then entity type.
-   * @param string|null $bundle_id
-   *   The bundle name or NULL.
-   *
-   * @return object
-   *   Dereferenced schema object.
-   */
-  protected function getDereferencedSchemaByOptions($format, $entity_type_id, $bundle_id = NULL) {
-    $url = SchemaUrl::fromOptions('schema_json', $format, $entity_type_id, $bundle_id)->toString();
-    return $this->requestSchemaByUrl($url);
   }
 
 }

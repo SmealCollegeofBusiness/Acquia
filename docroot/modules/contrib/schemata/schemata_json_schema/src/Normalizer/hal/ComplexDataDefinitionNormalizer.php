@@ -27,7 +27,7 @@ class ComplexDataDefinitionNormalizer extends JsonComplexDataDefinitionNormalize
    * {@inheritdoc}
    */
   public function normalize($entity, $format = NULL, array $context = []) {
-    /* @var $entity \Drupal\Core\TypedData\ComplexDataDefinitionInterface */
+    /** @var \Drupal\Core\TypedData\ComplexDataDefinitionInterface $entity */
     // If this does not wrap a reference, revert to standard JSON behavior.
     if (!$this->isReferenceField($entity, $context)) {
       return parent::normalize($entity, $format, $context);

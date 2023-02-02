@@ -69,7 +69,7 @@ class ContextCacheMetadata {
 
             $context_data = explode(':', $context_name);
             if (!isset($context_data[1]) || $context_data[0] == 'context') {
-              $contexts[] = isset($context_data[1]) ? $context_data[1] : $context_data[0];
+              $contexts[] = $context_data[1] ?? $context_data[0];
             }
           }
 

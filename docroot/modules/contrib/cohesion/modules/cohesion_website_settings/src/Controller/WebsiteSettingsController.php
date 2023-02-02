@@ -556,7 +556,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
 
     // Setup an event to be dispatched pre rebuild.
     $pre_event = new PreRebuildEvent();
-    \Drupal::service('event_dispatcher')->dispatch(SiteStudioEvents::PRE_REBUILD, $pre_event);
+    \Drupal::service('event_dispatcher')->dispatch($pre_event, SiteStudioEvents::PRE_REBUILD);
 
     // Reset temporary template list.
     \Drupal::keyValue('cohesion.temporary_template')->set('temporary_templates', []);
@@ -571,7 +571,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
       'operations' => [],
       'finished' => 'entity_rebuild_finished_callback',
       'error_message' => t('Site Studio rebuild has encountered an error.'),
-      'file' => drupal_get_path('module', 'cohesion_website_settings') . '/cohesion_website_settings.batch.inc',
+      'file' => \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion_website_settings') . '/cohesion_website_settings.batch.inc',
     ];
 
     // Process default element styles.
@@ -604,6 +604,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
         // Get entity ids needing an Site Studio update.
         $entity_ids_needs_udpdate = \Drupal::entityTypeManager()
           ->getStorage($style_config_type)->getQuery()
+          ->accessCheck(FALSE)
           ->condition('status', TRUE)
           ->condition('last_entity_update', $entity_update_manager->getLastPluginId(), '<>')
           ->execute();
@@ -618,6 +619,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
 
         $entity_ids_no_udpdate = \Drupal::entityTypeManager()
           ->getStorage($style_config_type)->getQuery()
+          ->accessCheck(FALSE)
           ->condition('status', TRUE)
           ->condition('id', $entity_ids_needs_udpdate, 'NOT IN')
           ->execute();
@@ -639,7 +641,11 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
       if ($entity_type instanceof ConfigEntityTypeInterface && substr($entity_type_name, 0, strlen($search)) === $search) {
         try {
           $entity_ids = \Drupal::entityTypeManager()
-            ->getStorage($entity_type_name)->getQuery()->condition('modified', TRUE)->execute();
+            ->getStorage($entity_type_name)
+            ->getQuery()
+            ->accessCheck(FALSE)
+            ->condition('modified', TRUE)
+            ->execute();
 
           for ($i = 0; $i < count($entity_ids); $i += $entity_to_process) {
             $ids = array_slice($entity_ids, $i, $entity_to_process);
@@ -659,7 +665,7 @@ class WebsiteSettingsController extends ControllerBase implements ContainerInjec
     }
 
     // Save all "cohesion_layout" content entities.
-    $query = \Drupal::entityQuery('cohesion_layout');
+    $query = \Drupal::entityQuery('cohesion_layout')->accessCheck(FALSE);
     $entity_ids = $query->execute();
     for ($i = 0; $i < count($entity_ids); $i += $entity_to_process) {
       $ids = array_slice($entity_ids, $i, $entity_to_process);

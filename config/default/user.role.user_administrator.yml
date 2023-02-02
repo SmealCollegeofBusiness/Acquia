@@ -1,0 +1,25 @@
+uuid: efb36067-f132-4148-a075-a40b1db5510d
+langcode: en
+status: true
+dependencies:
+  module:
+    - password_policy
+    - seckit
+    - system
+    - toolbar
+_core:
+  default_config_hash: gcbhbH5x-B9oXQm2exCdSJpisKO70f8TqkrNJoBtVlY
+id: user_administrator
+label: 'User Administrator'
+weight: -4
+is_admin: null
+permissions:
+  - 'access toolbar'
+  - 'administer CAPTCHA settings'
+  - 'administer honeypot'
+  - 'administer recaptcha'
+  - 'administer seckit'
+  - 'administer site configuration'
+  - 'administer users'
+  - 'manage password reset'
+  - 'view the administration theme'

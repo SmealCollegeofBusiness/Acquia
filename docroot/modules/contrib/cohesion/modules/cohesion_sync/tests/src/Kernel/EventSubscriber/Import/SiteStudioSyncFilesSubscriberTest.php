@@ -90,7 +90,7 @@ class SiteStudioSyncFilesSubscriberTest extends EntityKernelTestBase {
    */
   protected function getPackageFixturePath() {
     return sprintf("%s/tests/fixtures/test_package",
-      drupal_get_path('module', 'cohesion_sync')
+      $this->container->get('extension.path.resolver')->getPath('module', 'cohesion_sync')
     );
   }
 
@@ -230,9 +230,9 @@ class SiteStudioSyncFilesSubscriberTest extends EntityKernelTestBase {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testHandleNewFile() {
-    $this->assertFileNotExists('public://image_4.png');
+    $this->assertFileDoesNotExist('public://image_4.png');
     $event_subscriber = $this->createEventSubscriber();
-    $this->assertFileNotExists('public://image_4.png');
+    $this->assertFileDoesNotExist('public://image_4.png');
 
     $incoming_file = [
       "fid" => "261",
@@ -274,15 +274,12 @@ class SiteStudioSyncFilesSubscriberTest extends EntityKernelTestBase {
     $this->assertFileExists('public://image_1.png');
     $this->assertFileExists('public://image_2.png');
     $this->assertFileExists('public://image_3.png');
-    $this->assertFileNotExists('public://image_4.png');
+    $this->assertFileDoesNotExist('public://image_4.png');
     $this->assertFileExists('public://image_5.png');
 
     $this->assertFileEquals($this->getPackageFixturePath() . '/image_2.png', 'public://image_2.png');
     $this->assertFileEquals($this->getPackageFixturePath() . '/image_3.png', 'public://image_3.png');
     $this->assertFileEquals($this->getPackageFixturePath() . '/image_5.png', 'public://image_5.png');
-
-    $cohesion_file_sync_messages['new_files'] = $this->newFiles;
-    $cohesion_file_sync_messages['updated_files'] = $this->updatedFiles;
   }
 
   /**
@@ -310,14 +307,14 @@ class SiteStudioSyncFilesSubscriberTest extends EntityKernelTestBase {
     $this->createEventSubscriber();
     $this->assertArrayHasKey('new_files', $cohesion_file_sync_messages);
     $this->assertArrayHasKey('updated_files', $cohesion_file_sync_messages);
-    $this->assertEqual($cohesion_file_sync_messages['new_files'], 0);
-    $this->assertEqual($cohesion_file_sync_messages['updated_files'], 0);
+    $this->assertEquals($cohesion_file_sync_messages['new_files'], 0);
+    $this->assertEquals($cohesion_file_sync_messages['updated_files'], 0);
 
     $this->createEventSubscriber(FALSE);
     $this->assertArrayHasKey('new_files', $cohesion_file_sync_messages);
     $this->assertArrayHasKey('updated_files', $cohesion_file_sync_messages);
-    $this->assertEqual($cohesion_file_sync_messages['new_files'], 1);
-    $this->assertEqual($cohesion_file_sync_messages['updated_files'], 2);
+    $this->assertEquals($cohesion_file_sync_messages['new_files'], 1);
+    $this->assertEquals($cohesion_file_sync_messages['updated_files'], 2);
   }
 
   /**

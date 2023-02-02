@@ -66,6 +66,7 @@ class RedirectPathTranslatorSubscriber extends RouterPathTranslatorSubscriber {
       // Find if there is a redirect for this path.
       $query = $redirect_storage
         ->getQuery()
+        ->accessCheck(TRUE)
         // Redirects are stored without the leading slash :-(.
         ->condition('redirect_source__path', ltrim($path_without_prefix, '/'));
       if (!empty($langcodes)) {

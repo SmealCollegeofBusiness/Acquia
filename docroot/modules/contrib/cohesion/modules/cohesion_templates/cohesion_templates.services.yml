@@ -16,6 +16,7 @@ services:
       - '@logger.factory'
       - '@cohesion_current_route_match'
       - '@current_user'
+      - '@file_url_generator'
     tags:
       - { name: twig.extension }
 

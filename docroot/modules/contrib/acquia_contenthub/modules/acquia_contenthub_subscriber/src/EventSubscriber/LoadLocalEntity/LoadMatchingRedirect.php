@@ -83,7 +83,9 @@ class LoadMatchingRedirect implements EventSubscriberInterface {
     $path = $redirect_source['value'][$langcode]['path'];
 
     /** @var \Drupal\Redirect\RedirectRepository $redirect_repository */
+    // @phpstan-ignore-next-line
     $redirect_repository = \Drupal::service('redirect.repository');
+    // @phpstan-ignore-next-line
     $existing_redirect = $redirect_repository->findMatchingRedirect($path, $query, $langcode);
 
     return $existing_redirect;

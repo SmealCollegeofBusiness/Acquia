@@ -48,8 +48,10 @@ class PublishOnlyRendered implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents() {
     return [
+      // phpcs:disable
       ContentHubPublisherEvents::ENQUEUE_CANDIDATE_ENTITY => ['onEnqueueCandidateEntity', 99],
       AcquiaContentHubEvents::PRUNE_PUBLISH_CDF_ENTITIES => ['onPrunePublishCdfEntities', 1000],
+      // phpcs:enable
     ];
   }
 
@@ -69,8 +71,8 @@ class PublishOnlyRendered implements EventSubscriberInterface {
     }
 
     $entity = $event->getEntity();
-    // If the entity view configuration on Acquia Lift Publisher settings page is
-    // set for the entity in question, the entity is qualified to be processed.
+    // If the entity view configuration on Publisher settings page is set for
+    // the entity in question, the entity is qualified to be processed.
     if (empty($this->getEntityViewModesSettingValue($entity))) {
       $event->setEligibility(FALSE);
       $event->stopPropagation();

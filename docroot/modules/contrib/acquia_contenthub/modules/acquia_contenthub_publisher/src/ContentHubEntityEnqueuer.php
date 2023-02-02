@@ -2,8 +2,12 @@
 
 namespace Drupal\acquia_contenthub_publisher;
 
+use Acquia\ContentHubClient\ContentHubClient;
+use Acquia\ContentHubClient\Syndication\SyndicationStatus;
 use Drupal\acquia_contenthub\Client\ClientFactory;
+use Drupal\acquia_contenthub\Libs\InterestList\InterestListTrait;
 use Drupal\acquia_contenthub_publisher\Event\ContentHubEntityEligibilityEvent;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Queue\QueueFactory;
@@ -13,6 +17,22 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Enqueues candidate entities for publishing.
  */
 class ContentHubEntityEnqueuer {
+
+  use InterestListTrait;
+
+  /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * Drupal config.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  protected $config;
 
   /**
    * The client factory.
@@ -52,6 +72,8 @@ class ContentHubEntityEnqueuer {
   /**
    * ContentHubEntityEnqueuer constructor.
    *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The client factory.
    * @param \Drupal\Core\Logger\LoggerChannelInterface $logger_channel
@@ -66,17 +88,20 @@ class ContentHubEntityEnqueuer {
    * @throws \ReflectionException
    */
   public function __construct(
+    ConfigFactoryInterface $config_factory,
     ClientFactory $client_factory,
     LoggerChannelInterface $logger_channel,
     EventDispatcherInterface $dispatcher,
     QueueFactory $queue_factory,
     PublisherTracker $publisher_tracker
   ) {
+    $this->configFactory = $config_factory;
     $this->clientFactory = $client_factory;
     $this->logger = $logger_channel;
     $this->dispatcher = $dispatcher;
     $this->queue = $queue_factory->get('acquia_contenthub_publish_export');
     $this->publisherTracker = $publisher_tracker;
+    $this->config = $this->configFactory->get('acquia_contenthub.admin_settings');
   }
 
   /**
@@ -120,13 +145,54 @@ class ContentHubEntityEnqueuer {
     $this->publisherTracker->queue($entity);
     $this->publisherTracker->setQueueItemByUuid($uuid, $queue_id);
 
-    $this->logger->info(
+    $this->logger
+      ->info(
       'Entity with (UUID: @uuid, Entity type: @entity_type) added to the export queue and to the tracking table.',
       [
         '@uuid' => $uuid,
         '@entity_type' => $entity_type_id,
       ]
     );
+
+    $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
+    if (!$send_update) {
+      return;
+    }
+
+    $client = $this->clientFactory->getClient();
+    if (!$client instanceof ContentHubClient) {
+      $msg = 'Error trying to connect to the Content Hub. Make sure this site is registered to Content hub.';
+      $this->logger->error($msg);
+
+      throw new \Exception($msg);
+    }
+
+    $interest_list = $this->buildInterestList([$uuid], SyndicationStatus::QUEUED_TO_EXPORT);
+    $webhook = $client->getSettings()->getWebhook('uuid');
+    try {
+      $client->addEntitiesToInterestListBySiteRole($webhook, 'PUBLISHER', $interest_list);
+      $this->logger
+        ->info('The entity (@entity_type: @entity_uuid) has been added to the interest list with status "@syndication_status" for webhook: @webhook.',
+          [
+            '@entity_type' => $entity->getEntityTypeId(),
+            '@entity_uuid' => $uuid,
+            '@syndication_status' => SyndicationStatus::QUEUED_TO_EXPORT,
+            '@webhook' => $webhook,
+          ]
+        );
+    }
+    catch (\Exception $e) {
+      $this->logger
+        ->error('Error adding the entity (@entity_type: @entity_uuid) to the interest list with status "@syndication_status" for webhook: @webhook. Error message: @exception.',
+          [
+            '@entity_type' => $entity->getEntityTypeId(),
+            '@entity_uuid' => $uuid,
+            '@syndication_status' => SyndicationStatus::QUEUED_TO_EXPORT,
+            '@webhook' => $webhook,
+            '@exception' => $e->getMessage(),
+          ]
+        );
+    }
   }
 
   /**

@@ -159,9 +159,6 @@ class LinkFieldSerializerTest extends EntityKernelTestBase {
     $this->serializer->onSerializeContentField($event);
     $data = $event->getFieldData();
 
-    // If field data is not set (because it is not a link field) it will be
-    // null. Otherwise the basic structure remains still resulting in null
-    // value.
     $actual = isset($data['value']['en']) ? current($data['value']['en']) : $data;
     $this->assertNull($actual, $message);
   }

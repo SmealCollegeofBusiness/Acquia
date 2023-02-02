@@ -32,7 +32,7 @@ interface FileSchemeHandlerInterface extends PluginInspectionInterface {
    * @param \Acquia\ContentHubClient\CDF\CDFObject $object
    *   The CDFObject from which to extract details about getting the file.
    *
-   * @return bool
+   * @return bool|void
    *   Whether the file successfully saved or not.
    */
   public function getFile(CDFObject $object);

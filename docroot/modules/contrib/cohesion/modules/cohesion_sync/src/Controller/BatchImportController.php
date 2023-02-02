@@ -359,7 +359,7 @@ class BatchImportController extends ControllerBase {
     $file_sync_event = new SiteStudioSyncFilesEvent($files, $path);
     /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher */
     $event_dispatcher = \Drupal::service('event_dispatcher');
-    $event_dispatcher->dispatch($file_sync_event::IMPORT, $file_sync_event);
+    $event_dispatcher->dispatch($file_sync_event, $file_sync_event::IMPORT);
   }
 
   /**

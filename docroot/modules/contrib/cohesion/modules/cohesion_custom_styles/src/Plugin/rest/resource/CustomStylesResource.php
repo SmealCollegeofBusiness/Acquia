@@ -82,8 +82,13 @@ class CustomStylesResource extends CohesionResourceBase {
 
     // Get parent custom styles.
     $condition_value = [$custom_style_type->get('id'), 'generic'];
-    $entity_ids = $storage->getQuery()->sort('weight')->notExists('parent')
-      ->condition('custom_style_type', $condition_value, 'IN')->condition('status', TRUE)->execute();
+    $entity_ids = $storage->getQuery()
+      ->accessCheck(TRUE)
+      ->sort('weight')
+      ->notExists('parent')
+      ->condition('custom_style_type', $condition_value, 'IN')
+      ->condition('status', TRUE)
+      ->execute();
 
     // Execute the query.
     if ($entities = $storage->loadMultiple($entity_ids)) {
@@ -96,7 +101,13 @@ class CustomStylesResource extends CohesionResourceBase {
 
         // Add custom style children entities.
         $children = [];
-        $children_ids = $storage->getQuery()->condition('parent', $entity->getClass())->condition('status', TRUE)->condition('selectable', TRUE)->sort('weight')->execute();
+        $children_ids = $storage->getQuery()
+          ->accessCheck(TRUE)
+          ->condition('parent', $entity->getClass())
+          ->condition('status', TRUE)
+          ->condition('selectable', TRUE)
+          ->sort('weight')
+          ->execute();
         if ($children_ids && count($children_ids) > 0) {
           foreach ($storage->loadMultiple($children_ids) as $child_entity) {
             /** @var \Drupal\cohesion_custom_styles\Entity\CustomStyle $child_entity */

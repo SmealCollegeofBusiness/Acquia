@@ -17,6 +17,7 @@ use Drupal\Tests\acquia_contenthub\Kernel\AcquiaContentHubSerializerTestBase;
  * @coversDefaultClass \Drupal\acquia_contenthub_subscriber\EventSubscriber\PreEntitySave\EntitySubqueuePreSave
  *
  * @requires module depcalc
+ * @requires module entityqueue
  *
  * @package Drupal\Tests\acquia_contenthub\Kernel\EventSubscriber\PreEntitySave
  */

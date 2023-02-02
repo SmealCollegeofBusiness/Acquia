@@ -159,6 +159,9 @@ pre_build:
   strict_deprecated_code_scan:
     - args: --env ORCA_JOB=STRICT_DEPRECATED_CODE_SCAN --env ALLOWED_FAILURE=true
       <<: *orca_job
+  strict_deprecated_code_scan_php8:
+    - args: --env ORCA_JOB=STRICT_DEPRECATED_CODE_SCAN --env ALLOWED_FAILURE=true --env JENKINS_PHP_VERSION=8.1
+      <<: *orca_job
   deprecated_code_scan_w_contrib:
     - args: --env ORCA_JOB=DEPRECATED_CODE_SCAN_W_CONTRIB --env ALLOWED_FAILURE=true
       <<: *orca_job

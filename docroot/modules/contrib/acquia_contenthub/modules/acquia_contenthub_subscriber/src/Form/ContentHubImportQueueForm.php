@@ -80,7 +80,7 @@ class ContentHubImportQueueForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'acquia_contenthub.import_queue_settings';
+    return 'acquia_contenthub_import_queue_settings';
   }
 
   /**

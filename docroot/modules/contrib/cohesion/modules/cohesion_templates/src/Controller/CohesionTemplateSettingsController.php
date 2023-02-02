@@ -113,7 +113,11 @@ class CohesionTemplateSettingsController extends ControllerBase {
    */
   private function menuTemplateEntities() {
     try {
-      $entity_ids = \Drupal::entityQuery('cohesion_menu_templates')->condition('status', TRUE)->condition('selectable', TRUE)->execute();
+      $entity_ids = \Drupal::entityQuery('cohesion_menu_templates')
+        ->accessCheck(TRUE)
+        ->condition('status', TRUE)
+        ->condition('selectable', TRUE)
+        ->execute();
 
       return \Drupal::service('entity_type.manager')->getStorage('cohesion_menu_templates')->loadMultiple($entity_ids);
     }

@@ -184,7 +184,6 @@
                                 }
                             },
                             "required": [
-                                "drupal_internal__uid",
                                 "name"
                             ]
                         },
@@ -428,7 +427,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the user user"
                     }
                 ],
@@ -449,7 +449,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the user user"
                     }
                 ],
@@ -467,7 +468,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the user user"
                     },
                     {
@@ -492,7 +494,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the user user"
                     }
                 ],
@@ -512,7 +515,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the user user"
                     }
                 ],
@@ -530,7 +534,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the user user"
                     }
                 ],
@@ -587,7 +592,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the user user"
                     },
                     {
@@ -689,7 +695,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the user user"
                     },
                     {

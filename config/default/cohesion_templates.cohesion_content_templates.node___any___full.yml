@@ -1,0 +1,18 @@
+uuid: 5fe83e1c-35a6-40e8-8144-72c6552a05a5
+langcode: en
+status: false
+dependencies: {  }
+label: 'Full content (Node)'
+id: node___any___full
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: __any__
+view_mode: full
+master_template: ''

@@ -6,9 +6,10 @@ use Drupal\cohesion_sync\Exception\PackageSourceMissingPropertiesException;
 use Drupal\Core\Extension\MissingDependencyException;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\File\Exception\DirectoryNotReadyException;
+use Drupal\Core\Extension\ExtensionPathResolver;
 
 /**
- * Default Module Package Source service.
+ * Default Module Package service.
  */
 class DefaultModulePackage implements PackageSourceServiceInterface {
 
@@ -23,15 +24,26 @@ class DefaultModulePackage implements PackageSourceServiceInterface {
   protected $moduleHandler;
 
   /**
+   * Factory for getting extension lists by type.
+   *
+   * @var \Drupal\Core\Extension\ExtensionPathResolver
+   */
+  protected $extensionPathResolver;
+
+  /**
    * DefaultModulePackage constructor.
    *
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   Module handler service.
+   * @param \Drupal\Core\Extension\ExtensionPathResolver $extensionPathResolver
+   *   Factory for getting extension lists by type.
    */
   public function __construct(
-    ModuleHandlerInterface $moduleHandler
+    ModuleHandlerInterface $moduleHandler,
+    ExtensionPathResolver $extensionPathResolver
   ) {
     $this->moduleHandler = $moduleHandler;
+    $this->extensionPathResolver = $extensionPathResolver;
   }
 
   /**
@@ -70,7 +82,7 @@ class DefaultModulePackage implements PackageSourceServiceInterface {
     }
     $this->validateMetadata($sourceMetadata);
 
-    $module_path = drupal_get_path('module', $sourceMetadata['module_name']);
+    $module_path = $this->extensionPathResolver->getPath('module', $sourceMetadata['module_name']);
     $package_path = $sourceMetadata['path'];
 
     return $module_path . '/' . $package_path;
@@ -98,7 +110,7 @@ class DefaultModulePackage implements PackageSourceServiceInterface {
       throw new MissingDependencyException(sprintf('Unable to install default module package due to missing module %s.', $sourceMetadata['module_name']));
     }
 
-    $module_path = drupal_get_path('module', $sourceMetadata['module_name']);
+    $module_path = $this->extensionPathResolver->getPath('module', $sourceMetadata['module_name']);
     $package_path = $module_path . '/' . $sourceMetadata['path'];
     if (!is_dir($package_path) || !is_readable($package_path)) {
       throw new DirectoryNotReadyException(sprintf('Directory "%s" is not found.', $package_path));

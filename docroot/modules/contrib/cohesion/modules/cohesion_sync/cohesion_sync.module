@@ -5,6 +5,7 @@
  */
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\Core\Url;
 use Symfony\Component\Yaml\Yaml;
@@ -40,11 +41,13 @@ function cohesion_sync_entity_operation_alter(array &$operations, EntityInterfac
           'weight' => 49,
         ];
 
-        $operations['legacy_export_package_to_file'] = [
-          'title' => t('Export package to YML file'),
-          'url' => $url,
-          'weight' => 50,
-        ];
+        if (\Drupal::config('cohesion.settings')->get('sync_legacy_visibility')) {
+          $operations['legacy_export_package_to_file'] = [
+            'title' => t('Export package to YML file'),
+            'url' => $url,
+            'weight' => 50,
+          ];
+        }
 
         $operations['toggle_lock_for_sync'] = [
           'title' => !$entity->isLocked() ? t('Lock entity') : t('Unlock entity'),
@@ -68,8 +71,9 @@ function cohesion_sync_modules_installed($modules) {
   if (\Drupal::getContainer()->has('cohesion.utils') && \Drupal::service('cohesion.utils')->usedx8Status() === FALSE) {
     return;
   }
+
   foreach ($modules as $module) {
-    $module_path = drupal_get_path('module', $module);
+    $module_path = \Drupal::service('extension.path.resolver')->getPath('module', $module);
     // Check to see if the config/dx8/packages.yml file exists.
     $packages_yaml_file = $module_path . "/config/dx8/packages.yml";
 
@@ -137,4 +141,67 @@ function cohesion_sync_page_attachments_alter(array &$attachments) {
   if (in_array($route, $sync_react_routes)) {
     $attachments['#attached']['drupalSettings']['cohesion']['urls']['sync_refresh'] = Url::fromRoute('cohesion_sync.refresh')->toString();
   }
+}
+
+/**
+ * @param $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param $form_id
+ * @return void
+ *
+ * Add a checkbox to the system settings form to show/hide the legacy sync
+ * options from the UI.
+ */
+function cohesion_sync_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id === 'cohesion_system_settings_form') {
+    $form['sync_legacy_visibility_accordion'] = [
+      '#type' => 'details',
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#title' => t('Show legacy sync in UI'),
+      '#weight' => 10,
+      'sync_legacy_visibility' => [
+        '#type' => 'checkbox',
+        '#title' => t('Show legacy sync in UI'),
+        '#required' => FALSE,
+        '#default_value' => \Drupal::config('cohesion.settings')->get('sync_legacy_visibility') ?: 0,
+        '#disabled' => isSyncLegacyOverridden(),
+        '#wrapper_attributes' => ['class' => ['clearfix']],
+        '#attributes' => [
+          'class' => [],
+        ],
+        '#description' => t('Show the legacy sync import / export in the UI.'),
+      ],
+      '#open' => 'panel-open',
+    ];
+
+    $form['#submit'][] = 'save_sync_legacy_visibility';
+  }
+}
+
+/**
+ * @param $form
+ * @param $form_state
+ * @return void
+ *
+ * Handle submit of legacy visibility option.
+ */
+function save_sync_legacy_visibility($form, &$form_state) {
+  // Get submitted value.
+  $value = $form_state->getValue('sync_legacy_visibility');
+  // Set config to form value.
+  \Drupal::service('config.factory')->getEditable('cohesion.settings')->set('sync_legacy_visibility', $value);
+  // Save the cohesion settings.
+  \Drupal::service('config.factory')->getEditable('cohesion.settings')->save();
+}
+
+/**
+ *  Check if config variable is overridden by the settings.php.
+ *
+ * @return bool
+ */
+function isSyncLegacyOverridden() {
+  $original = \Drupal::service('config.factory')->getEditable('cohesion.settings')->get('sync_legacy_visibility');
+  $current = \Drupal::config('cohesion.settings')->get('sync_legacy_visibility');
+  return $original != $current;
 }

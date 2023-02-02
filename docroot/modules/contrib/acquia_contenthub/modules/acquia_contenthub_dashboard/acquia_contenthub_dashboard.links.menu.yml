@@ -1,0 +1,10 @@
+acquia_contenthub_dashboard.dashboard:
+  title: 'Acquia ContentHub Dashboard'
+  description: 'Acquia ContentHub Dashboard'
+  route_name: acquia_contenthub_dashboard.ach_dashboard
+  parent: system.admin
+  weight: 10
+  options:
+    attributes:
+      target: _blank
+      class: [toolbar-icon-system-admin-reports]

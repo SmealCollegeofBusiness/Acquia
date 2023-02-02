@@ -122,6 +122,9 @@ class WebhookEnableForm extends ConfirmFormBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|string
+   *   The form description.
    */
   public function getDescription() {
     return '';

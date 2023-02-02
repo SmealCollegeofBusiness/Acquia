@@ -160,12 +160,26 @@ class ExternalAuth implements ExternalAuthInterface {
    * {@inheritdoc}
    */
   public function linkExistingAccount(string $authname, string $provider, UserInterface $account) {
-    // If a mapping (for the same provider) to this account already exists, we
-    // silently skip saving this auth mapping.
-    if (!$this->authmap->get($account->id(), $provider)) {
-      $authmap_event = $this->eventDispatcher->dispatch(new ExternalAuthAuthmapAlterEvent($provider, $authname, $account->getAccountName(), NULL), ExternalAuthEvents::AUTHMAP_ALTER);
-      $this->authmap->save($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData());
+    // If a mapping (for the same provider) to this account already exists, and
+    // the authname is the same, we silently skip saving this auth mapping.
+    $current_authname = $this->authmap->get($account->id(), $provider);
+    if ($current_authname === $authname) {
+      return;
     }
+    
+    // If we update the authmap entry, let's log the change.
+    if (!empty($current_authname)) {
+      $this->logger->debug('Authmap change (%old => %new) for user %name with uid %uid from provider %provider', [
+        '%old' => $current_authname,
+        '%new' => $authname,
+        '%name' => $account->getAccountName(),
+        '%uid' => $account->id(),
+        '%provider' => $provider,
+      ]);
+    }
+
+    $authmap_event = $this->eventDispatcher->dispatch(new ExternalAuthAuthmapAlterEvent($provider, $authname, $account->getAccountName(), NULL), ExternalAuthEvents::AUTHMAP_ALTER);
+    $this->authmap->save($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData());
   }
 
 }

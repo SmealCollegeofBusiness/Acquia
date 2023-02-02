@@ -33,7 +33,7 @@ class DataDefinitionNormalizer extends JsonNormalizerBase {
    * {@inheritdoc}
    */
   public function normalize($entity, $format = NULL, array $context = []) {
-    /* @var $entity \Drupal\Core\TypedData\DataDefinitionInterface */
+    /** @var \Drupal\Core\TypedData\DataDefinitionInterface $entity */
     // `text source` and `date source` produce objects not supported in the API.
     // It is not clear how the API excludes them.
     // @todo properly identify and exclude this class of computed objects.

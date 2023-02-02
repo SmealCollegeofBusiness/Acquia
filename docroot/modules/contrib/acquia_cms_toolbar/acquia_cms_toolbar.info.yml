@@ -7,7 +7,7 @@ dependencies:
   - admin_toolbar:admin_toolbar
   - admin_toolbar:admin_toolbar_tools
 
-# Information added by Drupal.org packaging script on 2022-09-22
-version: '1.4.0'
+# Information added by Drupal.org packaging script on 2022-12-08
+version: '1.4.1'
 project: 'acquia_cms_toolbar'
-datestamp: 1663876764
+datestamp: 1670501215

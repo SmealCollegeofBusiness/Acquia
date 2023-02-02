@@ -1,6 +1,469 @@
 # Release notes
 
-## 6.9.3
+## 7.0.1
+
+### Using view variable element to display a views exposed form caused duplicate IDs
+
+#### What is it?
+
+Fixes a bug when using the view variable element to display a views exposed form
+caused duplicate IDs in the DOM. This was due to the Site Studio view template
+also rendering the exposed form.
+
+The exposed form in the view template is now only inserted into the DOM, if a
+view variable element for "exposed" isn't used and the view has an exposed form.
+
+#### What impact will there be?
+
+If the view has an exposed form and the view variable element is used to render
+it the exposed form will only appear in the DOM once and no duplicate IDs will
+be present.
+
+#### What actions do I need to take?
+
+A Site Studio import and rebuild.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Adding compatibility for better exposed filters combined option
+
+#### What is it?
+
+Provides compatibility for using the Better Exposed Filters "Combine sort order
+with sort by" for view filters.
+
+#### What impact will there be?
+
+When using the Better Exposed Filters "Combine sort order with sort by" option
+in a view, the Site Studio view filter element will render this as expected,
+combining sort order and sort by options.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Twig templates handling Drupal Fields fix
+
+#### What is it?
+
+Site Studio v7.0.0 introduced a bug when handling templates with Drupal multi-value fields. Templates would contain syntax errors and would cause PHP exceptions when rendered. This fix resolves this regression.
+
+#### What impact will there be?
+
+Site Studio templates utilising Drupal fields will no longer cause exceptions.
+
+#### What actions do I need to take?
+
+Run a full rebuild.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 7.0.0
+
+### Drupal 10 compatibility
+
+#### What is it?
+
+Site Studio v7.0 is compatible with Drupal 9.4, 9.5 and 10. A number of changes have been implemented due to Drupal 10
+requirements:
+
+- CKEditor 5 support added
+- jQuery UI and Stable theme contrib dependencies added
+- PHP 8.1 support added
+- Drupal 8 support removed
+
+#### What impact will there be?
+
+Site Studio will no longer be installable on Drupal 8, however, it can now optionally be installed on Drupal 10
+with support for PHP 8.1
+
+#### What actions do I need to take?
+
+Site Studio v7.0 supports CKEditor 5 **only**; you are required to manually migrate text formats from CKEditor 4 to
+CKEditor 5, this should be completed on Drupal 9.x before upgrading to 10.x
+
+For details on migration steps [visit](https://sitestudiodocs.acquia.com/7.0/user-guide/CKEditor-4-CKEditor-5).
+
+#### Are there any risks I should be aware of?
+
+Some CKEditor plugins do not currently have support for CKEditor 5.
+
+For more details please refer to the following: https://www.drupal.org/docs/core-modules-and-themes/core-modules/CKEditor-5-module/upgrade-coordination-for-modules-providing-CKEditor-4-plugins
+
+### CKEditor 4 support removed
+
+#### What is it?
+
+Site Studio v7.0 only supports CKEditor 5, support for the now deprecated CKEditor 4 has been removed.
+
+_Note: A fresh install of Site Studio will provide a pre-configured CKEditor 5 text editor/format._
+
+#### What impact will there be?
+
+CKEditor 4 based text formats are not supported in Site Studio v7.0.
+
+#### What actions do I need to take?
+
+You are required to manually migrate text formats from CKEditor 4 to CKEditor 5, this should be completed on
+Drupal 9.x before upgrading to 10.x.
+
+For details on migration steps [visit](https://sitestudiodocs.acquia.com/7.0/user-guide/CKEditor-4-CKEditor-5).
+
+#### Are there any risks I should be aware of?
+
+Some CKEditor plugins do not currently have support for CKEditor 5.
+
+For more details please refer to the following: https://www.drupal.org/docs/core-modules-and-themes/core-modules/CKEditor-5-module/upgrade-coordination-for-modules-providing-CKEditor-4-plugins
+
+### Page builder button not appearing in some admin themes
+
+#### What is it?
+
+Fixes a bug where the Visual page builder was not appearing in other admin
+themes such as Gin.
+
+#### What impact will there be?
+
+The Visual page builder button will now appear as expected when using the Gin
+theme & toolbar.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Legacy Site Studio Sync user interface now hidden by default
+
+#### What is it?
+
+The legacy Site Studio Sync user interface options are only shown if a site
+builder enables "Show legacy sync in UI" within the Site Studio system settings.
+Legacy drush command are not affected.
+
+#### What impact will there be?
+
+The legacy sync options for importing and exporting Site Studio config will only
+appear in the UI if the "Show legacy sync in UI" has been enabled within the
+Site Studio system settings.
+
+#### What actions do I need to take?
+
+Toggling on "Show legacy sync in UI" in the Site Studio system settings is
+required to show the legacy options in the UI. We recommend for users to use
+the updated sync system, and only toggle this option on if required.
+
+To enable this by default add the following to your settings.php file:
+
+`$config['cohesion.settings']['sync_legacy_visibility'] = TRUE;`
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Module API hooks namespace update
+
+#### What is it?
+
+Module API hooks previously had the namespace of dx8, this has been updated to
+sitestudio. Previous hooks have been marked as deprecated.
+
+#### What impact will there be?
+
+The deprecated hooks will continue to work for the time being until removed, it
+is recommended to update any API hooks that your websites uses to the new
+namespace sitestudio.
+
+#### What actions do I need to take?
+
+If a website is using one of the API hooks, the namespace should be updated from
+dx8 to sitestudio.
+
+#### Are there any risks I should be aware of?
+
+If the API hooks namespace is not updated, then they will not work in a future
+version of Site Studio where the previous namespaces are used.
+
+### Custom element form HTML class change
+
+#### What is it?
+
+The format of the HTML classes used to layout custom element forms has been
+updated. Previously 'col-xs-12' is now 'ssa-grid-col-xs-12'.
+
+#### What impact will there be?
+
+If a site uses custom elements, the elements form will need the htmlClass in the
+form element array updated.
+
+#### What actions do I need to take?
+
+Custom elements forms will need the htmlClass in the form element array updated
+to the new format, or the form will not be laid out as expected.
+See 'example_element' module for examples.
+
+#### Are there any risks I should be aware of?
+
+If no action is taken, then the custom elements form will not be laid out as
+expected.
+
+### stable contrib module added as a dependency of Site Studio
+
+#### What is it?
+
+To provide support for both Drupal 9 & 10 a dependency on the [stable](https://www.drupal.org/project/stable)
+module has been introduced to Site Studio.
+
+Site Studio uses on `stable` theme as base theme for `cohesion_theme` theme, however, the `stable` theme this has been
+removed in Drupal core 10.x see
+[https://www.drupal.org/node/3309392](https://www.drupal.org/node/3309392) for details.
+
+#### What impact will there be?
+
+Site Studio frontend features will continue to function as expected.
+
+#### What actions do I need to take?
+
+Download and enable the [stable](https://www.drupal.org/project/stable) module and install `stable` theme.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### jquery_ui contrib module added as a dependency of Site Studio
+
+#### What is it?
+
+To provide support for both Drupal 9 & 10 a dependency on the [jquery_ui](https://www.drupal.org/project/jquery_ui)
+module has been introduced to Site Studio.
+
+Site Studio relies on jQuery UI for a number of frontend features, however, the library definition for this has been
+removed in Drupal core 10.x see
+[drupal.org/project/drupal/issues/3277744](https://www.drupal.org/project/drupal/issues/3277744) for details.
+
+#### What impact will there be?
+
+Site Studio frontend features will continue to function as expected.
+
+#### What actions do I need to take?
+
+Download and enable the [jquery_ui](https://www.drupal.org/project/jquery_ui) module.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Custom components can be ordered by a defined weight
+
+#### What is it?
+
+Custom components can now have a weight defined within the yml file, which allows them to be ordered with other custom
+components in the same category.
+
+#### What impact will there be?
+
+Custom components can now be ordered by weight, but only with other custom components in the same category. They will
+not be ordered within all components in the same category.
+
+#### What actions do I need to take?
+
+When adding a weight to the yml file the Drupal cache should be cleared for the ordering to take effect.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Form helpers can be used in the custom component builder
+
+#### What is it?
+
+When building a custom component using the custom component builder, developers can now use form helpers to help with
+the development of their custom component forms.
+
+#### What impact will there be?
+
+Form helpers are now available from the sidebar browser on the custom component builder page and can be used to help build a custom components form.
+
+#### What actions do I need to take?
+
+A Site Studio import & Drupal cache clear.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Custom components in-use tracking
+
+#### What is it?
+
+Custom component's usage can now be tracked via the Site Studio in-use system. Within the components list builder page,
+next to a custom component it will now display either an "in-use" link, so users can see where a custom component has
+been used or be shown as "Not in use".
+
+#### What impact will there be?
+
+Users can see where custom components have been placed.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Removing the "clone" option from Site Studio list builders
+
+#### What is it?
+
+Removing the "clone" option that the Entity Clone module adds, from Site Studio configuration list builders as Site
+Studio provides its own "duplicate" functionality. The "clone" functionality did not work as expected for Site Studio
+configuration entities.
+
+#### What impact will there be?
+
+If the Entity clone module is installed, the "clone" option will not appear in the operation list on Site Studio list
+builders.
+
+#### What actions do I need to take?
+
+If users want to "clone" a Site Studio configuration entity, use the "duplicate" operation.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Create a component content from a custom component via the UI
+
+#### What is it?
+
+The ability to create a component content from a custom component direct in the UI
+at `Site Studio > Components > Component Content > Create Component Content` rather than from the Layout Canvas.
+
+#### What impact will there be?
+
+Component contents can be created from a custom component directly in the UI as is possible with components and no
+longer has to be created from a Layout Canvas.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Menu template loses menu link context after rendering menu links
+
+#### What is it?
+
+Fixes a bug where menu templates with multiple levels were losing token context depending on where the elements were
+placed within the menu template.
+
+#### What impact will there be?
+
+The token context will not be lost and the token content will now render as expected within the menu.
+
+#### What actions do I need to take?
+
+A Site Studio import & rebuild.
+
+#### Are there any risks I should be aware of?
+
+We recommend visually testing menu layout of a rendered pages for sites that have multi-level menus and are using tokens
+to display content for specific links.
+
+### Custom menu link attributes were not being added to menu links as expected
+
+#### What is it?
+
+Fixes an issue were when using the menu link attributes module, and adding custom attributes they were not being rendered as expected.
+
+#### What impact will there be?
+
+Custom menu link attributes added to menu items will now be rendered on menu links.
+
+#### What actions do I need to take?
+
+Perform a Site Studio import & rebuild as per the upgrade steps.
+
+#### Are there any risks I should be aware of?
+
+If custom attributes were added to menu links in the past they will now render.
+
+### Limit allowed HTML tags filter is now enabled by default on Site Studio text format
+
+#### What is it?
+
+The `Limit allowed HTML tags and correct faulty HTML` filter is now enabled by default on the Site Studio text format.
+
+#### What impact will there be?
+
+New Site Studio module installations will have the`Limit allowed HTML tags and correct faulty HTML` filter enabled on
+the Site Studio text format.
+
+#### What actions do I need to take?
+
+Existing sites are not affected by this change, but it is recommended to enable
+the `Limit allowed HTML tags and correct faulty HTML` filter on the Site Studio text format.
+
+#### Are there any risks I should be aware of?
+
+New Site Studio module installs or reinstalls, the "Site Studio" text format will now limit the use of HTML tags within
+WYSIWYGs to the specific HTML tags configured in the text format.
+
+On existing Site Studio installs no change will occur and user action is required to limit the allowed HTML tags in the
+text format by enabling the `Limit allowed HTML tags and correct faulty HTML` filter in the "Site Studio" text format.
+
+### The menu-link tokens not working in menu templates
+
+#### What is it?
+
+The menu-link tokens were not rendering any values within menu templates.
+
+#### What impact will there be?
+
+The menu-link tokens will now work as expected in menu templates.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### View filter labels
+
+#### What is it?
+
+The View filter element has a new toggle option, "Show filter label", which when set will render the filter or sort
+label set within the Drupal view. By default, this option is toggled off for backward compatibility.
+
+#### What impact will there be?
+
+View filters can have labels that have been set within the Drupal view.
+
+#### What actions do I need to take?
+
+If a view filter should display a label, the "Show filter label" option should be toggled on within the view filter
+element.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 6.9.4
 
 ### Layout canvas changes are lost when server side validation and refresh takes place
 
@@ -20,6 +483,184 @@ None.
 #### Are there any risks I should be aware of?
 
 None.
+
+### Visual page builder initialized incorrectly
+
+#### What is it?
+
+Fixes a bug where the visual page builder would initialize when a Layout canvas
+field was used in a block. This would result in an error.
+
+#### What impact will there be?
+
+The visual page builder will only be initialized if the entity type has a layout
+canvas field. Nested entities that contain layout canvas fields will not enable
+the visual page builder.
+
+#### What actions do I need to take?
+
+Cache clear.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### PHP 8.1 support added
+
+#### What is it?
+
+Ensures php code meets php 8.1 standards and removes any errors or warnings from logs.
+
+#### What impact will there be?
+
+Site Studio 6.9.4 and above can be used without warnings or errors being logged.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Updating multiple twig functions to respect Drupal entity permissions
+
+#### What is it?
+
+Unpublished referenced entities sometimes would be still rendered for users
+without permissions to view such entities. This now has been resolved.
+
+#### What impact will there be?
+
+When rendering referenced entities Drupal permissions and entity status will be
+respected.
+
+#### What actions do I need to take?
+
+Cache clear.
+
+#### Are there any risks I should be aware of?
+
+If the website used this bug as a feature where unpublished entities were still
+displayed when used as referenced entities via Layout Canvas, this will need to
+be addressed.
+
+### Updating Image Browser Update manager to use ModuleHandlerInterface
+
+#### What is it?
+
+Updates the image browser update manager to use ModuleHandlerInterface rather
+than ModuleHandler.
+This caused some errors when contrib modules overwrote the default
+ModuleHandler.
+
+#### What impact will there be?
+
+If a site uses a module that overrides the default ModuleHandler, no errors
+relating to ModuleHandler should occur.
+
+#### What actions do I need to take?
+
+Cache clear.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Page builder incorrectly displaying drop zones from components that contained a nested component with a drop zone
+
+#### What is it?
+
+Fixes a bug where drop zones were appearing on the page builder from nested
+components, causing JS errors such as "Cannot read properties of undefined (
+reading 'parentUid')" when attempting to insert new components.
+Only drop zones from components on a node layout canvas should appear in the
+page builder.
+
+#### What impact will there be?
+
+Only drop zones from components on a node layout canvas will appear. Drop zones
+from a component in a component will not appear on the page builder, reflecting
+the node layout canvas.
+
+Users should not experience JS errors when attempting to insert components onto
+the layout canvas in the page builder.
+
+#### What actions do I need to take?
+
+Cache clear and Site Studio rebuild.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Nested accordion tabs components navigation links incorrect
+
+#### What is it?
+
+Fixes a bug where nested accordion tabs components navigation links were all the
+same. This meant users would not be able to navigate between the accordion
+items.
+
+#### What impact will there be?
+
+The navigation links will be correct and clicking on them will show the correct
+accordion item content.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Nested components in a pattern repeater resulted in same styling
+
+#### What is it?
+
+Fixes a bug where nested components in a pattern repeater resulted in the same
+styling when it should be different for each repeated item.
+
+#### What impact will there be?
+
+The styling will appear as expected and will be different for each repeated item
+if set in the component.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+### Error appeared on the page builder when editing a translated node that contained a component in a component
+
+#### What is it?
+
+Fixes a bug where the error "Cannot read properties of undefined (reading '
+uuid')" appeared whilst editing a translated node that contained a component in
+a component on the layout canvas.
+
+This error specifically appeared when editing using the Visual Page Builder.
+
+#### What impact will there be?
+
+The error "Cannot read properties of undefined (reading 'uuid')", will no longer
+appear when editing a translated node that contains a component in a component.
+Users will be able to edit the translated node as expected using the Visual Page
+Builder.
+
+#### What actions do I need to take?
+
+None.
+
+#### Are there any risks I should be aware of?
+
+None.
+
+## 6.9.3
 
 ### Any new component created by saving from the layout canvas cannot be used.
 

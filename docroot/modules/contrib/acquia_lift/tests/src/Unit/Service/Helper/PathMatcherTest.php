@@ -2,16 +2,17 @@
 
 namespace Drupal\Tests\acquia_lift\Unit\Service\Helper;
 
-use Drupal\Tests\UnitTestCase;
 use Drupal\acquia_lift\Service\Helper\PathMatcher;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * PathMatcher Test.
  *
- * @coversDefaultClass Drupal\acquia_lift\Service\Helper\PathMatcher
+ * @coversDefaultClass \Drupal\acquia_lift\Service\Helper\PathMatcher
  * @group acquia_lift
  */
 class PathMatcherTest extends UnitTestCase {
+
   /**
    * Alias manager.
    *
@@ -29,7 +30,7 @@ class PathMatcherTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     $this->aliasManager = $this->createMock('Drupal\path_alias\AliasManagerInterface');
@@ -75,21 +76,18 @@ class PathMatcherTest extends UnitTestCase {
    * @covers ::match
    */
   public function testMatchAliasMatched() {
-    $this->basePathMatcher->expects($this->at(0))
+    $this->basePathMatcher->expects($this->exactly(2))
       ->method('matchPath')
-      ->with('a_path', 'a_pattern')
-      ->willReturn(FALSE);
+      ->withConsecutive(['a_path', 'a_pattern'], ['an_alias', 'a_pattern'])
+      ->willReturnOnConsecutiveCalls(FALSE, TRUE);
     $this->aliasManager->expects($this->once())
       ->method('getAliasByPath')
       ->with('a_path')
       ->willReturn('AN_ALIAS');
-    $this->basePathMatcher->expects($this->at(1))
-      ->method('matchPath')
-      ->with('an_alias', 'a_pattern')
-      ->willReturn(TRUE);
 
     $pathMatcher = new PathMatcher($this->aliasManager, $this->basePathMatcher);
     $is_matched = $pathMatcher->match('A_PATH', 'A_PATTERN');
     $this->assertTrue($is_matched);
   }
+
 }

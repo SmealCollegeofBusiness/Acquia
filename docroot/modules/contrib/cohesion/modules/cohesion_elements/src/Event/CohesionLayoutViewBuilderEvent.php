@@ -3,7 +3,7 @@
 namespace Drupal\cohesion_elements\Event;
 
 use Drupal\cohesion_elements\Entity\CohesionLayout;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event to alter the view build array of

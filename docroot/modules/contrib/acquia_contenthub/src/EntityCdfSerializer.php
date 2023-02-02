@@ -13,6 +13,7 @@ use Drupal\acquia_contenthub\Event\LoadLocalEntityEvent;
 use Drupal\acquia_contenthub\Event\ParseCdfEntityEvent;
 use Drupal\acquia_contenthub\Event\PreEntitySaveEvent;
 use Drupal\acquia_contenthub\Event\PruneCdfEntitiesEvent;
+use Drupal\acquia_contenthub\Exception\InvalidCdfException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -110,7 +111,7 @@ class EntityCdfSerializer {
   /**
    * Serialize an array of entities into CDF format.
    *
-   * @param \Drupal\depcalc\DependentEntityWrapperInterface[] $dependencies
+   * @param \Drupal\depcalc\DependentEntityWrapperInterface ...$dependencies
    *   The entity dependency wrappers.
    *
    * @return \Acquia\ContentHubClient\CDF\CDFObject[]
@@ -149,12 +150,19 @@ class EntityCdfSerializer {
    * @param \Drupal\depcalc\DependencyStack $stack
    *   The dependency stack object.
    *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\acquia_contenthub\Exception\InvalidCdfException
+   * @throws \Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException
    * @throws \Exception
    */
   public function unserializeEntities(CDFDocument $cdf, DependencyStack $stack) {
     if (!$cdf->hasEntities()) {
-      throw new \Exception("Missing CDF Entities entry. Not a valid CDF.");
+      throw new InvalidCdfException(
+        'Missing CDF Entities entry. Not a valid CDF.',
+        InvalidCdfException::MISSING_ENTITIES_ENTRY,
+      );
     }
 
     $cdf = $this->preprocessCdf($cdf, $stack);
@@ -396,14 +404,8 @@ class EntityCdfSerializer {
    *   The CDF object.
    */
   protected function dispatchImportEvent(EntityInterface $entity, CDFObject $entity_data) {
-    if ($entity->isNew()) {
-      $event_name = AcquiaContentHubEvents::ENTITY_IMPORT_NEW;
-      $entity_import_event = new EntityImportEvent($entity, $entity_data);
-    }
-    else {
-      $event_name = AcquiaContentHubEvents::ENTITY_IMPORT_UPDATE;
-      $entity_import_event = new EntityImportEvent($entity, $entity_data);
-    }
+    $event_name = $entity->isNew() ? AcquiaContentHubEvents::ENTITY_IMPORT_NEW : AcquiaContentHubEvents::ENTITY_IMPORT_UPDATE;
+    $entity_import_event = new EntityImportEvent($entity, $entity_data);
     $this->dispatcher->dispatch($entity_import_event, $event_name);
   }
 

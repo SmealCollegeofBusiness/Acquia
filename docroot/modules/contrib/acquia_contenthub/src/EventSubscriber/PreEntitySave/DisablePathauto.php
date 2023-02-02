@@ -49,6 +49,7 @@ class DisablePathauto implements EventSubscriberInterface {
   public function onPreEntitySave(PreEntitySaveEvent $event) {
     $entity = $event->getEntity();
     if ($this->handler->moduleExists('pathauto') && $entity instanceof ContentEntityInterface && $entity->hasField('path')) {
+      // @phpstan-ignore-next-line
       $entity->path->pathauto = 0;
     }
   }

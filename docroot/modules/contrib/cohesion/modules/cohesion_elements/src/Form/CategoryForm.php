@@ -47,7 +47,7 @@ class CategoryForm extends EntityForm {
       '#access' => TRUE,
       '#weight' => 1,
       '#description_display' => 'before',
-      '#default_value' => str_replace($this->entity->getEntityMachineNamePrefix(), '', $this->entity->id()),
+      '#default_value' => str_replace($this->entity->getEntityMachineNamePrefix(), '', $this->entity->id() ?? ''),
       '#type' => 'ajax_machine_name',
       '#required' => FALSE,
       '#machine_name' => [
@@ -83,6 +83,7 @@ class CategoryForm extends EntityForm {
     // Include the Angular css (which controls the cohesion_accordion and other
     // form styling).
     $form['#attached']['library'][] = 'cohesion/cohesion-admin-styles';
+    $form['#attached']['library'][] = 'cohesion_elements/component-category';
 
     return $form;
   }
@@ -113,6 +114,7 @@ class CategoryForm extends EntityForm {
       // New weight should be higher than all other entities.
       $storage = $this->entityTypeManager->getStorage($this->entity->getEntityTypeId());
       $query = $storage->getQuery()
+        ->accessCheck(TRUE)
         ->range(0, 1)
         ->sort('weight', 'desc');
 

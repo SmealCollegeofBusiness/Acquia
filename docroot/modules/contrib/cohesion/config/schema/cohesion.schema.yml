@@ -78,6 +78,9 @@ cohesion.settings:
     add_animation_classes:
       type: string
       label: 'Animation classes'
+    sync_legacy_visibility:
+      type: boolean
+      label: 'Show legacy sync in UI'
     image_browser:
       type: mapping
       mapping:
@@ -99,3 +102,10 @@ cohesion.settings:
     compress_outbound_request:
       type: boolean
       label: 'Send call to the Site studio API gzipped or not, default TRUE'
+editor.editor.*.third_party.cohesion:
+  type: mapping
+  label: 'Site Studio settings'
+  mapping:
+    ssa_enabled:
+      type: boolean
+      label: 'SSA enabled'

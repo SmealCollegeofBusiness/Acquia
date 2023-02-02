@@ -193,6 +193,23 @@ class LayoutCanvas implements LayoutCanvasElementInterface, \JsonSerializable {
   }
 
   /**
+   *  Check if a helper is a form helper.
+   * @return bool
+   */
+  public function isFormHelper() {
+    foreach ($this->iterateCanvas() as $item) {
+      if ($i = $item->getModel()) {
+        $element_type = $i->getElement()->getProperty('type');
+
+        if ($element_type === 'form-field') {
+          return TRUE;
+        }
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * Find a property in the layout canvas.
    *
    * @param string|array $path_to_property

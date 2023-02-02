@@ -2,12 +2,12 @@
 
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
-use Acquia\ContentHubClient\CDF\CDFObjectInterface;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTrait;
 
 /**
  * Tests the NullifyQueueId class.
@@ -17,6 +17,8 @@ use Drupal\node\NodeInterface;
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class NullifyQueueIdTest extends EntityKernelTestBase {
+
+  use AcquiaContentHubAdminSettingsTrait;
 
   /**
    * Exported entity tracking Table.
@@ -97,6 +99,10 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
     $this->installSchema('acquia_contenthub_publisher', [self::TABLE_NAME]);
     $this->installEntitySchema('user');
     $this->installSchema('user', ['users_data']);
+
+    $this->createAcquiaContentHubAdminSettings();
+    $factory = $this->container->get('acquia_contenthub.client.factory');
+
     $this->installEntitySchema('node');
     $this->installSchema('node', ['node_access']);
     $this->installConfig([
@@ -122,57 +128,12 @@ class NullifyQueueIdTest extends EntityKernelTestBase {
     // Add Content Hub tracker service.
     $this->publisherTracker = \Drupal::service('acquia_contenthub_publisher.tracker');
 
-    $cdf_object = $this->getMockBuilder(CDFObjectInterface::class)
-      ->disableOriginalConstructor()
-      ->getMock();
-    $cdf_object->method('getOrigin')
-      ->willReturn($origin_uuid);
-
-    // Mock Acquia ContentHub Client.
-    $response = $this->getMockBuilder('\Psr\Http\Message\ResponseInterface')
-      ->disableOriginalConstructor()
-      ->getMock();
-    $response->method('getStatusCode')
-      ->willReturn(202);
-
-    $contenthub_client = $this->getMockBuilder('\Acquia\ContentHubClient\ContentHubClient')
-      ->disableOriginalConstructor()
-      ->getMock();
-    $contenthub_client->method('putEntities')
-      ->with($this->captureArg($this->cdfObject))
-      ->willReturn($response);
-    $contenthub_client->method('deleteEntity')
-      ->willReturn($response);
-    $contenthub_client->method('getEntity')
-      ->willReturn($cdf_object);
-
-    $contenthub_client_factory = $this->getMockBuilder('\Drupal\acquia_contenthub\Client\ClientFactory')
-      ->disableOriginalConstructor()
-      ->getMock();
-    $contenthub_client_factory->method('isConfigurationSet')
-      ->willReturn(TRUE);
-    $contenthub_client_factory->method('getClient')
-      ->willReturn($contenthub_client);
-    $this->container->set('acquia_contenthub.client.factory', $contenthub_client_factory);
-
-    $contenthub_settings = $this->getMockBuilder('\Acquia\ContentHubClient\Settings')
-      ->disableOriginalConstructor()
-      ->getMock();
-    $contenthub_settings->method('getUuid')
-      ->willReturn($origin_uuid);
-
-    $contenthub_client_factory->method('getSettings')
-      ->willReturn($contenthub_settings);
-
-    $contenthub_client->method('getSettings')
-      ->willReturn($contenthub_settings);
-
     $common = $this->getMockBuilder(ContentHubCommonActions::class)
       ->setConstructorArgs([
         $this->container->get('event_dispatcher'),
         $this->container->get('entity.cdf.serializer'),
         $this->container->get('entity.dependency.calculator'),
-        $this->container->get('acquia_contenthub.client.factory'),
+        $factory,
         $this->container->get('logger.factory'),
         $this->container->get('config.factory'),
       ])

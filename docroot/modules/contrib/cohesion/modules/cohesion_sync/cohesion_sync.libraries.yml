@@ -19,3 +19,4 @@ sync-chunked-file:
     file-js/chunked.js: {}
   dependencies:
     - core/drupal
+    - core/once

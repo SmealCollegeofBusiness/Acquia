@@ -60,6 +60,7 @@ class DefaultConfigSerializer implements EventSubscriberInterface {
    */
   public function onSerializeConfigEntity(ConfigDataEvent $event) {
     $entity = $event->getEntity();
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityTypeInterface $entity_type */
     $entity_type = $entity->getEntityType();
     $config_name = $entity_type->getConfigPrefix() . '.' . $entity->get($entity_type->getKey('id'));
     $config = $this->configFactory->get($config_name);

@@ -5,8 +5,11 @@ namespace Drupal\cohesion_elements;
 use Drupal\cohesion\LayoutCanvas\LayoutCanvas;
 use Drupal\cohesion_elements\Entity\Component;
 use Drupal\cohesion_elements\Entity\ComponentCategory;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Url;
 
 /**
  * Custom components service.
@@ -66,6 +69,11 @@ class CustomComponentsService {
   protected $categoryRelationshipsManager;
 
   /**
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * CustomComponentsService constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -74,6 +82,8 @@ class CustomComponentsService {
    *   Custom component discovery service.
    * @param \Drupal\cohesion_elements\CategoryRelationshipsManager $categoryRelationshipsManager
    *   Category relationships manager.
+   * @param \Drupal\Core\Render\RendererInterface $renderer
+   * The renderer service.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
@@ -82,12 +92,29 @@ class CustomComponentsService {
     EntityTypeManagerInterface $entityTypeManager,
     CustomComponentDiscoveryInterface $customComponentDiscovery,
     CategoryRelationshipsManager $categoryRelationshipsManager,
-    CacheBackendInterface $cacheBackend
+    CacheBackendInterface $cacheBackend,
+    RendererInterface $renderer
   ) {
     $this->customComponentDiscovery = $customComponentDiscovery;
     $this->cacheBackend = $cacheBackend;
     $this->entityTypeManager = $entityTypeManager;
     $this->categoryRelationshipsManager = $categoryRelationshipsManager;
+    $this->renderer = $renderer;
+  }
+
+  /**
+   * Sort array of components by weight.
+   *
+   * @param $a
+   * @param $b
+   * @return int
+   */
+  public static function sortByWeight($a, $b) {
+    $key = 'weight';
+    $a_weight = $a[$key] ?? 0;
+    $b_weight = $b[$key] ?? 0;
+
+    return $a_weight <=> $b_weight;
   }
 
   /**
@@ -109,6 +136,11 @@ class CustomComponentsService {
         $this->components = $cached_custom_components->data;
       }
     }
+
+    uasort($this->components, [
+      'Drupal\cohesion_elements\CustomComponentsService',
+      'sortByWeight',
+    ]);
 
     return $this->components;
   }
@@ -166,11 +198,13 @@ class CustomComponentsService {
     foreach ($custom_components as $customComponent) {
       $custom_component_entities[$customComponent['machine_name']] = new Component([
         'id' => $customComponent['machine_name'],
+        'weight' => $this->getWeight($customComponent),
         'uid' => $customComponent['machine_name'],
         'label' => $customComponent['name'],
         'category' => $customComponent['category']->id(),
         'json_values' => json_encode($customComponent['form']),
         'isCustomComponent' => TRUE,
+        'uuid' => $customComponent['machine_name'],
       ], 'cohesion_component');
     }
 
@@ -204,6 +238,7 @@ class CustomComponentsService {
         'uid' => $id,
         'type' => 'component',
         'title' => $component['title'],
+        'weight' => $this->getWeight($component),
         'enabled' => TRUE,
         'category' => $component['category']->get('class'),
         'componentId' => $id,
@@ -266,6 +301,7 @@ class CustomComponentsService {
       $components[$id] = $component;
       $components[$id]['title'] = $component['name'];
       $components[$id]['category'] = $this->getCategory($component['category']);
+      $components[$id]['weight'] = $this->getWeight($component);
       $components[$id]['form'] = $form;
       unset($form);
       if (isset($component['html'])) {
@@ -315,6 +351,52 @@ class CustomComponentsService {
 
       return $this->default_category;
     }
+  }
+
+  /**
+   * Get the markup for in use.
+   *
+   * @return mixed|null
+   *
+   * @throws \Drupal\Core\Entity\EntitymalformedException
+   */
+  public function getInUseMarkup($entity) {
+    if ($entity->hasInUse()) {
+      $markup = [
+        '#type' => 'link',
+        '#title' => t('In use'),
+        '#url' => URL::fromRoute('custom_component.' . $entity->id() . '.in_use', [
+          'machine_name' => $entity->id(),
+        ]),
+        '#options' => [
+          'attributes' => [
+            'class' => ['use-ajax'],
+            'data-dialog-type' => 'modal',
+            'data-dialog-options' => Json::encode([
+              'width' => 700,
+            ]),
+          ],
+        ],
+        '#attached' => ['library' => ['core/drupal.dialog.ajax']],
+      ];
+    }
+    else {
+      $markup = [
+        '#markup' => t('Not in use'),
+      ];
+    }
+
+    return $this->renderer->render($markup);
+  }
+
+  /**
+   * Get the custom components weight or default to 0.
+   *
+   * @param $custom_component
+   * @return int|mixed
+   */
+  public function getWeight($custom_component) {
+    return $custom_component['weight'] ?: 0;
   }
 
 }

@@ -8,7 +8,7 @@
         "issues": "https://drupal.org/project/issues/schemata",
         "source": "https://cgit.drupalcode.org/schemata"
     },
-    "license": "GPL-2.0+",
+    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "Adam Ross",
@@ -35,13 +35,10 @@
             "url": "https://packages.drupal.org/8"
         }
     ],
-    "require": {
-      "drupal/core": "^8 || ^9"
-    },
     "require-dev": {
         "drupal/coder": "^8.2",
+        "drupal/hal": "^1 || ^2",
         "jakub-onderka/php-parallel-lint": "^0.9.2",
-        "league/json-guard": "^1.0",
-        "league/json-reference": "^1.0"
+        "justinrainbow/json-schema": "^5.2"
     }
 }

@@ -2,7 +2,10 @@
 
 namespace Drupal\Tests\acquia_contenthub\Functional;
 
+use Drupal\acquia_contenthub\Exception\PlatformIncompatibilityException;
+use Drupal\acquia_contenthub_server_test\Client\ContentHubClientMock;
 use Drupal\acquia_contenthub_test\MockDataProvider;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTrait;
 use Drupal\Tests\BrowserTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -14,6 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
  * @group acquia_contenthub
  */
 class ContentHubSettingsFormTest extends BrowserTestBase {
+
+  use AcquiaContentHubAdminSettingsTrait;
 
   /**
    * User that has administer permission.
@@ -167,6 +172,28 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
   }
 
   /**
+   * Tests when an exception occurs during the check.
+   *
+   * @throws \Behat\Mink\Exception\ElementNotFoundException
+   * @throws \Behat\Mink\Exception\ExpectationException
+   * @throws \Behat\Mink\Exception\ResponseTextException
+   */
+  public function testContentHubSettingsPageWithValidDataWhenExceptionOccurs() {
+    $session = $this->assertSession();
+    $this->createAcquiaContentHubAdminSettings();
+
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH, [], [
+      ContentHubClientMock::X_ACH_TEST_EXECUTION_RESULT => 'exception',
+      ContentHubClientMock::X_ACH_TEST_EXECUTION_MSG => 'The request is failed due to some error',
+    ]);
+    $session->pageTextContains('Your client is not registered to Content Hub');
+    $session->statusCodeEquals(200);
+    $session->buttonExists('Register Site');
+    $session->buttonNotExists('Update Public URL');
+    $session->linkNotExists('Unregister Site');
+  }
+
+  /**
    * Tests successful registration with the exception of the webhook.
    *
    * @throws \Behat\Mink\Exception\ElementNotFoundException
@@ -239,6 +266,28 @@ class ContentHubSettingsFormTest extends BrowserTestBase {
     $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
     $this->submitForm($settings, 'Register Site');
     $session->pageTextContains('[4001] Signature for the message does not match expected signature for API key.');
+  }
+
+  /**
+   * Tests platform with non-featured account.
+   *
+   * @throws \Behat\Mink\Exception\ResponseTextException
+   */
+  public function testContentHubSettingsPageOnNonFeaturedAccount() {
+    $session = $this->assertSession();
+
+    $settings = [
+      'hostname' => MockDataProvider::VALID_HOSTNAME,
+      'api_key' => MockDataProvider::VALID_API_KEY,
+      'secret_key' => MockDataProvider::VALID_SECRET,
+      'client_name' => 'accountIsNotFeatured',
+      'webhook' => MockDataProvider::VALID_WEBHOOK_URL,
+    ];
+
+    $this->drupalGet(self::CH_SETTINGS_FORM_PATH);
+    $this->submitForm($settings, 'Register Site');
+
+    $session->pageTextContains('Platform error: ' . PlatformIncompatibilityException::$incompatiblePlatform);
   }
 
 }

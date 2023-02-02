@@ -179,12 +179,15 @@ class ConfigEntityHandler implements EventSubscriberInterface {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   protected function getEntityWithValues(string $entity_type_id, array $default_values): ConfigEntityInterface {
-    $entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->createFromStorageRecord($default_values);
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage */
+    $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
+    $entity = $storage->createFromStorageRecord($default_values);
     if ($old_entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->load($entity->id())) {
       // @todo check if this entity was previously imported. (Multiple entities of the same ID from different publishers)
       $default_values['uuid'] = $old_entity->uuid();
-      /** @var \Drupal\Core\Config\Entity\ConfigEntityInterface $old_entity */
-      $old_entity = \Drupal::entityTypeManager()->getStorage($entity_type_id)->createFromStorageRecord($default_values);
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $entity_storage */
+      $entity_storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
+      $old_entity = $entity_storage->createFromStorageRecord($default_values);
       $old_entity->enforceIsNew(FALSE);
       return $old_entity;
     }

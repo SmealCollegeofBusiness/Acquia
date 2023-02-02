@@ -1,0 +1,10 @@
+acquia_contenthub_dashboard:
+  version: 1.x
+  js:
+    js/acquia_contenthub_dashboard.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupalSettings
+  css:
+    theme:
+      css/acquia_contenthub_dashboard.css: {}

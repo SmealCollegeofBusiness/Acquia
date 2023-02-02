@@ -8,14 +8,14 @@ use Drupal\media_library\MediaLibraryEditorOpener;
 use Drupal\media_library\MediaLibraryState;
 
 /**
- * Site studio media library opener for text editors.
+ * Site studio media library opener for image uploader/entity browsers.
  *
  * @package Drupal\media_library
  */
 class MediaLibraryCohesionOpener extends MediaLibraryEditorOpener {
 
   /**
-   *
+   * {@inheritdoc}
    */
   public function checkAccess(MediaLibraryState $state, AccountInterface $account) {
     return AccessResult::allowed();

@@ -7,7 +7,12 @@ namespace Drupal\Tests\simple_oauth\Functional;
  */
 trait SimpleOauthTestTrait {
 
-  protected $privateKey = '-----BEGIN RSA PRIVATE KEY-----
+  /**
+   * The private key.
+   *
+   * @var string
+   */
+  protected string $privateKey = '-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAvPQBbfIu1fZ9Oq/af+KAxnhMRi3BJA9qBqsXLtNUgtkf68wn
 8z484j/yj9wLRP49b0K41yoExQ8KUD1D2mSh9C45GCmeBD4dM8KNMs2flSAXFgIV
 twABuu+7k+75RIndJo33heADIYf6BKT1Q4nAgDi4pyfvDYjYp5iDyeLNcWiNUo/Y
@@ -35,7 +40,12 @@ Oz9H1wukAZQtqf0LEGg0qIA0UuKvtvm9Iei0KpGrz21ExbPEyFhEgp5Utmw+Oon3
 Rk3L4fDUGqyKyamiZNZSRnC6gZm87EWHQNFFqU0yZ6a/QKbpOB1W
 -----END RSA PRIVATE KEY-----';
 
-  protected $publicKey = '-----BEGIN PUBLIC KEY-----
+  /**
+   * The public key.
+   *
+   * @var string
+   */
+  protected string $publicKey = '-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvPQBbfIu1fZ9Oq/af+KA
 xnhMRi3BJA9qBqsXLtNUgtkf68wn8z484j/yj9wLRP49b0K41yoExQ8KUD1D2mSh
 9C45GCmeBD4dM8KNMs2flSAXFgIVtwABuu+7k+75RIndJo33heADIYf6BKT1Q4nA
@@ -48,21 +58,18 @@ AwIDAQAB
   /**
    * Set up public and private keys.
    */
-  public function setUpKeys() {
-    $public_key_path = 'private:///public.key';
-    $private_key_path = 'private:///private.key';
+  public function setUpKeys(): void {
+    $public_key_path = 'private://public.key';
+    $private_key_path = 'private://private.key';
 
     file_put_contents($public_key_path, $this->publicKey);
     file_put_contents($private_key_path, $this->privateKey);
     chmod($public_key_path, 0660);
     chmod($private_key_path, 0660);
 
-    /** @var \Drupal\Core\File\FileSystemInterface $filesystem */
-    $filesystem = \Drupal::service('file_system');
-
     $settings = $this->config('simple_oauth.settings');
-    $settings->set('public_key', $filesystem->realpath($public_key_path));
-    $settings->set('private_key', $filesystem->realpath($private_key_path));
+    $settings->set('public_key', $public_key_path);
+    $settings->set('private_key', $private_key_path);
     $settings->save();
   }
 
@@ -75,7 +82,7 @@ AwIDAQAB
    * @return string
    *   The encoded string.
    */
-  public static function base64urlencode($string) {
+  public static function base64urlencode(string $string): string {
     $base64 = base64_encode($string);
     $base64 = rtrim($base64, "=");
     return strtr($base64, '+/', '-_');

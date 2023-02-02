@@ -349,8 +349,8 @@ abstract class CohesionElementEntityBase extends CohesionConfigEntityBase implem
         if (isset($top_level_element['uid'])) {
           if ($top_uid === FALSE) {
             $top_uid = $top_level_element['uid'];
-            $top_type = isset($top_level_element['type']) ? $top_level_element['type'] : FALSE;
-            $top_component_type = isset($top_level_element['componentType']) ? $top_level_element['componentType'] : FALSE;
+            $top_type = $top_level_element['type'] ?? FALSE;
+            $top_component_type = $top_level_element['componentType'] ?? FALSE;
           }
           elseif ($top_uid !== $top_level_element['uid']) {
             $top_uid = 'misc';

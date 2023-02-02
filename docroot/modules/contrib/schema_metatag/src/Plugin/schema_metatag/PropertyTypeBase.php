@@ -3,13 +3,13 @@
 namespace Drupal\schema_metatag\Plugin\schema_metatag;
 
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\schema_metatag\SchemaMetatagManagerInterface;
-use Drupal\schema_metatag\SchemaMetatagClientInterface;
-use Drupal\schema_metatag\SchemaMetatagTestTagInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\schema_metatag\SchemaMetatagClientInterface;
+use Drupal\schema_metatag\SchemaMetatagManagerInterface;
+use Drupal\schema_metatag\SchemaMetatagTestTagInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for Property type plugins.

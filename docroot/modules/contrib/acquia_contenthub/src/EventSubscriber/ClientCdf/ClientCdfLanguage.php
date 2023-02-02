@@ -17,7 +17,7 @@ class ClientCdfLanguage implements EventSubscriberInterface {
   /**
    * The Entity Type Manager.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManager
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 

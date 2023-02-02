@@ -397,7 +397,7 @@ class PackagerManager {
         if (!$needs_complete_rebuild && $action['is_config'] && substr($action['entity_type'], 0, strlen($config_prefix)) === $config_prefix) {
           // If the entity already exisits under a different UUID the UUID
           // currently in DB will be used.
-          $uuid_in_use = isset($action['replace_uuid']) ? $action['replace_uuid'] : $action['entry_uuid'];
+          $uuid_in_use = $action['replace_uuid'] ?? $action['entry_uuid'];
           // If a cohesion config, add it to the list of entities that neeeds
           // to be rebuilt.
           $entities_need_rebuild[$uuid_in_use] = $action['entity_type'];
@@ -497,6 +497,7 @@ class PackagerManager {
       $config_id = $entry['export'][$type_definition->getKey('id')];
       if ($type_definition->id() == 'cohesion_custom_style') {
         $custom_style_ids = \Drupal::entityQuery('cohesion_custom_style')
+          ->accessCheck(TRUE)
           ->condition('class_name', $entry['export']['class_name'])
           ->execute();
 
@@ -738,7 +739,10 @@ class PackagerManager {
           // Loop through the results and add them to the dependencies.
           foreach ($typed_uuids as $type => $uuids) {
             $entity_type = $this->entityTypeManager->getDefinition($type);
-            $ids = $this->entityTypeManager->getStorage($type)->getQuery()->condition($entity_type->getKey('uuid'), $uuids, 'IN')->execute();
+            $ids = $this->entityTypeManager->getStorage($type)->getQuery()
+              ->accessCheck(TRUE)
+              ->condition($entity_type->getKey('uuid'), $uuids, 'IN')
+              ->execute();
 
             $entities = $this->entityTypeManager->getStorage($type)->loadMultiple($ids);
 

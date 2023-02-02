@@ -27,7 +27,14 @@ services:
 
   acquia_contenthub_translations.prune_languages_from_cdf:
     class: Drupal\acquia_contenthub_translations\EventSubscriber\PruneCdf\PruneLanguagesFromCdf
-    arguments: ['@acquia_contenthub_translations.undesired_language_registrar', '@acquia_contenthub_translations.config', '@language_manager', '@acquia_contenthub_translations.logger_channel', '@acquia_contenthub_translations.manager', '@acquia_contenthub_translations.nt_entity_handler.context']
+    arguments:
+      - '@acquia_contenthub_translations.undesired_language_registrar'
+      - '@acquia_contenthub_translations.config'
+      - '@language_manager'
+      - '@acquia_contenthub_translations.logger_channel'
+      - '@acquia_contenthub_translations.manager'
+      - '@acquia_contenthub_translations.nt_entity_handler.context'
+      - '@acquia_contenthub_subscriber.cdf_importer'
     tags:
       - { name: event_subscriber }
 

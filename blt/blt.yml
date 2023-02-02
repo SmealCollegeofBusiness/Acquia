@@ -1,2 +1,8 @@
 project:
   machine_name: deploy
+drush:
+  aliases:
+    remote: devtest.01dev
+    local: self
+    ci: self
+  default_alias: '${drush.aliases.local}'

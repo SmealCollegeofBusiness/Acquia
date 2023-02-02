@@ -125,4 +125,4 @@ services:
 
   plugin.manager.schemata_json_schema.type_mapper:
     class: Drupal\schemata_json_schema\Plugin\Type\TypeMapperPluginManager
-    arguments: ['@container.namespaces', '@module_handler']
+    parent: default_plugin_manager

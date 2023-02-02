@@ -6,7 +6,7 @@ use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a plugin for the 'ItemListElement' Schema.org property type.
+ * Provides a plugin for the 'BreadcrumbList' Schema.org property type.
  *
  * @SchemaPropertyType(
  *   id = "breadcrumb_list",

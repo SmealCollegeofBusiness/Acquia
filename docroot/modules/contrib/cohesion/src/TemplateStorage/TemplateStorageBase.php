@@ -2,14 +2,12 @@
 
 namespace Drupal\cohesion\TemplateStorage;
 
-use Twig\Loader\ExistsLoaderInterface;
-
 /**
  * Defines a base class for template storage services.
  *
  * @phpstan-ignore-next-line
  */
-abstract class TemplateStorageBase implements TemplateStorageInterface, ExistsLoaderInterface {
+abstract class TemplateStorageBase implements TemplateStorageInterface {
 
   const TEMPLATE_PREFIX = '--cohesion-';
 

@@ -6,8 +6,8 @@ canvas-preview:
       css/canvas-preview.css: {}
   dependencies:
     - core/jquery
-    - core/jquery.ui
-    - core/jquery.ui.resizable
+    - jquery_ui/core
+    - cohesion/global_libraries.jquery_ui_resizable
 
 custom-component-form-builder:
   js:
@@ -17,3 +17,8 @@ custom-component-form-builder:
       css/custom-component-form-builder: { }
   dependencies:
     - core/jquery
+
+component-category:
+  css:
+    component:
+      css/component-category.css: {}

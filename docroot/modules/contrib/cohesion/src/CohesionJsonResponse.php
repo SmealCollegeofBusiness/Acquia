@@ -33,7 +33,7 @@ class CohesionJsonResponse extends JsonResponse {
         $status = $data['code'];
       }
 
-      $response_data = isset($data['data']) ? $data['data'] : $data;
+      $response_data = $data['data'] ?? $data;
       if (isset($data['status'])) {
         $this->setStatusCode($status, $data['status']);
       }

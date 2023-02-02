@@ -1,0 +1,13 @@
+uuid: e4bd9e5c-4e36-4a9a-88ba-a1716794fe53
+langcode: en
+status: true
+dependencies: {  }
+label: 'Page layouts'
+id: hlp_cat_landing_pages
+json_values: '{}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: true
+class: category-1
+weight: -10

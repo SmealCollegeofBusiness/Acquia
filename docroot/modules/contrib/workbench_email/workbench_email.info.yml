@@ -7,7 +7,7 @@ dependencies:
   - drupal:filter
 configure: entity.workbench_email_template.collection
 
-# Information added by Drupal.org packaging script on 2022-09-02
-version: '2.3.2'
+# Information added by Drupal.org packaging script on 2022-11-09
+version: '2.3.3'
 project: 'workbench_email'
-datestamp: 1662087615
+datestamp: 1667986453

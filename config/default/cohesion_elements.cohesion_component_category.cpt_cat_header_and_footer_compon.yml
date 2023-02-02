@@ -1,0 +1,14 @@
+uuid: 8aa56cf8-95af-446e-8a50-db0fa0d01fd0
+langcode: en
+status: true
+dependencies: {  }
+label: 'Header and footer components'
+id: cpt_cat_header_and_footer_compon
+json_values: '{}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+locked: false
+modified: false
+selectable: true
+class: category-3
+weight: -1

@@ -114,6 +114,7 @@ class ContentTemplates extends CohesionTemplateBase implements CohesionSettingsI
     if ($this->get('default') === TRUE && $this->get('view_mode') === 'full' && $this->get('bundle') !== '__any__') {
 
       $default_templates_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
+        ->accessCheck(TRUE)
         ->condition('entity_type', $this->get('entity_type'))
         ->condition('bundle', $this->get('bundle'))
         ->condition('view_mode', $this->get('view_mode'))
@@ -156,10 +157,11 @@ class ContentTemplates extends CohesionTemplateBase implements CohesionSettingsI
       foreach ($entity['bundles'] as $bundle_id => $bundle) {
         foreach ($entity['view_modes'] as $entity_view_mode) {
           // Try to import entity.
-          list($entity_type_id, $view_mode) = explode('.', $entity_view_mode['id']);
+          [$entity_type_id, $view_mode] = explode('.', $entity_view_mode['id']);
           // Determine if has already been imported by finding some existing
           // templates in DB.
           $already_imported_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
+            ->accessCheck(TRUE)
             ->condition('entity_type', $entity_type)
             ->condition('bundle', $bundle_id)
             ->condition('view_mode', $view_mode)
@@ -195,9 +197,10 @@ class ContentTemplates extends CohesionTemplateBase implements CohesionSettingsI
       if ($hasBundle) {
         foreach ($entity['view_modes'] as $entity_view_mode) {
           $bundle_id = '__any__';
-          list($entity_type_id, $view_mode) = explode('.', $entity_view_mode['id']);
+          [$entity_type_id, $view_mode] = explode('.', $entity_view_mode['id']);
 
           $already_imported_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
+            ->accessCheck(TRUE)
             ->condition('entity_type', $entity_type)
             ->condition('bundle', $bundle_id)
             ->condition('view_mode', $view_mode)
@@ -307,7 +310,7 @@ class ContentTemplates extends CohesionTemplateBase implements CohesionSettingsI
         '#type' => 'markup',
         '#markup' => '-',
       ];
-      return render($in_use);
+      return \Drupal::service('renderer')->render($in_use);
     }
     else {
       return parent::getInUseMarkup();
@@ -335,6 +338,7 @@ class ContentTemplates extends CohesionTemplateBase implements CohesionSettingsI
     // Only delete full view mode content template.
     if ($this->get('view_mode') == 'full') {
       $candidate_template_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
+        ->accessCheck(TRUE)
         ->condition('entity_type', $this->get('entity_type'))
         ->condition('bundle', $this->get('bundle'))
         ->condition('view_mode', $this->get('view_mode'))

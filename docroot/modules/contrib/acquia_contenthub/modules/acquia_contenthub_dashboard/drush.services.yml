@@ -1,0 +1,6 @@
+services:
+  acquia_contenthub_dashboard.allowed_origins_commands:
+    class: Drupal\acquia_contenthub_dashboard\Commands\ContentHubAllowedOriginsCommands
+    arguments: [ '@config.factory', '@acquia_contenthub_dashboard.ach_allowed_origins' ]
+    tags:
+      - { name: drush.command }

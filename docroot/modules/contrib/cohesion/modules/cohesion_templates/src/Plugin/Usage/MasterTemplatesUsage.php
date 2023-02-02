@@ -54,7 +54,10 @@ class MasterTemplatesUsage extends UsagePluginBase {
         // If it's set as default, get the default master template id.
         if ($entry['id'] == '__none__') {
 
-          $master_template_id = $this->storage->getQuery('AND')->condition('default', TRUE)->execute();
+          $master_template_id = $this->storage->getQuery('AND')
+            ->accessCheck(TRUE)
+            ->condition('default', TRUE)
+            ->execute();
 
           if ($master_template_id) {
             $master_template_id = array_shift($master_template_id);

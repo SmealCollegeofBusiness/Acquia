@@ -7,6 +7,7 @@ use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
 use Drupal\acquia_contenthub_publisher\EventSubscriber\HandleWebhook\GetFile;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTrait;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\ContentHubClientTestTrait;
 use Drupal\Tests\acquia_contenthub\Kernel\Traits\RequestTrait;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -24,6 +25,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class GetFileTest extends EntityKernelTestBase {
 
   use AcquiaContentHubAdminSettingsTrait;
+  use ContentHubClientTestTrait;
   use RequestTrait;
 
   /**
@@ -104,7 +106,8 @@ class GetFileTest extends EntityKernelTestBase {
       ],
     ];
 
-    $event = new HandleWebhookEvent($this->createSignedRequest(), $payload, $key, $this->clientFactory->getClient());
+    $client = $this->getMockedContentHubClient();
+    $event = new HandleWebhookEvent($this->createSignedRequest(), $payload, $key, $client->reveal());
     $this->getFile->onHandleWebhook($event);
     $binary = new BinaryFileResponse($payload['cdf']['uri'], 200, [], TRUE, 'inline');
 

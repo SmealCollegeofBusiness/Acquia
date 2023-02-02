@@ -178,6 +178,13 @@ class CohesionElementsEventSubscriber implements EventSubscriberInterface {
       }
     }
 
+    // If the route is the custom component builder then we need to allow
+    // element access.
+    if ($this->currentRouteMatch->getRouteName() === 'cohesion_elements.custom_component.builder') {
+      $route_params['custom_component_builder'] = 'true';
+      $route_params['access_elements'] = 'true';
+    }
+
     // Access elements on the frontend is not allowed.
     $url = Url::fromRoute('drupal_data_endpoint.element_group_info', [$route_params])->toString();
     $event->addUrl('helpers-elements-list', [
@@ -187,8 +194,8 @@ class CohesionElementsEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Add component content list for the sidebar browser to the front and admin
-   * urls
+   * Add component content list for the sidebar browser to the front and
+   * admin urls.
    *
    * @param \Drupal\cohesion\Event\CohesionJsAppUrlsEvent $event
    */

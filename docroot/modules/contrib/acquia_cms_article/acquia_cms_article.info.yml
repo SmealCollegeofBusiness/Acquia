@@ -6,7 +6,7 @@ core_version_requirement: ^9
 dependencies:
   - drupal:acquia_cms_person
 
-# Information added by Drupal.org packaging script on 2022-09-22
-version: '1.4.0'
+# Information added by Drupal.org packaging script on 2022-12-19
+version: '1.5.1'
 project: 'acquia_cms_article'
-datestamp: 1663873917
+datestamp: 1671443694

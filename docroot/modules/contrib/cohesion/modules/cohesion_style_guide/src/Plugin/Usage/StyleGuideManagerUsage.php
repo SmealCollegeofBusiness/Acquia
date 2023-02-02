@@ -120,6 +120,7 @@ class StyleGuideManagerUsage extends UsagePluginBase {
       foreach ($this->themeHandler->listInfo()[$entity->get('theme')]->base_themes as $base_theme_id => $base_theme_name) {
         $style_guide_managers = $this->entityTypeManager->getStorage('cohesion_style_guide_manager')
           ->getQuery()
+          ->accessCheck(TRUE)
           ->condition('theme', $base_theme_id)
           ->condition('style_guide_uuid', $entity->get('style_guide_uuid'))
           ->execute();

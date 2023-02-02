@@ -1,0 +1,18 @@
+uuid: 27f09c3b-3ba1-4d05-bcb3-449302e44d37
+langcode: en
+status: false
+dependencies: {  }
+label: 'Card (Media)'
+id: media___any___card
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: media
+bundle: __any__
+view_mode: card
+master_template: ''

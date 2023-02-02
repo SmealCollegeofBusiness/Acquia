@@ -1,3 +1,0 @@
-test:
-  uri: 'https://drupal.org/project/jsonapi_hypermedia/link-relations/#test'
-  description: "An extension link relation type, used for testing."

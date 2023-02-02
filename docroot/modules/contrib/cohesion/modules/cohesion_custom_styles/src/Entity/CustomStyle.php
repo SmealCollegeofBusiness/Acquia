@@ -74,6 +74,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     "class_name",
  *     "custom_style_type",
  *     "available_in_wysiwyg",
+ *     "available_in_wysiwyg_inline",
  *     "parent",
  *     "weight"
  *   }
@@ -93,13 +94,6 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
    * @var string
    */
   protected $custom_style_type;
-
-  /**
-   * Available in WYSIWYG?
-   *
-   * @var bool
-   */
-  protected $available_in_wysiwyg;
 
   /**
    * The className.
@@ -146,7 +140,7 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
    * @return string
    */
   public function getParent() {
-    return $this->parent;
+    return $this->parent ?? '';
   }
 
   /**
@@ -165,10 +159,12 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
       return FALSE;
     }
 
-    if ($ids = $storage->getQuery()->condition('class_name', $this->getParent())->execute()) {
-
+    $ids = $storage->getQuery()
+      ->accessCheck(TRUE)
+      ->condition('class_name', $this->getParent())
+      ->execute();
+    if (!empty($ids)) {
       return reset($ids);
-
     }
     else {
       return FALSE;
@@ -178,7 +174,7 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
   /**
    * Setter.
    *
-   * @return string
+   * @return \Drupal\cohesion_custom_styles\Entity\CustomStyle
    */
   public function setParent($parent) {
     $this->parent = $parent;
@@ -202,7 +198,10 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
 
     // If this is a parent item, attempt to get the child entities.
     if (!$this->getParent()) {
-      $ids = $storage->getQuery()->condition('parent', $this->getClass())->execute();
+      $ids = $storage->getQuery()
+        ->condition('parent', $this->getClass())
+        ->accessCheck(TRUE)
+        ->execute();
       $entities = $storage->loadMultiple($ids);
     }
 
@@ -226,6 +225,7 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
 
     if (!$this->getStatus()) {
       $this->set('available_in_wysiwyg', FALSE);
+      $this->set('available_in_wysiwyg_inline', FALSE);
     }
   }
 
@@ -330,6 +330,7 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
     $this->set('custom_style_type', '');
     $this->set('class_name', '');
     $this->set('available_in_wysiwyg', FALSE);
+    $this->set('available_in_wysiwyg_inline', FALSE);
   }
 
   /**
@@ -429,6 +430,7 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
     $storage = $entity_type_manager->getStorage($entity_type_repository->getEntityTypeFromClass(get_called_class()));
 
     $parent_ids = $storage->getQuery()->notExists('parent')
+      ->accessCheck(TRUE)
       ->sort('label', 'ASC')
       ->sort('weight', 'ASC')
       ->execute();
@@ -440,6 +442,7 @@ class CustomStyle extends CohesionConfigEntityBase implements CohesionSettingsIn
         /** @var CustomStyle $parent */
         if ($parent = self::load($entityId)) {
           $children = $storage->getQuery()
+            ->accessCheck(TRUE)
             ->condition('parent', $parent->getClass(), '=')
             ->sort('label', 'ASC')
             ->sort('weight', 'ASC')

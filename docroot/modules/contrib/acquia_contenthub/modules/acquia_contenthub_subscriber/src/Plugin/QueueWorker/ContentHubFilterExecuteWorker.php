@@ -167,7 +167,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
       return;
     }
 
-    $scroll_time_window = $this->getNormalizedScrollTimeWindowValue($this->client);
+    $scroll_time_window = $this->getNormalizedScrollTimeWindowValue();
     $uuids = [];
     $interest_list = $this->client->getInterestsByWebhook($webhook_uuid);
     $matched_data = $this->client->startScrollByFilter($data->filter_uuid, $scroll_time_window, self::SCROLL_SIZE);
@@ -203,6 +203,7 @@ class ContentHubFilterExecuteWorker extends QueueWorkerBase implements Container
         'crud' => 'update',
         'assets' => $chunk,
         'initiator' => 'some-initiator',
+        'filter_uuid' => $data->filter_uuid,
       ];
 
       $request = new Request([], [], [], [], [], [], json_encode($payload));

@@ -17,6 +17,9 @@ use Drupal\Tests\node\Traits\NodeCreationTrait;
  *
  * @group acquia_contenthub
  *
+ * @requires module crop
+ * @requires module focal_point
+ *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class FocalPointCollectorTest extends KernelTestBase {

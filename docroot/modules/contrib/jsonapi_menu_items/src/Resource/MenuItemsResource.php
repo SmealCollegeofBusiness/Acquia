@@ -107,7 +107,7 @@ final class MenuItemsResource extends ResourceBase {
    *   The Menu Tree Parameters object.
    */
   protected function applyFiltersToParams(Request $request, MenuTreeParameters $parameters) {
-    $filter = $request->query->get('filter');
+    $filter = $request->query->all('filter');
 
     if (!empty($filter['min_depth'])) {
       $parameters->setMinDepth((int) $filter['min_depth']);
@@ -196,7 +196,7 @@ final class MenuItemsResource extends ResourceBase {
         ],
         'title' => (string) $menu_link->link->getTitle(),
         'url' => $url->getGeneratedUrl(),
-        'weight' => $menu_link->link->getWeight(),
+        'weight' => (int) $menu_link->link->getWeight(),
       ];
       $links = new LinkCollection([]);
 

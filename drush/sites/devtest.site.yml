@@ -1,0 +1,24 @@
+01dev:
+    uri: devtest.dev-psusmeal.acsitefactory.com
+    host: psusmeal01dev.ssh.enterprise-g1.acquia-sites.com
+    options: {  }
+    paths: { dump-dir: /mnt/tmp }
+    root: /var/www/html/psusmeal.01dev/docroot
+    user: psusmeal.01dev
+    ssh: { options: '-p 22' }
+01live:
+    uri: devtest.psusmeal.acsitefactory.com
+    host: psusmeal01live.ssh.enterprise-g1.acquia-sites.com
+    options: {  }
+    paths: { dump-dir: /mnt/tmp }
+    root: /var/www/html/psusmeal.01live/docroot
+    user: psusmeal.01live
+    ssh: { options: '-p 22' }
+01test:
+    uri: devtest.test-psusmeal.acsitefactory.com
+    host: psusmeal01test.ssh.enterprise-g1.acquia-sites.com
+    options: {  }
+    paths: { dump-dir: /mnt/tmp }
+    root: /var/www/html/psusmeal.01test/docroot
+    user: psusmeal.01test
+    ssh: { options: '-p 22' }

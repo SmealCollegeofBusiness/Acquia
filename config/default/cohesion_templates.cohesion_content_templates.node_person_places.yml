@@ -1,0 +1,18 @@
+uuid: 9b700488-337e-432c-9024-b9318a63c5af
+langcode: en
+status: false
+dependencies: {  }
+label: 'Places (Node, Person)'
+id: node_person_places
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: person
+view_mode: places
+master_template: ''

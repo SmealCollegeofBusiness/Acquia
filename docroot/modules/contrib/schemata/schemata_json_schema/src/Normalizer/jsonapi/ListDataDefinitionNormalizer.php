@@ -5,6 +5,7 @@ namespace Drupal\schemata_json_schema\Normalizer\jsonapi;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\DataReferenceTargetDefinition;
 use Drupal\Core\TypedData\ListDataDefinitionInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Normalizer for ListDataDefinitionInterface objects.
@@ -14,6 +15,8 @@ use Drupal\Core\TypedData\ListDataDefinitionInterface;
  * might be more of a scalar.
  */
 class ListDataDefinitionNormalizer extends DataDefinitionNormalizer {
+
+  use StringTranslationTrait;
 
   /**
    * The interface or class that this Normalizer supports.
@@ -57,7 +60,7 @@ class ListDataDefinitionNormalizer extends DataDefinitionNormalizer {
     }
 
     $normalized = [
-      'description' => t('Entity attributes'),
+      'description' => $this->t('Entity attributes'),
       'type' => 'object',
       'properties' => [],
     ];

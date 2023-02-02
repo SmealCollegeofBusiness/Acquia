@@ -49,24 +49,24 @@ final class KeyValueStorage extends TemplateStorageBase {
   /**
    * {@inheritdoc}
    */
-  public function getSourceContext($name) {
-    list ($content) = $this->load($name);
+  public function getSourceContext($name): Source {
+    [$content] = $this->load($name);
     return new Source($content, $name);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getCacheKey($name) {
-    list ($content) = $this->load($name);
+  public function getCacheKey($name): string {
+    [$content] = $this->load($name);
     return "$name:$content";
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isFresh($name, $time) {
-    list (, $changed_at) = $this->load($name);
+  public function isFresh($name, $time): bool {
+    [, $changed_at] = $this->load($name);
     return $changed_at < $time;
   }
 

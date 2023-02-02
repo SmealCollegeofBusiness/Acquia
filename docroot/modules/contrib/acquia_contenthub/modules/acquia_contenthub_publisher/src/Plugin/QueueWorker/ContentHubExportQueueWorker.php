@@ -3,15 +3,17 @@
 namespace Drupal\acquia_contenthub_publisher\Plugin\QueueWorker;
 
 use Acquia\ContentHubClient\CDFDocument;
+use Acquia\ContentHubClient\Syndication\SyndicationStatus;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
 use Drupal\acquia_contenthub\Event\PrunePublishCdfEntitiesEvent;
+use Drupal\acquia_contenthub\Libs\InterestList\InterestListTrait;
+use Drupal\acquia_contenthub\Libs\Logging\ContentHubLoggerInterface;
 use Drupal\acquia_contenthub_publisher\PublisherTracker;
 use Drupal\Component\Uuid\Uuid;
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\Config;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -26,6 +28,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * )
  */
 class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFactoryPluginInterface {
+
+  use InterestListTrait;
 
   /**
    * The event dispatcher.
@@ -56,18 +60,11 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
   protected $tracker;
 
   /**
-   * The config factory.
+   * Acquia Content Hub settings object.
    *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   * @var \Drupal\Core\Config\Config
    */
-  protected $configFactory;
-
-  /**
-   * The logger channel factory.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
-   */
-  protected $achLoggerChannel;
+  protected $config;
 
   /**
    * The Content Hub Client.
@@ -75,6 +72,13 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
    * @var \Acquia\ContentHubClient\ContentHubClient
    */
   protected $client;
+
+  /**
+   * Content Hub logger.
+   *
+   * @var \Drupal\acquia_contenthub\Libs\Logging\ContentHubLoggerInterface
+   */
+  protected $chLogger;
 
   /**
    * ContentHubExportQueueWorker constructor.
@@ -90,10 +94,10 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
    * @param \Drupal\acquia_contenthub_publisher\PublisherTracker $tracker
    *   The published entity tracker.
    *   The event dispatcher.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The config factory.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
-   *   The logger factory.
+   * @param \Drupal\Core\Config\Config $config
+   *   The acquia_contenthub.admin_settings config object.
+   * @param \Drupal\acquia_contenthub\Libs\Logging\ContentHubLoggerInterface $ch_logger
+   *   Content Hub logger service.
    * @param array $configuration
    *   The plugin configuration.
    * @param string $plugin_id
@@ -109,12 +113,11 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
     ContentHubCommonActions $common,
     ClientFactory $factory,
     PublisherTracker $tracker,
-    ConfigFactoryInterface $config_factory,
-    LoggerChannelFactoryInterface $logger_factory,
+    Config $config,
+    ContentHubLoggerInterface $ch_logger,
     array $configuration,
     $plugin_id,
-    $plugin_definition
-  ) {
+    $plugin_definition) {
     $this->dispatcher = $dispatcher;
     $this->common = $common;
     if (!empty($this->common->getUpdateDbStatus())) {
@@ -124,8 +127,8 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
     $this->entityTypeManager = $entity_type_manager;
     $this->client = $factory->getClient();
     $this->tracker = $tracker;
-    $this->configFactory = $config_factory;
-    $this->achLoggerChannel = $logger_factory->get('acquia_contenthub_publisher');
+    $this->config = $config;
+    $this->chLogger = $ch_logger;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -139,8 +142,8 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
       $container->get('acquia_contenthub_common_actions'),
       $container->get('acquia_contenthub.client.factory'),
       $container->get('acquia_contenthub_publisher.tracker'),
-      $container->get('config.factory'),
-      $container->get('logger.factory'),
+      $container->get('acquia_contenthub.config'),
+      $container->get('acquia_contenthub_publisher.ch_logger'),
       $configuration,
       $plugin_id,
       $plugin_definition
@@ -160,31 +163,43 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
    */
   public function processItem($data) {
     if (!$this->client) {
-      $this->achLoggerChannel->error('Acquia Content Hub client cannot be initialized because connection settings are empty.');
+      $this->chLogger->getChannel()->error('Acquia Content Hub client cannot be initialized because connection settings are empty.');
       return FALSE;
     }
-
     $storage = $this->entityTypeManager->getStorage($data->type);
     $entity = $storage->loadByProperties(['uuid' => $data->uuid]);
 
     // Entity missing so remove it from the tracker and stop processing.
     if (!$entity) {
       $this->tracker->delete('entity_uuid', $data->uuid);
-      $this->achLoggerChannel->warning(
-        sprintf(
-          'Entity ("%s", "%s") being exported no longer exists on the publisher. Deleting item from the publisher queue.',
-          $data->type,
-          $data->uuid
-        )
+      $this->chLogger->logWarning(
+        'Entity ("@entity_type", "@uuid") being exported no longer exists on the publisher. Deleting item from the publisher queue.',
+        [
+          '@entity_type' => $data->type,
+          '@uuid' => $data->uuid,
+        ]
       );
       return TRUE;
     }
 
+    /** @var \Drupal\Core\Entity\EntityInterface $entity */
     $entity = reset($entity);
     $entities = [];
     $calculate_dependencies = $data->calculate_dependencies ?? TRUE;
-    $output = $this->common->getEntityCdf($entity, $entities, TRUE, $calculate_dependencies);
-    $config = $this->configFactory->get('acquia_contenthub.admin_settings');
+    try {
+      $output = $this->common->getEntityCdf($entity, $entities, TRUE, $calculate_dependencies);
+    }
+    catch (\Exception $ex) {
+      $this->chLogger->logError('Entity: @entity_type - @uuid. Error: @error',
+        [
+          '@entity_type' => $entity->getEntityType()->getBundleLabel(),
+          '@uuid' => $entity->uuid(),
+        ]
+      );
+
+      throw $ex;
+    }
+
     $document = new CDFDocument(...$output);
 
     // $output is a cdf of ALLLLLL entities that support the entity we wanted
@@ -192,30 +207,17 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
     // we want to export were imported initially? We should dispatch an event
     // to look at the output and see if there are entries in our subscriber
     // table and then compare the rest against plexus data.
-    $event = new PrunePublishCdfEntitiesEvent($this->client, $document, $config->get('origin'));
+    $event = new PrunePublishCdfEntitiesEvent($this->client, $document, $this->config->get('origin'));
     $this->dispatcher->dispatch($event, AcquiaContentHubEvents::PRUNE_PUBLISH_CDF_ENTITIES);
     $output = array_values($event->getDocument()->getEntities());
     if (empty($output)) {
-      $this->achLoggerChannel->warning(
-        sprintf('You are trying to export an empty CDF. Triggering entity: %s, %s',
-          $data->type,
-          $data->uuid
-        )
+      $this->chLogger->logWarning('You are trying to export an empty CDF. Triggering entity: @entity, @uuid',
+        [
+          '@entity' => $data->type,
+          '@uuid' => $data->uuid,
+        ]
       );
       return 0;
-    }
-
-    // ContentHub backend determines new or update on the PUT endpoint.
-    $response = $this->client->putEntities(...$output);
-    if ($response->getStatusCode() !== 202) {
-      $this->achLoggerChannel->error(
-        sprintf(
-          'Request to Content Hub "/entities" endpoint returned with status code = %s. Triggering entity: %s.',
-          $response->getStatusCode(),
-          $data->uuid
-        )
-      );
-      return FALSE;
     }
 
     $entity_uuids = [];
@@ -227,12 +229,13 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
       }
       $entity_uuids[] = $item->getUuid();
     }
-
-    $webhook = $config->get('webhook.uuid') ?? '';
     $exported_entities = implode(', ', $entity_uuids);
+    // ContentHub backend determines new or update on the PUT endpoint.
+    $response = $this->client->putEntities(...$output);
 
+    $webhook = $this->config->get('webhook.uuid');
     if (!Uuid::isValid($webhook)) {
-      $this->achLoggerChannel->warning(
+      $this->chLogger->getChannel()->warning(
         sprintf(
           'Site does not have a valid registered webhook and it is required to add entities (%s) to the site\'s interest list in Content Hub.',
           $exported_entities
@@ -241,30 +244,71 @@ class ContentHubExportQueueWorker extends QueueWorkerBase implements ContainerFa
       return FALSE;
     }
 
-    if (($config->get('send_contenthub_updates') ?? TRUE)) {
-      try {
-        $this->client->addEntitiesToInterestList($webhook, $entity_uuids);
-        $this->achLoggerChannel->info(
-          sprintf(
-            'The following exported entities have been added to the interest list on Content Hub for webhook "%s": [%s].',
-            $webhook,
-            $exported_entities
-          )
-        );
-      }
-      catch (\Exception $e) {
-        $this->achLoggerChannel->error(
-          sprintf(
-            'Error adding the following entities to the interest list for webhook "%s": [%s]. Error message: "%s".',
-            $webhook,
-            $exported_entities,
-            $e->getMessage()
-          )
-        );
-      }
+    if ($response->getStatusCode() !== 202) {
+      $event_ref = $this->chLogger->logError(
+        'Request to Content Hub "/entities" endpoint returned with status code = @status_code. Triggering entity: @uuid.',
+        [
+          '@status_code' => $response->getStatusCode(),
+          '@uuid' => $data->uuid,
+        ]
+      );
+      $this->updateInterestList($entity_uuids, $webhook, SyndicationStatus::EXPORT_FAILED, $event_ref);
+
+      return FALSE;
     }
 
+    $this->updateInterestList($entity_uuids, $webhook, SyndicationStatus::EXPORT_SUCCESSFUL);
+
     return count($output);
+  }
+
+  /**
+   * The extended interest list to add based on site role.
+   *
+   * @param array $uuids
+   *   The entity uuids to build interest list from.
+   * @param string $webhook_uuid
+   *   The webhook uuid to register interest items for.
+   * @param string $status
+   *   The syndication status.
+   * @param string|null $event_ref
+   *   The id of the event.
+   */
+  protected function updateInterestList(array $uuids, string $webhook_uuid, string $status, ?string $event_ref = NULL): void {
+    $send_update = $this->config->get('send_contenthub_updates') ?? TRUE;
+    if (!$send_update) {
+      return;
+    }
+    $interest_list = $this->buildInterestList(
+      $uuids,
+      $status,
+      NULL,
+      $event_ref
+    );
+    $exported_entities = implode(', ', $uuids);
+    try {
+      $this->client->updateInterestListBySiteRole($webhook_uuid, 'PUBLISHER', $interest_list);
+
+      $this->chLogger->getChannel()
+        ->info('The following exported entities have been added to the interest list with status "@syndication_status" for webhook @webhook: [@exported_entities].',
+          [
+            '@webhook' => $webhook_uuid,
+            '@syndication_status' => $status,
+            '@exported_entities' => $exported_entities,
+          ]
+        );
+    }
+    catch (\Exception $e) {
+      $this->chLogger->getChannel()
+        ->error('Error adding the following entities to the interest list with status "@syndication_status" for webhook @webhook: [@exported_entities]. Error message: @exception.',
+          [
+            '@webhook' => $webhook_uuid,
+            '@syndication_status' => $status,
+            '@exported_entities' => $exported_entities,
+            '@exception' => $e->getMessage(),
+          ]
+        );
+    }
   }
 
 }

@@ -103,6 +103,7 @@ class TemplatesApi extends ApiPluginBase {
               $string = str_replace("\'", "'", $string);
               $string = str_replace("'", "\'", $string);
             }
+            $string = '{% verbatim %}' . $string . '{% endverbatim %}';
             // Perform the replacement.
             $template_values['twig'] = str_replace($hash, $string, $template_values['twig']);
           }

@@ -93,6 +93,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
    */
   public function attachFilter(string $uuid, string $url): void {
     $client = $this->clientFactory->getClient();
+    /** @var \Acquia\ContentHubClient\Webhook|array $webhook */
     $webhook = $client->getWebHook($url);
 
     if (empty($webhook)) {
@@ -144,6 +145,7 @@ class AcquiaContentHubFiltersCommands extends DrushCommands {
    */
   public function detachFilter(string $uuid, string $url): void {
     $client = $this->clientFactory->getClient();
+    /** @var \Acquia\ContentHubClient\Webhook|array $webhook */
     $webhook = $client->getWebHook($url);
 
     if (empty($webhook) || empty($webhook->getFilters())) {

@@ -1,0 +1,18 @@
+uuid: 6546811b-9dee-4ae2-aa05-a671c0cbd3c9
+langcode: en
+status: false
+dependencies: {  }
+label: 'Places (Node, Event)'
+id: node_event_places
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: event
+view_mode: places
+master_template: ''

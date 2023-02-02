@@ -150,6 +150,12 @@ Set organization key:
 $config['cohesion.settings']['organization_key'] = 'org-key';
 ```
 
+Show legacy sync options in the UI:
+
+```
+$config['cohesion.settings']['sync_legacy_visibility'] = TRUE;
+```
+
 ### Site Studio Events
 
 When certain Site Studio operations are taking place events are dispatched so that you can interact with it, but you must write your own event subscribers to subscribe to the relevant events.

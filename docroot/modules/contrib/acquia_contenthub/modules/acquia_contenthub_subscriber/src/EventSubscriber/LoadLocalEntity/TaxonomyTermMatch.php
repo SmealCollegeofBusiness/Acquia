@@ -126,7 +126,8 @@ class TaxonomyTermMatch implements EventSubscriberInterface {
    * @return array|null
    *   Attribute value or NULL.
    */
-  protected function extractParentAttribute(CDFObject $object) {
+  protected function extractParentAttribute(CDFObject $object): ?array {
+    /** @var \Acquia\ContentHubClient\CDFAttribute|null $parent_attribute */
     $parent_attribute = $object->getAttribute('parent');
     if (empty($parent_attribute)) {
       return ['0'];

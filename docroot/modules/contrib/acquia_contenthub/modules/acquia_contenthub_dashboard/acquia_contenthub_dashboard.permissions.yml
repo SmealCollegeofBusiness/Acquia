@@ -1,0 +1,3 @@
+administer ach dashboard:
+  title: 'Administer Acquia ContentHub Dashboard'
+  restrict access: true

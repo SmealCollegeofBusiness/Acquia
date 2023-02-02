@@ -21,6 +21,7 @@ class KeyValueStorageTest extends EntityKernelTestBase {
    * {@inheritdoc}
    */
   public static $modules = [
+    'file',
     'cohesion',
   ];
 
@@ -32,7 +33,7 @@ class KeyValueStorageTest extends EntityKernelTestBase {
     $keyValueStorage = \Drupal::service('keyvalue')->get('cohesion.templates');
     $templateStorage = \Drupal::service('cohesion.template_storage');
 
-    $this->assertEqual(get_class($templateStorage), KeyValueStorage::class);
+    $this->assertEquals(get_class($templateStorage), KeyValueStorage::class);
 
     $time = time();
     $template_name = 'component--cohesion-test.html.twig';

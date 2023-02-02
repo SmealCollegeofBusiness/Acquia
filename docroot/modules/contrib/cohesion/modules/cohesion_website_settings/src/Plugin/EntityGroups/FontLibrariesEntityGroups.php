@@ -61,7 +61,7 @@ class FontLibrariesEntityGroups extends EntityGroupsPluginBase {
 
           case 'fontStacks':
             // Does the entity already exist?
-            $query = \Drupal::entityQuery('cohesion_font_stack');
+            $query = \Drupal::entityQuery('cohesion_font_stack')->accessCheck(TRUE);
             $query->condition('id', $library->stack->uid);
             $entity_ids = $query->execute();
 
@@ -83,7 +83,7 @@ class FontLibrariesEntityGroups extends EntityGroupsPluginBase {
     }
 
     // FontLibrary: Delete any removed entities.
-    $query = \Drupal::entityQuery('cohesion_font_library');
+    $query = \Drupal::entityQuery('cohesion_font_library')->accessCheck(TRUE);
     if ($entity_ids = $query->execute()) {
       foreach ($libraries as $source => $group) {
         foreach ($group as $library) {
@@ -104,7 +104,7 @@ class FontLibrariesEntityGroups extends EntityGroupsPluginBase {
     }
 
     // FontStack: Delete any removed entities.
-    $query = \Drupal::entityQuery('cohesion_font_stack');
+    $query = \Drupal::entityQuery('cohesion_font_stack')->accessCheck(TRUE);
     if ($entity_ids = $query->execute()) {
       foreach ($libraries as $source => $group) {
         foreach ($group as $library) {

@@ -81,13 +81,9 @@ class PublicFileSchemeHandler extends PluginBase implements FileSchemeHandlerInt
    */
   public function addAttributes(CDFObject $object, FileInterface $file) {
     $uri = $file->getFileUri();
+    // @phpstan-ignore-next-line
     $directory_path = $this->streamWrapperManager->getViaUri($uri)->getDirectoryPath();
-    if (version_compare(\Drupal::VERSION, '8.8.0', '>=')) {
-      $url = Url::fromUri('base:' . $directory_path . '/' . StreamWrapperManager::getTarget($uri), ['absolute' => TRUE])->toString();
-    }
-    else {
-      $url = Url::fromUri('base:' . $directory_path . '/' . file_uri_target($uri), ['absolute' => TRUE])->toString();
-    }
+    $url = Url::fromUri('base:' . $directory_path . '/' . StreamWrapperManager::getTarget($uri), ['absolute' => TRUE])->toString();
     $object->addAttribute('file_scheme', CDFAttribute::TYPE_STRING, 'public');
     $object->addAttribute('file_location', CDFAttribute::TYPE_STRING, $url);
     $object->addAttribute('file_uri', CDFAttribute::TYPE_STRING, $uri);

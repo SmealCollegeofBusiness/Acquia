@@ -10,7 +10,10 @@ cohesion_custom_styles.cohesion_custom_style.*:
       label: 'Custom style type'
     available_in_wysiwyg:
       type: boolean
-      label: 'Available in WYSIWYG'
+      label: 'Available in CKEditor block'
+    available_in_wysiwyg_inline:
+      type: boolean
+      label: 'Available in CKEditor inline'
     parent:
       type: string
       label: 'Extended from'

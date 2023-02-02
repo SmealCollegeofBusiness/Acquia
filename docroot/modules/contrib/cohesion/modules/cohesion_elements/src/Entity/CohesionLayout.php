@@ -311,7 +311,7 @@ class CohesionLayout extends ContentEntityBase implements CohesionLayoutInterfac
     }
     else {
       $cohesion_error = &drupal_static('entity_cohesion_error');
-      $cohesion_error = isset($responseData['error']) ? $responseData['error'] : '';
+      $cohesion_error = $responseData['error'] ?? '';
       return $cohesion_error;
     }
 

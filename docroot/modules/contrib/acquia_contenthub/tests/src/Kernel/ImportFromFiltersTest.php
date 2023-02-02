@@ -82,7 +82,12 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
       ->willReturn('00000000-0000-460b-ac74-b6bed08b4441');
     $content_hub_settings
       ->method('toArray')
-      ->willReturn(['name' => 'test-client']);
+      ->willReturn([
+        'webhook' => [
+          'uuid' => '00000000-0000-460b-ac74-b6bed08b4441',
+        ],
+        'name' => 'some_client_name',
+      ]);
 
     $content_hub_client = $this
       ->getMockBuilder(ContentHubClient::class)
@@ -99,6 +104,7 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
         'isFeatured',
         'listFiltersForWebhook',
         'getInterestsByWebhook',
+        'addEntitiesToInterestListBySiteRole',
       ])
       ->getMock();
     $content_hub_client->method('isFeatured')->willReturn(FALSE);
@@ -115,6 +121,9 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
     $content_hub_client
       ->method('delete')
       ->will($this->returnCallback([$this, 'returnEmptyResponse']));
+    $content_hub_client
+      ->method('addEntitiesToInterestListBySiteRole')
+      ->willReturn(new Response());
 
     $this->contentHubClientMock = $content_hub_client;
   }
@@ -196,8 +205,8 @@ class ImportFromFiltersTest extends EntityKernelTestBase {
    * @return \Psr\Http\Message\ResponseInterface
    *   Guzzle response.
    */
-  public function returnEmptyResponse(): ResponseInterface {
-    return new Response(200, [], "");
+  public function returnEmptyResponse() {
+    return new Response(200, [], json_encode([]));
   }
 
   /**

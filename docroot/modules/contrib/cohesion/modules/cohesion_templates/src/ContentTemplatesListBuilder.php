@@ -47,7 +47,9 @@ class ContentTemplatesListBuilder extends CohesionListBuilder {
   public function load() {
     $entity_type = \Drupal::routeMatch()->getParameter('content_entity_type');
     $candidate_template_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
-      ->condition('entity_type', $entity_type)->execute();
+      ->accessCheck(TRUE)
+      ->condition('entity_type', $entity_type)
+      ->execute();
 
     if ($candidate_template_ids) {
       $candidate_templates = $this->storage->loadMultiple($candidate_template_ids);

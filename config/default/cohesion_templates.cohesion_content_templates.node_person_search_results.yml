@@ -1,0 +1,18 @@
+uuid: 87c19f3d-48d1-4cd3-ad63-bfddde19e585
+langcode: en
+status: false
+dependencies: {  }
+label: 'Search Results (Node, Person)'
+id: node_person_search_results
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: person
+view_mode: search_results
+master_template: ''

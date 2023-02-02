@@ -43,7 +43,7 @@ class _0028EntityUpdateUnitTest extends EntityUpdateUnitTestCase {
     $this->assertionsLayoutCanvasBefore($base_style_entity->getDecodedJsonValues());
     $styles_before = $base_style_entity->getDecodedJsonValues()['styles'];
     $this->unit->runUpdate($base_style_entity);
-    $this->assertArrayEquals($styles_before, $base_style_entity->getDecodedJsonValues()['styles']);
+    $this->assertEquals($styles_before, $base_style_entity->getDecodedJsonValues()['styles']);
     $this->assertionsLayoutCanvasAfter($base_style_entity->getDecodedJsonValues());
     $this->unit->runUpdate($base_style_entity);
     $this->assertionsLayoutCanvasAfter($base_style_entity->getDecodedJsonValues());

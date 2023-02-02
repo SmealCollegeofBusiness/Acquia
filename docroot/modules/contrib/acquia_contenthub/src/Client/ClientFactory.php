@@ -2,19 +2,23 @@
 
 namespace Drupal\acquia_contenthub\Client;
 
-use Acquia\ContentHubClient\CDF\ClientCDFObject;
+use Acquia\ContentHubClient\CDF\CDFObject;
 use Acquia\ContentHubClient\ContentHubClient;
+use Acquia\ContentHubClient\ContentHubLoggingClient;
 use Acquia\ContentHubClient\Settings;
 use Acquia\Hmac\Exception\KeyNotFoundException;
 use Acquia\Hmac\KeyLoader;
 use Acquia\Hmac\RequestAuthenticator;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubSettingsEvent;
+use Drupal\acquia_contenthub\Exception\EventServiceUnreachableException;
+use Drupal\acquia_contenthub\Libs\Common\PlatformCompatibilityChecker;
 use Drupal\acquia_contenthub\Libs\Traits\HandleResponseTrait;
+use Drupal\acquia_contenthub\Libs\Traits\ResponseCheckerTrait;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -26,6 +30,7 @@ use Symfony\Component\HttpFoundation\Request;
 class ClientFactory {
 
   use HandleResponseTrait;
+  use ResponseCheckerTrait;
 
   /**
    * The event dispatcher.
@@ -42,6 +47,13 @@ class ClientFactory {
   protected $client;
 
   /**
+   * Content Hub Event logging client.
+   *
+   * @var \Acquia\ContentHubClient\ContentHubLoggingClient
+   */
+  protected $loggingClient;
+
+  /**
    * Settings Provider.
    *
    * @var string
@@ -56,18 +68,18 @@ class ClientFactory {
   protected $settings;
 
   /**
-   * Logger Factory.
+   * ACH Logger Channel.
    *
-   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
    */
-  protected $loggerFactory;
+  protected $logger;
 
   /**
-   * Client CDF object.
+   * The platform checker service.
    *
-   * @var \Acquia\ContentHubClient\CDF\ClientCDFObject
+   * @var \Drupal\acquia_contenthub\Libs\Common\PlatformCompatibilityChecker
    */
-  protected $clientCDFObject;
+  protected $platformChecker;
 
   /**
    * The module extension list.
@@ -88,18 +100,21 @@ class ClientFactory {
    *
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
    *   The event dispatcher.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
-   *   The logger factory.
+   * @param \Drupal\Core\Logger\LoggerChannelInterface $logger
+   *   ACH logger channel.
    * @param \Drupal\Core\Extension\ModuleExtensionList $module_list
    *   The module extension list.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The configuration factory.
+   * @param \Drupal\acquia_contenthub\Libs\Common\PlatformCompatibilityChecker $checker
+   *   The platform checker service.
    */
-  public function __construct(EventDispatcherInterface $dispatcher, LoggerChannelFactoryInterface $logger_factory, ModuleExtensionList $module_list, ConfigFactoryInterface $config_factory) {
+  public function __construct(EventDispatcherInterface $dispatcher, LoggerChannelInterface $logger, ModuleExtensionList $module_list, ConfigFactoryInterface $config_factory, PlatformCompatibilityChecker $checker) {
     $this->dispatcher = $dispatcher;
-    $this->loggerFactory = $logger_factory;
+    $this->logger = $logger;
     $this->moduleList = $module_list;
-    $this->config = $config_factory->get('acquia_contenthub.admin_settings');
+    $this->platformChecker = $checker;
+    $this->config = $config_factory->getEditable('acquia_contenthub.admin_settings');
     // Whenever a new client is constructed, make sure settings are invoked.
     $this->populateSettings();
   }
@@ -141,13 +156,18 @@ class ClientFactory {
   /**
    * Instantiates the content hub client.
    *
+   * @param \Acquia\ContentHubClient\Settings|null $settings
+   *   The Settings object or null.
+   *
    * @return \Acquia\ContentHubClient\ContentHubClient|bool
    *   The ContentHub Client
+   *
+   * @throws \Exception
    */
   public function getClient(Settings $settings = NULL) {
     if (!$settings) {
       if (isset($this->client)) {
-        return $this->client;
+        return $this->platformChecker->intercept($this->client);
       }
       $settings = $this->getSettings();
     }
@@ -158,7 +178,7 @@ class ClientFactory {
 
     // Override configuration.
     $languages_ids = array_keys(\Drupal::languageManager()->getLanguages());
-    array_push($languages_ids, ClientCDFObject::LANGUAGE_UNDETERMINED);
+    $languages_ids[] = CDFObject::LANGUAGE_UNDETERMINED;
 
     $config = [
       'base_url' => $settings->getUrl(),
@@ -167,14 +187,85 @@ class ClientFactory {
     ];
 
     $this->client = new ContentHubClient(
-      $this->loggerFactory->get('acquia_contenthub'),
+      $this->logger,
       $settings,
       $settings->getMiddleware(),
       $this->dispatcher,
       $config
     );
 
-    return $this->client;
+    return $this->platformChecker->intercept($this->client);
+  }
+
+  /**
+   * Instantiates the content hub logging client.
+   *
+   * @return \Acquia\ContentHubClient\ContentHubLoggingClient|null
+   *   The ContentHub Logging Client
+   *
+   * @throws \Exception
+   */
+  public function getLoggingClient(Settings $settings = NULL): ?ContentHubLoggingClient {
+    if (!$settings) {
+      if (isset($this->loggingClient)) {
+        return $this->loggingClient;
+      }
+      $settings = $this->getSettings();
+    }
+
+    // If any of these variables is empty, then we do NOT have a valid
+    // connection.
+    // @todo add validation for the Hostname.
+    if (!$settings
+      || !Uuid::isValid($settings->getUuid())
+      || empty($settings->getName())
+      || empty($settings->getUrl())
+      || empty($settings->getApiKey())
+      || empty($settings->getSecretKey())
+    ) {
+      return NULL;
+    }
+
+    $config = [
+      'base_url' => $this->getLoggingUrl(),
+      'client-user-agent' => $this->getClientUserAgent(),
+    ];
+
+    $this->loggingClient = new ContentHubLoggingClient(
+      $this->logger,
+      $settings,
+      $settings->getMiddleware(),
+      $this->dispatcher,
+      $config
+    );
+
+    $this->checkLoggingClient($this->loggingClient);
+
+    return $this->loggingClient;
+  }
+
+  /**
+   * Checks whether Logging Client is reachable or not.
+   *
+   * @param \Acquia\ContentHubClient\ContentHubLoggingClient|null $logging_client
+   *   Logging client.
+   *
+   * @throws \Exception
+   */
+  public function checkLoggingClient(ContentHubLoggingClient $logging_client = NULL) {
+    if (is_null($logging_client)) {
+      throw new \RuntimeException('Content Hub Logging Client is not configured.');
+    }
+
+    try {
+      $resp = $logging_client->ping();
+    }
+    catch (\Exception $e) {
+      throw new EventServiceUnreachableException(sprintf('Error during contacting Event Micro Service: %s', $e->getMessage()));
+    }
+    if (!$this->isSuccessful($resp)) {
+      throw new EventServiceUnreachableException(sprintf('Content Hub Logging Client could not reach Event Micro Service: status code: %s, body: %s', $resp->getStatusCode(), $resp->getBody()));
+    }
   }
 
   /**
@@ -243,8 +334,7 @@ class ClientFactory {
       return $authenticator->authenticate($psr7_request);
     }
     catch (KeyNotFoundException $exception) {
-      $this->loggerFactory
-        ->get('acquia_contenthub')
+      $this->logger
         ->debug('HMAC validation failed. [authorization_header = %authorization_header]', [
           '%authorization_header' => $request->headers->get('authorization'),
         ]);
@@ -274,8 +364,60 @@ class ClientFactory {
    *
    * @see \Acquia\ContentHubClient\ContentHubClient::register()
    */
-  public function registerClient(string $name, string $url, string $api_key, string $secret, string $api_version = 'v2') {
-    return ContentHubClient::register($this->loggerFactory->get('acquia_contenthub'), $this->dispatcher, $name, $url, $api_key, $secret, $api_version);
+  public function registerClient(string $name, string $url, string $api_key, string $secret, string $api_version = 'v2'): ContentHubClient {
+    $client = ContentHubClient::register($this->logger, $this->dispatcher, $name, $url, $api_key, $secret, $api_version);
+    $this->client = $this->platformChecker->interceptAndDelete($client);
+    return $this->client;
+  }
+
+  /**
+   * Returns Event logging URL for given Content Hub Service URL.
+   *
+   * @return string
+   *   Event Logging Url to use for logging. Varies with CH realm.
+   *
+   * @throws \Exception
+   */
+  public function getLoggingUrl(): string {
+    if (!$this->config->get('event_service_url')) {
+      $event_logging_url = $this->getEventLoggingUrlFromRemoteSettings();
+      $this->saveAchAdminSettingsConfig('event_service_url', $event_logging_url);
+    }
+
+    return $this->config->get('event_service_url');
+  }
+
+  /**
+   * Fetch event logging url from ACH remote settings.
+   *
+   * @todo proper handling of event logger exception.
+   *
+   * @return array|string
+   *   Event logging url.
+   *
+   * @throws \ReflectionException
+   */
+  public function getEventLoggingUrlFromRemoteSettings() {
+    $remote_settings = $this->getClient()->getRemoteSettings();
+    if (isset($remote_settings['event_service_url'])) {
+      return $remote_settings['event_service_url'];
+    }
+
+    $this->logger->error('Event logging service url not found in remote settings.');
+    return '';
+  }
+
+  /**
+   * Save the ACH admin settings configurations.
+   *
+   * @param string $key
+   *   Config key.
+   * @param string $value
+   *   Config value.
+   */
+  public function saveAchAdminSettingsConfig(string $key, string $value): void {
+    $this->config->set($key, $value);
+    $this->config->save();
   }
 
 }

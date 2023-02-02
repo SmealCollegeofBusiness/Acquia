@@ -2,8 +2,9 @@
 
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
-use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Core\Database\Database;
+use Acquia\ContentHubClient\Syndication\SyndicationStatus;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\WatchdogAssertsTrait;
+use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
 
 /**
@@ -14,6 +15,8 @@ use Prophecy\Argument;
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class ImportQueueWorkerLoggingTest extends UnserializationTest {
+
+  use WatchdogAssertsTrait;
 
   /**
    * {@inheritdoc}
@@ -28,7 +31,7 @@ class ImportQueueWorkerLoggingTest extends UnserializationTest {
   protected function setup(): void {
     parent::setUp();
 
-    $this->installSchema('dblog', ['watchdog']);
+    $this->installSchema('dblog', 'watchdog');
   }
 
   /**
@@ -39,7 +42,10 @@ class ImportQueueWorkerLoggingTest extends UnserializationTest {
   public function testImporQueueWorkerLogging() {
     // Throw error while getting interest list.
     $error_msg = 'Some error from service.';
-    $this->contentHubClient->getInterestsByWebhook(Argument::type('string'))->willThrow(new \Exception($error_msg));
+    $this->contentHubClient->getInterestsByWebhookAndSiteRole(
+      Argument::type('string'),
+      Argument::type('string')
+    )->willThrow(new \Exception($error_msg));
     $this->runImportQueueWorker([self::CLIENT_UUID_1]);
 
     $this->assertLogMessage(
@@ -51,7 +57,10 @@ class ImportQueueWorkerLoggingTest extends UnserializationTest {
     );
 
     // Mimic entity deletion from publisher.
-    $this->contentHubClient->getInterestsByWebhook(Argument::type('string'))->willReturn([]);
+    $this->contentHubClient->getInterestsByWebhookAndSiteRole(
+      Argument::type('string'),
+      Argument::type('string')
+    )->willReturn([]);
     $this->runImportQueueWorker([self::CLIENT_UUID_1]);
 
     $message = sprintf(
@@ -62,29 +71,56 @@ class ImportQueueWorkerLoggingTest extends UnserializationTest {
     $this->assertLogMessage('acquia_contenthub_subscriber', $message);
 
     // Mimic if there are no match between the queued items and interest list.
-    $this->contentHubClient->getInterestsByWebhook(Argument::type('string'))->willReturn([]);
+    $this->contentHubClient->getInterestsByWebhookAndSiteRole(
+      Argument::type('string'),
+      Argument::type('string')
+    )->willReturn([]);
     $this->runImportQueueWorker([]);
 
-    $this->assertLogMessage('acquia_contenthub_subscriber', 'There are no matching entities in the queues and the site interest list.');
+    $this->assertLogMessage('acquia_contenthub_subscriber',
+      'There are no matching entities in the queues and the site interest list.'
+    );
 
     // Successful addition to interest list.
     $cdf_document = $this->createCdfDocumentFromFixtureFile('view_modes.json');
     $this->contentHubClient->getEntities([self::CLIENT_UUID_1 => self::CLIENT_UUID_1])->willReturn($cdf_document);
 
-    $this->contentHubClient->getInterestsByWebhook(Argument::type('string'))->willReturn(['fefd7eda-4244-4fe4-b9b5-b15b89c61aa8']);
-    $this->contentHubClient->addEntitiesToInterestList(Argument::any(), Argument::any())->willReturn();
+    $interest_list = [
+      'fefd7eda-4244-4fe4-b9b5-b15b89c61aa8' => [
+        'status' => SyndicationStatus::IMPORT_SUCCESSFUL,
+        'reason' => 'manual',
+        'event_ref' => 'event_uuid',
+      ],
+    ];
+    $this->contentHubClient->getInterestsByWebhookAndSiteRole(
+      Argument::type('string'), Argument::type('string'))
+      ->willReturn($interest_list);
+    $this->contentHubClient->addEntitiesToInterestListBySiteRole(
+      Argument::any(), Argument::any(), Argument::type('array'))
+      ->willReturn(new Response());
+    $this->contentHubClient->updateInterestListBySiteRole(
+      Argument::any(), Argument::any(), Argument::type('array'))
+      ->willReturn(new Response());
     $this->runImportQueueWorker([self::CLIENT_UUID_1]);
 
-    $this->assertLogMessage('acquia_contenthub_subscriber', 'The following imported entities have been added to the interest ');
+    $this->assertLogMessage('acquia_contenthub_subscriber',
+      'The following imported entities have been added to the interest '
+    );
 
     // Failed addition to interest list.
     $this->contentHubClient->getEntities([self::CLIENT_UUID_1 => self::CLIENT_UUID_1])->willReturn($cdf_document);
 
-    $this->contentHubClient->getInterestsByWebhook(Argument::type('string'))->willReturn(['fefd7eda-4244-4fe4-b9b5-b15b89c61aa8']);
-    $this->contentHubClient->addEntitiesToInterestList(Argument::any(), Argument::any())->willThrow(new \Exception('error'));
+    $this->contentHubClient->getInterestsByWebhookAndSiteRole(
+      Argument::type('string'), Argument::type('string'))
+      ->willReturn($interest_list);
+    $this->contentHubClient->addEntitiesToInterestListBySiteRole(
+      Argument::any(), Argument::any(), Argument::type('array'))
+      ->willThrow(new \Exception('error'));
     $this->runImportQueueWorker([self::CLIENT_UUID_1]);
 
-    $this->assertLogMessage('acquia_contenthub_subscriber', 'Error adding the following entities to the interest list for webhook');
+    $this->assertLogMessage('acquia_contenthub_subscriber',
+      'Error adding the following entities to the interest list for webhook'
+    );
   }
 
   /**
@@ -99,25 +135,6 @@ class ImportQueueWorkerLoggingTest extends UnserializationTest {
     $item = new \stdClass();
     $item->uuids = implode(', ', $uuids);
     $this->contentHubImportQueueWorker->processItem($item);
-  }
-
-  /**
-   * Verify a log entry was entered into watchdog table.
-   *
-   * @param string $type
-   *   The channel to which this message belongs.
-   * @param string $message
-   *   The message to check in the log.
-   */
-  public function assertLogMessage(string $type, string $message) {
-    $count = Database::getConnection()->select('watchdog', 'w')
-      ->condition('type', $type)
-      ->condition('message', '%' . $message . '%', 'LIKE')
-      ->countQuery()
-      ->execute()
-      ->fetchField();
-
-    $this->assertTrue($count > 0, new FormattableMarkup('watchdog table contains @count rows for @message', ['@count' => $count, '@message' => new FormattableMarkup($message, [])]));
   }
 
 }

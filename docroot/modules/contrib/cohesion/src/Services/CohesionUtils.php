@@ -3,6 +3,8 @@
 namespace Drupal\cohesion\Services;
 
 use Drupal\cohesion_elements\Entity\Component;
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Component\Utility\Xss;
@@ -352,13 +354,7 @@ class CohesionUtils {
           break;
 
         case 'cohTypeahead':
-          $fieldValue = $this->pathRenderer($fieldValue);
-
-          // Check that the URL is valid
-          // accounts for node::1, mailto:, external & internal links.
-          if(!UrlHelper::isValid($fieldValue)) {
-            $fieldValue = '';
-          }
+          $fieldValue = $this->urlProcessor($fieldValue);
           break;
 
         default:
@@ -379,6 +375,50 @@ class CohesionUtils {
     }
 
     return $fieldValue;
+  }
+
+  /**
+   * Given an url ensure it's valid & encoded correctly or return empty string.
+   *
+   * @param string $url
+   * @return \Drupal\Core\GeneratedUrl|string
+   */
+  public function urlProcessor(string $url) {
+    // Encode path to account for spaces in external and relative paths and
+    // ignore parsing of "mailto" links.
+    if ((UrlHelper::isExternal($url) || strpos($url, '/') === 0) && strpos($url, 'mailto') !== 0) {
+      $parsedUrl = parse_url($url);
+      $path = isset($parsedUrl['path']) ? UrlHelper::encodePath($parsedUrl['path']) : '';
+      // Is there a query parameter?
+      $query = isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '';
+      // Is there a fragment?
+      $fragment = isset($parsedUrl['fragment']) ? '#' . $parsedUrl['fragment'] : '';
+
+      if (isset($parsedUrl['scheme'])) {
+        $absolute = TRUE;
+        $url = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $path . $query . $fragment;
+      }
+      else {
+        $absolute = FALSE;
+        $url = $path . $query . $fragment;
+      }
+
+    }
+    else {
+      $absolute = FALSE;
+      try {
+        $url = $this->pathRenderer($url);
+      } catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
+        $this->loggerChannelFactory->get('cohesion')->error($e->getMessage());
+      }
+    }
+
+    // Check that the URL is valid
+    // accounts for node::1, mailto:, external & internal links.
+    if (!UrlHelper::isValid($url, $absolute)) {
+      $url = '';
+    }
+    return $url;
   }
 
   /**
@@ -477,7 +517,7 @@ class CohesionUtils {
           break;
       }
     }
-    else {
+    elseif (is_numeric($entity_data[0])) {
       // Backward compatibility ( node id )
       $nid = $entity_data[0];
       if ($entity = $this->entityTypeManager->getStorage('node')->load($nid)) {

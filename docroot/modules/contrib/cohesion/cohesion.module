@@ -4,12 +4,11 @@
  * @file
  */
 
+use Drupal\ckeditor5\HTMLRestrictions;
 use Drupal\cohesion\CohesionEntityViewBuilder;
 use Drupal\cohesion_elements\Plugin\Field\FieldType\CohesionEntityReferenceRevisionsItem;
-use Drupal\Core\Ajax\CloseDialogCommand;
+use Drupal\Core\Asset\AttachedAssets;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\media\Entity\MediaType;
-use Drupal\media_library\MediaLibraryState;
 use Drupal\tmgmt\JobItemInterface;
 use Drupal\tmgmt\JobInterface;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
@@ -26,7 +25,10 @@ use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
-use Symfony\Component\HttpFoundation\Request;
+use Drupal\ckeditor5\Plugin\CKEditor5Plugin\Style;
+use Drupal\filter\Entity\FilterFormat;
+use Drupal\editor\EditorInterface;
+use Drupal\Core\Extension\Extension;
 
 define('COHESION_FILESYSTEM_URI', 'public://cohesion/');
 define('COHESION_CSS_PATH', COHESION_FILESYSTEM_URI . 'styles');
@@ -223,6 +225,21 @@ function cohesion_page_attachments(array &$attachments) {
     $attachments['#attached']['library'][] = 'cohesion/cohesion-admin-styles';
   }
 
+  if ($is_admin) {
+    $assets = new AttachedAssets();
+    $assets->setLibraries(['cohesion/coh-theme']);
+    /** @var \Drupal\Core\Asset\AssetResolver $asset_resolver */
+    $asset_resolver = \Drupal::service('asset.resolver');
+    $css = $asset_resolver->getCssAssets($assets, FALSE);
+
+    $css_urls = [];
+    foreach ($css as $css_entry) {
+      $css_urls[] = \Drupal::service('file_url_generator')->generateAbsoluteString($css_entry['data']);
+    }
+
+    $attachments['#attached']['drupalSettings']['cohesion']['themeCSS'] = $css_urls;
+  }
+
   // Add config to Drupal.settings for use in JS.
   $attachments['#attached']['drupalSettings']['cohesion']['google_map_api_key'] = \Drupal::config('cohesion.settings')
     ->get('google_map_api_key');
@@ -328,23 +345,23 @@ function cohesion_ckeditor_css_alter(&$css, $editor) {
         $wysiwyg_cache_token = \Drupal::keyValue('cohesion.wysiwyg_cache_token');
         $wysiwyg_cache_buster = $wysiwyg_cache_token->get('cache_token') ? '?_t=' . $wysiwyg_cache_token->get('cache_token') : '';
         // Reset and ckeditor specific styles.
-        $css[] = drupal_get_path('module', 'cohesion') . '/css/reset.css' . $wysiwyg_cache_buster;
-        $css[] = drupal_get_path('module', 'cohesion') . '/css/plugin-styles.css' . $wysiwyg_cache_buster;
+        $css[] = \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion') . '/css/reset.css' . $wysiwyg_cache_buster;
+        $css[] = \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion') . '/css/plugin-styles.css' . $wysiwyg_cache_buster;
 
         $default_theme_id = \Drupal::service('theme_handler')->getDefault();
 
-        if(\Drupal::service('cohesion.utils')->themeHasCohesionEnabled($default_theme_id)) {
+        if (\Drupal::service('cohesion.utils')->themeHasCohesionEnabled($default_theme_id)) {
           $css_base_filename = \Drupal::service('cohesion.local_files_manager')
             ->getStyleSheetFilename('base', $default_theme_id, TRUE);
           $css_theme_filename = \Drupal::service('cohesion.local_files_manager')
             ->getStyleSheetFilename('theme', $default_theme_id, TRUE);
           // Generated stylsheets.
-          $css[] = file_create_url($css_base_filename) . $wysiwyg_cache_buster;
-          $css[] = file_create_url($css_theme_filename) . $wysiwyg_cache_buster;
+          $css[] = \Drupal::service('file_url_generator')->generateAbsoluteString($css_base_filename) . $wysiwyg_cache_buster;
+          $css[] = \Drupal::service('file_url_generator')->generateAbsoluteString($css_theme_filename) . $wysiwyg_cache_buster;
 
         }
         // Add the body reset stylesheet.
-        $css[] = drupal_get_path('module', 'cohesion') . '/css/cohesion-body-reset.css' . $wysiwyg_cache_buster;
+        $css[] = \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion') . '/css/cohesion-body-reset.css' . $wysiwyg_cache_buster;
       }
     } catch (\Exception $e) {
 
@@ -395,7 +412,16 @@ function cohesion_library_info_alter(&$libraries, $extension) {
  * Alter css per theme for Site Studio base and theme css
  */
 function cohesion_css_alter(&$css, $assets) {
-  if (\Drupal::service('cohesion.utils')->currentThemeUseCohesion()) {
+
+  $module_path = \Drupal::service('extension.list.module')->getPath('cohesion');
+
+  $cohesion_css = [
+    'base-default' => $module_path . '/css/base-default.css',
+    'reset' => $module_path . '/css/reset.css',
+    'theme-default' => $module_path . '/css/theme-default.css',
+  ];
+
+  if (!empty(array_intersect(array_keys($css), $cohesion_css))) {
     // Get the smallest weight set on all css libraries
     // We need to set the reset.css and the base stylesheets as the
     // first two stylesheet loaded on the head.
@@ -406,12 +432,24 @@ function cohesion_css_alter(&$css, $assets) {
       }
     }
 
-    $module_path = drupal_get_path('module', 'cohesion');
-    $active_theme_id = \Drupal::service('theme.manager')
-      ->getActiveTheme()
-      ->getName();
+    /** @var \Drupal\cohesion\Services\CohesionUtils $ss_utils */
+    $ss_utils = \Drupal::service('cohesion.utils');
+    $is_admin = $ss_utils->isAdminTheme();
 
-    if (isset($css[$module_path . '/css/base-default.css'])) {
+    // Site studio cannot be used in admin theme, so when attached from
+    // an admin theme, get the default theme and check if it has site studio
+    if($is_admin) {
+      $active_theme_id = \Drupal::config('system.theme')->get('default');
+      if(!$ss_utils->themeHasCohesionEnabled($active_theme_id)) {
+        return;
+      }
+    } else {
+      $active_theme_id = \Drupal::service('theme.manager')
+        ->getActiveTheme()
+        ->getName();
+    }
+
+    if (isset($css[$cohesion_css['base-default']])) {
       $css_filename = \Drupal::service('cohesion.local_files_manager')
         ->getStyleSheetFilename('base', $active_theme_id, TRUE);
       $css[$module_path . '/css/base-default.css']['data'] = $css_filename;
@@ -420,13 +458,13 @@ function cohesion_css_alter(&$css, $assets) {
       $css[$module_path . '/css/base-default.css']['weight'] = $min_weight;
     }
 
-    if (isset($css[$module_path . '/css/reset.css'])) {
+    if (isset($css[$cohesion_css['reset']])) {
       // Set the reset.css as the first css to load.
       $min_weight--;
       $css[$module_path . '/css/reset.css']['weight'] = $min_weight;
     }
 
-    if (isset($css[$module_path . '/css/theme-default.css'])) {
+    if (isset($css[$cohesion_css['theme-default']])) {
       $css_filename = \Drupal::service('cohesion.local_files_manager')
         ->getStyleSheetFilename('theme', $active_theme_id, TRUE);
       $css[$module_path . '/css/theme-default.css']['data'] = $css_filename;
@@ -472,7 +510,7 @@ function cohesion_theme_registry_alter(array &$theme_registry) {
       }
       else {
         // And entry to the theme registry.
-        $theme_info = isset($theme_registry[$base_theme_hook]) ? $theme_registry[$base_theme_hook] : [];
+        $theme_info = $theme_registry[$base_theme_hook] ?? [];
         $theme_info['template'] = str_replace('_', '-', $theme_hook);
         $theme_info['path'] = $template_path;
         $theme_info['base hook'] = 'component';
@@ -820,7 +858,7 @@ function cohesion_themes_uninstalled(array $themes) {
   // stylesheets.
   foreach ($themes as $theme) {
     if (Drupal::service('cohesion.utils')->themeHasCohesionEnabled($theme)) {
-      foreach (['base', 'theme', 'json'] as $type) {
+      foreach (['base', 'prefixed', 'theme', 'json'] as $type) {
         $theme_file = Drupal::service('cohesion.local_files_manager')
           ->getStyleSheetFilename($type, $theme);
         Drupal::service('file_system')->delete($theme_file);
@@ -875,7 +913,7 @@ function cohesion_form_system_theme_settings_alter(&$form, FormStateInterface $f
  * Implements hook_config_schema_info_alter().
  */
 function cohesion_config_schema_info_alter(&$definitions) {
-  if(isset($definitions['theme_settings']['mapping']['features']['mapping']) && is_array($definitions['theme_settings']['mapping']['features']['mapping'])){
+  if (isset($definitions['theme_settings']['mapping']['features']['mapping']) && is_array($definitions['theme_settings']['mapping']['features']['mapping'])) {
     $definitions['theme_settings']['mapping']['features']['mapping']['cohesion_build_assets'] = [
       'type' => 'boolean',
       'label' => 'Build site studio assets',
@@ -900,68 +938,156 @@ function preprocess_cohesion_preview_page(&$variables) {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_entity_operation_alter().
+ *
+ * Remove the "clone" option from site studio entity lists.
  *
  */
-function cohesion_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $request = \Drupal::request();
-
-  // This resolves an issue where after selecting media library filters you
-  // can't insert media. Restrict this to views exposed form and media library
-  // inside Site Studio.
-  if ($form_id == 'views_exposed_form' && !empty($request->get('media_library_opener_id') === 'media_library.opener.cohesion')) {
-    // Get the selected by from the request.
-    $selected_type = $request->get('media_library_selected_type');
-    // Get the selected type from the view args.
-    if (!empty($view_arg = $form_state->getStorage()['view']->args[0])) {
-      // If the request selected by and view args are not the same then set the
-      // request select type to be the views arg type.
-      if ($selected_type !== $view_arg) {
-        $request->query->set('media_library_selected_type', $view_arg);
-        // Re-create the media state based on the new selected type to get the
-        // hash and update the hash in the request.
-        $media_state = MediaLibraryState::create('media_library.opener.cohesion', $request->get('media_library_allowed_types'), $request->get('media_library_selected_type'), 1);
-        $request->query->set('hash', $media_state->getHash());
-      }
-    }
+function cohesion_entity_operation_alter(array &$operations, EntityInterface $entity) {
+  if (isset($operations['clone']) && str_contains($entity->getEntityTypeId(), 'cohesion_')) {
+    unset($operations['clone']);
   }
+}
 
-  // Resolves an issue where the media library doesn't close after clicking
-  // insert as it's expecting to close a modal with "drupal-modal" as the id.
-  if (!empty($request->get('media_library_opener_id') === 'media_library.opener.cohesion')) {
-    // Check the selected media type & load it.
-    if (!empty($selected_media_type = $request->get('media_library_selected_type'))) {
-      $media_type = MediaType::load($selected_media_type);
-      // Check its source is image (as this only seems to affect when using
-      // images) and we need to account for if some creates their own image
-      // media type.
-      if ($media_type->get('source') === 'image') {
-        if ($form_id === 'views_form_media_library_widget_' . $media_type->get('id')) {
-          $form['actions']['submit']['#ajax']['callback'] = 'cohesion_alter_media_update_widget';
-        }
-      }
+function cohesion_form_filter_format_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\editor\Entity\Editor $editor */
+  $editor = $form_state->get('editor');
+
+  if ($editor) {
+    if ($editor->getEditor() == 'ckeditor') {
+      $warning['ssa_warning'] = [
+        '#theme' => 'status_messages',
+        '#message_list' => [
+          'warning' => [t('Site Studio requires text formats to use CKeditor 5. To make sure this text format is compatible with Site Studio, please set the editor to use CKEditor 5')],
+        ],
+        '#status_headings' => [
+          'warning' => t('Warning message'),
+        ],
+      ];
+
+      $form['editor']['settings']['subform'] = array_merge($warning, $form['editor']['settings']['subform']);
     }
   }
 
 }
 
-/**
- * Callback for the media library widget.
+function cohesion_form_filter_format_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $editor = $form_state->get('editor');
+  if ($editor instanceof EditorInterface && $editor->getEditor() == 'ckeditor5' && isset($form['editor']['settings']['subform']['plugins']['ckeditor5_style']['styles'])) {
+    $form['editor']['settings']['subform']['plugins']['ckeditor5_style']['styles']['#after_build'][] = '_sitestudio_ckeditor_styles_after_build_callback';
+    $form['editor']['settings']['subform']['plugins']['ckeditor5_style']['ssa_enabled'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Add Site Studio styles'),
+      '#default_value' => (bool) $editor->getThirdPartySetting('cohesion', 'ssa_enabled', FALSE),
+      '#ajax' => [
+        'callback' => '_update_ckeditor5_html_filter',
+        'event' => 'change',
+        'trigger_as' => ['name' => 'editor_configure'],
+      ],
+    ];
+    $form['#entity_builders'][] = 'cohesion_form_filter_format_edit_form_builder';
+  }
+}
+
+/*
+ * Adds Site Studio styles based on "ssa_enabled" checkbox state.
+ *
+ * @param array $element
+ *   Textarea element with Styles.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   Form State.
  */
-function cohesion_alter_media_update_widget(array &$form, FormStateInterface $form_state, Request $request) {
-  // As Site Studio does not use the Drupal modal for the media library popup,
-  // we need to pass the id to CloseDialogCommand as by default it expects
-  // drupal-modal.
-  // @see \Drupal\media_library\Plugin\views\field\MediaLibrarySelectForm::updateWidget().
-  $field_id = $form_state->getTriggeringElement()['#field_id'];
-  $selected_ids = $form_state->getValue($field_id);
-  $selected_ids = $selected_ids ? array_filter(explode(',', $selected_ids)) : [];
+function _sitestudio_ckeditor_styles_after_build_callback(array $element, FormStateInterface $form_state) {
+  if (!$form_state->isProcessingInput()) {
+    return $element;
+  }
 
-  // Allow the opener service to handle the selection.
-  $state = MediaLibraryState::fromRequest($request);
+  $input = $form_state->getUserInput();
+  $ssa_enabled = $input['editor']['settings']['plugins']['ckeditor5_style']['ssa_enabled'] ?? 0;
 
-  return \Drupal::service('media_library.opener_resolver')
-    ->get($state)
-    ->getSelectionResponse($state, $selected_ids)
-    ->addCommand(new CloseDialogCommand('#modal-body'));
+  $textFormatStyles = \Drupal::service('cohesion.text_format_styles');
+  $initial_styles = $element['#value'];
+
+  if (!$ssa_enabled || !empty($element['#value'])) {
+    $style_values = $element['#value'];
+    $styles = Style::parseStylesFormValue($style_values);
+    $new_styles = $textFormatStyles->getStyleList($styles[0], $ssa_enabled);
+    $as_selectors = '';
+    foreach ($new_styles as $style) {
+      [$tag, $classes] = Style::getTagAndClasses(HTMLRestrictions::fromString($style['element']));
+      $as_selectors .= sprintf("%s.%s|%s\n", $tag, implode('.', $classes), $style['label']);
+    }
+    $element['#value'] = $as_selectors;
+
+    return $element;
+  }
+
+  $styles = $textFormatStyles->getStylesText();
+  if (!empty($styles)) {
+    $element['#value'] = $styles;
+  }
+  if ($initial_styles !== $element['#value']) {
+    $form_state->setValidationComplete();
+  }
+
+  return $element;
+}
+
+/**
+ * Entity builder for the filter editor config entity.
+ */
+function cohesion_form_filter_format_edit_form_builder($entity_type, FilterFormat $filterFormat, &$form, FormStateInterface $form_state) {
+  $editor = $form_state->get('editor');
+  if ($ssa_enabled = $form_state->getValue([
+    'editor',
+    'settings',
+    'plugins',
+    'ckeditor5_style',
+    'ssa_enabled',
+  ])) {
+    $editor->setThirdPartySetting('cohesion', 'ssa_enabled', (bool) $ssa_enabled);
+    return;
+  }
+  $editor->unsetThirdPartySetting('cohesion', 'ssa_enabled');
+}
+
+/**
+ * Make sure the filter format form alter is the last to run
+ *
+ * @param $implementations
+ * @param $hook
+ *
+ * @return void
+ */
+function cohesion_module_implements_alter(&$implementations, $hook) {
+  if (isset($implementations['cohesion']) && ($hook == 'form_filter_format_form_alter' || $hook == 'form_alter')) {
+    $group = $implementations['cohesion'];
+    unset($implementations['cohesion']);
+    $implementations['cohesion'] = $group;
+  }
+}
+
+/**
+ * Implements hook_system_info_alter().
+ *
+ * Adds prefixed Site Studio CKEditor 5 stylesheet to default and admin themes.
+ */
+function cohesion_system_info_alter(array &$info, Extension $file, $type) {
+  if ($type === 'theme') {
+    $theme_config = \Drupal::config('system.theme');
+    $default_theme_id = $theme_config->get('default');
+    $admin_theme_id = $theme_config->get('admin');
+
+    if (in_array($file->getName(), [$admin_theme_id, $default_theme_id])) {
+      $wysiwyg_cache_token = \Drupal::keyValue('cohesion.wysiwyg_cache_token');
+      $wysiwyg_cache_buster = $wysiwyg_cache_token->get('cache_token') ? '?_t=' . $wysiwyg_cache_token->get('cache_token') : '';
+      $prefixed_ckeditor_css = \Drupal::service('cohesion.local_files_manager')
+        ->getStyleSheetFilename('prefixed', $file->getName(), TRUE);
+      if (!isset($info['ckeditor5-stylesheets']) || $info['ckeditor5-stylesheets'] === FALSE) {
+        $info['ckeditor5-stylesheets'] = [];
+      }
+      $info['ckeditor5-stylesheets'][] = \Drupal::service('file_url_generator')->generateAbsoluteString($prefixed_ckeditor_css) . $wysiwyg_cache_buster;
+    }
+
+  }
 }

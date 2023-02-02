@@ -6,6 +6,7 @@ editor-loader:
     js/editor-loader.js: {}
   dependencies:
     - core/jquery
+    - core/once
 
 cohesion-frontend-edit-scripts:
   js:

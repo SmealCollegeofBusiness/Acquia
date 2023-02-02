@@ -48,7 +48,7 @@ function component_contents_mass_update(array $component_contents, array $update
       'error_message' => t('The update has encountered an error.'),
       // The operations do not live in the .module file, so we need to
       // tell the batch engine which file to load before calling them.
-      'file' => drupal_get_path('module', 'cohesion_elements') . '/cohesion_elements.admin.inc',
+      'file' => \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion_elements') . '/cohesion_elements.admin.inc',
     ];
     batch_set($batch);
   }

@@ -290,6 +290,7 @@ class Element implements LayoutCanvasElementInterface, \JsonSerializable {
   /**
    * {@inheritdoc}
    */
+  #[\ReturnTypeWillChange]
   public function jsonSerialize() {
     $json_obj = new \stdClass();
     foreach ($this->element as $property_name => $property_value) {

@@ -16,3 +16,12 @@ function acquia_contenthub_translations_schema() {
   $schema[EntityTranslations::TABLE] = EntityTranslations::schema();
   return $schema;
 }
+
+/**
+ * Implements hook_install().
+ */
+function acquia_contenthub_translations_install() {
+  $warning_message = 'This module needs "translatable" attribute in CDF\'s metadata for content entities. Please re-enqueue and export content from publisher. Eg. "drush acquia:contenthub-re-queue --use-tracking-table".';
+  \Drupal::logger('acquia_contenthub_translations')->warning($warning_message);
+  \Drupal::messenger()->addWarning($warning_message);
+}

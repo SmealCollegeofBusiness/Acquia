@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\smart_trim\Unit;
 
-use Drupal\smart_trim\Truncate\TruncateHTML;
+use Drupal\smart_trim\TruncateHTML;
 use Drupal\Tests\UnitTestCase;
 
 /**
@@ -35,19 +35,19 @@ class TruncateHTMLTest extends UnitTestCase {
         'A test string',
         5,
         '…',
-        'A tes…',
+        'A…',
       ],
       [
         '“I like funky quotes”',
         5,
         '',
-        '“I li',
+        '“I',
       ],
       [
         '“I <em>really, really</em> like funky quotes”',
         14,
         '',
-        '“I <em>really, rea</em>',
+        '“I <em>really</em>',
       ],
     ];
   }
@@ -97,8 +97,14 @@ class TruncateHTMLTest extends UnitTestCase {
         '“I <em>really, really</em> like funky quotes”',
         2,
         '',
-        '“I <em>really,</em>',
+        '“I <em>really</em>',
       ],
+      [
+        '<p><strong>Every <em>man <s>who has lotted here over the centuries, has looked up</s> to the light</em> and imagined climbing to freedom.</strong></p>',
+        10,
+        '',
+        '<p><strong>Every <em>man <s>who has lotted here over the centuries, has</s></em></strong></p>',
+      ]
     ];
   }
 

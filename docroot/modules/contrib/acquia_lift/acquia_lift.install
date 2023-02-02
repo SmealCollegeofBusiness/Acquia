@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Install, update, and uninstall functions for the Acquia Lift module.
+ */
+
 use Drupal\acquia_lift\Service\Helper\SettingsHelper;
 use Drupal\Core\Url;
 
@@ -13,7 +18,7 @@ function acquia_lift_requirements($phase) {
     return $requirements;
   }
 
-  $credentialSettings = \Drupal::config('acquia_lift.settings')->get('credential');
+  $credentialSettings = \Drupal::config('acquia_lift.settings')->get('credential') ?? [];
   if (!SettingsHelper::isInvalidCredential($credentialSettings)) {
     return $requirements;
   }

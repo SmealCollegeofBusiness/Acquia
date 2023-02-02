@@ -26,7 +26,7 @@ class DiscoveryInterfaceController extends ControllerBase {
   /**
    * Config Factory.
    *
-   * @var \Drupal\Core\Config\ConfigFactory
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $configFactory;
 
@@ -68,7 +68,7 @@ class DiscoveryInterfaceController extends ControllerBase {
   /**
    * The content hub client factory.
    *
-   * @var |Drupal\acquia_contenthub\Client\ClientFactory
+   * @var \Drupal\acquia_contenthub\Client\ClientFactory
    */
   protected $clientFactory;
 
@@ -89,7 +89,7 @@ class DiscoveryInterfaceController extends ControllerBase {
   /**
    * ContentHubSubscriberController constructor.
    *
-   * @param \Drupal\core\Config\ConfigFactoryInterface $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The client manager.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   The language manager.

@@ -18,6 +18,9 @@ class WebhookEditForm extends ClientFormBase {
   /**
    * {@inheritdoc}
    *
+   * @return \Symfony\Component\HttpFoundation\RedirectResponse|array
+   *   The form structure.
+   *
    * @throws \Exception
    */
   public function buildForm(array $form, FormStateInterface $form_state, $uuid = NULL) {

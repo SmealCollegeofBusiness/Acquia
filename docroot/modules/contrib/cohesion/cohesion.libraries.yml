@@ -9,36 +9,49 @@ coh-theme:
 cohesion-admin-scripts:
   js:
     js/ios.js: {}
-    public://cohesion/scripts/dx8/vendor.js: { }
-    public://cohesion/scripts/dx8/scripts.js: { }
     public://cohesion/scripts/dx8/app.js: { }
+  css:
+    theme:
+      css/loading.css: {}
   dependencies:
     - core/drupal
     - core/jquery
     - editor/drupal.editor
     - editor/drupal.editor.admin
-    - ckeditor/drupal.ckeditor
+    - ckeditor5/internal.drupal.ckeditor5
     - core/drupalSettings
     - core/backbone
 
-cohesion-admin-styles:
-  css:
-    base:
-      public://cohesion/styles/dx8/vendor.css: {}
-      public://cohesion/styles/dx8/main.css: {}
+
 
 drupal.machine-name:
   js:
     js/machine-name.js: {}
   dependencies:
     - core/jquery
-    - core/jquery.once
+    - core/once
     - core/drupal
     - core/drupalSettings
     - core/drupal.form
 
 coh-module:
   css: []
+
+
+cohesion-accordion-element:
+  js:
+    js/cohesion-accordion-element.js: {}
+  css:
+    theme:
+      css/cohesion-accordion-element.css: {}
+  dependencies:
+    - core/jquery
+
+# temporary - remove this after code has been moved into angular.
+cohesion_token:
+  css:
+    component:
+      css/cohesion-token.css: { weight: -10 }
 
 admin-icon-libraries:
   css:
@@ -49,23 +62,6 @@ admin-responsive-grid-settings:
   css:
     theme:
       public://cohesion/styles/cohesion-responsive-grid-settings.css: { media: all }
-
-admin-grid-settings:
-  css:
-    theme:
-      public://cohesion/styles/cohesion-responsive-grid.css: { media: all, weight: 99 }
-
-cohesion-accordion-element:
-  js:
-    js/cohesion-accordion-element.js: {}
-  dependencies:
-    - core/jquery
-
-# temporary - remove this after code has been moved into angular.
-cohesion_token:
-  css:
-    component:
-      css/cohesion-token.css: { weight: -10 }
 
 cohesion-ui:
   css:

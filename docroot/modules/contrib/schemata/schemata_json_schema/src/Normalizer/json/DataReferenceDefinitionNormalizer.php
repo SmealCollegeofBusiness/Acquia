@@ -46,7 +46,7 @@ class DataReferenceDefinitionNormalizer extends DataDefinitionNormalizer {
    * {@inheritdoc}
    */
   public function normalize($entity, $format = NULL, array $context = []) {
-    /* @var $entity \Drupal\Core\TypedData\DataReferenceDefinitionInterface */
+    /** @var \Drupal\Core\TypedData\DataReferenceDefinitionInterface $entity */
     try {
       $is_valid = $this->validateEntity($entity);
     }
@@ -82,7 +82,7 @@ class DataReferenceDefinitionNormalizer extends DataDefinitionNormalizer {
 
     $entity_type_plugin = $this->entityTypeManager->getDefinition($entity->getConstraint('EntityType'), FALSE);
     return !empty($entity_type_plugin) && $entity_type_plugin
-        ->entityClassImplements(ContentEntityInterface::class);
+      ->entityClassImplements(ContentEntityInterface::class);
   }
 
 }

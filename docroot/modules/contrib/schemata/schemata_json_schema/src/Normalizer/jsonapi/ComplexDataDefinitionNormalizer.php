@@ -27,7 +27,7 @@ class ComplexDataDefinitionNormalizer extends DataDefinitionNormalizer {
    * {@inheritdoc}
    */
   public function normalize($entity, $format = NULL, array $context = []) {
-    /* @var $entity \Drupal\Core\TypedData\ComplexDataDefinitionInterface */
+    /** @var \Drupal\Core\TypedData\ComplexDataDefinitionInterface $entity */
     $context['parent'] = $entity;
     $normalized = $this->extractPropertyData($entity);
     $normalized['type'] = 'object';

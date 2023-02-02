@@ -6,6 +6,8 @@ use Acquia\ContentHubClient\Webhook;
 use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubConnectionManager;
+use Drupal\acquia_contenthub\Exception\PlatformIncompatibilityException;
+use Drupal\acquia_contenthub\Libs\Traits\ResponseCheckerTrait;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
@@ -20,6 +22,8 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ContentHubSettingsForm extends ConfigFormBase {
 
+  use ResponseCheckerTrait;
+
   /**
    * The Content Hub endpoint for receiving webhooks.
    *
@@ -30,7 +34,7 @@ class ContentHubSettingsForm extends ConfigFormBase {
   /**
    * The client factory.
    *
-   * @var |Drupal\acquia_contenthub\Client\ClientFactory
+   * @var \Drupal\acquia_contenthub\Client\ClientFactory
    */
   protected $clientFactory;
 
@@ -130,7 +134,18 @@ class ContentHubSettingsForm extends ConfigFormBase {
     $this->settings = $this->clientFactory->getSettings();
     $this->client = $this->clientFactory->getClient();
     $readonly = $provider !== 'core_config';
-    $connected = !empty($this->client);
+    $connected = FALSE;
+    if (!empty($this->client)) {
+      try {
+        $response = $this->client->ping();
+        $connected = $this->isSuccessful($response);
+      }
+      catch (\Exception $e) {
+        $msg = 'Your client is not registered to Content Hub';
+        $this->messenger()->addWarning($this->t('@msg', ['@msg' => $msg]));
+        $this->logger('acquia_contenthub')->warning(sprintf('%s: %s', $msg, $e->getMessage()));
+      }
+    }
     $client_name = '';
 
     $is_suppressed = $this
@@ -325,6 +340,8 @@ class ContentHubSettingsForm extends ConfigFormBase {
       '#name' => 'unregister_site',
     ];
 
+    $form['actions']['#suffix'] = '<p>' . $this->t('By clicking on this button it will update the webhook.') . '</p>';
+
     unset($form['actions']['submit']);
 
     return $form;
@@ -390,6 +407,11 @@ class ContentHubSettingsForm extends ConfigFormBase {
     $webhook_url = $this->getFormattedWebhookUrl($form_state);
     if (!UrlHelper::isValid($webhook_url, TRUE)) {
       $form_state->setErrorByName('webhook', $this->t('Please type a publicly accessible url.'));
+    }
+
+    $saved_webhook_url = $this->settings->getWebhook('url');
+    if ($saved_webhook_url === $webhook_url && $this->chConnectionManager->webhookIsRegistered($webhook_url)) {
+      return;
     }
 
     if ($this->chConnectionManager->webhookIsRegistered($webhook_url)) {
@@ -470,6 +492,7 @@ class ContentHubSettingsForm extends ConfigFormBase {
         ]));
       return;
     }
+
     $this->messenger()->addMessage($this->t('Successfully Updated Public URL.'));
   }
 
@@ -544,6 +567,13 @@ class ContentHubSettingsForm extends ConfigFormBase {
               $this->t('There is a problem connecting to Acquia Content Hub. Please ensure that your hostname and credentials are correct.'));
         }
       }
+    }
+    catch (PlatformIncompatibilityException $e) {
+      $form_state->setErrorByName('settings',
+        $this->t('Platform error: @message', [
+          '@message' => $e->getMessage(),
+        ])
+      );
     }
     catch (\Exception $ch_error) {
       $form_state->setErrorByName('settings', $this->t('Unexpected error occurred: @message', ['@message' => $ch_error->getMessage()]));

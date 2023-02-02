@@ -261,7 +261,7 @@ class AcquiaContentHubSubscriberInterestListCommands extends DrushCommands {
       return $webhook_url;
     }
     $webhooks = $this->client->getWebHooks();
-    /** @var \Acquia\ContentHubClient\Webhook $webhook */
+    /** @var \Acquia\ContentHubClient\Webhook|array $webhook */
     $webhook = current(array_filter($webhooks,
       function (Webhook $webhook) use ($webhook_uuid) {
         return $webhook->getUuid() === $webhook_uuid;

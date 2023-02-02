@@ -74,10 +74,10 @@ class Controller extends ControllerBase {
    *
    * @param string $entity_type_id
    *   The entity type ID to describe.
-   * @param string $bundle
-   *   The (optional) bundle to describe.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
+   * @param string $bundle
+   *   The (optional) bundle to describe.
    *
    * @return \Drupal\Core\Cache\CacheableResponse
    *   The response object.

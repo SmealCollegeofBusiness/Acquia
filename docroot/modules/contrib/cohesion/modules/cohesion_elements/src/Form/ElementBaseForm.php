@@ -33,7 +33,7 @@ abstract class ElementBaseForm extends CohesionBaseForm {
     $form['cohesion']['#cohFormId'] = $this->entity->getAssetName();
     unset($form['cohesion']['#json_mapper']);
 
-    $form_class = str_replace('_', '-', $this->entity->getEntityTypeId()) . '-' . str_replace('_', '-', $this->entity->id()) . '-form';
+    $form_class = str_replace('_', '-', $this->entity->getEntityTypeId()) . '-' . str_replace('_', '-', $this->entity->id() ?? '') . '-form';
     $form['#attributes']['class'][] = $form_class;
 
     // Set Drupal field endpoint.
@@ -102,7 +102,7 @@ abstract class ElementBaseForm extends CohesionBaseForm {
       '#weight' => 1,
       '#description' => $this->entity->getEntityMachineNamePrefix(),
       '#description_display' => 'before',
-      '#default_value' => str_replace($this->entity->getEntityMachineNamePrefix(), '', $this->entity->id()),
+      '#default_value' => str_replace($this->entity->getEntityMachineNamePrefix(), '', $this->entity->id() ?? ''),
       '#type' => 'ajax_machine_name',
       '#required' => FALSE,
       '#machine_name' => [
@@ -119,7 +119,7 @@ abstract class ElementBaseForm extends CohesionBaseForm {
     ];
 
     $storage = $this->entityTypeManager->getStorage('entity_view_mode');
-    $entity_ids = $storage->getQuery()->execute();
+    $entity_ids = $storage->getQuery()->accessCheck(TRUE)->execute();
     $entities = $storage->loadMultiple($entity_ids);
     $entity_types = $this->entityTypeManager->getDefinitions();
 
@@ -358,7 +358,7 @@ abstract class ElementBaseForm extends CohesionBaseForm {
     $removed_index = $form_state->get('removed_index');
     $triggering_element = $form_state->getTriggeringElement();
     // Get removed index from trigger object.
-    $trigger_index = isset($triggering_element['#attributes']['data-remove-index']) ? $triggering_element['#attributes']['data-remove-index'] : NULL;
+    $trigger_index = $triggering_element['#attributes']['data-remove-index'] ?? NULL;
 
     if ($trigger_index) {
       $removed_index = array_merge($removed_index, [$trigger_index]);
@@ -413,7 +413,7 @@ abstract class ElementBaseForm extends CohesionBaseForm {
     $entity = $this->entity;
 
     // Merge entity types and bundles data.
-    list($types, $bundles) = $this->filterEntityTypes($form_state);
+    [$types, $bundles] = $this->filterEntityTypes($form_state);
     $entity->set('entity_type_access', $types);
     $entity->set('bundle_access', $bundles);
 
@@ -458,7 +458,7 @@ abstract class ElementBaseForm extends CohesionBaseForm {
     };
 
     foreach ($select_index as $i) {
-      $type = isset($select_data['entity_type_access_' . $i]) ? $select_data['entity_type_access_' . $i] : NULL;
+      $type = $select_data['entity_type_access_' . $i] ?? NULL;
       $bundles = isset($select_data['bundle_access_' . $i]) ? array_values($select_data['bundle_access_' . $i]) : [];
       if ($type && $bundles) {
         $results[$type][$i] = array_filter($bundles);

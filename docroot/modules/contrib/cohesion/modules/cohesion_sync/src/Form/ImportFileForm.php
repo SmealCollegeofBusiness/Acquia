@@ -6,6 +6,7 @@ use Drupal\cohesion_sync\PackagerManager;
 use Drupal\cohesion_sync\PackageSourceManager;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Uuid\UuidInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystemInterface;
@@ -119,6 +120,11 @@ class ImportFileForm extends FormBase {
   protected $packageSourceManager;
 
   /**
+   * @var \Drupal\Core\Config\Config|\Drupal\Core\Config\ImmutableConfig
+   */
+  protected $cohesionSettings;
+
+  /**
    * ImportForm constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -141,7 +147,8 @@ class ImportFileForm extends FormBase {
     StorageInterface $config_storage,
     FileSystemInterface $file_system = NULL,
     Settings $settings = NULL,
-    PackageSourceManager $package_source_manager
+    PackageSourceManager $package_source_manager,
+    ConfigFactoryInterface $config_factory
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->packagerManager = $packager_manager;
@@ -151,6 +158,8 @@ class ImportFileForm extends FormBase {
     $this->fileSystem = $file_system;
     $this->settings = $settings;
     $this->packageSourceManager = $package_source_manager;
+    $this->setConfigFactory($config_factory);
+    $this->cohesionSettings = $this->config('cohesion.settings');
   }
 
   /**
@@ -165,7 +174,8 @@ class ImportFileForm extends FormBase {
       $container->get('cohesion_sync.file_storage'),
       $container->get('file_system'),
       $container->get('settings'),
-      $container->get('cohesion_sync.package_source_manager')
+      $container->get('cohesion_sync.package_source_manager'),
+      $container->get('config.factory')
     );
   }
 
@@ -182,7 +192,7 @@ class ImportFileForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
 
     $form['help'] = [
-      '#markup' => $this->t('Import an Site Studio package from a file uploaded from your local device.'),
+      '#markup' => $this->t('Import a Site Studio package from a file uploaded from your local device.'),
     ];
 
     if ($this->step == 1) {
@@ -215,13 +225,16 @@ class ImportFileForm extends FormBase {
         '#name' => 'import_submit',
       ];
 
-      $form['legacy_import'] = [
-        '#type' => 'details',
-        '#open' => FALSE,
-        '#title' => 'Legacy import (single yml file)',
-      ];
+      // Only show Legacy import if user has turned it on.
+      if ($this->cohesionSettings->get('sync_legacy_visibility')) {
+        $form['legacy_import'] = [
+          '#type' => 'details',
+          '#open' => FALSE,
+          '#title' => 'Legacy import (single yml file)',
+        ];
 
-      $form['legacy_import'][] = $this->buildLegacyForm($form_state);
+        $form['legacy_import'][] = $this->buildLegacyForm($form_state);
+      }
     }
 
     return $form;

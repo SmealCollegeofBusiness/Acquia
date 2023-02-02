@@ -30,6 +30,7 @@ class JsonSchemaEncoder extends JsonEncoder {
    * Create a JsonSchemaEncoder instance.
    *
    * @param \Symfony\Component\Serializer\Encoder\EncoderInterface $inner_encoder
+   *   The inner encoder.
    */
   public function __construct(EncoderInterface $inner_encoder) {
     parent::__construct();
@@ -39,14 +40,14 @@ class JsonSchemaEncoder extends JsonEncoder {
   /**
    * {@inheritdoc}
    */
-  public function supportsEncoding($format) {
+  public function supportsEncoding($format, array $context = []): bool {
     $parts = explode(':', $format, 2);
 
     if (count($parts) < 2 || empty($parts[1])) {
-        // Require sub type.
-        return FALSE;
+      // Require sub type.
+      return FALSE;
     }
-    list ($base, $encoded) = $parts;
+    [$base, $encoded] = $parts;
 
     // Verify the correct base and that the sub type is supported by inner.
     return ($base === $this->baseFormat) && $this->innerEncoder->supportsEncoding($encoded);
@@ -55,9 +56,9 @@ class JsonSchemaEncoder extends JsonEncoder {
   /**
    * {@inheritdoc}
    */
-  public function supportsDecoding($format) {
+  public function supportsDecoding($format, array $context = []): bool {
     // We don't decode have a decoding system for json_schema.
-    // @TODO: Implement conversion of json_schema to typed data.
+    // @todo Implement conversion of json_schema to typed data.
     return FALSE;
   }
 

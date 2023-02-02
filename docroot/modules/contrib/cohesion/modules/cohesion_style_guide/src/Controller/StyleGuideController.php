@@ -11,6 +11,8 @@ use Drupal\cohesion_style_guide\Services\StyleGuideManagerHandler;
 use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Extension\ExtensionPathResolver;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
@@ -66,6 +68,16 @@ class StyleGuideController extends ControllerBase {
   protected $styleGuideManagerHandler;
 
   /**
+   * @var \Drupal\Core\Extension\ExtensionPathResolver
+   */
+  protected $extensionPathResolver;
+
+  /**
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
    * StyleGuideController constructor.
    *
    * @param \Drupal\Core\Theme\ThemeManagerInterface $theme_manager
@@ -75,8 +87,20 @@ class StyleGuideController extends ControllerBase {
    * @param \Drupal\Component\Uuid\UuidInterface $uuid_manager
    * @param \Drupal\cohesion\UsageUpdateManager $usage_update_manager
    * @param \Drupal\cohesion_style_guide\Services\StyleGuideManagerHandler $style_guide__manager_handler
+   * @param \Drupal\Core\Extension\ExtensionPathResolver $extensionPathResolver
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
    */
-  public function __construct(ThemeManagerInterface $theme_manager, LocalFilesManager $local_files_manager, EntityRepositoryInterface $entity_repository, PrivateTempStoreFactory $temp_store_factory, UuidInterface $uuid_manager, UsageUpdateManager $usage_update_manager, StyleGuideManagerHandler $style_guide__manager_handler) {
+  public function __construct(
+    ThemeManagerInterface $theme_manager,
+    LocalFilesManager $local_files_manager,
+    EntityRepositoryInterface $entity_repository,
+    PrivateTempStoreFactory $temp_store_factory,
+    UuidInterface $uuid_manager,
+    UsageUpdateManager $usage_update_manager,
+    StyleGuideManagerHandler $style_guide__manager_handler,
+    ExtensionPathResolver $extensionPathResolver,
+    FileUrlGeneratorInterface $fileUrlGenerator
+  ) {
     $this->themeManager = $theme_manager;
     $this->localFilesManager = $local_files_manager;
     $this->entityRepository = $entity_repository;
@@ -84,6 +108,8 @@ class StyleGuideController extends ControllerBase {
     $this->uuid = $uuid_manager;
     $this->usageUpdateManager = $usage_update_manager;
     $this->styleGuideManagerHandler = $style_guide__manager_handler;
+    $this->fileUrlGenerator = $fileUrlGenerator;
+    $this->extensionPathResolver = $extensionPathResolver;
   }
 
   /**
@@ -97,7 +123,9 @@ class StyleGuideController extends ControllerBase {
       $container->get('tempstore.private'),
       $container->get('uuid'),
       $container->get('cohesion_usage.update_manager'),
-      $container->get('cohesion_style_guide.style_guide_handler')
+      $container->get('cohesion_style_guide.style_guide_handler'),
+      $container->get('extension.path.resolver'),
+      $container->get('file_url_generator')
     );
   }
 
@@ -212,7 +240,7 @@ class StyleGuideController extends ControllerBase {
 
     if ($this->tempStore->get('coh-preview-sgm-base-' . $uuid) != $base_css) {
       $this->tempStore->set('coh-preview-sgm-base-' . $uuid, $base_css);
-      $base_css_path = file_url_transform_relative(file_create_url($this->localFilesManager->getStyleSheetFilename('base', $active_theme->getName())));
+      $base_css_path = $this->fileUrlGenerator->generateString($this->localFilesManager->getStyleSheetFilename('base', $active_theme->getName()));
       $base_css_preview = Url::fromRoute('cohesion_style_guide.preview.css')
         ->setRouteParameter('t', 'base')
         ->setRouteParameter('uuid', $uuid)
@@ -222,7 +250,7 @@ class StyleGuideController extends ControllerBase {
 
     if ($this->tempStore->get('coh-preview-sgm-theme-' . $uuid) != $theme_css) {
       $this->tempStore->set('coh-preview-sgm-theme-' . $uuid, $theme_css);
-      $theme_css_path = file_url_transform_relative(file_create_url($this->localFilesManager->getStyleSheetFilename('theme', $active_theme->getName())));
+      $theme_css_path = $this->fileUrlGenerator->generateString($this->localFilesManager->getStyleSheetFilename('theme', $active_theme->getName()));
       $theme_css_preview = Url::fromRoute('cohesion_style_guide.preview.css')
         ->setRouteParameter('t', 'theme')
         ->setRouteParameter('uuid', $uuid)
@@ -257,8 +285,8 @@ class StyleGuideController extends ControllerBase {
             'formGroup' => 'style_guide',
             'formId' => 'preview',
             'drupalFormId' => 'cohPreviewForm',
-            'canvas_preview_css' => drupal_get_path('module', 'cohesion_elements') . '/css/canvas-preview.css',
-            'canvas_preview_js' => drupal_get_path('module', 'cohesion_elements') . '/js/canvas-preview.js',
+            'canvas_preview_css' => $this->extensionPathResolver->getPath('module', 'cohesion_elements') . '/css/canvas-preview.css',
+            'canvas_preview_js' => $this->extensionPathResolver->getPath('module', 'cohesion_elements') . '/js/canvas-preview.js',
           ],
           'cohOnInitForm' => \Drupal::service('settings.endpoint.utils')->getCohFormOnInit('style_guide', 'preview'),
         ],

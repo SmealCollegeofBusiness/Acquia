@@ -43,7 +43,7 @@ class BaseStylesForm extends CohesionStyleBuilderForm {
       '#weight' => 1,
       '#description' => $entity->getEntityMachineNamePrefix(),
       '#description_display' => 'before',
-      '#default_value' => str_replace($entity->getEntityMachineNamePrefix(), '', $this->entity->id()),
+      '#default_value' => str_replace($entity->getEntityMachineNamePrefix(), '', $this->entity->id() ?? ''),
       '#type' => 'ajax_machine_name',
       '#required' => FALSE,
       '#machine_name' => [

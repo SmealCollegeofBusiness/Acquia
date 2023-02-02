@@ -28,6 +28,12 @@ acquia_contenthub_translations.settings:
           label: 'Mapped entities'
           sequence:
             type: acquia_contenthub_translations.nt_entity_registry.handler_mapping.[%key]
+    nt_override_registry:
+      type: sequence
+      label: 'Non-translatable override entity registry'
+      sequence:
+        type: string
+        label: 'Overridden entity types'
 
 acquia_contenthub_translations.nt_entity_registry.unspecified.*:
   label: 'Unspecified list'

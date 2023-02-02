@@ -1,0 +1,18 @@
+uuid: cd7d16a3-2b56-4b48-b1fe-f4b66d1410d4
+langcode: en
+status: false
+dependencies: {  }
+label: 'Full content (Node, Event)'
+id: node_event_full
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: event
+view_mode: full
+master_template: ''

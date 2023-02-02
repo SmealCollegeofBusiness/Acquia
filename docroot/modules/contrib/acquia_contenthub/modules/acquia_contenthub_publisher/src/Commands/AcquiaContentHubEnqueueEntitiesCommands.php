@@ -141,6 +141,7 @@ class AcquiaContentHubEnqueueEntitiesCommands extends DrushCommands {
    */
   public function enqueueEntities():int {
     $data = [];
+    $storage = '';
 
     $entity_type = $this->input->getOption('type');
     if ($entity_type) {

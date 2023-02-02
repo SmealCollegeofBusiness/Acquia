@@ -4,6 +4,7 @@ namespace Drupal\acquia_contenthub\Commands;
 
 use Acquia\ContentHubClient\CDF\CDFObjectInterface;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
+use Drupal\acquia_contenthub\Exception\EntityOriginMismatchException;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\depcalc\DependencyCalculator;
 use Drush\Commands\DrushCommands;
@@ -201,28 +202,49 @@ class AcquiaContentHubEntityCommands extends DrushCommands {
    *
    * @param string $uuid
    *   The entity's UUID.
+   * @param array $options
+   *   An associative array of options whose values come from cli, aliases,
+   *   config, etc.
+   *
+   * @option ignore-origin
+   *   Ignores origin check while deleting entity.
+   *
+   * @usage drush acquia:contenthub-delete 848e7343-c079-4235-9693-0f9e6386c7ed
+   *   | Deletes entity by uuid.
+   * @usage drush acquia:contenthub-delete 848e7343-c079-4235-9693-0f9e6386c7ed --ignore-origin
+   *   | Deletes entity by uuid even if entity source is different.
    *
    * @command acquia:contenthub-delete
    * @aliases ach-del,acquia-contenthub-delete
    *
    * @throws \Exception
    */
-  public function contenthubDelete($uuid) {
-    if (!$this->io()->confirm(dt('Are you sure you want to delete the entity with uuid = @uuid from the Content Hub? There is no way back from this action!', [
+  public function contenthubDelete(string $uuid, array $options = ['ignore-origin' => FALSE]): void {
+    // @todo link public doc for entity deletion once LCH-6248 is done.
+    $this->logger()->warning(
+      'On entity deletion, a webhook will be sent around to all subscribers about the deletion.'
+    );
+    if (!$this->io()->confirm(dt('Are you sure you want to delete the entity with uuid = @uuid from the Content Hub?' . ' There is no way back from this action!', [
       '@uuid' => $uuid,
     ]))) {
       return;
     }
 
-    if ($this->commonActions->deleteRemoteEntity($uuid)) {
-      $this->output()->writeln(dt('Entity with UUID = @uuid has been successfully deleted from the Content Hub Service.', [
+    try {
+      $result = $this->commonActions->deleteRemoteEntity($uuid, $options['ignore-origin']);
+      if ($result === TRUE) {
+        $this->output()->writeln(dt('Entity with UUID = @uuid has been successfully deleted from the Content Hub Service.', [
+          '@uuid' => $uuid,
+        ]));
+        return;
+      }
+      $this->output()->writeln(dt('WARNING: Entity with UUID = @uuid cannot be deleted from the Content Hub Service.', [
         '@uuid' => $uuid,
       ]));
-      return;
     }
-    $this->output()->writeln(dt('WARNING: Entity with UUID = @uuid cannot be deleted from the Content Hub Service.', [
-      '@uuid' => $uuid,
-    ]));
+    catch (EntityOriginMismatchException $e) {
+      $this->output()->writeln($e->getMessage() . 'Use --ignore-origin flag to ignore origin check.');
+    }
   }
 
   /**

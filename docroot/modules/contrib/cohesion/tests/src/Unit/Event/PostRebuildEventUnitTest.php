@@ -6,7 +6,7 @@ use Drupal\cohesion\Event\PostRebuildEvent;
 use Drupal\cohesion\Event\SiteStudioEvents;
 use Drupal\Tests\Component\EventDispatcher\TestEventSubscriber;
 use Drupal\Tests\UnitTestCase;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -86,13 +86,13 @@ class PostRebuildEventTest extends UnitTestCase {
     $successfulResults = [];
     $successfulSuccess = TRUE;
     $this->successfulEvent = new PostRebuildEvent($successfulResults, $successfulSuccess);
-    $this->successfulReturn = $this->dispatcher->dispatch(self::PRE_REBUILD, $this->successfulEvent);
+    $this->successfulReturn = $this->dispatcher->dispatch($this->successfulEvent, self::PRE_REBUILD);
 
     // Setup event which is not successful.
     $failedResults['error'] = 'some error';
     $failedSuccess = TRUE;
     $this->failedEvent = new PostRebuildEvent($failedResults, $failedSuccess);
-    $this->failedReturn = $this->dispatcher->dispatch(self::PRE_REBUILD, $this->failedEvent);
+    $this->failedReturn = $this->dispatcher->dispatch($this->failedEvent, self::PRE_REBUILD);
   }
 
   /**
@@ -100,10 +100,10 @@ class PostRebuildEventTest extends UnitTestCase {
    */
   public function testEvent() {
     $this->assertTrue($this->dispatcher->hasListeners(self::PRE_REBUILD));
-    $this->assertInstanceOf(Event::class, $this->dispatcher->dispatch(self::PRE_REBUILD, $this->successfulEvent));
+    $this->assertInstanceOf(Event::class, $this->dispatcher->dispatch($this->successfulEvent, self::PRE_REBUILD));
     $this->assertSame($this->successfulEvent, $this->successfulReturn);
 
-    $this->assertInstanceOf(Event::class, $this->dispatcher->dispatch(self::PRE_REBUILD, $this->failedEvent));
+    $this->assertInstanceOf(Event::class, $this->dispatcher->dispatch($this->failedEvent, self::PRE_REBUILD));
     $this->assertSame($this->failedEvent, $this->failedReturn);
   }
 

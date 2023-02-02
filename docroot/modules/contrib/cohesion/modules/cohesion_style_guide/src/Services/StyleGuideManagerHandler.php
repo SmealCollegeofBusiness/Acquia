@@ -73,6 +73,7 @@ class StyleGuideManagerHandler {
   public function getStyleGuideManagerJson($theme_id) {
     $style_guide_managers_ids = $this->entityTypeManager->getStorage('cohesion_style_guide_manager')
       ->getQuery()
+      ->accessCheck(TRUE)
       ->condition('theme', $theme_id)
       ->execute();
 
@@ -190,6 +191,7 @@ class StyleGuideManagerHandler {
       ->getStorage('cohesion_style_guide');
 
     $style_guide_ids = $style_guide_storage->getQuery()
+      ->accessCheck(TRUE)
       ->sort('weight')
       ->condition('status', TRUE)
       ->execute();
@@ -229,6 +231,7 @@ class StyleGuideManagerHandler {
 
       $style_guide_managers_ids = $this->entityTypeManager->getStorage('cohesion_style_guide_manager')
         ->getQuery()
+        ->accessCheck(TRUE)
         ->condition('theme', $theme_id)
         ->execute();
 
@@ -345,6 +348,7 @@ class StyleGuideManagerHandler {
       $style_guide_storage = \Drupal::entityTypeManager()
         ->getStorage('cohesion_style_guide');
       $style_guide_ids = $style_guide_storage->getQuery()
+        ->accessCheck(TRUE)
         ->sort('weight')
         ->condition('status', TRUE)
         ->execute();

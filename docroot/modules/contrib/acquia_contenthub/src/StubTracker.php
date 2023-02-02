@@ -31,7 +31,7 @@ class StubTracker {
   /**
    * The dependency stack.
    *
-   * @var \Drupal\depcalc\DependencyStack
+   * @var \Drupal\depcalc\DependencyStack|array
    */
   protected $stack;
 

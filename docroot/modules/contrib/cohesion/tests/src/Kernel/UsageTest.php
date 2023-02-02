@@ -3,6 +3,7 @@
 use Drupal\cohesion_elements\Entity\Component;
 use Drupal\cohesion_templates\Entity\MasterTemplates;
 use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
 
@@ -76,10 +77,10 @@ class UsageTest extends EntityKernelTestBase {
       ->execute()
       ->fetchAllKeyed();
 
-    $this->assertEqual($dependencies_count, 1);
-    $this->assertEqual(count($dependencies), 1);
+    $this->assertEquals($dependencies_count, 1);
+    $this->assertEquals(count($dependencies), 1);
     $this->assertArrayHasKey($component->uuid(), $dependencies);
-    $this->assertEqual($dependencies[$component->uuid()], 'cohesion_component');
+    $this->assertEquals($dependencies[$component->uuid()], 'cohesion_component');
   }
 
   /**
@@ -99,7 +100,7 @@ class UsageTest extends EntityKernelTestBase {
       'filemime' => 'text/plain',
       'created' => 1,
       'changed' => 1,
-      'status' => FILE_STATUS_PERMANENT,
+      'status' => FileInterface::STATUS_PERMANENT,
     ]);
     file_put_contents($file->getFileUri(), 'hello world');
 
@@ -123,9 +124,9 @@ class UsageTest extends EntityKernelTestBase {
       ->execute()
       ->fetchAllKeyed();
 
-    $this->assertEqual($dependencies_count, 1);
-    $this->assertEqual(count($dependencies), 1);
+    $this->assertEquals($dependencies_count, 1);
+    $this->assertEquals(count($dependencies), 1);
     $this->assertArrayHasKey($file->uuid(), $dependencies);
-    $this->assertEqual($dependencies[$file->uuid()], 'file');
+    $this->assertEquals($dependencies[$file->uuid()], 'file');
   }
 }

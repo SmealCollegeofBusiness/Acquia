@@ -9,6 +9,7 @@ use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\Event\ContentHubPublishEntitiesEvent;
 use Drupal\acquia_contenthub\Event\DeleteRemoteEntityEvent;
+use Drupal\acquia_contenthub\Exception\EntityOriginMismatchException;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -192,13 +193,17 @@ class ContentHubCommonActions {
    *
    * @param string $uuid
    *   The uuid of the remote entity to delete.
+   * @param bool $ignore_origin
+   *   Whether to ignore the origin check while deleting entity or not.
    *
-   * @return bool|void
-   *   Boolean for success or failure, void if nonexistent or not ours.
+   * @return bool
+   *   Boolean for success or failure, void if nonexistent
+   *   and array if origin doesn't match.
    *
+   * @throws \Drupal\acquia_contenthub\Exception\EntityOriginMismatchException
    * @throws \Exception
    */
-  public function deleteRemoteEntity(string $uuid) {
+  public function deleteRemoteEntity(string $uuid, bool $ignore_origin = FALSE) {
     if (!Uuid::isValid($uuid)) {
       throw new \Exception(sprintf("Invalid uuid %s.", $uuid));
     }
@@ -206,12 +211,15 @@ class ContentHubCommonActions {
     $this->dispatcher->dispatch($event, AcquiaContentHubEvents::DELETE_REMOTE_ENTITY);
     $remote_entity = $this->getRemoteEntity($uuid);
     if (!$remote_entity) {
-      return; //@codingStandardsIgnoreLine
+      return FALSE;
     }
     $client = $this->getClient();
     $settings = $client->getSettings();
-    if ($settings->getUuid() !== $remote_entity->getOrigin()) {
-      return; //@codingStandardsIgnoreLine
+    if (!$ignore_origin && $settings->getUuid() !== $remote_entity->getOrigin()) {
+      throw new EntityOriginMismatchException(sprintf(
+        'The current site is not the owner of the entity (entity_uuid: "%s", current origin: "%s", entity origin: "%s").',
+        $uuid, $settings->getUuid(), $remote_entity->getOrigin()
+      ));
     }
     $response = $client->deleteEntity($uuid);
     if ($response->getStatusCode() !== 202) {

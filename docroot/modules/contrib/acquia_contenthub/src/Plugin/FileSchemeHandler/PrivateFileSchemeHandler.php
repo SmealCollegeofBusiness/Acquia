@@ -94,6 +94,7 @@ class PrivateFileSchemeHandler extends PluginBase implements FileSchemeHandlerIn
       $uri = $object->getAttribute('file_uri')->getValue()[LanguageInterface::LANGCODE_NOT_SPECIFIED];
       $uuid = $object->getUuid();
       $dirname = $this->fileSystem->dirname($uri);
+      $contents = '';
       if ($this->fileSystem->prepareDirectory($dirname, FileSystemInterface::CREATE_DIRECTORY)) {
         try {
           $contents = $this->contentHubCommonActions->requestRemoteEntity($url, $uri, $uuid, 'private');

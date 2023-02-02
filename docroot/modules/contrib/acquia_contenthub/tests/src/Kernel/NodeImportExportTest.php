@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
+use Drupal\depcalc\DependencyStack;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\CdfDocumentCreatorTrait;
+
 /**
  * Tests node imports and exports.
  *
@@ -10,6 +13,15 @@ namespace Drupal\Tests\acquia_contenthub\Kernel;
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class NodeImportExportTest extends ImportExportTestBase {
+
+  use CdfDocumentCreatorTrait;
+
+  /**
+   * Entity cdf serializer.
+   *
+   * @var \Drupal\acquia_contenthub\EntityCdfSerializer
+   */
+  protected $cdfSerializer;
 
   protected $fixtures = [
     0 => [
@@ -73,6 +85,7 @@ class NodeImportExportTest extends ImportExportTestBase {
     $this->installEntitySchema('workflow');
     $this->installEntitySchema('content_moderation_state');
     $this->drupalSetUpCurrentUser();
+    $this->cdfSerializer = $this->container->get('entity.cdf.serializer');
   }
 
   /**
@@ -88,6 +101,18 @@ class NodeImportExportTest extends ImportExportTestBase {
    */
   public function testNodeEntity(...$args) {
     parent::contentEntityImportExport(...$args);
+  }
+
+  /**
+   * Tests Node import having multiple translations.
+   */
+  public function testNodeImportWithMultipleTranslation() {
+    $cdf_document = $this->createCdfDocumentFromFixtureFile('node/node-multiple-translations.json');
+    $this->cdfSerializer->unserializeEntities($cdf_document, new DependencyStack());
+    $node_loaded_by_uuid = \Drupal::entityTypeManager()->getStorage('node')->loadByProperties(['uuid' => 'bac07a8d-d881-45fa-949b-8b2cc8401824']);
+    $actual_langcodes = array_keys($node_loaded_by_uuid[1]->getTranslationLanguages());
+    $expected_langcodes = ['en', 'es', 'fr', 'de'];
+    $this->assertSame(array_diff($expected_langcodes, $actual_langcodes), array_diff($actual_langcodes, $expected_langcodes));
   }
 
   /**

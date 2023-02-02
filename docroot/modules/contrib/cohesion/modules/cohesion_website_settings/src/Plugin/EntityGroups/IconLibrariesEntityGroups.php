@@ -45,13 +45,21 @@ class IconLibrariesEntityGroups extends EntityGroupsPluginBase {
       // Create any new entities.
       foreach ($libraries->iconLibraries as $index => $library) {
         // Does the entity already exist?
-        $entity_count = $this->storage->getQuery()->condition('id', $library->library->provider)->count()->execute();
+        $entity_count = $this->storage->getQuery()
+          ->accessCheck(TRUE)
+          ->condition('id', $library->library->provider)
+          ->count()
+          ->execute();
 
         // No? Then create and save it.
         if ($entity_count === 0) {
 
           // Make sure no other entity has the same name.
-          $entity_by_name_count = $this->storage->getQuery()->condition('label', $library->library->name)->count()->execute();
+          $entity_by_name_count = $this->storage->getQuery()
+            ->accessCheck(TRUE)
+            ->condition('label', $library->library->name)
+            ->count()
+            ->execute();
 
           if ($entity_by_name_count === 0) {
             /** @var \Drupal\cohesion_website_settings\Entity\IconLibrary $entity */
@@ -83,7 +91,7 @@ class IconLibrariesEntityGroups extends EntityGroupsPluginBase {
       }
 
       // Delete any removed entities.
-      $query = $this->storage->getQuery();
+      $query = $this->storage->getQuery()->accessCheck(TRUE);
       if ($to_delete_entity_ids = $query->execute()) {
         foreach ($libraries->iconLibraries as $library) {
           if (isset($to_delete_entity_ids[$library->library->provider])) {

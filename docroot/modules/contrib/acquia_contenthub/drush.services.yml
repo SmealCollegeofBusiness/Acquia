@@ -55,13 +55,13 @@ services:
 
   acquia_contenthub.commands.webhook:
     class: Drupal\acquia_contenthub\Commands\AcquiaContentHubWebhookCommands
-    arguments: ['@acquia_contenthub.client.factory', '@event_dispatcher']
+    arguments: ['@acquia_contenthub.client.factory', '@event_dispatcher', '@acquia_contenthub.connection_manager', '@acquia_contenthub.cdf_metrics_manager']
     tags:
       - { name: drush.command }
 
   acquia_contenthub.commands.webhook.interests:
     class: Drupal\acquia_contenthub\Commands\AcquiaContentHubWebhookInterestCommands
-    arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.connection_manager', '@config.factory']
+    arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.connection_manager', '@config.factory', '@pub.sub_status.checker']
     tags:
       - { name: drush.command }
 

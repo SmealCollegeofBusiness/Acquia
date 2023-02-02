@@ -119,7 +119,7 @@ class SubscriberTracker {
   /**
    * Add tracking for an entity in a self::QUEUED state.
    *
-   * @var string $uuid
+   * @param string $uuid
    *   The entity uuid to enqueue.
    *
    * @throws \Exception
@@ -201,6 +201,7 @@ class SubscriberTracker {
         ->getStorage($result->entity_type)
         ->load($result->entity_id);
     }
+    return NULL;
   }
 
   /**
@@ -226,7 +227,7 @@ class SubscriberTracker {
    * @param string $id
    *   The id of an entity.
    *
-   * @return string
+   * @return string|void
    *   The status string.
    */
   public function getStatusByTypeId(string $type, string $id) {
@@ -246,7 +247,7 @@ class SubscriberTracker {
    * @param string $uuid
    *   The uuid of an entity.
    *
-   * @return string
+   * @return string|void
    *   The status string.
    */
   public function getStatusByUuid(string $uuid) {
@@ -335,19 +336,23 @@ class SubscriberTracker {
   /**
    * Obtains a list of entities.
    *
-   * @param string $status
-   *   The status of the entities to track.
+   * @param string|array $status
+   *   The status of the entities to list or an array of statuses.
    * @param string $entity_type_id
    *   The Entity type.
    *
    * @return array
    *   An array of Tracked Entities set to reindex.
    */
-  public function listTrackedEntities(string $status, $entity_type_id = ''): array {
+  public function listTrackedEntities($status, string $entity_type_id = ''): array {
+    if (!is_array($status)) {
+      $status = [$status];
+    }
+
     $query = $this->database
       ->select(self::IMPORT_TRACKING_TABLE, 'ci')
       ->fields('ci')
-      ->condition('status', $status);
+      ->condition('status', $status, 'IN');
 
     if (!empty($entity_type_id)) {
       $query = $query->condition('entity_type', $entity_type_id);

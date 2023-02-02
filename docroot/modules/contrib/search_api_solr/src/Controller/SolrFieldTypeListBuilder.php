@@ -75,7 +75,7 @@ class SolrFieldTypeListBuilder extends AbstractSolrEntityListBuilder {
     static $entities;
 
     $active_languages = array_keys(\Drupal::languageManager()->getLanguages());
-    // Ignore region and variant of the locale string the langauge manager
+    // Ignore region and variant of the locale string the language manager
     // returns as we provide language fallbacks. For example, 'de' should be
     // used for 'de-at' if there's no dedicated 'de-at' field type.
     array_walk($active_languages, function (&$value) {
@@ -250,6 +250,7 @@ class SolrFieldTypeListBuilder extends AbstractSolrEntityListBuilder {
    * Returns the formatted XML for solrconfig_extra.xml.
    *
    * @param int|null $solr_major_version
+   *   The Solr major version.
    *
    * @return string
    *   The XML snippet.
@@ -258,7 +259,7 @@ class SolrFieldTypeListBuilder extends AbstractSolrEntityListBuilder {
    */
   public function getSchemaExtraFieldsXml(?int $solr_major_version = NULL) {
     $xml = '';
-    /* @var \Drupal\search_api_solr\SolrFieldTypeInterface $solr_field_type */
+    /** @var \Drupal\search_api_solr\SolrFieldTypeInterface $solr_field_type */
     foreach ($this->getEnabledEntities() as $solr_field_type) {
       foreach ($solr_field_type->getStaticFields() as $static_field) {
         $xml .= '<field ';

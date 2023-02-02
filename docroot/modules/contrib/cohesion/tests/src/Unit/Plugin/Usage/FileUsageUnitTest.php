@@ -5,7 +5,10 @@ namespace Drupal\Tests\cohesion\Unit\Plugin\Usage;
 use Drupal\cohesion\Entity\CohesionConfigEntityBase;
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
 use Drupal\cohesion\Plugin\Usage\FileUsage;
+use Drupal\file\FileInterface;
+use Drupal\file\FileRepositoryInterface;
 use Drupal\Tests\cohesion\Unit\UsagePluginBaseUnitTest;
+use Prophecy\Argument;
 
 /**
  * Mock for the core File entity.
@@ -30,6 +33,28 @@ class FileUsageUnitTest extends UsagePluginBaseUnitTest {
   public function setUp() {
     parent::setUp();
 
+    $fileMock = $this->getMockBuilder(FileInterface::class)
+      ->disableOriginalConstructor()
+      ->getMock();
+    $fileMock->expects($this->any())
+      ->method('uuid')
+      ->willReturn(NULL);
+    $fileMock->expects($this->any())
+      ->method('setPermanent')
+      ->willReturn(NULL);
+    $fileMock->expects($this->any())
+      ->method('save')
+      ->willReturn(1);
+
+    $prophecy = $this->prophesize(FileRepositoryInterface::class);
+    $prophecy->writeData(
+      Argument::type('string'),
+      Argument::type('string'),
+      Argument::type('integer')
+    )->willReturn($fileMock);
+
+    $this->file_repository = $prophecy->reveal();
+
     // Init the plugin.
     $this->unit = new FileUsage(
       $this->configuration,
@@ -37,7 +62,9 @@ class FileUsageUnitTest extends UsagePluginBaseUnitTest {
       $this->plugin_definition,
       $this->entity_type_manager_mock,
       $this->stream_wrapper_manager_mock,
-      $this->database_connection_mock);
+      $this->database_connection_mock,
+      $this->file_repository
+    );
   }
 
   /**

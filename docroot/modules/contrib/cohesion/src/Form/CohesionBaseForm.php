@@ -84,7 +84,7 @@ class CohesionBaseForm extends EntityForm {
 
     /** @var \Drupal\cohesion\Entity\CohesionConfigEntityBase $entity */
     $entity = $this->entity;
-    $form_class = str_replace('_', '-', $entity->getEntityTypeId()) . '-' . str_replace('_', '-', $entity->id()) . '-form';
+    $form_class = str_replace('_', '-', $entity->getEntityTypeId()) . '-' . str_replace('_', '-', $entity->id() ?? '') . '-form';
     $form_class_entity = str_replace('_', '-', $entity->getEntityTypeId()) . '-edit-form';
 
     $jsonValue = $entity->getJsonValues() ? $entity->getJsonValues() : "{}";
@@ -330,7 +330,7 @@ class CohesionBaseForm extends EntityForm {
 
     $query = $this->entityTypeManager->getStorage($this->entity->getEntityTypeId())->getQuery();
     $parameter = $this->entity->getEntityMachineNamePrefix() . $value;
-    $query->condition('id', $parameter);
+    $query->condition('id', $parameter)->accessCheck(TRUE);
     $entity_ids = $query->execute();
 
     return count($entity_ids) > 0;

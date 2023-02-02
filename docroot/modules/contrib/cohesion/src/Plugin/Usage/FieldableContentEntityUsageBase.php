@@ -23,12 +23,17 @@ abstract class FieldableContentEntityUsageBase extends UsagePluginBase {
 
     if ($template != '__default__') {
       // Not a default template, so just make sure the template exists.
-      $template_result = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
-        ->condition('id', $template)->execute();
+      $template_result = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')
+        ->getQuery()
+        ->accessCheck(TRUE)
+        ->condition('id', $template)
+        ->execute();
     }
     else {
       // Default, so query for the default of this entity type/bundle.
-      $template_result = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
+      $template_result = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')
+        ->getQuery()
+        ->accessCheck(TRUE)
         ->condition('entity_type', $entity->getEntityTypeId())
         ->condition('bundle', $entity->bundle())
         ->condition('view_mode', 'full')

@@ -250,6 +250,7 @@ class ConfigEntitySync extends SyncPluginBase {
     if ($this->entityTypeStorage->getEntityTypeId() === 'cohesion_custom_style') {
       // Load any entities that contain the same class name.
       $custom_style_ids = \Drupal::entityQuery('cohesion_custom_style')
+        ->accessCheck(TRUE)
         ->condition('class_name', $entry['class_name'])
         ->execute();
 
@@ -361,6 +362,7 @@ class ConfigEntitySync extends SyncPluginBase {
     if ($this->entityTypeStorage->getEntityTypeId() === 'cohesion_custom_style') {
       try {
         $ids = \Drupal::entityQuery('cohesion_custom_style')
+          ->accessCheck(TRUE)
           ->condition('class_name', $entry['class_name'])
           ->execute();
 

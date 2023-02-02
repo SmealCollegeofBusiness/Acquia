@@ -64,7 +64,7 @@ class AcquiaContentHubSubscriberAuditCommands extends DrushCommands {
    *
    * @throws \Exception
    */
-  public function audit(string $entity_type_id = '') {
+  public function audit(?string $entity_type_id = '') {
     $reimport = $this->input->getOption('reimport');
     if ($reimport) {
       $warning_message = dt('Are you sure you want to republish entities to Content Hub?');

@@ -1,5 +1,5 @@
 cohesion_sync.index:
-  path: 'admin/cohesion/sync'
+  path: '/admin/cohesion/sync'
   defaults:
     _controller: '\Drupal\cohesion\Controller\AdministrationController::index'
     _title: 'Sync packages'

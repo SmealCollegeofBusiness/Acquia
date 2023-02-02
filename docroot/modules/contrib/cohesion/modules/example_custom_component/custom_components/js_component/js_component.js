@@ -1,10 +1,10 @@
 // CSS/JS ONLY
-(function ($, Drupal, drupalSettings) {
+(function ($, Drupal, once, drupalSettings) {
     "use strict";
 
     Drupal.behaviors.jsComponent = {
         attach: function (context) {
-            $('.js_component').once().each(function() {
+            once('js-component').forEach(function() {
                 const content = JSON.parse($(this).attr('data-ssa-custom-component'));
 
                 const template = `
@@ -22,6 +22,6 @@
             });
         }
     };
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal, once, drupalSettings);
 
 

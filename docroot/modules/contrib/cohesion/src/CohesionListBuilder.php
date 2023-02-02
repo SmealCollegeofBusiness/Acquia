@@ -77,7 +77,7 @@ class CohesionListBuilder extends DraggableListBuilder {
     $row = [];
 
     $row['label'] = $entity->label();
-    $row['type'] = FALSE;
+    $row['type'] = [];
 
     if ($this->entityType->hasKey('class')) {
       $row['class'] = ['#markup' => $entity->getClass()];

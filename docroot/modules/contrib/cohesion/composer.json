@@ -14,8 +14,10 @@
         "ext-json": "*",
         "cweagans/composer-patches": "^1.6",
         "drupal/entity_reference_revisions": "^1.7",
-        "drupal/imce": "^2.2",
-        "drupal/token": "^1.5"
+        "drupal/imce": "^3.0",
+        "drupal/token": "^1.11",
+        "drupal/jquery_ui": "^1.4",
+        "drupal/stable": "^2.0"
     },
     "require-dev": {
         "acquia/coding-standards": "^0.4.1",

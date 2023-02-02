@@ -132,6 +132,7 @@
         "languages": [
           "hi"
         ],
+        "translatable": true,
         "version": 2
       }
     },

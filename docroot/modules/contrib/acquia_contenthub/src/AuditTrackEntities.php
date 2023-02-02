@@ -105,7 +105,7 @@ class AuditTrackEntities {
    * @throws \Exception
    */
   public static function enqueueTrackedEntities(EntityInterface $entity, string $audit_command) {
-    /** @var \Drupal\acquia_contenthub\PubSubModuleStatusChecker $check */
+    /** @var \Drupal\acquia_contenthub\PubSubModuleStatusChecker $checker */
     $checker = \Drupal::service('pub.sub_status.checker');
     if ($checker->isPublisher() && $audit_command === 'publisher_audit') {
       /** @var \Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer $entity_enqueuer */

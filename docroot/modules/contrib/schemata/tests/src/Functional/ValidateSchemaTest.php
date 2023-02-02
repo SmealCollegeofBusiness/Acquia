@@ -2,7 +2,10 @@
 
 namespace Drupal\Tests\schemata\Functional;
 
-use League\JsonGuard\Validator;
+use JsonSchema\Constraints\Constraint;
+use JsonSchema\Constraints\Factory;
+use JsonSchema\SchemaStorage;
+use JsonSchema\Validator;
 
 /**
  * Tests that generated JSON Schemas are valid as JSON Schema.
@@ -70,30 +73,26 @@ class ValidateSchemaTest extends SchemataBrowserTestBase {
     }
     $this->assertNotEmpty($data->{'$schema'}, 'JSON Schema should include a $schema reference to a defining schema.');
 
-    // Prepare the schema for validation.
-    // By definition of the JSON Schema spec, schemas use a top-level '$schema'
-    // key to identify the schema specification with which they conform.
-    $schema = $this->getDereferencedSchema($data->{'$schema'});
-    $this->assertTrue(!empty($schema), 'The schema specification must be retrieved and dereferenced for use.');
-
+    $schemaStorage = new SchemaStorage();
     // Validate our schema is a correct schema.
-    $validator = new Validator($data, $schema);
-    if ($validator->fails()) {
-      $bundle_label = empty($bundle_id) ? 'no-bundle' : $bundle_id;
-      $message = "Schema ($entity_type_id:$bundle_label) failed validation for $format:\n";
-      $errors = $validator->errors();
-      $message .= json_encode($errors, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-      $this->assertTrue(FALSE, $message);
+    $validator = new Validator(new Factory($schemaStorage));
+    $validator->validate($data, (object) ['$ref' => $data->{'$schema'}], Constraint::CHECK_MODE_TYPE_CAST);
+    if ($validator->isValid()) {
+      // If the schema is valid, we do not expect any error messages.
+      $this->assertEmpty($validator->getErrors());
     }
 
     // Now that the schema has validated correctly, let's confirm an invalid
     // schema will fail validation.
     $data->properties = '';
-    $validator = new Validator($data, $schema);
-    if (!$validator->fails()) {
-      $bundle_label = empty($bundle_id) ? 'no-bundle' : $bundle_id;
-      $message = "Schema ($entity_type_id:$bundle_label) should fail validation if it is wrong.\n";
-      $this->assertTrue(FALSE, $message);
+    $validator->validate($data, (object)['$ref' => $data->{'$schema'}]);
+    if (!$validator->isValid()) {
+      $expectedMessage = "String value found, but an object is required";
+      $expectedProperty = 'properties';
+      $errors = $validator->getErrors();
+      $errors = reset($errors);
+      $this->assertSame($expectedMessage, $errors['message']);
+      $this->assertSame($expectedProperty, $errors['property']);
     }
   }
 

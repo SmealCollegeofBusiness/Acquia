@@ -94,7 +94,13 @@ class ContentHubStatusReportTest extends EntityKernelTestBase {
     $this->clientFactory->getClient()->willReturn($this->client->reveal());
     $this->container->set('acquia_contenthub.client.factory',
       $this->clientFactory->reveal());
-    $controller = new StatusReportController($this->container->get('acquia_contenthub.client.factory'), $this->container->get('acquia_contenthub.cdf_metrics_manager'), $this->container->has('pager.manager') ? $this->container->get('pager.manager') : NULL);
+    $controller = new StatusReportController(
+      $this->container->get('acquia_contenthub.client.factory'),
+      $this->container->get('acquia_contenthub.cdf_metrics_manager'),
+      $this->container->get('date.formatter'),
+      $this->container->get('datetime.time'),
+      $this->container->get('pager.manager')
+    );
     $request = new Request();
     $build = $controller->statusReportPage($request);
 
@@ -131,7 +137,13 @@ class ContentHubStatusReportTest extends EntityKernelTestBase {
 
     $this->clientFactory->getClient()->willReturn($this->client->reveal());
     $this->container->set('acquia_contenthub.client.factory', $this->clientFactory->reveal());
-    $controller = new StatusReportController($this->container->get('acquia_contenthub.client.factory'), $this->container->get('acquia_contenthub.cdf_metrics_manager'), $this->container->has('pager.manager') ? $this->container->get('pager.manager') : NULL);
+    $controller = new StatusReportController(
+      $this->container->get('acquia_contenthub.client.factory'),
+      $this->container->get('acquia_contenthub.cdf_metrics_manager'),
+      $this->container->get('date.formatter'),
+      $this->container->get('datetime.time'),
+      $this->container->get('pager.manager')
+    );
     $request = new Request();
     $build = $controller->statusReportPage($request);
 
@@ -225,16 +237,6 @@ class ContentHubStatusReportTest extends EntityKernelTestBase {
    */
   protected function getMarkupValue($element) : string {
     return strip_tags((string) $element);
-  }
-
-  /**
-   * Creates cloned prophetic client.
-   *
-   * @return \Prophecy\Prophecy\ObjectProphecy
-   *   Clones client so data isn't changed.
-   */
-  private function getClient() {
-    return clone $this->client;
   }
 
 }

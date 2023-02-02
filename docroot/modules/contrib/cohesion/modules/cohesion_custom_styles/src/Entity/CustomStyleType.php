@@ -118,7 +118,10 @@ class CustomStyleType extends CohesionConfigEntityBase implements CohesionSettin
     $canonical_list = [];
     foreach ($entities as $e) {
       // Check to see if this entity exists.
-      $entity_ids = \Drupal::entityQuery('custom_style_type')->condition('id', $e['element_id'])->execute();
+      $entity_ids = \Drupal::entityQuery('custom_style_type')
+        ->accessCheck(TRUE)
+        ->condition('id', $e['element_id'])
+        ->execute();
 
       // New, so create.
       if (!count($entity_ids)) {

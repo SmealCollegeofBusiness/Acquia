@@ -25,7 +25,7 @@ class UpdatePublished implements EventSubscriberInterface {
   /**
    * UpdatePublished constructor.
    *
-   * @param Drupal\Core\Database\Connection $database
+   * @param \Drupal\Core\Database\Connection $database
    *   The database connection.
    */
   public function __construct(Connection $database) {

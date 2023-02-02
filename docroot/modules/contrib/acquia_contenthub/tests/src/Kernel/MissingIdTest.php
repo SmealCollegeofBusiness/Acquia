@@ -10,6 +10,8 @@ use Drupal\webform\Entity\WebformSubmission;
  *
  * @group acquia_contenthub
  *
+ * @requires module webform
+ *
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 class MissingIdTest extends QueueingTestBase {
@@ -40,7 +42,6 @@ class MissingIdTest extends QueueingTestBase {
    * Tests missing "Entity Id" functionality.
    */
   public function testMissingId() {
-    // Create a webform.
     $webform = Webform::create([
       'id' => $this->randomMachineName(),
     ]);

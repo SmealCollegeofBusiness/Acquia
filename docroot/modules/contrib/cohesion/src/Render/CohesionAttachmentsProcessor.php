@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion\Render;
 
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Asset\AssetCollectionRendererInterface;
 use Drupal\Core\Asset\AssetResolverInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -73,11 +74,13 @@ class CohesionAttachmentsProcessor extends HtmlResponseAttachmentsProcessor {
       $cohesion_attachments = $attachments['cohesion'];
       unset($attachments['cohesion']);
       foreach ($cohesion_attachments as $cohesion_attachment) {
-        if (!is_string($cohesion_attachment)) {
-          throw new \LogicException(sprintf('Site Studio attachment must be of string, %s given', gettype($cohesion_attachment)));
+        if (is_string($cohesion_attachment) || $cohesion_attachment instanceof MarkupInterface) {
+          $processed_styles = Markup::create($cohesion_attachment);
         }
-        $processed_styles = Markup::create($cohesion_attachment);
-        if($processed_styles != '<style></style>') {
+        else {
+          throw new \LogicException(sprintf('Site Studio attachment must be of string or markup, %s given', gettype($cohesion_attachment)));
+        }
+        if ($processed_styles != '<style></style>') {
           $processed_cohesion_attachments[] = $processed_styles;
         }
       }
@@ -90,7 +93,7 @@ class CohesionAttachmentsProcessor extends HtmlResponseAttachmentsProcessor {
     $processed_html_response = $this->htmlResponseAttachmentsProcessor->processAttachments($html_response);
     $attachments = $processed_html_response->getAttachments();
     $cohesion_response = clone $processed_html_response;
-    if(count($processed_cohesion_attachments)) {
+    if (count($processed_cohesion_attachments)) {
       $attachments['cohesion'] = $processed_cohesion_attachments;
     }
 

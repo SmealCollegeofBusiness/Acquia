@@ -1,0 +1,18 @@
+uuid: d12460fc-8d4d-4459-a412-a9217dddca4e
+langcode: en
+status: false
+dependencies: {  }
+label: 'Video component (Media, Document)'
+id: media_document_video_component
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: media
+bundle: document
+view_mode: video_component
+master_template: ''

@@ -40,6 +40,7 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
     $view_modes = $this->entityTypeManager()
       ->getStorage('entity_view_mode')
       ->getQuery()
+      ->accessCheck(TRUE)
       ->condition('targetEntityType', $entity_type)
       ->execute();
 
@@ -81,11 +82,10 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
   public function getViewModes(Request $request) {
 
     $view_modes_data = [];
-
-    $restrict = $request->query->get('restrict', []);
+    $restrict = [$request->query->get('restrict')] ?: [];
 
     $storage = $this->entityTypeManager()->getStorage('entity_view_mode');
-    $entity_ids = $storage->getQuery()->execute();
+    $entity_ids = $storage->getQuery()->accessCheck(TRUE)->execute();
     $entities = $storage->loadMultiple($entity_ids);
     $entity_types_definition = $this->entityTypeManager->getDefinitions();
 
@@ -227,7 +227,7 @@ class CohesionDrupalViewEndpointController extends ControllerBase {
     if ($view = $this->entityTypeManager()->getStorage('view')->load($view_name)) {
 
       // Get the defined pager for this view display.
-      $this_pager_type = isset($view->get('display')[$view_display_name]['display_options']['pager']['type']) ? $view->get('display')[$view_display_name]['display_options']['pager']['type'] : $view->get('display')['default']['display_options']['pager']['type'];
+      $this_pager_type = $view->get('display')[$view_display_name]['display_options']['pager']['type'] ?? $view->get('display')['default']['display_options']['pager']['type'];
 
       // Get all the possible pagers.
       if ($options = Views::fetchPluginNames('pager', !TRUE ? 'basic' : NULL, [])) {

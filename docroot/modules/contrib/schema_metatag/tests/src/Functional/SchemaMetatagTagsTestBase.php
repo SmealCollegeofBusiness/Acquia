@@ -26,7 +26,7 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'claro';
 
   /**
    * {@inheritdoc}
@@ -153,7 +153,7 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
 
     parent::setUp();
     $this->propertyTypeManager = \Drupal::service('plugin.manager.schema_property_type');
@@ -264,8 +264,8 @@ abstract class SchemaMetatagTagsTestBase extends BrowserTestBase {
         }
       }
 
-      $this->drupalPostForm(NULL, $form_values, 'Save');
-      $this->assertSession()->pageTextContains($save_message, 'Configuration successfully posted.');
+      $this->submitForm($form_values, 'Save');
+      $this->assertSession()->pageTextContains($save_message);
 
       // Load the config page to confirm the settings got saved.
       $this->drupalGet($config_path);

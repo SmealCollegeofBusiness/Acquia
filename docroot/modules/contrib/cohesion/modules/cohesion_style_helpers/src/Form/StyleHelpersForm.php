@@ -72,7 +72,7 @@ class StyleHelpersForm extends CohesionStyleBuilderForm {
       '#weight' => 0,
       '#description' => $this->entity->getEntityMachineNamePrefix(),
       '#description_display' => 'before',
-      '#default_value' => str_replace($this->entity->getEntityMachineNamePrefix(), '', $this->entity->id()),
+      '#default_value' => str_replace($this->entity->getEntityMachineNamePrefix(), '', $this->entity->id() ?? ''),
       '#type' => 'ajax_machine_name',
       '#required' => FALSE,
       '#machine_name' => [

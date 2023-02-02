@@ -113,6 +113,8 @@ class ElementModel implements \JsonSerializable {
   }
 
   /**
+   * Set a property to the model
+   *
    * @param $path_to_property
    * @param $value
    */
@@ -145,6 +147,40 @@ class ElementModel implements \JsonSerializable {
       }
     }
 
+  }
+
+  /**
+   * Remove a property from the model
+   *
+   * @param $property_name
+   */
+  public function unsetProperty($path_to_property) {
+    $property_names = [];
+
+    if (is_string($path_to_property)) {
+      $property_names = [$path_to_property];
+    }
+    elseif (is_array($path_to_property)) {
+      $property_names = $path_to_property;
+    }
+
+    $current_pointer = $this->model;
+    foreach ($property_names as $index => $property_name) {
+      if (is_object($current_pointer) && property_exists($current_pointer, $property_name)) {
+        if($index + 1 === count($property_names)) {
+          unset($current_pointer->{$property_name});
+        } else {
+          $current_pointer = $current_pointer->{$property_name};
+        }
+      }
+      elseif (is_array($current_pointer) && isset($current_pointer[$property_name])) {
+        if($index + 1 === count($property_names)) {
+          unset($current_pointer->{$property_name});
+        } else {
+          $current_pointer = $current_pointer[$property_name];
+        }
+      }
+    }
   }
 
   /**
@@ -259,7 +295,7 @@ class ElementModel implements \JsonSerializable {
               foreach ($element->getModel()->getLeavesWithPathToRoot() as $component_model_value) {
                 // Check if the form element field is attached to one or more
                 // component field (field.[uuid])
-                if (preg_match_all(self::MATCH_COMPONENT_FIELD, $component_model_value['value'], $matches) && isset($matches[1])) {
+                if (preg_match_all(self::MATCH_COMPONENT_FIELD, $component_model_value['value'] ?? '', $matches) && isset($matches[1])) {
                   foreach ($matches[1] as $uuid) {
                     // If it is a component in component.
                     if ($is_nested_component) {
@@ -408,6 +444,7 @@ class ElementModel implements \JsonSerializable {
   /**
    * @inheritdoc
    */
+  #[\ReturnTypeWillChange]
   public function jsonSerialize() {
     return $this->model;
   }

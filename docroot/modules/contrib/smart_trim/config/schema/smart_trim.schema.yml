@@ -26,6 +26,9 @@ field.formatter.settings.smart_trim:
     more_text:
       type: string
       label: 'More link text'
+    more_aria_label:
+      type: string
+      label: 'More link aria-label value'
     summary_handler:
       type: string
       label: 'Summary handler'
@@ -39,3 +42,6 @@ field.formatter.settings.smart_trim:
         trim_zero:
           type: boolean
           label: 'Honor a zero trim length'
+        replace_tokens:
+          type: boolean
+          label: 'Replace tokens before trimming'

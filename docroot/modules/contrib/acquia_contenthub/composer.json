@@ -4,10 +4,10 @@
     "description": "Module allowing Drupal sites to connect to Acquia Content Hub.",
     "license": "GPL-2.0-or-later",
     "require": {
-        "acquia/content-hub-php": "^2.4.1",
-        "acquia/contenthub-console": "^1.6.2",
+        "acquia/content-hub-php": "^3.0",
         "drupal/depcalc": "^1.16",
         "laminas/laminas-diactoros": "^1.8 || ^2.2",
+        "spatie/ssl-certificate": "1.21 || 1.22.1",
         "symfony/psr-http-message-bridge": "^1.1.2 || ^2.0"
     },
     "require-dev": {
@@ -17,7 +17,7 @@
         "drupal/metatag": "^1.16",
         "drupal/paragraphs": "^1",
         "drupal/redirect": "^1.6",
-        "drupal/s3fs": "3.0-beta5",
+        "drupal/s3fs": "3.x-dev@dev",
         "drupal/webform": "^6.0"
     },
     "suggest": {
@@ -25,7 +25,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-8.x-2.x": "2.x-dev"
+            "dev-3.0.x": "3.0.x-dev"
         },
         "drush": {
             "services": {

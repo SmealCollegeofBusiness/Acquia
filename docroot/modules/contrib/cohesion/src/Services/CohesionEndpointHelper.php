@@ -98,7 +98,7 @@ class CohesionEndpointHelper {
       );
     }
     else {
-      list($error, $message) = $this->createElement($entity_type_id, $values, $machine_name);
+      [$error, $message] = $this->createElement($entity_type_id, $values, $machine_name);
     }
 
     return [$error, $message];
@@ -125,7 +125,9 @@ class CohesionEndpointHelper {
         // check no "default" category (uncategorized) is available.
         $category_class = $this->entityTypeManager->getStorage($entity->getCategoryEntityTypeId())->getEntitytype()->getOriginalClass();
         $default_category_id = $category_class::DEFAULT_CATEGORY_ID;
-        $query = $this->entityTypeManager->getStorage($entity_type_id)->getQuery()->condition('category', $default_category_id, '=');
+        $query = $this->entityTypeManager->getStorage($entity_type_id)->getQuery()
+          ->accessCheck(TRUE)
+          ->condition('category', $default_category_id, '=');
 
         // if "default" category (uncategorized) not available create and set
         // category.

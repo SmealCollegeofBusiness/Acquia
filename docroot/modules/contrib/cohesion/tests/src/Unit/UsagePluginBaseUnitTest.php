@@ -101,6 +101,10 @@ abstract class UsagePluginBaseUnitTest extends UnitTestCase {
           return $this->entities;
         }
 
+        public function accessCheck() {
+          return $this;
+        }
+
       };
     });
 

@@ -24,8 +24,10 @@
         </div>
         <div class="panel-collapse">
             <div class="panel-body coh-accordion-panel-body coh-accordion-panel-body--light">
-              {% for key, child in element if key|first != '#' %}
+              {% for key, child in element %}
+                {% if key|first != '#' %}
                   {{ child }}
+                {% endif %}
               {% endfor %}
             </div>
         </div>

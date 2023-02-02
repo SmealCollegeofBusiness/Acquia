@@ -121,7 +121,7 @@ services:
 
   acquia_contenthub_publisher.entity_enqueuer:
     class: Drupal\acquia_contenthub_publisher\ContentHubEntityEnqueuer
-    arguments: [ '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@event_dispatcher', '@queue', '@acquia_contenthub_publisher.tracker']
+    arguments: [ '@config.factory', '@acquia_contenthub.client.factory', '@acquia_contenthub.logger_channel', '@event_dispatcher', '@queue', '@acquia_contenthub_publisher.tracker']
 
   update_tracking.delete_remote_entity:
     class: Drupal\acquia_contenthub_publisher\EventSubscriber\DeleteRemoteEntity\UpdateTracking
@@ -151,3 +151,7 @@ services:
     class: Drupal\Core\Logger\LoggerChannel
     factory: logger.factory:get
     arguments: [ 'acquia_contenthub_publisher' ]
+
+  acquia_contenthub_publisher.ch_logger:
+    class: Drupal\acquia_contenthub_publisher\ContentHubExportLogger
+    arguments: [ '@acquia_contenthub_publisher.logger_channel', '@acquia_contenthub.event_logger']

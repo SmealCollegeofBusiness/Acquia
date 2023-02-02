@@ -3,6 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\acquia_contenthub\Kernel\Traits\AcquiaContentHubAdminSettingsTrait;
 
 /**
  * Base for enqueue eligibility tests.
@@ -12,6 +13,8 @@ use Drupal\KernelTests\KernelTestBase;
  * @package Drupal\Tests\acquia_contenthub\Kernel
  */
 abstract class QueueingTestBase extends KernelTestBase {
+
+  use AcquiaContentHubAdminSettingsTrait;
 
   /**
    * Modules to enable.
@@ -35,6 +38,13 @@ abstract class QueueingTestBase extends KernelTestBase {
   protected $contentHubQueue;
 
   /**
+   * Client factory.
+   *
+   * @var \Drupal\acquia_contenthub_server_test\Client\ClientFactoryMock
+   */
+  protected $clientFactory;
+
+  /**
    * {@inheritdoc}
    *
    * @throws \Exception
@@ -44,6 +54,9 @@ abstract class QueueingTestBase extends KernelTestBase {
 
     $this->installSchema('acquia_contenthub_publisher', ['acquia_contenthub_publisher_export_tracking']);
     $this->contentHubQueue = $this->container->get('acquia_contenthub_publisher.acquia_contenthub_export_queue');
+
+    $this->createAcquiaContentHubAdminSettings();
+    $this->clientFactory = $this->container->get('acquia_contenthub.client.factory');
   }
 
 }

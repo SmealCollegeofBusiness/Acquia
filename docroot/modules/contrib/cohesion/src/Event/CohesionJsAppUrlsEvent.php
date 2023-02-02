@@ -2,7 +2,7 @@
 
 namespace Drupal\cohesion\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event that collects all urls to endpoints needed for the Site Studio app

@@ -1,0 +1,18 @@
+name: Acquia ContentHub Assymetric Paragraphs Testing
+description: Provides additional unserializer to filter out assymetric paragraphs while unserialization.
+package: Acquia ContentHub
+
+type: module
+core_version_requirement: '>=9.2'
+
+dependencies:
+  - depcalc:depcalc
+  - drupal:system (>= 9.2)
+  - paragraphs:paragraphs
+  - acquia_contenthub:acquia_contenthub_translations
+  - acquia_contenthub:acquia_contenthub_subscriber
+
+# Information added by Drupal.org packaging script on 2022-12-14
+version: '3.0.3'
+project: 'acquia_contenthub'
+datestamp: 1671020586

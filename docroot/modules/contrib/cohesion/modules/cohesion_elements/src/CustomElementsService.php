@@ -87,7 +87,7 @@ class CustomElementsService {
         $elements[] = [
           'value' => $key,
           'label' => $element['label'],
-          'container' => isset($plugin->getPluginDefinition()['container']) ? $plugin->getPluginDefinition()['container'] : FALSE,
+          'container' => $plugin->getPluginDefinition()['container'] ?? FALSE,
         ];
       }
     }
@@ -315,7 +315,7 @@ class CustomElementsService {
           'conditionVariables' => [
             'element' => 'element',
           ],
-          'htmlClass' => 'row',
+          'htmlClass' => 'ssa-grid',
           'items' => $form_items,
         ];
       }

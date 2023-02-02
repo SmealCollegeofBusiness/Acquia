@@ -1,0 +1,25 @@
+acquia_contenthub_dashboard.ach_dashboard:
+  path: '/admin/acquia-contenthub/contenthub-dashboard'
+  defaults:
+    _controller: '\Drupal\acquia_contenthub_dashboard\Controller\ContentHubDashboardController::loadContentHubDashboard'
+    _title: 'Acquia ContentHub Dashboard'
+  requirements:
+    _contenthub_dashboard_access: 'TRUE'
+  options:
+    _admin_route: TRUE
+
+acquia_contenthub_dashboard.ach_dashboard.dashboard:
+  path: '/admin/acquia-contenthub/contenthub-dashboard/dashboard/index'
+  defaults:
+    _controller: '\Drupal\acquia_contenthub_dashboard\Controller\ContentHubDashboardController::indexPage'
+  requirements:
+    _contenthub_dashboard_access: 'TRUE'
+  options:
+    _admin_route: TRUE
+
+acquia_contenthub_dashboard.redirect_entity_edit_form:
+  path: '/acquia-contenthub/entity-edit/{entity_type}/{uuid}'
+  defaults:
+    _controller: '\Drupal\acquia_contenthub_dashboard\Controller\ContentHubRedirectEntitiesController::redirectToEntityEditForm'
+  requirements:
+    _access: 'TRUE'

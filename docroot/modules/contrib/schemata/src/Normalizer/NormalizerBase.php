@@ -3,7 +3,6 @@
 namespace Drupal\schemata\Normalizer;
 
 use Drupal\Core\TypedData\DataDefinitionInterface;
-use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\serialization\Normalizer\NormalizerBase as SerializationNormalizerBase;
 use Drupal\Component\Utility\NestedArray;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -16,14 +15,14 @@ abstract class NormalizerBase extends SerializationNormalizerBase implements Den
   /**
    * {@inheritdoc}
    */
-  public function supportsDenormalization($data, $type, $format = NULL) {
+  public function supportsDenormalization($data, $type, $format = NULL, array $context = []): bool {
     return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function denormalize($data, $class, $format = NULL, array $context = []) {
+  public function denormalize($data, $type, $format = NULL, array $context = []) {
     throw new \RuntimeException('Denormalization is not supported.');
   }
 
@@ -71,7 +70,7 @@ abstract class NormalizerBase extends SerializationNormalizerBase implements Den
    *   purposes.
    */
   protected function requiredProperty(DataDefinitionInterface $property) {
-    return $property->isReadOnly() || $property->isRequired();
+    return $property->isRequired();
   }
 
   /**

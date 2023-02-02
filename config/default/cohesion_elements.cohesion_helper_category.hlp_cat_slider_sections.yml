@@ -1,0 +1,13 @@
+uuid: 80b155f8-db76-4a98-bd21-1ee9f5c299d6
+langcode: en
+status: true
+dependencies: {  }
+label: 'Slider sections'
+id: hlp_cat_slider_sections
+json_values: '{}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: true
+class: category-7
+weight: -1

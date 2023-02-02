@@ -121,7 +121,7 @@ class AdministrationController extends ControllerBase {
       'title' => t('Importing elements'),
       'operations' => $operations,
       'finished' => 'cohesion_website_settings_batch_import_finished',
-      'file' => drupal_get_path('module', 'cohesion_website_settings') . '/cohesion_website_settings.module',
+      'file' => \Drupal::service('extension.path.resolver')->getPath('module', 'cohesion_website_settings') . '/cohesion_website_settings.module',
     ];
 
     if ($cron) {

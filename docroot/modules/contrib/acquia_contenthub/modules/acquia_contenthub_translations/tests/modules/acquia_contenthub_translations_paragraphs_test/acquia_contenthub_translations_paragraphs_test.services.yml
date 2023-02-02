@@ -1,0 +1,6 @@
+services:
+  acquia_contenthub_translations_paragraphs_test.asymmetric_paragraph_unserializer:
+    class: Drupal\acquia_contenthub_translations_paragraphs_test\EventSubscriber\UnserializeContentField\AsymmetricParagraphFieldUnserializer
+    decorates: entity_reference.field.cdf.unserializer
+    arguments:
+      - '@acquia_contenthub.logger_channel'

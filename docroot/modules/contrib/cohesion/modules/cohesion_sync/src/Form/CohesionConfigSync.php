@@ -234,7 +234,7 @@ class CohesionConfigSync extends FormBase {
     $files = $this->syncStorage->getFiles();
     $path = Settings::get('site_studio_sync', COHESION_SYNC_DEFAULT_DIR);
     $file_sync_event = new SiteStudioSyncFilesEvent($files, $path);
-    $this->eventDispatcher->dispatch($file_sync_event::CHANGES, $file_sync_event);
+    $this->eventDispatcher->dispatch($file_sync_event, $file_sync_event::CHANGES);
     // Store the path for use in the "submitForm".
     $form_state->set('sync_dir', $path);
 

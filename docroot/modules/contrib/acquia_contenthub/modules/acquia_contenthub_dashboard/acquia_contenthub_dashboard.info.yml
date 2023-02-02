@@ -1,0 +1,12 @@
+name: Acquia ContentHub Dashboard
+type: module
+description: Provides Dashboard for Acquia ContentHub.
+core_version_requirement: '>=9.2'
+package: Acquia ContentHub
+dependencies:
+  - acquia_contenthub
+
+# Information added by Drupal.org packaging script on 2022-12-14
+version: '3.0.3'
+project: 'acquia_contenthub'
+datestamp: 1671020586

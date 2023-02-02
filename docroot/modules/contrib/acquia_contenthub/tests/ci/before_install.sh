@@ -11,7 +11,9 @@ fi
 
 if [[ "$ORCA_JOB" == "STATIC_CODE_ANALYSIS" ]]; then
   rm -Rf "$ORCA_SUT_DIR/modules/acquia_contenthub_curation/ember"
+  rm -Rf "$ORCA_SUT_DIR/modules/acquia_contenthub_dashboard/dashboard"
 fi
 if [[ "$ORCA_JOB" == "STATIC_CODE_ANALYSIS" && "$ACQUIACI" == TRUE ]]; then
   rm -Rf "/ramfs$ORCA_SUT_DIR/modules/acquia_contenthub_curation/ember"
+  rm -Rf "/ramfs$ORCA_SUT_DIR/modules/acquia_contenthub_dashboard/dashboard"
 fi

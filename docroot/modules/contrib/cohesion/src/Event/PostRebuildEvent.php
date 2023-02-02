@@ -2,7 +2,7 @@
 
 namespace Drupal\cohesion\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event that is fired when pre a Site Studio rebuild.

@@ -2,6 +2,7 @@
 
 namespace Drupal\cohesion_sync;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -27,6 +28,16 @@ class PackageListBuilder extends ConfigEntityListBuilder {
   protected $state;
 
   /**
+   * @var \Drupal\Core\Config\Config|\Drupal\Core\Config\ImmutableConfig
+   */
+  protected $cohesionSettings;
+
+  /**
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $config_factory;
+
+  /**
    * Instantiates a new instance of this entity handler.
    *
    * This is a factory method that returns a new instance of this object. The
@@ -46,7 +57,8 @@ class PackageListBuilder extends ConfigEntityListBuilder {
     return new static(
       $entity_type,
       $container->get('entity_type.manager')->getStorage($entity_type->id()),
-      $container->get('state')
+      $container->get('state'),
+      $container->get('config.factory')
     );
   }
 
@@ -63,10 +75,13 @@ class PackageListBuilder extends ConfigEntityListBuilder {
   public function __construct(
     EntityTypeInterface $entity_type,
     EntityStorageInterface $storage,
-    StateInterface $state
+    StateInterface $state,
+    ConfigFactoryInterface $config_factory
   ) {
     parent::__construct($entity_type, $storage);
     $this->state = $state;
+    $this->config_factory = $config_factory;
+    $this->cohesionSettings = $config_factory->get('cohesion.settings');
   }
 
   /**
@@ -83,11 +98,16 @@ class PackageListBuilder extends ConfigEntityListBuilder {
       'class' => [RESPONSIVE_PRIORITY_MEDIUM],
       'width' => '35%',
     ];
-    $header['legacy_export'] = [
-      'data' => $this->t('Legacy export'),
-      'class' => [RESPONSIVE_PRIORITY_MEDIUM],
-      'width' => '35%',
-    ];
+
+    // Only show Legacy export option if user has turned it on.
+    if ($this->cohesionSettings->get('sync_legacy_visibility')) {
+      $header['legacy_export'] = [
+        'data' => $this->t('Legacy export'),
+        'class' => [RESPONSIVE_PRIORITY_MEDIUM],
+        'width' => '35%',
+      ];
+    }
+
     $header += parent::buildHeader();
     return $header;
   }
@@ -99,7 +119,7 @@ class PackageListBuilder extends ConfigEntityListBuilder {
     $row['label'] = $sync_package->label();
     $row['description'] = $sync_package->get('description');
 
-    // Create the legacyt export package download link.
+    // Create the legacy export package download link.
     $destination = Url::fromRoute('<current>')->toString();
     $url = Url::fromRoute('cohesion_sync.operation_export_single', [
       'entity_type' => $sync_package->getEntityTypeId(),
@@ -123,18 +143,21 @@ class PackageListBuilder extends ConfigEntityListBuilder {
       ],
     ];
 
-    $row['legacy_export']['data'] = [
-      '#type' => 'operations',
-      '#links' => [
-        [
-          'title' => $this->t('Export as YML file'),
-          'url' => $url,
+    // Only show Legacy export option if user has turned it on.
+    if ($this->cohesionSettings->get('sync_legacy_visibility')) {
+      $row['legacy_export']['data'] = [
+        '#type' => 'operations',
+        '#links' => [
+          [
+            'title' => $this->t('Export as YML file'),
+            'url' => $url,
+          ],
         ],
-      ],
-      '#attributes' => [
-        'class' => ['legacy-export'],
-      ],
-    ];
+        '#attributes' => [
+          'class' => ['legacy-export'],
+        ],
+      ];
+    }
 
     $row += parent::buildRow($sync_package);
     return $row;

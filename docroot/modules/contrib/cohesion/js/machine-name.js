@@ -1,5 +1,5 @@
 
-(function ($, Drupal, drupalSettings) {
+(function ($, Drupal, once, drupalSettings) {
     Drupal.behaviors.machineName = {
         attach: function attach(context, settings) {
             var self = this;
@@ -43,7 +43,7 @@
                 var machine = '';
                 var options = settings.machineName[sourceId];
 
-                var $source = $context.find(sourceId).addClass('machine-name-source').once('machine-name');
+                var $source = $(once('machine-name', sourceId, context)).addClass('machine-name-source');
                 var $target = $context.find(options.target).addClass('machine-name-target');
                 var $suffix = $context.find(options.suffix);
                 var $wrapper = $target.closest('.js-form-item');
@@ -127,4 +127,4 @@
             });
         }
     };
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal, once, drupalSettings);

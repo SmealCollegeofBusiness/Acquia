@@ -1,0 +1,12 @@
+name: 'JSON:API Menu items Hypermedia'
+description: Integrates jsonapi_menu_items and jsonapi_hypermedia.
+type: module
+core_version_requirement: ^9 || ^10
+dependencies:
+  - jsonapi_menu_items:jsonapi_menu_items
+  - jsonapi_hypermedia:jsonapi_hypermedia
+
+# Information added by Drupal.org packaging script on 2022-12-08
+version: '1.2.4'
+project: 'jsonapi_menu_items'
+datestamp: 1670542786

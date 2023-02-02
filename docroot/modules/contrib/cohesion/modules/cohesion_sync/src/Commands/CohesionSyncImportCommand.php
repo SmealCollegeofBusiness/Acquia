@@ -257,7 +257,7 @@ class CohesionSyncImportCommand extends DrushCommands {
    */
   protected function handleFileSync(array $files, string $path) {
     $file_sync_event = new SiteStudioSyncFilesEvent($files, $path);
-    $this->dispatcher->dispatch($file_sync_event::IMPORT, $file_sync_event);
+    $this->dispatcher->dispatch($file_sync_event, $file_sync_event::IMPORT);
 
     $cohesion_file_sync_messages = &drupal_static('cohesion_file_sync_messages');
     if ($cohesion_file_sync_messages['new_files'] || $cohesion_file_sync_messages['updated_files']) {

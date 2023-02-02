@@ -6,6 +6,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\schemata\Schema\SchemaInterface;
 use Drupal\schemata\Schema\NodeSchema;
+use Drupal\schemata\SchemaFactory;
 
 /**
  * Tests the Schema Factory service.
@@ -21,12 +22,12 @@ class SchemaFactoryTest extends KernelTestBase {
    *
    * @var \Drupal\schemata\SchemaFactory
    */
-  protected $factory;
+  protected ?SchemaFactory $factory;
 
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'schemata',
     'field',
     'node',
@@ -38,7 +39,7 @@ class SchemaFactoryTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Add the entity schemas.
@@ -53,8 +54,7 @@ class SchemaFactoryTest extends KernelTestBase {
       'type' => 'article',
     ]);
     $this->nodeType->save();
-
-    $this->factory = \Drupal::service('schemata.schema_factory');
+    $this->factory = $this->container->get('schemata.schema_factory');
   }
 
   /**
@@ -101,7 +101,7 @@ class SchemaFactoryTest extends KernelTestBase {
    */
   public function testInvalidEntityOnCreate() {
     $schema = $this->factory->create('gastropod');
-    $this->assertEmpty($schema, 'Schemata should not produce a schema for non-existant entity types.');
+    $this->assertEmpty($schema, 'Schemata should not produce a schema for non-existent entity types.');
     $schema = $this->factory->create('node', 'gastropod');
     $this->assertEmpty($schema, 'Schemata should not produce a schema for non-existant bundles.');
   }

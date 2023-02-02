@@ -16,6 +16,7 @@ services:
       - '@cohesion_elements.custom_component.discovery'
       - '@cohesion_elements.category_relationships'
       - '@cache.default'
+      - '@renderer'
     tags:
       - { name: custom.components, scheme: cohesion_elements }
 
@@ -39,7 +40,7 @@ services:
   cohesion_elements.custom_component.discovery:
     class: \Drupal\cohesion_elements\CustomComponentDiscovery
     arguments:
-      - '@app.root'
+      - '%app.root%'
       - '@module_handler'
       - '@theme_handler'
       - '@logger.channel.custom_component'

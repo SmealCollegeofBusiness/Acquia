@@ -21,7 +21,7 @@ class CreateCdfEntityEvent extends Event {
   /**
    * The entity being serialized.
    *
-   * @var \Drupal\Core\Entity\ContentEntityInterface
+   * @var \Drupal\Core\Entity\EntityInterface
    */
   protected $entity;
 
@@ -55,7 +55,7 @@ class CreateCdfEntityEvent extends Event {
   /**
    * The entity to which the field belongs.
    *
-   * @return \Drupal\Core\Entity\ContentEntityInterface
+   * @return \Drupal\Core\Entity\EntityInterface
    *   The entity which the field belongs.
    */
   public function getEntity() {
@@ -98,7 +98,7 @@ class CreateCdfEntityEvent extends Event {
    * @param string $uuid
    *   The UUID.
    *
-   * @return \Acquia\ContentHubClient\CDF\CDFObject
+   * @return \Acquia\ContentHubClient\CDF\CDFObject|void
    *   The CDF object.
    */
   public function getCdf($uuid) {

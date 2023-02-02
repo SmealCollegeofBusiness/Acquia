@@ -45,7 +45,9 @@ class IconLibraryUsage extends UsagePluginBase {
       // Match two siblings.
       if (isset($item['fontFamily']) && isset($item['iconName'])) {
         // Load the icon library entity to get it's UUID.
-        if ($icon_library_entity = $this->storage->load($item['fontFamily'])) {
+        // If it doesn't load via the font family, default to "custom"
+        // for custom icon libraries.
+        if ($icon_library_entity = $this->storage->load($item['fontFamily']) ?: $this->storage->load('custom')) {
           // Add to the list of dependencies.
           $this->entities[] = [
             'type' => $this->getEntityType(),

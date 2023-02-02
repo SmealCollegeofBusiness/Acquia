@@ -1,0 +1,13 @@
+uuid: 4d0295dd-ffda-488d-b3bf-7eb5a514c828
+langcode: en
+status: true
+dependencies: {  }
+label: 'Card sections'
+id: hlp_cat_card_sections
+json_values: '{}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: true
+class: category-2
+weight: -6

@@ -2,7 +2,7 @@
 
 namespace Drupal\cohesion_sync\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Site Studio Sync Files event, used to handle files during package import.

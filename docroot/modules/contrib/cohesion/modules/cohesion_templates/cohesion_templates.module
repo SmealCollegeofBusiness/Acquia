@@ -16,6 +16,7 @@ use Drupal\cohesion_templates\Entity\MasterTemplates;
 use Drupal\cohesion_templates\Entity\ContentTemplates;
 use Drupal\views\ViewExecutable;
 use Drupal\Core\File\FileSystemInterface;
+use Twig\Error\LoaderError;
 
 /**
  * Implements hook_help().
@@ -73,7 +74,7 @@ function _cohesion_templates_delete_twig_cache_file($filename) {
         }
       }
     }
-    catch (\Twig_Error_Loader $e) {
+    catch (LoaderError $e) {
 
     }
   }
@@ -249,6 +250,7 @@ function _cohesion_templates_get_template_candidate(ContentEntityInterface $enti
 
   // Build the query to select which template we need.
   $candidate_template_query = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
+    ->accessCheck(TRUE)
     ->condition('entity_type', $entity->getEntityTypeId())
     ->condition('bundle', [$bundle, '__any__'], 'IN')
     ->condition('view_mode', $view_mode)
@@ -447,6 +449,7 @@ function _cohesion_templates_get_master_template() {
 
     // If no master template has been found try to get the default if any.
     $candidate_template_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_master_templates')->getQuery()
+      ->accessCheck(TRUE)
       ->condition('default', TRUE)
       ->condition('status', TRUE)
       ->execute();
@@ -569,7 +572,7 @@ function _cohesion_templates_generate_content_template_entities() {
   // (same as view modes list).
   $storage = \Drupal::service('entity_type.manager')
     ->getStorage('entity_view_mode');
-  $view_mode_ids = $storage->getQuery()->execute();
+  $view_mode_ids = $storage->getQuery()->accessCheck(TRUE)->execute();
   /** @var \Drupal\Core\Entity\Entity\EntityViewMode[] $entities */
   $view_modes = $storage->loadMultiple($view_mode_ids);
   $entity_types = \Drupal::service('entity_type.manager')->getDefinitions();

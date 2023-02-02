@@ -18,7 +18,9 @@ class CohesionContentTemplateLocalTasks extends DeriverBase {
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
 
-    $templates_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()->execute();
+    $templates_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_content_templates')->getQuery()
+      ->accessCheck(TRUE)
+      ->execute();
 
     if ($templates_ids) {
       $entity_types = \Drupal::entityTypeManager()->getDefinitions();

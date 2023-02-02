@@ -4,6 +4,7 @@ namespace Drupal\Tests\acquia_contenthub_s3\Kernel;
 
 use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\ContentHubCommonActions;
+use Drupal\acquia_contenthub\Libs\Common\PlatformCompatibilityChecker;
 use Drupal\acquia_contenthub_s3\S3FileOriginLocator;
 use Drupal\acquia_contenthub_s3_test\EventSubscriber\GetSettings\OverwriteContentHubAdminSettings;
 use Drupal\file\FileInterface;
@@ -61,6 +62,10 @@ class S3FileOriginLocatorTest extends S3FileKernelTestBase {
     $this->installSchema('file', 'file_usage');
 
     $this->s3FileMap = $this->container->get('acquia_contenthub_s3.file_map');
+
+    $checker = $this->prophesize(PlatformCompatibilityChecker::class);
+    $checker->intercept(Argument::any())->willReturnArgument();
+    $this->container->set('acquia_contenthub.platform_checker', $checker->reveal());
   }
 
   /**

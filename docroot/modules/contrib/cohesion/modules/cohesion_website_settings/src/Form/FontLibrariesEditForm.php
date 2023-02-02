@@ -34,7 +34,7 @@ class FontLibrariesEditForm extends WebsiteSettingsGroupFormBase {
     $libraries = json_decode($form_state->getValue('json_values'));
 
     if (is_array($libraries->fonts)) {
-      list($this->in_use_list, $this->changed_entities, $flush_caches) = $this->getEntityGroupsPlugin()->saveFromModel($libraries);
+      [$this->in_use_list, $this->changed_entities, $flush_caches] = $this->getEntityGroupsPlugin()->saveFromModel($libraries);
 
       // (Optionally) run color rebuild batch for entities using changed colors.
       if (count($this->in_use_list)) {

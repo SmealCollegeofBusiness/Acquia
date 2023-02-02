@@ -4,6 +4,7 @@ namespace Drupal\acquia_contenthub\EventSubscriber\ImportFailure;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\FailedImportEvent;
+use Drupal\acquia_contenthub_subscriber\Exception\ContentHubImportException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -29,7 +30,10 @@ class DefaultException implements EventSubscriberInterface {
    */
   public function onImportFailure(FailedImportEvent $event) {
     if (!$event->hasException()) {
-      $exception = new \Exception(sprintf("Failed to import. %d of %d imported", $event->getCount(), count($event->getCdf()->getEntities())));
+      $exception = new ContentHubImportException(
+        sprintf("Failed to import. %d of %d imported", $event->getCount(), count($event->getCdf()->getEntities())),
+        ContentHubImportException::PARTIAL_IMPORT,
+      );
       $event->setException($exception);
     }
   }

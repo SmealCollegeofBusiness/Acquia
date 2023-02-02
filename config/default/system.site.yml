@@ -1,0 +1,16 @@
+_core:
+  default_config_hash: l58O_yEXSo-SeJi19LXdzTU1tNJG3lmnIhCitRkM1tk
+langcode: en
+uuid: 03fc520f-0baa-4d3d-b44c-125e779edc8c
+name: devtest
+mail: clt16@psu.edu
+slogan: ''
+page:
+  403: ''
+  404: ''
+  front: /user/login
+  0: ''
+  1: ''
+admin_compact_mode: false
+weight_select_max: 100
+default_langcode: en

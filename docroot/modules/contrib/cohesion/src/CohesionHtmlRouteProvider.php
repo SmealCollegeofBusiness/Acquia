@@ -3,6 +3,7 @@
 namespace Drupal\cohesion;
 
 use Drupal\cohesion\Controller\CohesionEntityController;
+use Drupal\cohesion_elements\Controller\CustomComponentController;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Routing\AdminHtmlRouteProvider;
 use Symfony\Component\Routing\Route;
@@ -46,6 +47,16 @@ class CohesionHtmlRouteProvider extends AdminHtmlRouteProvider {
 
     if ($in_use_route = $this->getInUseRoute($entity_type)) {
       $collection->add("entity.{$entity_type_id}.in_use", $in_use_route);
+    }
+
+    if ($entity_type_id == 'cohesion_component') {
+      if ($custom_components = \Drupal::service('custom.components')->getComponents()) {
+        foreach ($custom_components as $custom_component) {
+          $custom_component_route = $this->getCustomComponentInUseRoute($custom_component);
+          $machine_name = $custom_component['machine_name'];
+          $collection->add("custom_component.{$machine_name}.in_use", $custom_component_route);
+        }
+      }
     }
 
     if ($enable_selection_form_route = $this->getEnableSelectionRoute($entity_type)) {
@@ -233,6 +244,28 @@ class CohesionHtmlRouteProvider extends AdminHtmlRouteProvider {
 
       return $route;
     }
+  }
+
+  /**
+   * Gets the in use route for custom component.
+   *
+   * @param $custom_component
+   *
+   * @return \Symfony\Component\Routing\Route
+   */
+  protected function getCustomComponentInUseRoute($custom_component) {
+
+    $route = new Route('/admin/cohesion/components/custom-component/{machine_name}/in-use');
+
+    $route->setOption('_admin_route', TRUE);
+    $route->setDefault('_controller', CustomComponentController::class . '::inUse');
+    $route->setDefault('_title_callback', CustomComponentController::class . '::inUseTitle');
+    $route->setRequirement('_permission', 'access content');
+    $route->setOption('parameters', [
+      'machine_name' => $custom_component['machine_name'],
+    ]);
+
+    return $route;
   }
 
   /**

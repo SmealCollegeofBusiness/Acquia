@@ -1,0 +1,62 @@
+uuid: a88c81db-491f-417d-afcf-134c6ba710c1
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.card
+    - field.field.node.place.body
+    - field.field.node.place.field_categories
+    - field.field.node.place.field_geofield
+    - field.field.node.place.field_place_address
+    - field.field.node.place.field_place_image
+    - field.field.node.place.field_place_telephone
+    - field.field.node.place.field_place_type
+    - field.field.node.place.field_tags
+    - node.type.place
+  module:
+    - address
+    - user
+  enforced:
+    module:
+      - acquia_cms_place
+_core:
+  default_config_hash: xrEAxdAvgU4F2NvADc0WrxX7UZC02e-V4eMfux_DrvI
+id: node.place.card
+targetEntityType: node
+bundle: place
+mode: card
+content:
+  field_place_address:
+    type: address_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  field_place_telephone:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 2
+    region: content
+  field_place_image:
+    type: entity_reference_entity_view
+    label: hidden
+    settings:
+      view_mode: small_landscape
+      link: true
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden:
+  body: true
+  content_moderation_control: true
+  field_categories: true
+  field_geofield: true
+  field_place_type: true
+  field_tags: true
+  langcode: true
+  links: true
+  search_api_excerpt: true

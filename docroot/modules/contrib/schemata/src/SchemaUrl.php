@@ -2,7 +2,7 @@
 
 namespace Drupal\schemata;
 
-use Drupal\schemata\schema\SchemaInterface;
+use Drupal\schemata\Schema\SchemaInterface;
 use Drupal\Core\Url;
 
 /**
@@ -21,7 +21,7 @@ class SchemaUrl {
    *   The format or type of schema.
    * @param string $describes
    *   The format being described.
-   * @param \Drupal\schemata\schema\SchemaInterface $schema
+   * @param \Drupal\schemata\Schema\SchemaInterface $schema
    *   The schema for which we generate the link.
    *
    * @return \Drupal\Core\Url

@@ -1,0 +1,13 @@
+uuid: d40b0fd9-7272-4acc-be66-1c7352004ecb
+langcode: en
+status: false
+dependencies: {  }
+label: 'Description list'
+id: description_list
+json_values: '{}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+locked: false
+modified: false
+selectable: false
+custom: null

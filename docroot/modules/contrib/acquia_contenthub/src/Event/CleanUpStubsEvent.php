@@ -30,7 +30,7 @@ class CleanUpStubsEvent extends Event {
   /**
    * By default, we do not delete the stubs.
    *
-   * @var \Drupal\depcalc\DependencyStack
+   * @var bool
    * @see \Drupal\acquia_contenthub\EventSubscriber\CleanupStubs\DefaultStubCleanup
    */
   protected $delete = FALSE;
@@ -83,7 +83,7 @@ class CleanUpStubsEvent extends Event {
    *
    * @see \Drupal\acquia_contenthub\StubTracker::cleanUp
    */
-  public function doDeleteStub() : bool {
+  public function doDeleteStub(): bool {
     return $this->delete;
   }
 

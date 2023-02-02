@@ -20,8 +20,8 @@
  * hook to be invoked in the first place.
  *
  * If you need to make persistent changes to the data structure, use core's
- * hook_ENTITY_TYPE_presave() with one of the DX8 config entity types, or
- * an entity type using DX8 layout fields and/or templates.
+ * hook_ENTITY_TYPE_presave() with one of the Site Studio config entity types,
+ * or an entity type using Site Studio layout fields and/or templates.
  *
  * Due to the nature of manipulating data at this level, it's recommended that
  * usage of this hook be limited to advanced use cases only, and alterations be
@@ -35,6 +35,19 @@
  *   The type of operation. Currently one of: "style", "template",
  *   "layout_field", "elements".
  */
+function hook_sitestudio_api_outbound_data_alter(array &$data, \Drupal\Core\Entity\EntityInterface $entity, $type) {
+
+}
+
+/**
+ * @param array $data
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param $type
+ * @return void
+ *
+ * Deprecated function, replaced by hook_sitestudio_api_outbound_data_alter().
+ *
+ */
 function hook_dx8_api_outbound_data_alter(array &$data, \Drupal\Core\Entity\EntityInterface $entity, $type) {
 
 }
@@ -44,6 +57,17 @@ function hook_dx8_api_outbound_data_alter(array &$data, \Drupal\Core\Entity\Enti
  *
  * @param $variable
  *   The variable used for the entity type
+ */
+function hook_sitestudio_ENTITY_TYPE_drupal_token_context_alter(&$variable) {
+  $variable = 'product_entity';
+}
+
+/**
+ * @param $variable
+ * @return void
+ *
+ * Deprecated function, replaced by
+ * hook_sitestudio_ENTITY_TYPE_drupal_token_context_alter().
  */
 function hook_dx8_ENTITY_TYPE_drupal_token_context_alter(&$variable) {
   $variable = 'product_entity';
@@ -56,11 +80,22 @@ function hook_dx8_ENTITY_TYPE_drupal_token_context_alter(&$variable) {
  * @param $variable
  *   The variable used for the entity type
  */
-function hook_dx8_ENTITY_TYPE_drupal_field_prefix_alter(&$variable) {
-  // By default the content of the page is stored in the twig variable content
+function hook_sitestudio_ENTITY_TYPE_drupal_field_prefix_alter(&$variable) {
+  // By default, the content of the page is stored in the twig variable content
   // But this not a strict rule and other module can store the main information
   // inside different variables. For example Commerce stores every field of
   // their product inside the product variable.
+  $variable = 'product';
+}
+
+/**
+ * @param $variable
+ * @return void
+ *
+ * Deprecated function, replaced by
+ * hook_sitestudio_ENTITY_TYPE_drupal_field_prefix_alter().
+ */
+function hook_dx8_ENTITY_TYPE_drupal_field_prefix_alter(&$variable) {
   $variable = 'product';
 }
 
@@ -69,6 +104,20 @@ function hook_dx8_ENTITY_TYPE_drupal_field_prefix_alter(&$variable) {
  * for a specific entity type.
  *
  * @param array $variables
+ */
+function hook_sitestudio_ENTITY_TYPE_drupal_field_variable_alter(&$variables) {
+  $variables[] = [
+    'value' => 'my_twig_variable',
+    'name' => 'My twig variable',
+  ];
+}
+
+/**
+ * @param $variables
+ * @return void
+ *
+ * Deprecated function, replaced by
+ * hook_sitestudio_ENTITY_TYPE_drupal_field_variable_alter().
  */
 function hook_dx8_ENTITY_TYPE_drupal_field_variable_alter(&$variables) {
   $variables[] = [
@@ -83,6 +132,20 @@ function hook_dx8_ENTITY_TYPE_drupal_field_variable_alter(&$variables) {
  *
  * @param array $variables
  */
+function hook_sitestudio_ENTITY_TYPE_BUNDLE_drupal_field_variable_alter(&$variables) {
+  $variables[] = [
+    'value' => 'my_twig_variable',
+    'name' => 'My twig variable',
+  ];
+}
+
+/**
+ * @param $variables
+ * @return void
+ *
+ * Deprecated function, replaced by
+ * hook_sitestudio_ENTITY_TYPE_BUNDLE_drupal_field_variable_alter().
+ */
 function hook_dx8_ENTITY_TYPE_BUNDLE_drupal_field_variable_alter(&$variables) {
   $variables[] = [
     'value' => 'my_twig_variable',
@@ -95,6 +158,20 @@ function hook_dx8_ENTITY_TYPE_BUNDLE_drupal_field_variable_alter(&$variables) {
  * for all entity types.
  *
  * @param array $variables
+ */
+function hook_sitestudio_drupal_field_variable_alter(&$variables) {
+  $variables[] = [
+    'value' => 'my_twig_variable',
+    'name' => 'My twig variable',
+  ];
+}
+
+/**
+ * @param $variables
+ * @return void
+ *
+ * Deprecated function, replaced by
+ * hook_sitestudio_drupal_field_variable_alter().
  */
 function hook_dx8_drupal_field_variable_alter(&$variables) {
   $variables[] = [

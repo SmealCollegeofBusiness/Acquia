@@ -2,12 +2,16 @@
 
 namespace Drupal\acquia_contenthub_translations\EventSubscriber\PruneCdf;
 
+use Acquia\ContentHubClient\CDF\CDFObjectInterface;
 use Acquia\ContentHubClient\CDFDocument;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Event\PruneCdfEntitiesEvent;
+use Drupal\acquia_contenthub\Libs\Traits\EntityCdfWrapperTrait;
+use Drupal\acquia_contenthub_subscriber\CdfImporterInterface;
 use Drupal\acquia_contenthub_translations\EntityHandler\Context;
 use Drupal\acquia_contenthub_translations\EntityHandler\NonTranslatableEntityHandlerContext;
 use Drupal\acquia_contenthub_translations\EntityTranslationManagerInterface;
+use Drupal\acquia_contenthub_translations\Exceptions\TranslationDataException;
 use Drupal\acquia_contenthub_translations\Helpers\SubscriberLanguagesTrait;
 use Drupal\acquia_contenthub_translations\UndesiredLanguageRegistry\UndesiredLanguageRegistryInterface;
 use Drupal\Core\Config\Config;
@@ -21,6 +25,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class PruneLanguagesFromCdf implements EventSubscriberInterface {
 
+  use EntityCdfWrapperTrait;
   use SubscriberLanguagesTrait;
 
   /**
@@ -73,6 +78,22 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
   private $entitiesToTrack = [];
 
   /**
+   * Entities that don't have the translatable attributes.
+   *
+   * Issued for re-export.
+   *
+   * @var array
+   */
+  private $needReExport = [];
+
+  /**
+   * The acquia_contenthub_subscriber.cdf_importer service.
+   *
+   * @var \Drupal\acquia_contenthub_subscriber\CdfImporterInterface
+   */
+  protected $cdfImporter;
+
+  /**
    * {@inheritDoc}
    */
   public static function getSubscribedEvents() {
@@ -98,6 +119,8 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
    *   Entity translation manager.
    * @param \Drupal\acquia_contenthub_translations\EntityHandler\NonTranslatableEntityHandlerContext $handler
    *   The handler registry.
+   * @param \Drupal\acquia_contenthub_subscriber\CdfImporterInterface $cdfImporter
+   *   The acquia_contenthub_subscriber.cdf_importer service.
    */
   public function __construct(
     UndesiredLanguageRegistryInterface $registrar,
@@ -105,7 +128,8 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
     LanguageManagerInterface $language_manager,
     LoggerChannelInterface $logger,
     EntityTranslationManagerInterface $entity_translation_manager,
-    NonTranslatableEntityHandlerContext $handler
+    NonTranslatableEntityHandlerContext $handler,
+    CdfImporterInterface $cdfImporter
   ) {
     $this->registrar = $registrar;
     $this->config = $config;
@@ -113,6 +137,7 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
     $this->logger = $logger;
     $this->entityTranslationManager = $entity_translation_manager;
     $this->ntEntityHandler = $handler;
+    $this->cdfImporter = $cdfImporter;
   }
 
   /**
@@ -157,21 +182,30 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
   public function filterCdfDocument(CDFDocument $cdf_document, array $enabled_languages, array $incoming_languages): void {
     $non_translatables = [];
     $undesired_languages = [];
-    $removable_languages = [];
+    // Initial state: all languages other than already enabled are removable,
+    // if a translation claims otherwise the language will be removed from the
+    // removable list.
+    $removable_languages = array_diff_key($incoming_languages, array_flip($enabled_languages));
     foreach ($cdf_document->getEntities() as $cdf) {
+      if (!$this->isValidCdf($cdf)) {
+        $this->enqueueForReExport($cdf);
+        continue;
+      }
+
       $cdf_metadata = $cdf->getMetadata();
       $default_language = $cdf_metadata['default_language'];
-      if (isset($cdf_metadata['translatable']) && !$cdf_metadata['translatable']) {
+      $languages = $cdf_metadata['languages'] ?? [$default_language];
+      $entity_type = $cdf->getAttribute('entity_type')->getValue()[LanguageInterface::LANGCODE_NOT_SPECIFIED];
+      if ($this->isEntityNonTranslatable($cdf_metadata, $languages, $entity_type)) {
         $non_translatables[$cdf->getUuid()] = $cdf;
         continue;
       }
 
-      $languages = $cdf->getMetadata()['languages'] ?? [$default_language];
       // Languages common between this cdf and enabled on subscriber.
       $common_languages = array_values(array_intersect($languages, $enabled_languages));
       $tracking_data = [
         'entity_uuid' => $cdf->getUuid(),
-        'entity_type' => $cdf->getAttribute('entity_type')->getValue()[LanguageInterface::LANGCODE_NOT_SPECIFIED],
+        'entity_type' => $entity_type,
       ];
       $tracked_entity = $this->entityTranslationManager->getTrackedEntity($cdf->getUuid());
       // If none of the languages are available on subscriber,
@@ -186,12 +220,23 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
             'default_language' => $default_language,
           ];
         }
+        if (!in_array($default_language, $undesired_languages)) {
+          $this->logger->info(
+            '"@language" will be marked as undesired. This language will also be imported.',
+            ['@language' => $default_language]);
+          $this->logger->info('Incoming languages of @uuid having entity type "@type": @incoming_languages', [
+            '@uuid' => $cdf->getUuid(),
+            '@incoming_languages' => implode(',', array_keys($incoming_languages)),
+            '@type' => $cdf->getAttributes()['entity_type']->getValue()[LanguageInterface::LANGCODE_NOT_SPECIFIED] ?? '',
+          ]);
+        }
         $this->updateUndesiredList($undesired_languages, $default_language);
+        unset($removable_languages[$default_language]);
         $cdf_metadata['languages'] = [$default_language];
         // Remove other languages from language metadata
         // and dependency list of this entity.
         $unwanted_languages = array_diff($languages, $cdf_metadata['languages']);
-        $this->removeConfigurableLanguagesFromCdf($cdf_metadata, $removable_languages, $unwanted_languages, $incoming_languages);
+        $this->removeConfigurableLanguagesFromCdf($cdf_metadata, $unwanted_languages, $incoming_languages, $removable_languages);
         $cdf->setMetadata($cdf_metadata);
         continue;
       }
@@ -204,14 +249,17 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
       // Ensure that the default language if it's not in common languages
       // is always updated whether it is accepted now or not.
       $cdf_metadata['languages'] = $tracked_entity && !in_array($default_language, $common_languages, TRUE)
-        ? array_merge($common_languages, [$tracked_entity->defaultLanguage()])
+        ? array_unique(array_merge($common_languages, [$tracked_entity->defaultLanguage()]))
         : $common_languages;
       // Remove other languages from language metadata
       // and dependency list of this entity.
       $unwanted_languages = array_diff($languages, $cdf_metadata['languages']);
-      $this->removeConfigurableLanguagesFromCdf($cdf_metadata, $removable_languages, $unwanted_languages, $incoming_languages);
+      $this->removeConfigurableLanguagesFromCdf($cdf_metadata, $unwanted_languages, $incoming_languages, $removable_languages);
       $cdf->setMetadata($cdf_metadata);
     }
+
+    // Halt before further processing if needed.
+    $this->requestRepublishForInvalidCdfs();
 
     [$removable_languages, $undesired_languages] = $this->processNonTranslatables(
       $non_translatables, $cdf_document,
@@ -245,6 +293,65 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
   }
 
   /**
+   * Checks whether the CDF complies to the syndication requirements.
+   *
+   * @param \Acquia\ContentHubClient\CDF\CDFObjectInterface $cdf
+   *   The CDF object to validate.
+   *
+   * @return bool
+   *   True if the CDF passed the validation.
+   */
+  protected function isValidCdf(CDFObjectInterface $cdf): bool {
+    return $cdf->getType() !== 'drupal8_content_entity' ||
+      isset($cdf->getMetadata()['translatable']);
+  }
+
+  /**
+   * Enqueues a CDF for reexport.
+   *
+   * @param \Acquia\ContentHubClient\CDF\CDFObjectInterface $cdf
+   *   The CDF object to enqueue.
+   */
+  protected function enqueueForReExport(CDFObjectInterface $cdf): void {
+    $entity_type = $this->getEntityType($cdf);
+    $this->logger->warning(
+      'Entity of type {entity_type} ({entity_uuid)} marked for re-export.',
+      [
+        'entity_type' => $entity_type,
+        'entity_uuid' => $cdf->getUuid(),
+      ]
+    );
+    $this->needReExport[$cdf->getOrigin()][] = [
+      'uuid' => $cdf->getUuid(),
+      'type' => $entity_type,
+      'dependencies' => array_keys($cdf->getDependencies()),
+    ];
+  }
+
+  /**
+   * Sends a republish request to the publisher(s).
+   *
+   * Requests a re-export of entities collected during the filtering process.
+   *
+   * @throws \Drupal\acquia_contenthub_translations\Exceptions\TranslationDataException
+   */
+  protected function requestRepublishForInvalidCdfs(): void {
+    if (empty($this->needReExport)) {
+      return;
+    }
+
+    $this->logger->info(
+      'Requested publisher(s) (origins: {origins}) to re-export entities with missing "translatable" attributes.',
+      ['origins' => implode(', ', array_keys($this->needReExport))]
+    );
+    $this->cdfImporter->requestToRepublishEntities($this->needReExport);
+
+    throw new TranslationDataException(
+      'CDF validation failed due to missing "translatable" attribute.'
+    );
+  }
+
+  /**
    * Processes non-translatable entities.
    *
    * Returns a modified list of removable and undesired language list.
@@ -267,19 +374,20 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
       return [$removable_languages, $undesired_languages];
     }
 
-    $incoming_languages = $language_collection['incoming'];
     $enabled_languages = $language_collection['enabled'];
-
-    if (empty($removable_languages) && empty($undesired_languages)) {
-      $removable_languages = $original_removable_list =
-        array_diff_key($incoming_languages, array_flip($enabled_languages));
-    }
+    $original_removable_list = $removable_languages;
 
     $context = new Context($document, $removable_languages);
     $this->ntEntityHandler->handle($entities, $enabled_languages, $context);
     $removable_languages = $context->getRemovableLanguages();
-    if (isset($original_removable_list)) {
-      $undesired_languages = array_diff_key($original_removable_list, $removable_languages);
+    // Removable list was modified. If a language is removed from the list it
+    // must be considered as undesired.
+    $diff = array_diff_key($original_removable_list, $removable_languages);
+    if (!empty($diff)) {
+      $undesired_languages = array_unique(array_merge($diff, $undesired_languages));
+      $this->logger->info('Languages marked as undesired from non-translatable: (@languages).', [
+        '@languages' => implode(',', $diff),
+      ]);
     }
     array_push($this->entitiesToTrack, ...$context->getTrackableEntities());
 
@@ -332,8 +440,6 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
   /**
    * Removes unwanted configurable languages from current CDF's dependencies.
    *
-   * Mark such languages as removable to be removed from CDF document.
-   *
    * If a language was in the cdf as dependency
    * but was previously imported on subscriber(as undesired language)
    * so added to stack directly(unchanged hash) without fetching
@@ -343,14 +449,15 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
    *
    * @param array $cdf_metadata
    *   Cdf metadata.
-   * @param array $removable_languages
-   *   Removable languages.
    * @param array $unwanted_languages
    *   Unwanted languages for this CDF.
    * @param array $incoming_languages
    *   Configurable languages coming from publisher.
+   * @param array $removable_languages
+   *   Removable languages from CDF.
    */
-  protected function removeConfigurableLanguagesFromCdf(array &$cdf_metadata, array &$removable_languages, array $unwanted_languages, array $incoming_languages): void {
+  protected function removeConfigurableLanguagesFromCdf(array &$cdf_metadata, array $unwanted_languages, array $incoming_languages, array $removable_languages): void {
+    $unwanted_languages = array_unique(array_merge($unwanted_languages, array_keys($removable_languages)));
     foreach ($unwanted_languages as $unwanted_language) {
       // Get cdf of this unwanted language.
       $unwanted_language_uuid = $incoming_languages[$unwanted_language] ?? '';
@@ -358,8 +465,6 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
         continue;
       }
       unset($cdf_metadata['dependencies']['entity'][$unwanted_language_uuid]);
-      // Set this language to be removed from overall cdf document.
-      $removable_languages[$unwanted_language] = $unwanted_language_uuid;
     }
   }
 
@@ -421,6 +526,9 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
   /**
    * Removes finally removable languages from CDF document.
    *
+   * If the incoming language is not marked as removable but not in the
+   * undesired language list, it means it can be safely removed.
+   *
    * @param \Acquia\ContentHubClient\CDFDocument $cdf_document
    *   Cdf document.
    * @param array $removable_languages
@@ -437,6 +545,28 @@ class PruneLanguagesFromCdf implements EventSubscriberInterface {
       }
       $cdf_document->removeCdfEntity($uuid);
     }
+  }
+
+  /**
+   * Checks whether a particular cdf should be non-translatable or not.
+   *
+   * @param array $cdf_metadata
+   *   Cdf metadata.
+   * @param array $languages
+   *   Languages available for this CDF.
+   * @param string $entity_type
+   *   Entity type for this CDF.
+   *
+   * @return bool
+   *   True if non-translatable, false otherwise.
+   */
+  protected function isEntityNonTranslatable(array $cdf_metadata, array $languages, string $entity_type): bool {
+    return (isset($cdf_metadata['translatable']) && !$cdf_metadata['translatable'])
+      ||
+      // This is a hard requirement for entities
+      // to be treated as non-translatables
+      // that they only have 1 language and are added to nt override registry.
+      (count($languages) === 1 && $this->ntEntityHandler->isEntityOverridden($entity_type));
   }
 
 }

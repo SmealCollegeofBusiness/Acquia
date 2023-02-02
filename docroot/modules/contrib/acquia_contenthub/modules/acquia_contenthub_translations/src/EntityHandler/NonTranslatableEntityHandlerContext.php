@@ -95,6 +95,19 @@ class NonTranslatableEntityHandlerContext {
   }
 
   /**
+   * Checks whether entity is overridden to be non-translatable.
+   *
+   * @param string $entity_type
+   *   Entity type.
+   *
+   * @return bool
+   *   True if entity is overridden. False otherwise.
+   */
+  public function isEntityOverridden(string $entity_type): bool {
+    return in_array($entity_type, $this->registry->getOverriddenHandlerMapping(), TRUE);
+  }
+
+  /**
    * Returns the appropriate handler types.
    *
    * @param string $entity_type

@@ -78,21 +78,22 @@ class EntityModeratedRevision {
   /**
    * Checks if the revision transitioning from published to unpublished state.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Entity\EntityInterface $base_entity
    *   The entity revision being saved.
    *
    * @return bool
    *   True if the original entity is published,
    *   but the current revision is unpublished.
    */
-  public function isTransitionedToUnpublished(EntityInterface $entity): bool {
-    $status = $entity->getEntityType()->hasKey("status") ? $entity->getEntityType()->getKey("status") : NULL;
-    if (!$status || !($entity instanceof RevisionableInterface)) {
+  public function isTransitionedToUnpublished(EntityInterface $base_entity): bool {
+    $status = $base_entity->getEntityType()->hasKey("status") ? $base_entity->getEntityType()->getKey("status") : NULL;
+    if (!$status || !($base_entity instanceof RevisionableInterface)) {
       // If the entity does not have a publishing status then
       // it is considered published.
       return TRUE;
     }
-
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    $entity = $base_entity;
     $definition = $entity->getFieldDefinition($status);
     $property = $definition->getFieldStorageDefinition()->getMainPropertyName();
 
@@ -137,19 +138,21 @@ class EntityModeratedRevision {
   /**
    * Checks if the revision has at least one published translation.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Entity\EntityInterface $base_entity
    *   The entity revision being saved.
    *
    * @return bool
    *   TRUE if this revision has a published translation, FALSE otherwise.
    */
-  protected function revisionHasPublishedTranslation(EntityInterface $entity): bool {
-    $status = $entity->getEntityType()->hasKey("status") ? $entity->getEntityType()->getKey("status") : NULL;
-    if (!$status || !($entity instanceof RevisionableInterface)) {
+  protected function revisionHasPublishedTranslation(EntityInterface $base_entity): bool {
+    $status = $base_entity->getEntityType()->hasKey("status") ? $base_entity->getEntityType()->getKey("status") : NULL;
+    if (!$status || !($base_entity instanceof RevisionableInterface)) {
       // If the entity does not have a publishing status then
       // it is considered published.
       return TRUE;
     }
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    $entity = $base_entity;
     $definition = $entity->getFieldDefinition($status);
     $property = $definition->getFieldStorageDefinition()->getMainPropertyName();
     // Ensure we are checking all translations of the revision to be saved.

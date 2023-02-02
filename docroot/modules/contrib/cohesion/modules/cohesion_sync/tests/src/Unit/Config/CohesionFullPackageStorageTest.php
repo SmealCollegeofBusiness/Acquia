@@ -140,8 +140,8 @@ class CohesionFullPackageStorageTest extends UnitTestCase {
       ->willReturn(array_keys($this->configs));
     $this->storage = new CohesionFullPackageStorage($this->configStorage, $this->configManager, $this->usagePluginManager);
 
-    $this->assertArrayEquals($this->storage->listAll(), ['cohesion_elements.cohesion_component.config_id'], 'ListAll show only contain the cohesion component');
-    $this->assertArrayEquals($this->storage->listAll('some_prefix'), ['cohesion_elements.cohesion_component.config_id'], 'ListAll show only contain the cohesion component regardless of the prefix');
+    $this->assertEquals($this->storage->listAll(), ['cohesion_elements.cohesion_component.config_id'], 'ListAll show only contain the cohesion component');
+    $this->assertEquals($this->storage->listAll('some_prefix'), ['cohesion_elements.cohesion_component.config_id'], 'ListAll show only contain the cohesion component regardless of the prefix');
   }
 
   /**
@@ -324,7 +324,7 @@ class CohesionFullPackageStorageTest extends UnitTestCase {
       'dependency_5' => 'file',
       'dependency_4' => 'file',
     ];
-    $this->assertArrayEquals($excepted, $this->storage->getStorageFileList(), 'getStorageFileList should contain file dependency');
+    $this->assertEquals($excepted, $this->storage->getStorageFileList(), 'getStorageFileList should contain file dependency');
 
 
   }
@@ -357,7 +357,7 @@ class CohesionFullPackageStorageTest extends UnitTestCase {
         ->method('listAll')
         ->willReturn(array_keys($this->configs));
       $this->storage = new CohesionFullPackageStorage($this->configStorage, $this->configManager, $this->usagePluginManager);
-      $this->assertArrayEquals($results, $this->storage->getIncludedEntityTypes());
+      $this->assertEquals($results, $this->storage->getIncludedEntityTypes());
     }
   }
 

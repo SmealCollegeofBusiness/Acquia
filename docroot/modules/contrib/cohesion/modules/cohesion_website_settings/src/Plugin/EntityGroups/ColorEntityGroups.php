@@ -32,7 +32,7 @@ class ColorEntityGroups extends EntityGroupsPluginBase {
     // Create any new entities.
     foreach ($colors->colors as $color) {
       // Does the entity already exist?
-      $query = $this->storage->getQuery();
+      $query = $this->storage->getQuery()->accessCheck(TRUE);
       $query->condition('id', $color->uid);
       $entity_ids = $query->execute();
 
@@ -50,7 +50,7 @@ class ColorEntityGroups extends EntityGroupsPluginBase {
     }
 
     // Delete any removed entities.
-    $query = $this->storage->getQuery();
+    $query = $this->storage->getQuery()->accessCheck(TRUE);
     if ($entity_ids = $query->execute()) {
       foreach ($colors->colors as $color) {
         if (isset($entity_ids[$color->uid])) {

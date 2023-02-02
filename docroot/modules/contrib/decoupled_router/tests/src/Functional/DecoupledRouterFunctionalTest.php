@@ -43,7 +43,7 @@ class DecoupledRouterFunctionalTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'language',
     'node',
     'path',
@@ -55,7 +55,7 @@ class DecoupledRouterFunctionalTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $language = ConfigurableLanguage::createFromLangcode('ca');
     $language->save();
@@ -237,8 +237,8 @@ class DecoupledRouterFunctionalTest extends BrowserTestBase {
       'jsonapi' => [
         'individual' => $this->buildUrl('/jsonapi/node/article/' . $node->uuid()),
         'resourceName' => 'node--article',
-        'pathPrefix' => 'jsonapi',
-        'basePath' => '/jsonapi',
+        'pathPrefix' => 'subdirectory/jsonapi',
+        'basePath' => '/subdirectory/jsonapi',
         'entryPoint' => $this->buildUrl('/jsonapi'),
       ],
       'meta' => [

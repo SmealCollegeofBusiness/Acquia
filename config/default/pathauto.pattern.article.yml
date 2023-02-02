@@ -1,0 +1,24 @@
+uuid: 320a446e-be91-4b5a-bbf2-e65ccb61da11
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+_core:
+  default_config_hash: 1HXrnsMSOzz3kBURyyzSw08wX8X5WlX8tDOavMUWVGY
+id: article
+label: 'Article path'
+type: 'canonical_entities:node'
+pattern: 'article/[node:field_article_type]/[node:title]'
+selection_criteria:
+  96d501c7-103e-4c5c-943b-2f91d8125aff:
+    id: 'entity_bundle:node'
+    negate: false
+    uuid: 96d501c7-103e-4c5c-943b-2f91d8125aff
+    context_mapping:
+      node: node
+    bundles:
+      article: article
+selection_logic: and
+weight: -5
+relationships: {  }

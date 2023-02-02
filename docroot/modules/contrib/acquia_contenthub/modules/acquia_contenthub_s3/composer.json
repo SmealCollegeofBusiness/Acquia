@@ -5,7 +5,7 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "drupal/core": ">=9.2",
-        "drupal/s3fs": "3.0-beta5"
+        "drupal/s3fs": "3.x-dev@dev"
     },
     "extra": {
         "drush": {

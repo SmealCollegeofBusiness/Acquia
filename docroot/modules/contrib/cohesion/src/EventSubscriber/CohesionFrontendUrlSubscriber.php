@@ -83,7 +83,7 @@ class CohesionFrontendUrlSubscriber implements EventSubscriberInterface {
 
     // Components model.
     $url = Url::fromRoute('drupal_data_endpoint.component_models')->toString();
-    $event->addUrl('cohesion-component', [
+    $event->addUrl('cohesion-components', [
       'url' => $url,
       'method' => 'GET',
     ]);

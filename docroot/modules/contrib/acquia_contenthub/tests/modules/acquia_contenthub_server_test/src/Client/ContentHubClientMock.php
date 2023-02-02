@@ -2,7 +2,9 @@
 
 namespace Drupal\acquia_contenthub_server_test\Client;
 
+use Acquia\ContentHubClient\CDF\CDFObject;
 use Acquia\ContentHubClient\ContentHubClient;
+use Acquia\ContentHubClient\ContentHubDescriptor;
 use Acquia\ContentHubClient\Settings;
 use Acquia\ContentHubClient\Webhook;
 use Acquia\Hmac\Guzzle\HmacAuthMiddleware;
@@ -19,6 +21,20 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  * Mocks server responses.
  */
 class ContentHubClientMock extends ContentHubClient {
+
+  /**
+   * Used for testing purposes.
+   *
+   * Based on the value custom behaviour can be added to ContentHubClientMock.
+   */
+  public const X_ACH_TEST_EXECUTION_RESULT = 'x-ach-test-execution-result';
+
+  /**
+   * An arbitrary message if needed for the test execution.
+   *
+   * For example in cases of exceptions.
+   */
+  public const X_ACH_TEST_EXECUTION_MSG = 'x-ach-test-execution-msg';
 
   /**
    * Content Hub settings.
@@ -64,7 +80,7 @@ class ContentHubClientMock extends ContentHubClient {
       'base_uri' => "$url/$api_version",
       'headers' => [
         'Content-Type' => 'application/json',
-        'User-Agent' => self::LIBRARYNAME . '/' . static::LIB_VERSION . ' ' . \GuzzleHttp\default_user_agent(),
+        'User-Agent' => ContentHubDescriptor::userAgent(),
       ],
     ];
 
@@ -79,6 +95,13 @@ class ContentHubClientMock extends ContentHubClient {
    * {@inheritdoc}
    */
   public function ping(): ResponseInterface {
+    $headers = \Drupal::request()->headers;
+    $test_exec = $headers->get(static::X_ACH_TEST_EXECUTION_RESULT);
+    if ($test_exec === 'exception') {
+      $msg = $headers->get(static::X_ACH_TEST_EXECUTION_MSG);
+      throw new \Exception($msg);
+    }
+
     $response_body = [
       'success' => TRUE,
       'request_id' => 'some-uuid',
@@ -189,6 +212,19 @@ class ContentHubClientMock extends ContentHubClient {
   /**
    * {@inheritdoc}
    */
+  public function getSettings(): Settings {
+    return new Settings(
+      'test-client',
+      '00000000-0000-0001-0000-123456789123',
+      '12312321312321',
+      '12312321312321',
+      'https://example.com',
+      '12312321312321');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getRemoteSettings(): array {
     $this->options = $this->getSettings()->toArray();
     return [
@@ -218,7 +254,7 @@ class ContentHubClientMock extends ContentHubClient {
    */
   public function getFilterByName($filter_name) {
     $filter = MockDataProvider::mockFilter();
-    if ($filter !== $filter_name) {
+    if ($filter['name'] !== $filter_name) {
       return [
         'success' => FALSE,
       ];
@@ -254,6 +290,17 @@ class ContentHubClientMock extends ContentHubClient {
       'success' => TRUE,
       'uuid' => $filter['uuid'],
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function putEntities(CDFObject ...$objects) {
+    $json = json_encode([
+      'request_id' => MockDataProvider::randomUuid(),
+      'success' => TRUE,
+    ], JSON_THROW_ON_ERROR);
+    return new Response(202, [], $json);
   }
 
   /**
@@ -307,6 +354,37 @@ class ContentHubClientMock extends ContentHubClient {
       new Request('POST', \Drupal::request()->getRequestUri()),
       new Response($status, [], json_encode($resp_body))
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addEntitiesToInterestListBySiteRole(string $webhook_uuid, string $site_role, array $interest_list): ResponseInterface {
+    return new Response();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function queryEntities(array $params = []): ?array {
+    return [
+      'data' => [
+        [
+          'metadata' => [
+            'settings' => [
+              'webhook' => [
+                'settings_url' => 'https://www.example.com',
+              ],
+            ],
+          ],
+          'attributes' => [
+            'publisher' => [
+              'und' => TRUE,
+            ],
+          ],
+        ],
+      ],
+    ];
   }
 
 }

@@ -139,7 +139,7 @@ class ContentEntityParseCdfHandler implements EventSubscriberInterface {
             $ex->getMessage()
           ));
         }
-        return;
+        continue;
       }
 
       /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */

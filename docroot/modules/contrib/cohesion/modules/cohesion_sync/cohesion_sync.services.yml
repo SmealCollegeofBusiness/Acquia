@@ -67,6 +67,7 @@ services:
     class: Drupal\cohesion_sync\Services\DefaultModulePackage
     arguments:
       - '@module_handler'
+      - '@extension.path.resolver'
     tags:
       - { name: sitestudio_package_source, priority: 50}
 

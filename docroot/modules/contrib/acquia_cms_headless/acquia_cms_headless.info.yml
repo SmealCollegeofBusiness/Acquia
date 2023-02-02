@@ -20,7 +20,7 @@ dependencies:
   - drupal:restui
   - drupal:simple_oauth
 
-# Information added by Drupal.org packaging script on 2022-10-10
-version: '1.3.0'
+# Information added by Drupal.org packaging script on 2022-12-06
+version: '1.3.1'
 project: 'acquia_cms_headless'
-datestamp: 1665389981
+datestamp: 1670328577

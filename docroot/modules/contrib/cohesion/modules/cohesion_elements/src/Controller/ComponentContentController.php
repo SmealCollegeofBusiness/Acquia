@@ -88,7 +88,10 @@ class ComponentContentController extends ControllerBase {
   public function getComponentContents(Request $request) {
 
     $storage = $this->entityTypeManager()->getStorage('component_content');
-    $query = $storage->getQuery()->condition('status', TRUE)->sort('title', 'asc');
+    $query = $storage->getQuery()
+      ->accessCheck(TRUE)
+      ->condition('status', TRUE)
+      ->sort('title', 'asc');
     $exclude_path = ($request->query->get('componentPath')) ?: FALSE;
     $exclude_component_content = FALSE;
 
@@ -217,7 +220,9 @@ class ComponentContentController extends ControllerBase {
   public function getComponentContentsByIds(Request $request) {
     $components = [];
     // Get the uid of the component from the request.
-    $uids = $request->query->get('ids');
+    $request_uids = $request->query->get('ids');
+    $uids = explode(',', $request_uids);
+
     if (is_array($uids)) {
       foreach ($uids as $uid) {
         $id = str_replace('cc_', '', $uid);
@@ -352,19 +357,23 @@ class ComponentContentController extends ControllerBase {
     $reflector = new \ReflectionClass($entityType->getClass());
     $category_type_id = $reflector->getConstant('CATEGORY_ENTITY_TYPE_ID');
 
-    $categories_query = $this->entityTypeManager->getStorage($category_type_id)->getQuery()->sort('weight', 'asc');
+    $categories_query = $this->entityTypeManager->getStorage($category_type_id)->getQuery()
+      ->accessCheck(TRUE)
+      ->sort('weight', 'asc');
 
     if ($categories = $this->entityTypeManager->getStorage($category_type_id)->loadMultiple($categories_query->execute())) {
       foreach ($categories as $category) {
 
-        $query = $this->entityTypeManager->getStorage($entityType->id())->getQuery()->condition('category', $category->id())->sort('weight', 'asc');
+        $query = $this->entityTypeManager->getStorage($entityType->id())->getQuery()
+          ->accessCheck(TRUE)
+          ->condition('category', $category->id())
+          ->sort('weight', 'asc');
 
         $entities = $this->entityTypeManager->getStorage($entityType->id())->loadMultiple($query->execute());
 
         // Format the custom components as components.
         if ($custom_components = $this->customComponentsService->getComponentsInCategory(ComponentCategory::load($category->id()))) {
-          $custom_components = $this->customComponentsService
-            ->formatAsComponent($custom_components);
+          $custom_components = $this->customComponentsService->formatAsComponent($custom_components);
         }
 
         // Count UI & Custom components.
@@ -398,7 +407,7 @@ class ComponentContentController extends ControllerBase {
       '#header' => ($entities) ? $this->buildHeader() : [],
       '#title' => $category->label(),
       '#rows' => [],
-      '#empty' => $this->t('There are no available @label that component content can be created from.', ['@label' => mb_strtolower($entityType->getLabel())]),
+      '#empty' => $this->t('There are no available @label that component content can be created from.', ['@label' => mb_strtolower($entityType->getLabel() ?? '')]),
       '#cache' => [
         'contexts' => $entityType->getListCacheContexts(),
         'tags' => $entityType->getListCacheTags(),

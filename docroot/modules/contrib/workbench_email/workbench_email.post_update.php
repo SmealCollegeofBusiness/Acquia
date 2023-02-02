@@ -32,3 +32,8 @@ function workbench_email_post_update_add_template_format(&$sandbox = NULL) {
     }
   );
 }
+
+/**
+ * Update the config schema to make email body translatable.
+ */
+function workbench_email_post_update_make_email_body_translatable(&$sandbox = NULL) { }

@@ -124,7 +124,10 @@ class TaskManager implements TaskManagerInterface {
    * {@inheritdoc}
    */
   public function getTasksCount(array $conditions = []) {
-    return $this->getTasksQuery($conditions)->count()->execute();
+    return $this->getTasksQuery($conditions)
+      ->count()
+      ->accessCheck(FALSE)
+      ->execute();
   }
 
   /**
@@ -346,6 +349,9 @@ class TaskManager implements TaskManagerInterface {
     }
     if (!isset($context['results']['total'])) {
       $context['results']['total'] = $this->getTasksCount($conditions);
+      if (!$context['results']['total']) {
+        return;
+      }
     }
 
     $task_id = array_shift($context['sandbox']['task_ids']);

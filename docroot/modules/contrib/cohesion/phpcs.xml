@@ -22,5 +22,6 @@
     <exclude name="DrupalPractice.CodeAnalysis.VariableAnalysis"/>
     <exclude name="DrupalPractice.General.OptionsT"/>
     <exclude name="PHPCompatibility.Keywords.ForbiddenNamesAsDeclared"/>
+    <exclude name="SlevomatCodingStandard.Variables.DisallowSuperGlobalVariable"/>
   </rule>
 </ruleset>

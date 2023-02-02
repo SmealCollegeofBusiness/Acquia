@@ -151,7 +151,7 @@ class CohesionComponentController extends ControllerBase {
 
         $build = [
           '#type' => 'inline_template',
-          '#template' => isset($template['twig']) ? $template['twig'] : '',
+          '#template' => $template['twig'] ?? '',
           '#attached' => [
             'library' => [
               'cohesion_elements/canvas-preview',
@@ -163,7 +163,7 @@ class CohesionComponentController extends ControllerBase {
           ],
         ];
 
-        $content = '<style>' . (isset($data['css']['theme']) ? $data['css']['theme'] : '') . '</style>';
+        $content = '<style>' . ($data['css']['theme'] ?? '') . '</style>';
         $build['#attached']['cohesion'][] = $content;
 
         return $build;

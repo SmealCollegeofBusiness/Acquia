@@ -72,18 +72,25 @@ class ComponentListBuilder extends ElementsListBuilder {
     $reflector = new \ReflectionClass($this->entityType->getClass());
     $category_type_id = $reflector->getConstant('CATEGORY_ENTITY_TYPE_ID');
 
-    $categories_query = $this->entityTypeManager->getStorage($category_type_id)->getQuery()->sort('weight', 'asc');
+    $categories_query = $this->entityTypeManager->getStorage($category_type_id)->getQuery()
+      ->accessCheck(TRUE)
+      ->sort('weight', 'asc');
 
     if ($categories = $this->entityTypeManager->getStorage($category_type_id)->loadMultiple($categories_query->execute())) {
       foreach ($categories as $category) {
 
-        $query = $this->entityTypeManager->getStorage($this->entityType->id())->getQuery()->condition('category', $category->id())->sort('weight', 'asc');
+        $query = $this->entityTypeManager->getStorage($this->entityType->id())->getQuery()
+          ->accessCheck(TRUE)
+          ->condition('category', $category->id())
+          ->sort('weight', 'asc');
         $entities = $this->entityTypeManager->getStorage($this->entityType->id())->loadMultiple($query->execute());
 
         // Add custom components.
         if ($custom_components = $this->customComponentsService->getComponentsInCategory(ComponentCategory::load($category->id()))) {
           $custom_components = $this->customComponentsService->formatAsComponent($custom_components);
         }
+
+        sort($custom_components);
 
         // Count UI & Custom components.
         $count = $query->count()->execute() + count($custom_components);
@@ -160,7 +167,9 @@ class ComponentListBuilder extends ElementsListBuilder {
         $form_data['custom_components']['table'][$id]['selectable']['data']['#markup'] = '-';
 
         if (isset($common_row['in_use'])) {
-          $form_data['custom_components']['table'][$id]['in_use']['data']['#markup'] = '-';
+          $form_data['custom_components']['table'][$id]['in_use'] = [
+            '#markup' => $this->customComponentsService->getInUseMarkup($customComponent),
+          ];
         }
 
         $form_data['custom_components']['table'][$id]['locked']['data']['#markup'] = '-';

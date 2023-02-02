@@ -33,7 +33,7 @@ class SCSSVariablesEditForm extends WebsiteSettingsGroupFormBase {
     $variables = json_decode($form_state->getValue('json_values'));
 
     if (is_array($variables->SCSSVariables)) {
-      list($this->in_use_list, $this->changed_entities) = $this->getEntityGroupsPlugin()->saveFromModel($variables);
+      [$this->in_use_list, $this->changed_entities] = $this->getEntityGroupsPlugin()->saveFromModel($variables);
 
       // (Optionally) run SCSS variables rebuild batch for entities using
       // changed SCSS variables.

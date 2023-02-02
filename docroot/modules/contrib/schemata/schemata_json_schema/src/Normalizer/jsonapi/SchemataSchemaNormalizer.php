@@ -6,12 +6,15 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\jsonapi\ResourceType\ResourceType;
 use Drupal\schemata\Schema\SchemaInterface;
 use Drupal\schemata\SchemaUrl;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
  * Primary normalizer for SchemaInterface objects.
  */
 class SchemataSchemaNormalizer extends JsonApiNormalizerBase {
+
+  use StringTranslationTrait;
 
   /**
    * The interface or class that this Normalizer supports.
@@ -24,7 +27,7 @@ class SchemataSchemaNormalizer extends JsonApiNormalizerBase {
    * {@inheritdoc}
    */
   public function normalize($entity, $format = NULL, array $context = []) {
-    /* @var $entity \Drupal\schemata\Schema\SchemaInterface */
+    /** @var \Drupal\schemata\Schema\SchemaInterface $entity */
     $generated_url = SchemaUrl::fromSchema($this->format, $this->describedFormat, $entity)
       ->toString(TRUE);
     // Create the array of normalized fields, starting with the URI.
@@ -55,12 +58,12 @@ class SchemataSchemaNormalizer extends JsonApiNormalizerBase {
             'type' => [
               'type' => 'string',
               'title' => 'type',
-              'description' => t('Resource type'),
+              'description' => $this->t('Resource type'),
               'enum' => [$resource_type->getTypeName()],
             ],
             'id' => [
               'type' => 'string',
-              'title' => t('Resource ID'),
+              'title' => $this->t('Resource ID'),
               'format' => 'uuid',
               'maxLength' => 128,
             ],

@@ -5,6 +5,7 @@ namespace Drupal\Tests\acquia_contenthub_translations\Kernel\EventSubscriber\Pru
 use Acquia\ContentHubClient\CDFDocument;
 use Drupal\acquia_contenthub\Event\EntityDataTamperEvent;
 use Drupal\acquia_contenthub\Event\PruneCdfEntitiesEvent;
+use Drupal\acquia_contenthub_subscriber\CdfImporterInterface;
 use Drupal\acquia_contenthub_translations\Data\EntityTranslations;
 use Drupal\acquia_contenthub_translations\Data\EntityTranslationsTracker;
 use Drupal\acquia_contenthub_translations\EventSubscriber\EntityDataTamper\NormalizeFieldValues;
@@ -15,6 +16,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\acquia_contenthub\Unit\Helpers\LoggerMock;
 use Drupal\Tests\acquia_contenthub_translations\Traits\CdfGeneratorForTranslationsTrait;
+use Prophecy\Argument;
 
 /**
  * Tests processing of non-translatable entities.
@@ -233,6 +235,8 @@ class PruneCdfLanguagesWithNonTranslatableEntitiesTest extends KernelTestBase {
     $config = $this->config(ContentHubTranslationsSettingsForm::CONFIG);
     $config->set('selective_language_import', TRUE)
       ->save();
+    $cdf_importer = $this->prophesize(CdfImporterInterface::class);
+    $cdf_importer->requestToRepublishEntities(Argument::type('array'));
 
     return new PruneLanguagesFromCdf(
       $this->container->get('acquia_contenthub_translations.undesired_language_registrar'),
@@ -240,7 +244,8 @@ class PruneCdfLanguagesWithNonTranslatableEntitiesTest extends KernelTestBase {
       $this->container->get('language_manager'),
       new LoggerMock(),
       $this->entityTranslationManager,
-      $this->container->get('acquia_contenthub_translations.nt_entity_handler.context')
+      $this->container->get('acquia_contenthub_translations.nt_entity_handler.context'),
+      $cdf_importer->reveal()
     );
   }
 

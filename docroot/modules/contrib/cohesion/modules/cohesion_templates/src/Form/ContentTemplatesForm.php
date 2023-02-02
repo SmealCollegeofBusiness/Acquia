@@ -129,7 +129,10 @@ class ContentTemplatesForm extends TemplateForm {
     // Show default & master template fields for full content templates.
     if ($view_mode == 'full') {
       $master_template_ids = \Drupal::service('entity_type.manager')->getStorage('cohesion_master_templates')->getQuery()
-        ->condition('status', TRUE)->condition('selectable', TRUE)->execute();
+        ->accessCheck(TRUE)
+        ->condition('status', TRUE)
+        ->condition('selectable', TRUE)
+        ->execute();
       $master_template_storage = $this->entityTypeManager->getStorage('cohesion_master_templates');
       $master_templates = $master_template_storage->loadMultiple($master_template_ids);
 

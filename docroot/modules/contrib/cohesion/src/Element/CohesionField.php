@@ -3,10 +3,11 @@
 namespace Drupal\cohesion\Element;
 
 use Drupal\cohesion\Entity\CohesionSettingsInterface;
+use Drupal\cohesion\Entity\EntityJsonValuesInterface;
 use Drupal\cohesion\Event\CohesionJsAppUrlsEvent;
 use Drupal\cohesion_elements\Entity\CohesionLayout;
 use Drupal\Component\Utility\Environment;
-use Drupal\cohesion\Entity\EntityJsonValuesInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\Element\FormElement;
@@ -83,6 +84,28 @@ class CohesionField extends FormElement {
   }
 
   /**
+   * Get layoutCanvas field names for the current fieldable entity.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *
+   * @return array
+   */
+  protected static function getLayoutCanvasFields(FormStateInterface $form_state) {
+    $layout_fields = [];
+    $entity = $form_state->getFormObject()->getEntity();
+    if ($entity instanceof FieldableEntityInterface) {
+      $definitions = $entity->getFieldDefinitions();
+      foreach ($definitions as $definition) {
+        if ($definition->getType() == 'cohesion_entity_reference_revisions') {
+          $layout_fields[] = $definition->getName();
+        }
+      }
+    }
+
+    return $layout_fields;
+  }
+
+  /**
    * @param $element
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    * @param $complete_form
@@ -95,7 +118,7 @@ class CohesionField extends FormElement {
       $element['title'] = [
         '#type' => 'label',
         '#title' => $element['#title'],
-        '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
+        '#required' => $element['#required'] ?? FALSE,
         '#weight' => 0,
       ];
     }
@@ -128,14 +151,22 @@ class CohesionField extends FormElement {
 
     $json_values = NULL;
     // Add the json values.
-    if($element['#entity'] instanceof EntityJsonValuesInterface && $element['#entity']->isLayoutCanvas()) {
+    if ($element['#entity'] instanceof EntityJsonValuesInterface && $element['#entity']->isLayoutCanvas()) {
 
       // If state exists - apply to the entity.
-      if ($form_state_json_values = $form_state->getValue('field_layout_canvas')[0]['target_id']) {
-        !is_numeric($form_state_json_values) ?? $element['#entity']->setJsonValue($form_state_json_values);
+      $layout_fields = self::getLayoutCanvasFields($form_state);
+      if ($form_state->isProcessingInput() && $form_state->getValues() && !empty($layout_fields)) {
+        foreach ($layout_fields as $field) {
+          if (strstr($element['#canvas_name'], $field) !== FALSE) {
+            $form_state_value = $form_state->getValue($field);
+            if (!is_numeric($form_state_value)) {
+              $element['#entity']->setJsonValue($form_state_value);
+            }
+          }
+        }
       }
 
-      if($payload = \Drupal::service('cohesion.utils')->getPayloadForLayoutCanvasDataMerge($element['#entity'])) {
+      if ($payload = \Drupal::service('cohesion.utils')->getPayloadForLayoutCanvasDataMerge($element['#entity'])) {
         $response = \Drupal::service('cohesion.api_client')->layoutCanvasDataMerge($payload);
 
         if ($response && $response['code'] == 200) {
@@ -148,7 +179,7 @@ class CohesionField extends FormElement {
       }
     }
 
-    if(empty($json_values)) {
+    if (empty($json_values)) {
       $json_values = json_decode($element['#json_values']);
     }
 
@@ -266,9 +297,14 @@ class CohesionField extends FormElement {
     // Add the token browser.
     if (isset($element['#token_browser'])) {
       // Build the token tree (token.module).
+      // Check if it's an array of "allowed" tokens if not put into an array.
+      if (!is_array($token_browser = $element['#token_browser'])) {
+        $token_browser = [$element['#token_browser']];
+      }
+
       $token_tree = [
         '#theme' => 'token_tree_link',
-        '#token_types' => ($element['#token_browser'] == 'all') ? 'all' : [$element['#token_browser']],
+        '#token_types' => ($element['#token_browser'] == 'all') ? 'all' : $token_browser,
         // Token types (usually 'node').
       ];
 
@@ -281,7 +317,7 @@ class CohesionField extends FormElement {
 
     $event = new CohesionJsAppUrlsEvent($form_state);
     $event_dispatcher = \Drupal::service('event_dispatcher');
-    $event_dispatcher->dispatch($event::ADMIN_URL, $event);
+    $event_dispatcher->dispatch($event, $event::ADMIN_URL);
     $element['#attached']['drupalSettings']['cohesion']['urls'] = $event->getUrls();
 
     $element['json_values'] = [
@@ -333,7 +369,7 @@ class CohesionField extends FormElement {
 
       $element['json_values_view'] = [
         '#type' => 'html_tag',
-        '#tag' => 'textarea',
+        '#tag' => 'div',
         '#attributes' => [
           'class' => [$model_class_name . 'View', 'coh-devel-json-textarea'],
           'id' => [$model_class_name . 'View'],
@@ -347,7 +383,7 @@ class CohesionField extends FormElement {
       if (isset($element['#json_mapper'])) {
         $element['json_mapper_view'] = [
           '#type' => 'html_tag',
-          '#tag' => 'textarea',
+          '#tag' => 'div',
           '#attributes' => [
             'class' => [$mapper_class_name . 'View', 'coh-devel-json-textarea'],
             'id' => [$mapper_class_name . 'View'],

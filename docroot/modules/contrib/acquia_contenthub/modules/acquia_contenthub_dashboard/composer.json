@@ -1,0 +1,9 @@
+{
+    "name": "drupal/acquia_contenthub_dashboard",
+    "type": "drupal-module",
+    "description": "Provides Acquia ContentHub Dashboard for Acquia ContentHub.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": "^8.8 || ^9"
+    }
+}

@@ -13,7 +13,7 @@ dependencies:
   - drupal:views
   - search_api:search_api_db
 
-# Information added by Drupal.org packaging script on 2022-09-28
-version: '1.4.1'
+# Information added by Drupal.org packaging script on 2022-12-19
+version: '1.4.5'
 project: 'acquia_cms_search'
-datestamp: 1664365619
+datestamp: 1671444140

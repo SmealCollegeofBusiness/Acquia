@@ -53,7 +53,7 @@ class SyncConfigImporter extends ConfigImporter {
           ));
         }
       }
-      $this->eventDispatcher->dispatch(ConfigEvents::IMPORT_VALIDATE, new ConfigImporterEvent($this));
+      $this->eventDispatcher->dispatch(new ConfigImporterEvent($this), ConfigEvents::IMPORT_VALIDATE);
       if (count($this->getErrors())) {
         $errors = array_merge(['There were errors validating the config synchronization.'], $this->getErrors());
         throw new ConfigImporterException(implode(PHP_EOL, $errors));

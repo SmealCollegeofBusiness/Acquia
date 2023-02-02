@@ -184,8 +184,8 @@ class CohesionApiElementStorage {
    */
   public function cohUpsert($params = []) {
 
-    $element_id = isset($params['element_id']) ? $params['element_id'] : NULL;
-    $element_group_id = isset($params['element_group']) ? $params['element_group'] : NULL;
+    $element_id = $params['element_id'] ?? NULL;
+    $element_group_id = $params['element_group'] ?? NULL;
     if ($element_id && $element_group_id) {
       if ($this->cohElementExists($element_id, $element_group_id)) {
         // Update.

@@ -89,7 +89,7 @@ class PackageFormRefreshController extends ControllerBase {
       $entity_type_id = $definition['entity_type']->id();
 
       // Build the group data (sorted by label).
-      $query = $definition['storage']->getQuery();
+      $query = $definition['storage']->getQuery()->accessCheck(TRUE);
       if ($definition['entity_type']->hasKey('label')) {
         $query->sort($definition['entity_type']->getKey('label'), 'ASC');
       }
@@ -143,6 +143,7 @@ class PackageFormRefreshController extends ControllerBase {
       // Get the ids for all uuids and load the entities
       $ids = $this->entityTypeManager->getStorage($type)
         ->getQuery()
+        ->accessCheck(TRUE)
         ->condition($entity_type->getKey('uuid'), $uuids, 'IN')
         ->execute();
 

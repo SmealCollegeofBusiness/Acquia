@@ -115,7 +115,7 @@ class ContentHubFilterExecuteWorkerTest extends KernelTestBase {
 
     $this->client->isFeatured()->willReturn(TRUE);
 
-    $scroll_time_window = $this->filterExecuteWorker->getNormalizedScrollTimeWindowValue($this->client->reveal());
+    $scroll_time_window = $this->filterExecuteWorker->getNormalizedScrollTimeWindowValue();
     $this->assertTrue($scroll_time_window === '10m');
   }
 
@@ -129,7 +129,7 @@ class ContentHubFilterExecuteWorkerTest extends KernelTestBase {
 
     $this->client->isFeatured()->willReturn(FALSE);
 
-    $scroll_time_window = $this->filterExecuteWorker->getNormalizedScrollTimeWindowValue($this->client->reveal());
+    $scroll_time_window = $this->filterExecuteWorker->getNormalizedScrollTimeWindowValue();
     $this->assertTrue($scroll_time_window === '10');
   }
 

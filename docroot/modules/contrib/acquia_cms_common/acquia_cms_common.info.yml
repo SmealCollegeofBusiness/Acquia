@@ -5,9 +5,8 @@ type: module
 core_version_requirement: ^9
 dependencies:
   - drupal:acquia_purge
-  - drupal:acquia_telemetry
   - drupal:block
-  - drupal:ckeditor
+  - drupal:ckeditor5
   - drupal:config
   - drupal:config_ignore
   - drupal:config_rewrite
@@ -29,9 +28,6 @@ dependencies:
   - drupal:password_policy_length
   - drupal:password_policy_username
   - drupal:pathauto
-  - drupal:purge_processor_cron
-  - drupal:purge_processor_lateruntime
-  - drupal:purge_ui
   - drupal:redirect
   - drupal:responsive_preview
   - drupal:scheduler_content_moderation_integration
@@ -45,7 +41,7 @@ dependencies:
   - drupal:username_enumeration_prevention
   - drupal:workbench_email
 
-# Information added by Drupal.org packaging script on 2022-09-22
-version: '1.5.0'
+# Information added by Drupal.org packaging script on 2022-12-19
+version: '1.7.0'
 project: 'acquia_cms_common'
-datestamp: 1663875415
+datestamp: 1671442951

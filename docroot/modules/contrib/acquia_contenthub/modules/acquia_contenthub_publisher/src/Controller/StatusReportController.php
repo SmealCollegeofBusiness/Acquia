@@ -4,7 +4,10 @@ namespace Drupal\acquia_contenthub_publisher\Controller;
 
 use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Client\ClientFactory;
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Pager\PagerManagerInterface;
 use Drupal\Core\Url;
@@ -47,19 +50,41 @@ class StatusReportController extends ControllerBase {
   protected $cdfMetricsManager;
 
   /**
+   * The date formatter service.
+   *
+   * @var \Drupal\Core\Datetime\DateFormatterInterface
+   */
+  protected $dateFormatter;
+
+  /**
+   * The datetime.time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected $time;
+
+  /**
    * StatusReportController constructor.
    *
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   The client factory.
    * @param \Drupal\acquia_contenthub\Client\CdfMetricsManager $cdf_metrics_manager
    *   Cdf metrics manager.
-   * @param \Drupal\Core\Pager\PagerManagerInterface|null $pager_manager
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
+   *   The date.formatter service.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The datetime.time service.
+   * @param \Drupal\Core\Pager\PagerManagerInterface $pager_manager
    *   The pager manager.
+   *
+   * @throws \Exception
    */
-  public function __construct(ClientFactory $client_factory, CdfMetricsManager $cdf_metrics_manager, PagerManagerInterface $pager_manager = NULL) {
+  public function __construct(ClientFactory $client_factory, CdfMetricsManager $cdf_metrics_manager, DateFormatterInterface $date_formatter, TimeInterface $time, PagerManagerInterface $pager_manager) {
     $this->client = $client_factory->getClient();
     $this->pagerManager = $pager_manager;
     $this->cdfMetricsManager = $cdf_metrics_manager;
+    $this->dateFormatter = $date_formatter;
+    $this->time = $time;
   }
 
   /**
@@ -69,7 +94,9 @@ class StatusReportController extends ControllerBase {
     return new static(
       $container->get('acquia_contenthub.client.factory'),
       $container->get('acquia_contenthub.cdf_metrics_manager'),
-      $container->has('pager.manager') ? $container->get('pager.manager') : NULL
+      $container->get('date.formatter'),
+      $container->get('datetime.time'),
+      $container->get('pager.manager')
     );
   }
 
@@ -104,15 +131,7 @@ class StatusReportController extends ControllerBase {
     $total_pages = $client_entities['total_pages'];
     $current_start = ($page * self::LIMIT) + 1;
 
-    // @todo Remove condition once 8.8 is lowest supported version.
-    // Keep the logic within the if statement, remove the else.
-    if (!is_null($this->pagerManager)) {
-      $this->pagerManager->createPager($total_subscribers, self::LIMIT);
-    }
-    else {
-      // Global function needed for pager.
-      pager_default_initialize($total_subscribers, self::LIMIT);
-    }
+    $this->pagerManager->createPager($total_subscribers, self::LIMIT);
 
     $content['#attached']['library'][] = 'acquia_contenthub_publisher/acquia_contenthub_publisher';
 
@@ -150,7 +169,7 @@ class StatusReportController extends ControllerBase {
       '#empty' => $this->t('No clients found.'),
     ];
 
-    foreach ($returned_subscribers as $key => $client) {
+    foreach ($returned_subscribers as $client) {
       $type = $this->getClientType($client['attributes']);
       $settings = $client['metadata']['settings'] ?? [];
       $webhook_uuid = $settings['webhook']['uuid'] ?? 'Not Registered';
@@ -250,19 +269,21 @@ class StatusReportController extends ControllerBase {
     $subscribers['total_pages'] = 1;
     $subscribers['results'] = [];
 
-    if (!empty($client_entities['hits']['hits'])) {
-      foreach ($client_entities['hits']['hits'] as $key => $client_entity) {
-        if (!isset($client_entity['_source']['data']['metadata']['settings']['uuid'])) {
-          continue;
-        }
+    if (empty($client_entities['hits']['hits'])) {
+      return $subscribers;
+    }
 
-        $subscribers['data'][] = $client_entity['_source']['data'];
+    foreach ($client_entities['hits']['hits'] as $client_entity) {
+      if (!isset($client_entity['_source']['data']['metadata']['settings']['uuid'])) {
+        continue;
       }
 
-      $subscribers['total'] = $client_entities['hits']['total'];
-      $subscribers['total_pages'] = ceil($subscribers['total'] / self::LIMIT);
-      $subscribers['results'] = $subscribers['data'];
+      $subscribers['data'][] = $client_entity['_source']['data'];
     }
+
+    $subscribers['total'] = $client_entities['hits']['total'];
+    $subscribers['total_pages'] = ceil($subscribers['total'] / self::LIMIT);
+    $subscribers['results'] = $subscribers['data'];
 
     return $subscribers;
   }
@@ -347,11 +368,12 @@ class StatusReportController extends ControllerBase {
    */
   protected function getClientType(array $attributes = []) {
     $type = [];
+    $und = LanguageInterface::LANGCODE_NOT_SPECIFIED;
     if (!empty($attributes)) {
-      if (isset($attributes['publisher']['value']['und']) && $attributes['publisher']['value']['und']) {
+      if (isset($attributes['publisher']['value'][$und]) && $attributes['publisher']['value'][$und]) {
         $type[] = 'Publisher';
       }
-      if (isset($attributes['subscriber']['value']['und']) && $attributes['subscriber']['value']['und']) {
+      if (isset($attributes['subscriber']['value'][$und]) && $attributes['subscriber']['value'][$und]) {
         $type[] = 'Subscriber';
       }
     }
@@ -445,8 +467,6 @@ class StatusReportController extends ControllerBase {
     $times['publisher_updated'] = $metrics['publisher']['last_updated'] ?? 0;
     $times['subscriber_updated'] = $metrics['subscriber']['last_updated'] ?? 0;
 
-    $times = array_filter($times);
-
     return $this->getTimeAgo(max($times));
   }
 
@@ -458,7 +478,7 @@ class StatusReportController extends ControllerBase {
    * @param string $type
    *   The type of metrics to get.
    *
-   * @return string
+   * @return string|bool|int
    *   Percentage of imported entities
    *
    * @throws \Exception
@@ -488,15 +508,13 @@ class StatusReportController extends ControllerBase {
    *
    * @throws \Exception;
    */
-  protected function getTimeAgo($time) {
-    if (!$time) {
+  protected function getTimeAgo(int $time): string {
+    if ($time === 0) {
       return 'Not Found';
     }
-    $date_formatter = \Drupal::service('date.formatter');
-    $time_ago = $date_formatter->formatDiff($time, \Drupal::time()->getRequestTime(), [
+    return $this->dateFormatter->formatDiff($time, $this->time->getRequestTime(), [
       'granularity' => 2,
     ]);
-    return $time_ago;
   }
 
 }

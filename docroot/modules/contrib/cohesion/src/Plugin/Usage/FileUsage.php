@@ -8,6 +8,8 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
+use Drupal\file\FileRepositoryInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin for file usage.
@@ -51,6 +53,28 @@ class FileUsage extends UsagePluginBase {
   protected $wrappers;
 
   /**
+   * Drupal File Repository service.
+   *
+   * @var \Drupal\file\FileRepositoryInterface
+   */
+  protected $fileRepository;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager'),
+      $container->get('stream_wrapper_manager'),
+      $container->get('database'),
+      $container->get('file.repository')
+    );
+  }
+
+  /**
    * FileUsage constructor.
    *
    * @param $configuration
@@ -63,7 +87,15 @@ class FileUsage extends UsagePluginBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function __construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, StreamWrapperManager $stream_wrapper_manager, Connection $connection) {
+  public function __construct(
+    $configuration,
+    $plugin_id,
+    $plugin_definition,
+    $entity_type_manager,
+    StreamWrapperManager $stream_wrapper_manager,
+    Connection $connection,
+    FileRepositoryInterface $fileRepository
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $stream_wrapper_manager, $connection);
 
     // Create the URI regex based off the available stream wrappers.
@@ -80,6 +112,7 @@ class FileUsage extends UsagePluginBase {
     // This regex now handles spaces in filenames.
     $this->uriRegex = '/(?<!"preview_image":{"id":")((' . implode('|', array_keys($this->wrappers)) . '):\/\/(.*?)\.(.*?))([\s|:"*?<>|\\\\]|$)/m';
     $this->mediaReferenceRegex = '/\[media-reference:file:(.*?)\]/m';
+    $this->fileRepository = $fileRepository;
   }
 
   /**
@@ -104,7 +137,7 @@ class FileUsage extends UsagePluginBase {
       if (empty($files) && file_exists($uri)) {
         // Make file selected within Site Studio managed and permanent.
         $contents = file_get_contents($uri);
-        $file = file_save_data($contents, $uri, FileSystemInterface::EXISTS_REPLACE);
+        $file = $this->fileRepository->writeData($contents, $uri, FileSystemInterface::EXISTS_REPLACE);
         $file->setPermanent();
         $file->save();
         return $file;

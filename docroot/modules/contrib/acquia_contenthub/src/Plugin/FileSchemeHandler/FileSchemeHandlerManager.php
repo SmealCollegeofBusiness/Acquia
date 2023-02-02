@@ -77,7 +77,7 @@ class FileSchemeHandlerManager extends DefaultPluginManager implements FileSchem
    */
   protected function getFileScheme(FileInterface $file) {
     $uri = $file->getFileUri();
-    $scheme = version_compare(\Drupal::VERSION, '8.8.0', '>=') ? StreamWrapperManager::getScheme($uri) : \Drupal::service('file_system')->uriScheme($uri);
+    $scheme = StreamWrapperManager::getScheme($uri);
     if (!$scheme) {
       return self::EMPTY_SCHEME;
     }

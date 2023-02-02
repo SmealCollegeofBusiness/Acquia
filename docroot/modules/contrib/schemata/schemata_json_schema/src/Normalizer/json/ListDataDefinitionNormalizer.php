@@ -26,7 +26,7 @@ class ListDataDefinitionNormalizer extends DataDefinitionNormalizer {
    * {@inheritdoc}
    */
   public function normalize($entity, $format = NULL, array $context = []) {
-    /* @var $entity \Drupal\Core\TypedData\ListDataDefinitionInterface */
+    /** @var \Drupal\Core\TypedData\ListDataDefinitionInterface $entity */
     $context['parent'] = $entity;
     $property = $this->extractPropertyData($entity, $context);
     $property['type'] = 'array';

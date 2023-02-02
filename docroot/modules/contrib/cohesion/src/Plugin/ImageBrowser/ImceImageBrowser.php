@@ -3,10 +3,14 @@
 namespace Drupal\cohesion\Plugin\ImageBrowser;
 
 use Drupal\cohesion\ImageBrowserPluginBase;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\imce\Entity\ImceProfile;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin for imce image browser element.
@@ -20,6 +24,49 @@ use Drupal\imce\Entity\ImceProfile;
  * )
  */
 class ImceImageBrowser extends ImageBrowserPluginBase {
+
+  /**
+   * File URL generator service.
+   *
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  public static function create(
+    ContainerInterface $container,
+    array $configuration,
+    $plugin_id,
+    $plugin_definition
+  ) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('config.factory'),
+      $container->get('stream_wrapper_manager'),
+      $container->get('file_url_generator'),
+    );
+  }
+
+  /**
+   * @param array $configuration
+   * @param $plugin_id
+   * @param $plugin_definition
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   * @param \Drupal\Core\StreamWrapper\StreamWrapperManager $stream_wrapper_manager
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
+   */
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ConfigFactoryInterface $config_factory,
+    StreamWrapperManager $stream_wrapper_manager,
+    FileUrlGeneratorInterface $fileUrlGenerator
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $config_factory, $stream_wrapper_manager);
+    $this->fileUrlGenerator = $fileUrlGenerator;
+  }
 
   /**
    * {@inheritdoc}
@@ -154,7 +201,7 @@ class ImceImageBrowser extends ImageBrowserPluginBase {
       // Set default stream wrapper.
       $stream_wrapper = [
         'name' => 'public',
-        'path' => file_create_url('public://'),
+        'path' => $this->fileUrlGenerator->generateAbsoluteString('public://'),
       ];
 
       foreach ($wrapper_keys as $path_key) {
@@ -162,7 +209,7 @@ class ImceImageBrowser extends ImageBrowserPluginBase {
         if ($image_browser_object[$type]['dx8_imce_stream_wrapper'] == $path_key) {
           $stream_wrapper = [
             'name' => $path_key,
-            'path' => file_create_url($path),
+            'path' => $this->fileUrlGenerator->generateAbsoluteString($path),
           ];
           break;
         }
@@ -173,6 +220,7 @@ class ImceImageBrowser extends ImageBrowserPluginBase {
         // Add the image browser iFrame URL.
         'url' => $base_path . '/imce/' . $stream_wrapper['name'] . '?sendto=imceFileBrowserCallback',
         'title' => $this->getName(),
+        'key' => 'imce',
       ];
     }
   }

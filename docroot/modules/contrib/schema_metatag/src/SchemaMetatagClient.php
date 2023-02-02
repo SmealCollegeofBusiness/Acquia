@@ -2,9 +2,9 @@
 
 namespace Drupal\schema_metatag;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Cache\CacheBackendInterface;
 
 /**
  * Class SchemaMetatagClient.

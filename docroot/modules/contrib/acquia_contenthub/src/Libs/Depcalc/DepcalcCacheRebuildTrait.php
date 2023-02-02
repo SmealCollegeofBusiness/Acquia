@@ -27,6 +27,9 @@ trait DepcalcCacheRebuildTrait {
     $stack = new DependencyStack();
     foreach ($entities as $entity) {
       $entity = $entity_repository->loadEntityByUuid($entity['entity_type'], $entity['entity_uuid']);
+      if (!$entity) {
+        continue;
+      }
       $wrapper = new DependentEntityWrapper($entity);
       $depcalc->calculateDependencies($wrapper, $stack);
     }

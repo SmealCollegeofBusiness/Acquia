@@ -79,7 +79,15 @@ services:
 
   cohesion.local_files_manager:
     class: Drupal\cohesion\Services\LocalFilesManager
-    arguments: ['@string_translation', '@config.factory', '@keyvalue', '@tempstore.shared', '@cohesion.utils', '@session']
+    arguments:
+    - '@string_translation'
+    - '@config.factory'
+    - '@keyvalue'
+    - '@tempstore.shared'
+    - '@cohesion.utils'
+    - '@session'
+    - '@file.repository'
+    - '@logger.factory'
     tags:
       - { name: cohesion.local_files_manager, scheme: cohesion }
 
@@ -153,3 +161,13 @@ services:
   cohesion_current_route_match:
     class: Drupal\cohesion\Routing\CohesionCurrentRouteMatch
     arguments: [ '@request_stack' ]
+
+  cohesion.ckeditor.overrider:
+    class: Drupal\cohesion\Config\CKeditorStylesOverrides
+    arguments: [ '@module_handler', '@config.factory' ]
+    tags:
+      - { name: config.factory.override, priority: 5 }
+
+  cohesion.text_format_styles:
+    class: Drupal\cohesion\Services\TextFormatStyles
+    arguments: [ '@entity_type.manager' ]

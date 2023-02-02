@@ -206,6 +206,7 @@
                     "en",
                     "ro"
                 ],
+                "translatable": true,
                 "version": 2
             }
         },
@@ -441,6 +442,7 @@
                 "languages": [
                     "en"
                 ],
+                "translatable": false,
                 "version": 2
             }
         },

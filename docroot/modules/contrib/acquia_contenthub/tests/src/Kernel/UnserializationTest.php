@@ -4,7 +4,9 @@ namespace Drupal\Tests\acquia_contenthub\Kernel;
 
 use Acquia\ContentHubClient\CDFDocument;
 use Acquia\ContentHubClient\ContentHubClient;
+use Acquia\ContentHubClient\ContentHubLoggingClient;
 use Acquia\ContentHubClient\Settings;
+use Acquia\ContentHubClient\Syndication\SyndicationStatus;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub_subscriber\CdfImporter;
 use Drupal\acquia_contenthub_subscriber\Plugin\QueueWorker\ContentHubImportQueueWorker;
@@ -76,6 +78,13 @@ class UnserializationTest extends EntityKernelTestBase {
   protected $contentHubClient;
 
   /**
+   * Logging Client instance.
+   *
+   * @var \Acquia\ContentHubClient\ContentHubLoggingClient|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $contentHubLoggingClient;
+
+  /**
    * Client settings.
    *
    * @var \Acquia\ContentHubClient\Settings
@@ -100,7 +109,9 @@ class UnserializationTest extends EntityKernelTestBase {
     $this->settings->getUuid()->willReturn(self::CLIENT_UUID_1);
     $this->settings->toArray()->willReturn(['name' => 'foo']);
 
+    $this->contentHubLoggingClient = $this->prophesize(ContentHubLoggingClient::class);
     $client_factory_mock = $this->prophesize(ClientFactory::class);
+    $client_factory_mock->getLoggingClient()->willReturn($this->contentHubLoggingClient);
     $this->contentHubClient->getSettings()->willReturn($this->settings->reveal());
     $this->mockMetricsCalls($this->contentHubClient);
     $client_factory_mock->getClient()->willReturn($this->contentHubClient);
@@ -121,7 +132,7 @@ class UnserializationTest extends EntityKernelTestBase {
       ])
       ->onlyMethods(['getUpdateDbStatus'])
       ->getMock();
-    $this->container->set('acquia_contenthub_common_actions', $common);
+    $this->container->set('acquia_contenthub_subscriber.cdf_importer', $common);
 
     $this->contentHubImportQueueWorker = $this->getMockBuilder(ContentHubImportQueueWorker::class)
       ->setConstructorArgs([
@@ -129,8 +140,8 @@ class UnserializationTest extends EntityKernelTestBase {
         $this->container->get('acquia_contenthub_subscriber.cdf_importer'),
         $this->container->get('acquia_contenthub.client.factory'),
         $this->container->get('acquia_contenthub_subscriber.tracker'),
-        $this->container->get('logger.factory'),
-        $this->container->get('config.factory'),
+        $this->container->get('acquia_contenthub.config'),
+        $this->container->get('acquia_contenthub_subscriber.ch_logger'),
         $this->container->get('acquia_contenthub.cdf_metrics_manager'),
         [],
         NULL,
@@ -150,10 +161,23 @@ class UnserializationTest extends EntityKernelTestBase {
     $cdf_document = $this->createCDFDocumentFromFixtureFile('view_modes.json');
 
     $this->contentHubClient->getEntities([self::CLIENT_UUID_1 => self::CLIENT_UUID_1])->willReturn($cdf_document);
-    $this->contentHubClient->getInterestsByWebhook(Argument::type('string'))->willReturn([self::CLIENT_UUID_1]);
+    $get_il = [
+      self::CLIENT_UUID_1 => [
+        'status' => SyndicationStatus::IMPORT_SUCCESSFUL,
+        'reason' => 'manual',
+        'event_ref' => 'uuid',
+      ],
+    ];
+    $this->contentHubClient->getInterestsByWebhookAndSiteRole(Argument::type('string'), Argument::type('string'))->willReturn($get_il);
+    $this->contentHubClient->updateInterestListBySiteRole(Argument::type('string'), Argument::type('string'), Argument::type('array'))->willReturn(new Response());
 
     $this->initializeContentHubClientExpectation($cdf_document);
-    $this->contentHubClient->addEntitiesToInterestList("foo", [self::CLIENT_UUID_1])->willReturn(new Response());
+    $interest_list = [
+      'uuids' => [self::CLIENT_UUID_1],
+      'status' => SyndicationStatus::IMPORT_SUCCESSFUL,
+      'reason' => 'manual',
+    ];
+    $this->contentHubClient->addEntitiesToInterestListBySiteRole("foo", 'SUBSCRIBER', $interest_list)->willReturn(new Response());
 
     $item = new \stdClass();
     $item->uuids = implode(', ', [self::CLIENT_UUID_1]);
@@ -168,7 +192,6 @@ class UnserializationTest extends EntityKernelTestBase {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \ReflectionException
    *
    * @see _acquia_contenthub_publisher_enqueue_entity()
@@ -177,10 +200,26 @@ class UnserializationTest extends EntityKernelTestBase {
     $cdf_document = $this->createCdfDocumentFromFixtureFile('taxonomy.json');
 
     $this->contentHubClient->getEntities([self::CLIENT_UUID_2 => self::CLIENT_UUID_2])->willReturn($cdf_document);
-    $this->contentHubClient->getInterestsByWebhook(Argument::type('string'))->willReturn([self::CLIENT_UUID_2]);
+    $get_il = [
+      self::CLIENT_UUID_2 => [
+        'status' => SyndicationStatus::IMPORT_SUCCESSFUL,
+        'reason' => 'manual',
+        'event_ref' => 'uuid',
+      ],
+    ];
+    $this->contentHubClient->getInterestsByWebhookAndSiteRole(Argument::type('string'), Argument::type('string'))->willReturn($get_il);
+    $this->contentHubClient->updateInterestListBySiteRole(Argument::type('string'), Argument::type('string'), Argument::type('array'))->willReturn(new Response());
 
     $this->initializeContentHubClientExpectation($cdf_document);
-    $this->contentHubClient->addEntitiesToInterestList("foo", [self::CLIENT_UUID_3, self::CLIENT_UUID_2])->willReturn(new Response());
+    $interest_list = [
+      'uuids' => [
+        self::CLIENT_UUID_3,
+        self::CLIENT_UUID_2,
+      ],
+      'status' => SyndicationStatus::IMPORT_SUCCESSFUL,
+      'reason' => 'manual',
+    ];
+    $this->contentHubClient->addEntitiesToInterestListBySiteRole("foo", 'SUBSCRIBER', $interest_list)->willReturn(new Response());
 
     $item = new \stdClass();
     $item->uuids = implode(', ', [self::CLIENT_UUID_2]);

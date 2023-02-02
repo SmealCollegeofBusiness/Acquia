@@ -14,17 +14,8 @@
    *
    * @TODO: Use a dynamic or calculated id, to allow for multiple instances of
    * the UI to be rendered on the same page.
-   *
-   * @type {Drupal~behavior}
-   *
-   * @prop {Drupal~behaviorAttach} attach
-   *   Attaches the behavior to initilize the swagger-ui.
    */
-  Drupal.behaviors.swaggerui = {
-    attach: function (context, settings) {
-      /**
-       * Define a swagger ui plugin to remove the top bar from the swagger ui.
-       */
+   $(document).ready(function () {
       var $redocElem = $('redoc');
       // If url is set, then redoc should initialize properly.
       var url = $redocElem.attr('spec-url');
@@ -39,6 +30,6 @@
         }
       }
     }
-  };
+  );
 
 })(jQuery, Drupal);

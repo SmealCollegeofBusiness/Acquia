@@ -2,6 +2,7 @@
 
 namespace Drupal\simple_oauth\Authentication;
 
+use Drupal\consumers\Entity\ConsumerInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -34,7 +35,7 @@ class TokenAuthUser implements TokenAuthUserInterface {
   /**
    * The activated consumer instance.
    *
-   * @var \Drupal\consumers\Entity\Consumer
+   * @var \Drupal\consumers\Entity\ConsumerInterface
    */
   protected $consumer;
 
@@ -54,7 +55,9 @@ class TokenAuthUser implements TokenAuthUserInterface {
       $this->subject = $this->consumer->get('user_id')->entity;
     }
     if (!$this->subject) {
-      throw OAuthServerException::invalidClient();
+      $server_request = \Drupal::service('psr7.http_message_factory')
+        ->createRequest(\Drupal::request());
+      throw OAuthServerException::invalidClient($server_request);
     }
     $this->token = $token;
   }
@@ -69,7 +72,7 @@ class TokenAuthUser implements TokenAuthUserInterface {
   /**
    * {@inheritdoc}
    */
-  public function getConsumer() {
+  public function getConsumer(): ConsumerInterface {
     return $this->consumer;
   }
 
@@ -312,7 +315,7 @@ class TokenAuthUser implements TokenAuthUserInterface {
    * {@inheritdoc}
    */
   public function urlInfo($rel = 'canonical', array $options = []) {
-    return $this->subject->urlInfo($rel, $options);
+    return $this->subject->toUrl($rel, $options);
   }
 
   /**
@@ -326,7 +329,7 @@ class TokenAuthUser implements TokenAuthUserInterface {
    * {@inheritdoc}
    */
   public function link($text = NULL, $rel = 'canonical', array $options = []) {
-    return $this->subject->link($text, $rel, $options);
+    return $this->subject->toLink($text, $rel, $options)->toString();
   }
 
   /**
@@ -843,7 +846,7 @@ class TokenAuthUser implements TokenAuthUserInterface {
   /**
    * {@inheritdoc}
    */
-  public function getIterator() {
+  public function getIterator(): \Traversable {
     throw new \Exception('Invalid use of getIterator in token authentication.');
   }
 
@@ -851,7 +854,7 @@ class TokenAuthUser implements TokenAuthUserInterface {
    * {@inheritdoc}
    */
   public function toUrl($rel = 'canonical', array $options = []) {
-    $this->subject->toUrl($rel, $options);
+    return $this->subject->toUrl($rel, $options);
   }
 
   /**

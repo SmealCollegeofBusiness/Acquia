@@ -117,7 +117,7 @@ class S3FileOriginLocator {
    *
    * @throws \Exception
    */
-  protected function getRemoteFile(string $uri): ?\stdClass {
+  protected function getRemoteFile(string $uri): ?object {
     $files = $this->fileEntityStorage->loadByProperties(['uri' => $uri]);
     if (!$files) {
       return NULL;

@@ -1,11 +1,7 @@
 name: React calculator
 category: cpt_cat_example
+weight: 4
 js:
-  js/main.js: {}
-  js/vendor.js: {}
   js/app.js: {}
-css:
-  css/app.css: {}
-  css/component.css: {}
 preview_image: preview.png
 html: calculator.html

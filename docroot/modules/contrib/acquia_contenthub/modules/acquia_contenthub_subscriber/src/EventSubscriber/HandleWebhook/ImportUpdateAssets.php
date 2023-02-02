@@ -2,9 +2,11 @@
 
 namespace Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook;
 
+use Acquia\ContentHubClient\Syndication\SyndicationStatus;
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
 use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Event\HandleWebhookEvent;
+use Drupal\acquia_contenthub\Libs\InterestList\InterestListTrait;
 use Drupal\acquia_contenthub_subscriber\SubscriberTracker;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
@@ -17,6 +19,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * @package Drupal\acquia_contenthub_subscriber\EventSubscriber\HandleWebhook
  */
 class ImportUpdateAssets implements EventSubscriberInterface {
+
+  use InterestListTrait;
 
   /**
    * The queue object.
@@ -165,24 +169,39 @@ class ImportUpdateAssets implements EventSubscriberInterface {
         );
 
     }
-    if ($uuids) {
-      $item = new \stdClass();
-      $item->uuids = implode(', ', $uuids);
-      $queue_id = $this->queue->createItem($item);
-      if (empty($queue_id)) {
-        return;
-      }
-      $this->tracker->setQueueItemByUuids($uuids, $queue_id);
-      $this->channel
-        ->info('Entities with UUIDs @uuids added to the import queue and to the tracking table.',
-          ['@uuids' => print_r($uuids, TRUE)]);
-      $send_contenthub_updates = $this->config->get('send_contenthub_updates') ?? TRUE;
-      if ($send_contenthub_updates) {
-        $client->addEntitiesToInterestList($client->getSettings()->getWebhook('uuid'), $uuids);
-      }
 
-      $this->cdfMetricsManager->sendClientCdfUpdates();
+    if (!$uuids) {
+      return;
     }
+
+    $item = new \stdClass();
+    if (isset($payload['filter_uuid'])) {
+      $item->filter_uuid = $payload['filter_uuid'];
+    }
+    $item->uuids = implode(', ', $uuids);
+    $queue_id = $this->queue->createItem($item);
+    if (empty($queue_id)) {
+      return;
+    }
+    $this->tracker->setQueueItemByUuids($uuids, $queue_id);
+    $this->channel
+      ->info('Entities with UUIDs @uuids added to the import queue and to the tracking table.',
+        ['@uuids' => print_r($uuids, TRUE)]);
+    $send_contenthub_updates = $this->config->get('send_contenthub_updates') ?? TRUE;
+    if ($send_contenthub_updates) {
+
+      $client->addEntitiesToInterestListBySiteRole(
+        $client->getSettings()->getWebhook('uuid'),
+        'SUBSCRIBER',
+        $this->buildInterestList(
+          $uuids,
+          SyndicationStatus::SYNDICATION_IN_PROGRESS,
+          $payload['filter_uuid'] ?? 'manual'
+        )
+      );
+    }
+
+    $this->cdfMetricsManager->sendClientCdfUpdates();
   }
 
 }

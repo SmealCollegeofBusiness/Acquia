@@ -240,7 +240,7 @@ class SystemSettingsForm extends ConfigFormBase {
    * @return mixed
    */
   private function updateImageBrowser($browser_type, $form, FormStateInterface $form_state) {
-    $plugin_id = $form_state->getValue('image_browser_' . $browser_type) !== NULL ? $form_state->getValue('image_browser_' . $browser_type) : $this->image_browser_object[$browser_type]['type'] ?? FALSE;
+    $plugin_id = $form_state->getValue('image_browser_' . $browser_type) ?? $this->image_browser_object[$browser_type]['type'] ?? FALSE;
 
     // Return the form from the image browser plugin.
     if ($plugin_id) {

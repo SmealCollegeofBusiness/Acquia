@@ -64,10 +64,7 @@
                                     ],
                                     "title": "Test field"
                                 }
-                            },
-                            "required": [
-                                "drupal_internal__id"
-                            ]
+                            }
                         },
                         "relationships": {
                             "description": "Entity relationships",
@@ -306,7 +303,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity openapi_test_entity_test"
                     }
                 ],
@@ -327,7 +325,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity openapi_test_entity_test"
                     }
                 ],
@@ -345,7 +344,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity openapi_test_entity_test"
                     },
                     {
@@ -370,7 +370,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity openapi_test_entity_test"
                     }
                 ],
@@ -390,7 +391,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity openapi_test_entity_test"
                     }
                 ],
@@ -408,7 +410,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity openapi_test_entity_test"
                     }
                 ],
@@ -460,7 +463,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity openapi_test_entity_test"
                     },
                     {
@@ -552,7 +556,8 @@
                         "name": "entity",
                         "required": true,
                         "in": "path",
-                        "type": "uuid",
+                        "type": "string",
+                        "format": "uuid",
                         "description": "The uuid of the openapi_test_entity openapi_test_entity_test"
                     },
                     {

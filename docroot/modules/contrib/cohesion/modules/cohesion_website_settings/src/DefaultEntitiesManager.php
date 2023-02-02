@@ -146,7 +146,7 @@ class DefaultEntitiesManager {
   private function getCohesionEntity($type, $id) {
     try {
       if ($storage = $this->entityTypeManager->getStorage($type)) {
-        $id = $storage->getQuery()->condition('id', $id)->execute();
+        $id = $storage->getQuery()->accessCheck(TRUE)->condition('id', $id)->execute();
         if ($id) {
           $entity = $storage->load(array_pop($id));
         }
@@ -156,7 +156,7 @@ class DefaultEntitiesManager {
       $entity = FALSE;
     }
 
-    return isset($entity) ? $entity : FALSE;
+    return $entity ?? FALSE;
   }
 
 }

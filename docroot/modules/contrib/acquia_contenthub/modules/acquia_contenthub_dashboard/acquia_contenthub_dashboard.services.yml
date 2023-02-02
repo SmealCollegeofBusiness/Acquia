@@ -1,0 +1,25 @@
+services:
+  access_check.acquia_contenthub_dashboard.access:
+    class: Drupal\acquia_contenthub_dashboard\Access\ContentHubDashboardAccess
+    arguments: ['@logger.factory', '@acquia_contenthub.client.factory']
+    tags:
+      - { name: access_check, applies_to: _contenthub_dashboard_access }
+
+  acquia_contenthub_dashboard.ach_allowed_origins:
+    class: Drupal\acquia_contenthub_dashboard\Libs\ContentHubAllowedOrigins
+    arguments: [ '@acquia_contenthub.client.factory' ]
+
+  acquia_contenthub_dashboard.auto_pub_filter_handler:
+    class: Drupal\acquia_contenthub_dashboard\AutoPublisherDiscoveryFilterHandler
+    arguments: ['@acquia_contenthub.client.factory', '@acquia_contenthub.connection_manager', '@config.factory', '@acquia_contenthub_dashboard.ach_allowed_origins', '@acquia_contenthub_dashboard.logger_channel']
+
+  acquia_contenthub_dashboard.handle_webhook.update_allowed_origins:
+    class: Drupal\acquia_contenthub_dashboard\EventSubscriber\HandleWebhook\UpdateAllowedOrigins
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }
+
+  acquia_contenthub_dashboard.logger_channel:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: ['acquia_contenthub_dashboard']

@@ -1,0 +1,26 @@
+uuid: 438be048-1020-4e4c-92e7-945212052f1b
+langcode: en
+status: true
+dependencies:
+  config:
+    - cohesion_custom_styles.cohesion_custom_style.5d3e1401
+    - cohesion_custom_styles.cohesion_custom_style.63181883
+    - cohesion_custom_styles.cohesion_custom_style.a59e0629
+    - cohesion_elements.cohesion_component.cpt_1_column_layout
+    - cohesion_elements.cohesion_component.cpt_heading
+    - cohesion_elements.cohesion_helper_category.hlp_cat_text_sections
+  content:
+    - 'file:file:121b39ca-d4bf-4d0f-b281-908e28182c33'
+label: 'Heading section center aligned'
+id: hlp_heading_section
+json_values: '{"canvas":[{"uid":"cpt_1_column_layout","type":"component","title":"1 column layout","enabled":true,"category":"category-1","componentId":"cpt_1_column_layout","componentType":"container","uuid":"413177c0-c46a-4c4e-bc77-3e46bf43e919","parentUid":"root","status":{"collapsed":true},"children":[{"type":"container","uid":"component-drop-zone","mimicParent":true,"parentUid":"cpt_1_column_layout","title":"Component drop zone","selected":false,"status":{"collapsed":false,"disabled":false,"collapsedParents":["413177c0-c46a-4c4e-bc77-3e46bf43e919"]},"uuid":"01aa1c26-7ba9-4af3-8b77-ace402ffae81","dropzoneId":"c0116a84-e80c-428d-b6ff-ae43dda904f7","children":[{"uid":"cpt_heading","type":"component","title":"Heading","enabled":true,"category":"category-4","componentId":"cpt_heading","componentType":"container","uuid":"08b8f767-8e78-48f3-a091-f01d518dfb18","parentUid":"component-drop-zone","status":{"collapsedParents":["413177c0-c46a-4c4e-bc77-3e46bf43e919"]},"children":[]},{"uid":"cpt_heading","type":"component","title":"Heading","enabled":true,"category":"category-4","componentId":"cpt_heading","componentType":"container","uuid":"17fcf123-2574-413b-bc0e-ed4ecb0198d3","parentUid":"component-drop-zone","status":{"collapsedParents":["413177c0-c46a-4c4e-bc77-3e46bf43e919"]},"children":[]}]}]}],"mapper":{},"model":{"413177c0-c46a-4c4e-bc77-3e46bf43e919":{"settings":{"title":"Heading section center aligned - 1 column layout"},"c469e24d-d155-46d5-a9ca-dc61028163c6":"boxed","2647a498-53ac-4cf2-84d7-9a621dd838a0":"center","74a865c3-d896-45d6-ba96-5ac344ad9942":"coh-style-padding-top-large","2a2a10d2-02a6-4263-a8a7-6c84701354f9":"auto","f8f8754f-4921-41ee-bb30-47fc98451736":"flex-start","6b754e7a-6c7c-4ed2-9399-b64496075e6b":8,"d5dbd40f-6af7-413c-a38e-323fc3154a58":"auto","0214b304-c34f-4155-8795-52cd1c5621cb":"flex-start","5dcf43ba-fc68-44d2-a27c-03a042c3158e":10,"6e2005ad-103a-4e90-a28f-b12587182f5e":"auto","00ba9989-9e6f-40ba-b0a5-741c79bd5659":"flex-start","09032d58-36ec-4b7d-93f0-ce4110e125c0":12,"8cf47e32-7b34-4185-a2ba-731420fd6d98":false},"01aa1c26-7ba9-4af3-8b77-ace402ffae81":{"settings":{"title":"Column 1 drop zone","dropzoneHideSelector":"","styles":{"sm":{"col":12}}}},"08b8f767-8e78-48f3-a091-f01d518dfb18":{"settings":{"title":"Pre heading"},"50bae73f-99e4-446b-a738-9939a3dade60":"Pre heading","e8f77e4e-3de9-47cc-b229-7040a4f78719":"span","77d003da-6145-481e-95c8-2f6017361e26":"coh-style-pre-heading","42c2324a-e7ee-45b6-ab1e-f5dfba48bfb2":"align-text-center","fa5d575b-1d6e-44f0-a99e-1a2f7688bc27":"color-heading","fb51822d-28f0-4f47-8776-f7d715c910f5":""},"17fcf123-2574-413b-bc0e-ed4ecb0198d3":{"settings":{"title":"Heading"},"50bae73f-99e4-446b-a738-9939a3dade60":"A long and descriptive marketing heading that provides more information.","e8f77e4e-3de9-47cc-b229-7040a4f78719":"h2","77d003da-6145-481e-95c8-2f6017361e26":"","42c2324a-e7ee-45b6-ab1e-f5dfba48bfb2":"align-text-center","fa5d575b-1d6e-44f0-a99e-1a2f7688bc27":"dark-heading","fb51822d-28f0-4f47-8776-f7d715c910f5":"coh-style-margin-bottom-small"}},"previewModel":{"413177c0-c46a-4c4e-bc77-3e46bf43e919":{},"08b8f767-8e78-48f3-a091-f01d518dfb18":{},"17fcf123-2574-413b-bc0e-ed4ecb0198d3":{}},"variableFields":{"413177c0-c46a-4c4e-bc77-3e46bf43e919":[],"08b8f767-8e78-48f3-a091-f01d518dfb18":[],"17fcf123-2574-413b-bc0e-ed4ecb0198d3":[]},"meta":{"fieldHistory":[]}}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0041
+locked: false
+modified: true
+selectable: true
+category: hlp_cat_text_sections
+preview_image: 'public://element-preview-images/Heading centered.png'
+entity_type_access: {  }
+bundle_access: {  }
+weight: 8

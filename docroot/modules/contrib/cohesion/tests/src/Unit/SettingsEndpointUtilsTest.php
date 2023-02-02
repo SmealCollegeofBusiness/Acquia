@@ -72,7 +72,7 @@ class SettingsEndpointUtilsTest extends UnitTestCase {
 
 
     $all_colors = $this->unit->getColorsList($item);
-    $this->assertArrayEquals($expected, $all_colors);
+    $this->assertEquals($expected, $all_colors);
   }
 
   /**

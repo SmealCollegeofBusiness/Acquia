@@ -1,0 +1,14 @@
+uuid: 39657c0f-bc30-4013-8211-830540cf1171
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.developer
+  module:
+    - user
+id: user_add_role_action.developer
+label: 'Add the Low Code Site Builder role to the selected user(s)'
+type: user
+plugin: user_add_role_action
+configuration:
+  rid: developer

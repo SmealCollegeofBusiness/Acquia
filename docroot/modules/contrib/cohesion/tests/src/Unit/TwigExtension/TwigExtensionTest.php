@@ -51,7 +51,7 @@ class TwigExtensionTest extends UnitTestCase {
     $uuid = $this->createMock('\Drupal\Component\Uuid\UuidInterface');
     $entity_type_manager = $this->createMock('\Drupal\Core\Entity\EntityTypeManagerInterface');
     $stream_wrapper_manager = $this->createMock('\Drupal\Core\StreamWrapper\StreamWrapperManager');
-    $extension_mime_type_guesser = $this->createMock('\Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface');
+    $extension_mime_type_guesser = $this->createMock('\Symfony\Component\Mime\MimeTypeGuesserInterface');
     $theme_manager = $this->createMock('\Drupal\Core\Theme\ThemeManagerInterface');
     $cohesion_utils = $this->createMock('\Drupal\cohesion\Services\CohesionUtils');
     $loggerChannelFactory = $this->createMock('\Drupal\Core\Logger\LoggerChannelFactoryInterface');
@@ -78,7 +78,7 @@ class TwigExtensionTest extends UnitTestCase {
     $this->route->method('getOption')->with('sitestudio_build')->willReturn($is_page_builder);
     $this->cohesion_current_route_match->method('getRouteEntities')->willReturn([$page_entity]);
     $test_build = $this->twigExtension->addComponentFrontEndBuilderMarkup($input_build, $context, $componentInstanceUuid, $component_content_UUID, $component_content_id);
-    $this->assertArrayEquals($expectation, $test_build);
+    $this->assertEquals($expectation, $test_build);
   }
 
   /**

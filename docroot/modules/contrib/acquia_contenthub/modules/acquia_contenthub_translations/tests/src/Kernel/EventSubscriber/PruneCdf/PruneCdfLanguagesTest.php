@@ -3,6 +3,7 @@
 namespace Drupal\Tests\acquia_contenthub_translations\Kernel\EventSubscriber\PruneCdf;
 
 use Drupal\acquia_contenthub\Event\PruneCdfEntitiesEvent;
+use Drupal\acquia_contenthub_subscriber\CdfImporterInterface;
 use Drupal\acquia_contenthub_translations\Data\EntityTranslations;
 use Drupal\acquia_contenthub_translations\Data\EntityTranslationsTracker;
 use Drupal\acquia_contenthub_translations\EventSubscriber\PruneCdf\PruneLanguagesFromCdf;
@@ -11,6 +12,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\acquia_contenthub\Kernel\Traits\CdfDocumentCreatorTrait;
 use Drupal\Tests\acquia_contenthub\Unit\Helpers\LoggerMock;
+use Prophecy\Argument;
 
 /**
  * Tests pruning of languages in a CDF.
@@ -60,7 +62,7 @@ class PruneCdfLanguagesTest extends KernelTestBase {
    * @var array
    */
   protected $fixtures = [
-    0 => 'node/node-prune-cdf-languages.json',
+    0 => 'node/node-prune-cdf-languages-with-redirects.json',
   ];
 
   /**
@@ -142,27 +144,57 @@ class PruneCdfLanguagesTest extends KernelTestBase {
   }
 
   /**
+   * Tests pruning when tracked default language and common language are same.
+   *
+   * @covers ::onPruneCdf
+   */
+  public function testLanguagePruningForTrackedEntity(): void {
+    $uuid = '93aa4fec-639c-4a7d-9c94-96f7123fccaf';
+    /** @var \Drupal\acquia_contenthub_translations\EntityTranslationManagerInterface $entity_translation_manager */
+    $entity_translation_manager = $this->container->get('acquia_contenthub_translations.manager');
+    $entity_translation_manager->trackEntity($uuid, 'node', 'en', 'hi');
+    ConfigurableLanguage::createFromLangcode('hi');
+    $this->changeDefaultLanguage('hi');
+    ConfigurableLanguage::load('en')->delete();
+    $event = $this->triggerPruneCdfEntityEvent();
+    $cdf_object = $event->getCdf()->getCdfEntity($uuid);
+    $this->assertEquals(['hi'], $cdf_object->getMetadata()['languages']);
+  }
+
+  /**
    * Tests that entities with single language will have no pruning.
    *
-   * And language will be added to undesired list.
+   * Unless it is non-translatable. The language otherwise will be added to
+   * undesired list.
    *
    * @covers ::onPruneCdf
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testSingleLanguageEntityPruning(): void {
-    // Default language is be for this entity.
-    $uuid = '0612f69c-5968-4b40-9c1d-48a549b56326';
-    $old_cdf_object = $this->cdfDocument->getCdfEntity($uuid);
+    // Default language is 'be' for these entities.
+    $redirect = '0612f69c-5968-4b40-9c1d-48a549b56326';
+    $node = '5d1ba3c3-d527-4328-8fce-a6b714c5ef79';
+    $old_node = $this->cdfDocument->getCdfEntity($node);
+
     $this->changeDefaultLanguage();
     $this->cdfPruner = $this->newPruneLanguagesFromCdf();
     $event = $this->triggerPruneCdfEntityEvent();
-    $new_cdf_object = $event->getCdf()->getCdfEntity($uuid);
-    $this->assertEquals($old_cdf_object, $new_cdf_object);
-    $entity_default_language = $old_cdf_object->getMetadata()['default_language'];
+    $new_cdf_object = $event->getCdf()->getCdfEntity($redirect);
+    $this->assertEquals(NULL, $new_cdf_object,
+      'Redirect entity is pruned since the entity is non-translatable.'
+    );
+
+    $new_node_cdf = $event->getCdf()->getCdfEntity($node);
+    $this->assertEquals($old_node, $new_node_cdf,
+      'Node is not pruned, undesired language enabled.'
+    );
+    $entity_default_language = $old_node->getMetadata()['default_language'];
     $this->assertEquals([$entity_default_language], $this->registrar->getUndesiredLanguages());
     $info_messages = $this->logger->getInfoMessages();
-    $this->assertEquals('Languages marked as undesired: (' . $entity_default_language . '). These languages will also be imported.', $info_messages[0]);
+    $this->assertEquals('"be" will be marked as undesired. This language will also be imported.', $info_messages[0]);
+    $this->assertEquals('Incoming languages of 5d1ba3c3-d527-4328-8fce-a6b714c5ef79 having entity type "node": en,hi,fr,es', $info_messages[1]);
+    $this->assertEquals('Languages marked as undesired: (' . $entity_default_language . '). These languages will also be imported.', $info_messages[2]);
   }
 
   /**
@@ -276,10 +308,14 @@ class PruneCdfLanguagesTest extends KernelTestBase {
    *   The object.
    */
   protected function newPruneLanguagesFromCdf(): PruneLanguagesFromCdf {
+    $cdf_importer = $this->prophesize(CdfImporterInterface::class);
+    $cdf_importer->requestToRepublishEntities(Argument::type('array'));
+
     return new PruneLanguagesFromCdf(
       $this->registrar, $this->translationConfig,
       $this->languageManager, $this->logger,
-      $this->entityTranslationManager, $this->ntEntityHandlerContext
+      $this->entityTranslationManager, $this->ntEntityHandlerContext,
+      $cdf_importer->reveal()
     );
   }
 

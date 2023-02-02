@@ -57,7 +57,7 @@ workbench_email.workbench_email_template.*:
       label: 'Body'
       mapping:
         value:
-          type: string
+          type: text
           label: 'Value'
         format:
           type: string

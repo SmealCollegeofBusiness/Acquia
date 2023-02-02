@@ -73,7 +73,7 @@ a keyed array in the following format:
 public function getFields() {
   return [
     'tag' => [
-      'htmlClass' => 'col-xs-12',
+      'htmlClass' => 'ssa-grid-col-xs-12',
       'type' => 'select',
       'title' => 'HTML tag',
       'nullOption' => false,
@@ -84,7 +84,7 @@ public function getFields() {
       ]
     ],
     'text' => [
-      'htmlClass' => 'col-xs-12',
+      'htmlClass' => 'ssa-grid-col-xs-12',
       'title' => 'Text content',
       'type' => 'textfield',
       'placeholder' => 'e.g. Site Studio is great',

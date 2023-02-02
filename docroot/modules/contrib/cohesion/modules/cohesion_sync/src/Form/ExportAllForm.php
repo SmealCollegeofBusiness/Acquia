@@ -77,6 +77,11 @@ class ExportAllForm extends ExportFormBase {
   protected $dateFormatter;
 
   /**
+   * @var \Drupal\Core\Config\Config|\Drupal\Core\Config\ImmutableConfig
+   */
+  protected $cohesionSettings;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
@@ -144,6 +149,7 @@ class ExportAllForm extends ExportFormBase {
     );
 
     $this->configSyncSettings = $this->config('cohesion.sync.settings');
+    $this->cohesionSettings = $this->config('cohesion.settings');
     $this->usagePluginManager = $usage_plugin_manager;
     $this->fileSystem = $file_system;
     $this->fullPackageStorage = $cohesion_full_package_storage;
@@ -259,18 +265,21 @@ class ExportAllForm extends ExportFormBase {
     }
 
     // Legacy package export.
-    $form['legacy'] = [
-      '#type' => 'details',
-      '#title' => $this
-        ->t('Legacy full package export'),
-      '#open' => FALSE,
-    ];
-    $form['legacy']['filename'] = [
-      '#prefix' => '<p><em class="placeholder">',
-      '#suffix' => '</em></p>',
-      '#markup' => $this->getLegacyExportFilename(),
-    ];
-    $this->addLegacyActionsToForm($form);
+    // Only show Legacy export if user has turned it on.
+    if ($this->cohesionSettings->get('sync_legacy_visibility')) {
+      $form['legacy'] = [
+        '#type' => 'details',
+        '#title' => $this
+          ->t('Legacy full package export'),
+        '#open' => FALSE,
+      ];
+      $form['legacy']['filename'] = [
+        '#prefix' => '<p><em class="placeholder">',
+        '#suffix' => '</em></p>',
+        '#markup' => $this->getLegacyExportFilename(),
+      ];
+      $this->addLegacyActionsToForm($form);
+    }
 
     return $form;
   }

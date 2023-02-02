@@ -25,7 +25,7 @@ class ContainerExample extends CustomElementPluginBase {
       'mytextfield' => [
         // This is the bootstrap class name that will be applied to the
         // wrapping column.
-        'htmlClass' => 'col-xs-12',
+        'htmlClass' => 'ssa-grid-col-12',
         // All form elements require a title.
         'title' => 'Title of my text field.',
         // The field type.

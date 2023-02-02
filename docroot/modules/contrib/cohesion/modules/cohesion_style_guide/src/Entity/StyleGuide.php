@@ -151,7 +151,9 @@ class StyleGuide extends CohesionConfigEntityBase implements CohesionSettingsInt
     $style_guide_manager_storage = $this->entityTypeManager()
       ->getStorage('cohesion_style_guide_manager');
     $style_guide_manager_ids = $style_guide_manager_storage->getQuery()
-      ->condition('style_guide_uuid', $this->uuid())->execute();
+      ->accessCheck(TRUE)
+      ->condition('style_guide_uuid', $this->uuid())
+      ->execute();
 
     if ($style_guide_managers = $style_guide_manager_storage->loadMultiple($style_guide_manager_ids)) {
       foreach ($style_guide_managers as $style_guide_manager) {

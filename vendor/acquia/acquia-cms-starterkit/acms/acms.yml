@@ -71,14 +71,24 @@ questions:
       options:
         - yes
         - no
-    skip_on_value: false
     default_value: "no"
+    skip_on_value: false
   content_model:
     dependencies:
       starter_kits: acquia_cms_enterprise_low_code || acquia_cms_headless || acquia_cms_community
       questions:
         - ${demo_content} == "no"
     question: "Do you want to enable the content model (yes/no) ?"
+    allowed_values:
+      options:
+        - yes
+        - no
+    default_value: "no"
+    skip_on_value: false
+  dam_integration:
+    dependencies:
+      starter_kits: acquia_cms_enterprise_low_code || acquia_cms_headless || acquia_cms_community
+    question: "Would you like to enable the Acquia DAM modules (configuration will need to be done manually later after site installation) ?"
     allowed_values:
       options:
         - yes

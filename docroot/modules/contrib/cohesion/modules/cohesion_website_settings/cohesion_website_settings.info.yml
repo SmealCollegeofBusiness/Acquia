@@ -1,10 +1,10 @@
 name: Site Studio website settings
 type: module
 description: 'Defines the website settings configuration entities.'
-core_version_requirement: ^8.8.0 || ^9
+core_version_requirement: ^9 || ^10
 package: Site Studio
 libraries:
-  - core/jquery.ui
-  - core/jquery.ui.animate
+  - jquery_ui/core
 dependencies:
   - cohesion
+  - jquery_ui

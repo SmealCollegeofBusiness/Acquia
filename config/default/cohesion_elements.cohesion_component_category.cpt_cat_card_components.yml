@@ -1,0 +1,14 @@
+uuid: a8d77997-98d9-4f87-b595-f7b1442eb1fe
+langcode: en
+status: true
+dependencies: {  }
+label: 'Card components'
+id: cpt_cat_card_components
+json_values: '{}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+locked: false
+modified: false
+selectable: true
+class: category-2
+weight: -7

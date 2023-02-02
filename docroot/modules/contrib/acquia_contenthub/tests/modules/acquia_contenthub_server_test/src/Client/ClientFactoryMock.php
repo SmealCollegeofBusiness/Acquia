@@ -2,8 +2,10 @@
 
 namespace Drupal\acquia_contenthub_server_test\Client;
 
+use Acquia\ContentHubClient\ContentHubClient;
 use Acquia\ContentHubClient\Settings;
 use Drupal\acquia_contenthub\Client\ClientFactory;
+use Drupal\acquia_contenthub\Exception\PlatformIncompatibilityException;
 use Drupal\Component\Uuid\Uuid;
 
 /**
@@ -12,10 +14,16 @@ use Drupal\Component\Uuid\Uuid;
 class ClientFactoryMock extends ClientFactory {
 
   /**
-   * Override original, and replace Conent Hub client with mock.
+   * Override original, and replace Content Hub client with mock.
    */
-  public function registerClient(string $name, string $url, string $api_key, string $secret, string $api_version = 'v2') {
-    return ContentHubClientMock::register($this->loggerFactory->get('acquia_contenthub'), $this->dispatcher, $name, $url, $api_key, $secret);
+  public function registerClient(string $name, string $url, string $api_key, string $secret, string $api_version = 'v2'): ContentHubClient {
+    if ($name === 'accountIsNotFeatured') {
+      throw new PlatformIncompatibilityException(
+        PlatformIncompatibilityException::$incompatiblePlatform
+      );
+    }
+
+    return ContentHubClientMock::register($this->logger, $this->dispatcher, $name, $url, $api_key, $secret);
   }
 
   /**
@@ -43,7 +51,7 @@ class ClientFactoryMock extends ClientFactory {
     ];
 
     $this->client = new ContentHubClientMock(
-      $this->loggerFactory->get('acquia_contenthub'),
+      $this->logger,
       $this->settings,
       $this->settings->getMiddleware(),
       $this->dispatcher,

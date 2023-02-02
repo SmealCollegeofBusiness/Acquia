@@ -3,7 +3,9 @@
 namespace Drupal\acquia_contenthub\Commands;
 
 use Drupal\acquia_contenthub\AcquiaContentHubEvents;
+use Drupal\acquia_contenthub\Client\CdfMetricsManager;
 use Drupal\acquia_contenthub\Client\ClientFactory;
+use Drupal\acquia_contenthub\ContentHubConnectionManager;
 use Drupal\acquia_contenthub\Event\AcquiaContentHubUnregisterEvent;
 use Drupal\Core\Url;
 use Drush\Commands\DrushCommands;
@@ -32,16 +34,36 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
   protected $eventDispatcher;
 
   /**
+   * The acquia_contenthub.connection_manager service.
+   *
+   * @var \Drupal\acquia_contenthub\ContentHubConnectionManager
+   */
+  protected $connectionManager;
+
+  /**
+   * The acquia_contenthub.cdf_metrics_manager service.
+   *
+   * @var \Drupal\acquia_contenthub\Client\CdfMetricsManager
+   */
+  protected $metrics;
+
+  /**
    * AcquiaContentHubWebhookCommands constructor.
    *
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
    *   ACH client factory.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
    *   Symfony event dispatcher.
+   * @param \Drupal\acquia_contenthub\ContentHubConnectionManager $connection_manager
+   *   The acquia_contenthub.connection_manager service.
+   * @param \Drupal\acquia_contenthub\Client\CdfMetricsManager $metrics
+   *   The acquia_contenthub.cdf_metrics_manager service.
    */
-  public function __construct(ClientFactory $client_factory, EventDispatcherInterface $dispatcher) {
+  public function __construct(ClientFactory $client_factory, EventDispatcherInterface $dispatcher, ContentHubConnectionManager $connection_manager, CdfMetricsManager $metrics) {
     $this->clientFactory = $client_factory;
     $this->eventDispatcher = $dispatcher;
+    $this->connectionManager = $connection_manager;
+    $this->metrics = $metrics;
   }
 
   /**
@@ -85,8 +107,7 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
 
     switch ($op) {
       case 'register':
-        $connection_manager = \Drupal::service('acquia_contenthub.connection_manager');
-        $response = $connection_manager->registerWebhook($webhook_url);
+        $response = $this->connectionManager->registerWebhook($webhook_url);
         if (empty($response)) {
           return;
         }
@@ -108,7 +129,7 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
           }
           return;
         }
-
+        $this->metrics->sendClientCdfUpdates();
         $this->logger->notice(
           dt('Registered Content Hub Webhook: @url | @uuid',
             ['@url' => $webhook_url, '@uuid' => $response['uuid']]
@@ -122,7 +143,7 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
           return;
         }
 
-        /** @var \Acquia\ContentHubClient\Webhook $webhook */
+        /** @var \Acquia\ContentHubClient\Webhook|array $webhook */
         $webhook = $client->getWebHook($webhook_url);
         if (empty($webhook)) {
           $this->logger->warning(dt('Webhook @url not found', ['@url' => $webhook_url]));
@@ -152,19 +173,17 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
         }
 
         $success = FALSE;
-        /** @var \Drupal\acquia_contenthub\ContentHubConnectionManager $connection_manager */
-        $connection_manager = \Drupal::service('acquia_contenthub.connection_manager');
 
         // This runs if user picks "delete webhook only" or
         // there are no orphaned filters.
         if (!isset($answer) || $answer === 'webhook') {
-          $success = $connection_manager->unregisterWebhook($event);
+          $success = $this->connectionManager->unregisterWebhook($event);
         }
 
         // This runs only if user picked "delete webhooks and filters" and
         // there are orphaned filters which should be deleted.
         if (isset($answer) && $answer === 'both') {
-          $success = $connection_manager->unregisterWebhook($event, TRUE);
+          $success = $this->connectionManager->unregisterWebhook($event, TRUE);
         }
 
         if (!$success) {
@@ -172,6 +191,7 @@ class AcquiaContentHubWebhookCommands extends DrushCommands {
           return;
         }
 
+        $this->metrics->sendClientCdfUpdates();
         $this->logger->notice(dt('Successfully unregistered Content Hub Webhook: @url', ['@url' => $webhook_url]));
         break;
 

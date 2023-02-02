@@ -2,8 +2,12 @@
 
 namespace Drupal\acquia_contenthub\Commands;
 
+use Acquia\ContentHubClient\ContentHubClient;
+use Acquia\ContentHubClient\Syndication\SyndicationStatus;
 use Drupal\acquia_contenthub\Client\ClientFactory;
 use Drupal\acquia_contenthub\ContentHubConnectionManager;
+use Drupal\acquia_contenthub\Libs\InterestList\InterestListTrait;
+use Drupal\acquia_contenthub\PubSubModuleStatusChecker;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Console\Helper\Table;
@@ -14,6 +18,16 @@ use Symfony\Component\Console\Helper\Table;
  * @package Drupal\acquia_contenthub\Commands
  */
 class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
+
+  use InterestListTrait;
+
+  /**
+   * Allowed site Roles.
+   */
+  public const SITE_ROLES = [
+    'PUBLISHER',
+    'SUBSCRIBER',
+  ];
 
   /**
    * The client factory.
@@ -65,6 +79,13 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
   protected $chConfig;
 
   /**
+   * Status Checker.
+   *
+   * @var \Drupal\acquia_contenthub\PubSubModuleStatusChecker
+   */
+  protected $checker;
+
+  /**
    * AcquiaContentHubWebhookInterestCommands constructor.
    *
    * @param \Drupal\acquia_contenthub\Client\ClientFactory $client_factory
@@ -73,11 +94,14 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
    *   The Content Hub Connection Manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The Config Factory.
+   * @param \Drupal\acquia_contenthub\PubSubModuleStatusChecker $checker
+   *   Status checker.
    */
-  public function __construct(ClientFactory $client_factory, ContentHubConnectionManager $connection_manager, ConfigFactoryInterface $config_factory) {
+  public function __construct(ClientFactory $client_factory, ContentHubConnectionManager $connection_manager, ConfigFactoryInterface $config_factory, PubSubModuleStatusChecker $checker) {
     $this->clientFactory = $client_factory;
     $this->connectionManager = $connection_manager;
     $this->chConfig = $config_factory->getEditable('acquia_contenthub.admin_settings');
+    $this->checker = $checker;
   }
 
   /**
@@ -95,11 +119,6 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
     $this->webhook = $this->client->getWebHook($this->webhookUrl);
     if (!$this->webhook) {
       throw new \Exception(dt('The webhook is not available so the operation could not complete.'));
-    }
-
-    $this->webhookUuid = $this->webhook->getUuid();
-    if (!$this->webhookUuid) {
-      throw new \Exception(dt('The webhook uuid is not available so the operation could not complete.'));
     }
   }
 
@@ -147,6 +166,9 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
    * @option uuids
    *   The entities against which to perform the operation. Comma-separated.
    * @default uuids null
+   * @option site_role
+   *   The site against which to perform the operation.
+   * @default site_role null
    *
    * @usage acquia:contenthub-webhook-interests-add
    *   Add the interests to the webhook
@@ -155,26 +177,58 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
    */
   public function contenthubWebhookInterestsAdd() {
     $this->findWebhook();
-    if (empty($this->input()->getOptions()['uuids'])) {
+
+    $uuids = $this->input()->getOptions()['uuids'];
+    if (empty($uuids)) {
       $this->output()->writeln(dt('<fg=white;bg=red;options=bold;>[error] Uuids are required to add interests.</>'));
       return;
     }
-    $uuids = explode(',', $this->input()->getOptions()['uuids']);
+
+    $site_role = strtoupper($this->input()->getOptions()['site_role']);
+    if (empty($site_role)) {
+      $this->output()->writeln(dt('<fg=white;bg=red;options=bold;>[error] Site role is required to add interests.</>'));
+      return;
+    }
+
+    if (!in_array($site_role, self::SITE_ROLES, TRUE)) {
+      $this->output()->writeln(dt('<fg=white;bg=red;options=bold;>[error]Invalid site role.</>'));
+      return;
+    }
+
+    if ($site_role === 'PUBLISHER' && !$this->checker->isPublisher()) {
+      $this->output()->writeln(dt('<fg=white;bg=red;options=bold;>[error]Current site is not a publisher.</>'));
+      return;
+    }
+
+    if ($site_role === 'SUBSCRIBER' && !$this->checker->isSubscriber()) {
+      $this->output()->writeln(dt('<fg=white;bg=red;options=bold;>[error]Current site is not a subscriber.</>'));
+      return;
+    }
+
+    $uuids = explode(',', $uuids);
     $send_update = $this->chConfig->get('send_contenthub_updates') ?? TRUE;
     if ($send_update) {
-      $response = $this->client->addEntitiesToInterestList($this->webhookUuid, $uuids);
 
-      if (empty($response)) {
+      $reason = $site_role === 'PUBLISHER' ? '' : 'manual';
+      $interest_list = $this->buildInterestList($uuids, SyndicationStatus::EXPORT_SUCCESSFUL, $reason);
+      $response = $this->client->addEntitiesToInterestListBySiteRole($this->webhookUuid, $site_role, $interest_list);
+
+      if (!$response) {
+        $this->output()->writeln(dt('Empty response after attempting to add entities to interest list.'));
         return;
       }
 
       if (200 !== $response->getStatusCode()) {
-        $this->output()->writeln('An error occurred and interests were not updated.');
+        $resp = ContentHubClient::getResponseJson($response);
+        $this->output()->writeln(dt(
+          'An error occurred and interests were not updated. Error message: @error',
+          ['@error' => $resp['error']['message'] ?? 'Unknown error']
+        ));
         return;
       }
-
-      $this->output()->writeln("\nInterests updated successfully.\n");
+      $this->output()->writeln(dt("\nInterests updated successfully.\n"));
     }
+
     $this->contenthubWebhookInterestsList();
   }
 
@@ -209,7 +263,7 @@ class AcquiaContentHubWebhookInterestCommands extends DrushCommands {
       foreach ($uuids as $uuid) {
         $response = $this->client->deleteInterest($uuid, $this->webhookUuid);
 
-        if (empty($response)) {
+        if (!$response) {
           continue;
         }
 

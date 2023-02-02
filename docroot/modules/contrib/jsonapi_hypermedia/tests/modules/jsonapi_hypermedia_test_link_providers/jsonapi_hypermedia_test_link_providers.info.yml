@@ -1,9 +1,0 @@
-name: 'JSON:API Hypermedia Test Link Providers'
-type: module
-package: Testing
-core_version_requirement: ^8.8 || ^9
-
-# Information added by Drupal.org packaging script on 2022-08-03
-version: '8.x-1.8'
-project: 'jsonapi_hypermedia'
-datestamp: 1659547071

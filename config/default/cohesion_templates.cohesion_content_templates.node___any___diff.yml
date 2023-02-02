@@ -1,0 +1,18 @@
+uuid: dd6a98fd-8a59-442f-8373-62a289cd7dfa
+langcode: en
+status: false
+dependencies: {  }
+label: 'Revision comparison (Node)'
+id: node___any___diff
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: __any__
+view_mode: diff
+master_template: ''

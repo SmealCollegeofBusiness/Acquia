@@ -9,6 +9,7 @@ use Drupal\acquia_contenthub_test\MockDataProvider;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
 use Drupal\Tests\acquia_contenthub\Kernel\Traits\MetricsUpdateTrait;
 use Prophecy\Argument;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Tests that filter scroll is working as expected.
@@ -99,8 +100,8 @@ class FilterScrollTest extends EntityKernelTestBase {
       ->getInterestsByWebhook('00000000-0000-460b-ac74-b6bed08b4441')
       ->willReturn([]);
     $content_hub_client
-      ->addEntitiesToInterestList(Argument::any(), Argument::any())
-      ->willReturn();
+      ->addEntitiesToInterestListBySiteRole(Argument::any(), Argument::any(), Argument::type('array'))
+      ->willReturn($this->prophesize(ResponseInterface::class)->reveal());
     $content_hub_client
       ->isFeatured()
       ->willReturn(FALSE);
