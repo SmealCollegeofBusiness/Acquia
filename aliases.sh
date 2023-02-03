@@ -42,13 +42,13 @@
 # 4 - Execute this script with the following command:
 #     ./aliases.sh
 # 5 - Create a new alias for the selected site and exit the script.
-# 6 - Now you should be able to execute drush command against the new site with the following structure: 
+# 6 - Now you should be able to execute drush command against the new site with the following structure:
 #     drush @sitename.environment drush_command
 #     Examples:
 #     drush @devtest.01live status
 #     drush @devtest.01test status
 #     drush @devtest.01dev status
- 
+
 
 # Functions
 create_new_site_alias () {
@@ -87,8 +87,6 @@ create_new_site_alias () {
 
     # Go to  the sites folder inside the drush folder
     cd drush/sites/
-
-devtest.dev-psusmeal.acsitefactory.com
 
     # Create a new yml file for this site
     echo "01dev:" > $site_name.site.yml
@@ -147,7 +145,7 @@ do
     echo "       |--------------------|"
     echo "       |     Main Menu      |"
     echo "       |--------------------|"
-    echo "       | 1 - New site Alias |" 
+    echo "       | 1 - New site Alias |"
     echo "       | 2 - Exit           |"
     echo "       |--------------------|"
     echo " "

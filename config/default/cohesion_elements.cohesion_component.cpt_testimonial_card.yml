@@ -14,7 +14,7 @@ dependencies:
     - cohesion_website_settings.cohesion_color.white
     - image.style.coh_small_square
   content:
-    - 'file:file:333650ea-cca8-460e-a257-8df8b27ba42b'
+    - 'file:file:60a77ce3-f520-4f9c-9522-c15b04ae10f7'
     - 'file:file:954c7207-454b-4e9c-9fe2-ac23cbb6b031'
 label: 'Testimonial card'
 id: cpt_testimonial_card
@@ -30,4 +30,4 @@ has_quick_edit: true
 entity_type_access: {  }
 bundle_access: {  }
 twig_template: component--cohesion-cpt-testimonial-card
-weight: 29
+weight: 30

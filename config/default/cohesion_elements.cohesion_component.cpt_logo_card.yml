@@ -9,7 +9,7 @@ dependencies:
     - cohesion_website_settings.cohesion_color.gray-20
     - image.style.coh_x_small
   content:
-    - 'file:file:4e7078c6-abe6-4d27-9e3c-ff129ba80d02'
+    - 'file:file:b125ed5e-cf1e-4f9a-98bb-443d0152cd6b'
     - 'file:file:c5499c42-3daa-417d-93ff-d7c261d14e05'
 label: 'Logo card'
 id: cpt_logo_card
@@ -25,4 +25,4 @@ has_quick_edit: true
 entity_type_access: {  }
 bundle_access: {  }
 twig_template: component--cohesion-cpt-logo-card
-weight: 30
+weight: 31

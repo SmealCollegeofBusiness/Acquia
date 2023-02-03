@@ -1,4 +1,4 @@
-uuid: 8aa56cf8-95af-446e-8a50-db0fa0d01fd0
+uuid: 9eaf7198-e84c-4587-9fdc-b1f402668be9
 langcode: en
 status: true
 dependencies: {  }
@@ -11,4 +11,4 @@ locked: false
 modified: false
 selectable: true
 class: category-3
-weight: -1
+weight: 0

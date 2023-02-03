@@ -18,4 +18,4 @@ custom_style_type: heading
 available_in_wysiwyg: true
 available_in_wysiwyg_inline: true
 parent: .coh-style-pre-heading
-weight: 40
+weight: 53

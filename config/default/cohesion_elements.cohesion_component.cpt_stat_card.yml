@@ -12,7 +12,7 @@ dependencies:
     - cohesion_website_settings.cohesion_color.gray-10
     - image.style.coh_xx_small
   content:
-    - 'file:file:dac9a182-3230-458f-9b0b-47b5a37d9707'
+    - 'file:file:39cf74f4-eef2-4f1d-87be-3b117584d3fd'
     - 'file:file:fe2369de-d627-4cc9-ac11-f9b131c638a3'
 label: 'Stat card'
 id: cpt_stat_card
@@ -28,4 +28,4 @@ has_quick_edit: true
 entity_type_access: {  }
 bundle_access: {  }
 twig_template: component--cohesion-cpt-stat-card
-weight: 32
+weight: 33

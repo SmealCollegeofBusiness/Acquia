@@ -20,4 +20,4 @@ custom_style_type: button
 available_in_wysiwyg: false
 available_in_wysiwyg_inline: false
 parent: .coh-style-modal-close-button-light
-weight: 21
+weight: 34

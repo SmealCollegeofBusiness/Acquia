@@ -1,11 +1,8 @@
 _core:
   default_config_hash: R4IF-ClDHXxblLcG0L7MgsLvfBIMAvi_skumNFQwkDc
 module:
-  acquia_cms: 0
   acquia_cms_article: 0
   acquia_cms_common: 0
-  acquia_cms_component: 0
-  acquia_cms_document: 0
   acquia_cms_event: 0
   acquia_cms_image: 0
   acquia_cms_page: 0
@@ -13,14 +10,10 @@ module:
   acquia_cms_place: 0
   acquia_cms_search: 0
   acquia_cms_site_studio: 0
-  acquia_cms_site_studio_content: 0
-  acquia_cms_starter: 0
-  acquia_cms_support: 0
   acquia_cms_toolbar: 0
   acquia_cms_tour: 0
-  acquia_cms_video: 0
-  acquia_connector: 0
   acquia_purge: 0
+  acquia_telemetry: 0
   acsf: 0
   acsf_duplication: 0
   acsf_sso: 0
@@ -31,11 +24,9 @@ module:
   admin_toolbar_tools: 0
   block: 0
   breakpoint: 0
-  captcha: 0
   ckeditor: 0
   cohesion: 0
   cohesion_base_styles: 0
-  cohesion_breakpoint_indicator: 0
   cohesion_custom_styles: 0
   cohesion_elements: 0
   cohesion_style_guide: 0
@@ -44,7 +35,6 @@ module:
   cohesion_templates: 0
   cohesion_website_settings: 0
   collapsiblock: 0
-  component: 0
   config: 0
   config_filter: 0
   config_ignore: 0
@@ -60,8 +50,6 @@ module:
   editor: 0
   entity_clone: 0
   entity_reference_revisions: 0
-  example_custom_component: 0
-  example_element: 0
   facets: 0
   facets_pretty_paths: 0
   field: 0
@@ -74,14 +62,8 @@ module:
   geocoder_field: 0
   geocoder_geofield: 0
   geofield: 0
-  google_analytics: 0
-  google_tag: 0
-  history: 0
-  honeypot: 0
   image: 0
   imce: 0
-  jsonapi: 0
-  jsonapi_extras: 0
   language: 0
   layout_discovery: 0
   link: 0
@@ -111,7 +93,6 @@ module:
   purge_processor_lateruntime: 0
   purge_queuer_coretags: 0
   purge_ui: 0
-  recaptcha: 0
   redirect: 0
   responsive_preview: 0
   rest: 0
@@ -140,8 +121,6 @@ module:
   toolbar: 0
   user: 0
   username_enumeration_prevention: 0
-  webform: 0
-  webform_ui: 0
   workbench_email: 0
   workflows: 0
   pathauto: 1

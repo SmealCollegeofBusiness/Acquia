@@ -1,11 +1,9 @@
-uuid: 65262a6f-94b9-4796-a01e-e28809668b45
+uuid: 9d8e601d-dc7a-42c6-a26d-43df6683c732
 langcode: en
 status: true
 dependencies:
   module:
-    - google_analytics
     - media
-    - search_api_autocomplete
     - system
 _core:
   default_config_hash: dJ0L2DNSj5q6XVZAGsuVDpJTh5UeYkIPwKrUOOpr8YI
@@ -15,6 +13,5 @@ weight: 1
 is_admin: false
 permissions:
   - 'access content'
-  - 'opt-in or out of google analytics tracking'
   - 'use search_api_autocomplete for search'
   - 'view media'
