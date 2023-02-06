@@ -137,5 +137,4 @@ install:
   - externalauth
   - password_policy
   - views
-  - acquia_cms_minimal
   - smealbase

@@ -128,7 +128,6 @@ module:
   externalauth: 10
   password_policy: 10
   views: 10
-  acquia_cms_minimal: 1000
   smealbase: 1000
 theme:
   olivero: 0
