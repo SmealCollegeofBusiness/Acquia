@@ -1,0 +1,18 @@
+uuid: e0b65ad8-f953-4812-b394-9c1403b738b5
+langcode: en
+status: false
+dependencies: {  }
+label: 'Teaser (Node)'
+id: node___any___teaser
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: __any__
+view_mode: teaser
+master_template: ''

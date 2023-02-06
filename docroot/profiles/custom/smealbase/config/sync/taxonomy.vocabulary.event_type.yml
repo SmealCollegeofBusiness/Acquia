@@ -1,0 +1,13 @@
+uuid: b0837073-d70b-4592-b577-d8d3b7c8751d
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - acquia_cms_event
+_core:
+  default_config_hash: 5QDzZFDy2KBSsXlsKZAQAR-bn5ln8RWdh_FRkR8yZ9s
+name: 'Event Type'
+vid: event_type
+description: ''
+weight: 0
