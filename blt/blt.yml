@@ -6,3 +6,7 @@ drush:
     local: self
     ci: self
   default_alias: '${drush.aliases.local}'
+git:
+  default_branch: master
+  remotes:
+    cloud: 'psusmeal@svn-2398.enterprise-g1.hosting.acquia.com:psusmeal.git'
