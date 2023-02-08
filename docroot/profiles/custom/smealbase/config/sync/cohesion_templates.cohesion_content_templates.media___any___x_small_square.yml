@@ -1,0 +1,18 @@
+uuid: 3882661c-8ddf-4b09-90ca-14dff168952e
+langcode: en
+status: false
+dependencies: {  }
+label: 'X Small square (Media)'
+id: media___any___x_small_square
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0041
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: media
+bundle: __any__
+view_mode: x_small_square
+master_template: ''

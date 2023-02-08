@@ -1,0 +1,18 @@
+uuid: e424e66f-4b71-45ca-a6c5-b24f97e9245e
+langcode: en
+status: false
+dependencies: {  }
+label: 'Horizontal card (Node)'
+id: node___any___horizontal_card
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0036
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: __any__
+view_mode: horizontal_card
+master_template: ''

@@ -1,0 +1,15 @@
+uuid: 72ca32ff-73b6-4240-ad35-72b1695294eb
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+  enforced:
+    module:
+      - acquia_cms_place
+_core:
+  default_config_hash: 42WRO8AJPPIpHHo6qk6u7SzUpcuA6TdT4OBLCgN5aC0
+id: node.places
+label: Places
+targetEntityType: node
+cache: true

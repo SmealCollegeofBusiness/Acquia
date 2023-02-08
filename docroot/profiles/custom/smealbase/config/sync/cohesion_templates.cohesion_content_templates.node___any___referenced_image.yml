@@ -1,0 +1,18 @@
+uuid: ad54e7af-f638-4139-b5c1-8c8079e94568
+langcode: en
+status: false
+dependencies: {  }
+label: 'Referenced Image (Node)'
+id: node___any___referenced_image
+json_values: '{"canvas":[],"mapper":null,"model":[]}'
+json_mapper: '{}'
+last_entity_update: entityupdate_0041
+modified: false
+selectable: false
+custom: false
+twig_template: null
+default: false
+entity_type: node
+bundle: __any__
+view_mode: referenced_image
+master_template: ''
