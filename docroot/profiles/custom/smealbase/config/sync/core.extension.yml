@@ -25,6 +25,7 @@ module:
   block: 0
   breakpoint: 0
   ckeditor: 0
+  ckeditor5: 0
   cohesion: 0
   cohesion_base_styles: 0
   cohesion_custom_styles: 0
@@ -129,11 +130,10 @@ module:
   password_policy: 10
   views: 10
   acquia_cms_minimal: 1000
-  smealbase: 1000
 theme:
   olivero: 0
   claro: 0
   acquia_claro: 0
   stable: 0
   cohesion_theme: 0
-profile: smealbase
+profile: acquia_cms_minimal

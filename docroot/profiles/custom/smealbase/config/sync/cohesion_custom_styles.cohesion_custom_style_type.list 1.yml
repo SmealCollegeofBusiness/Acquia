@@ -1,7 +1,0 @@
-uuid: b3342999-8572-46fe-9a3f-00ba555298de
-langcode: en
-status: true
-dependencies: {  }
-label: List
-id: list
-element: 'ul,ol,dl'
